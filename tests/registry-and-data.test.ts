@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, playerGameStats, players, playerSeasonAggregates, teamGameStats, teams } from "@/lib/data/queries";
+import { dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
-import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
+import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
 
 describe("metric registry and official data", () => {
   it("has unique metric keys and complete glossary metadata", () => {
@@ -152,6 +152,31 @@ describe("query behavior", () => {
     expect(calculatePlayerMetric("efg_pct", row)).toBeGreaterThan(0);
     expect(calculatePlayerMetric("ts_pct", row)).toBeGreaterThan(0);
     expect(calculatePlayerMetric("shot_quality", row)).toBeNull();
+  });
+
+  it("keeps event, tracking, model, location, and lineup metrics unavailable without real feeds", () => {
+    expect(lineups).toHaveLength(0);
+    const row = playerSeasonAggregates[0];
+    for (const key of ["expected_fg_pct", "shot_quality", "actual_minus_expected_points", "transition_ppp", "lineup_net_rating", "average_speed", "touches_per_75", "frontcourt_touches", "boxouts", "rim_pressure_score", "rim_protection_value", "passes_per_touch", "points_created_by_assist", "rim_frequency", "corner_three_frequency", "rolling_75_possessions"]) {
+      expect(calculatePlayerMetric(key, row)).toBeNull();
+      expect(getPlayerLeaderboard(key, { limit: 5 }).every((leader) => leader.value === null)).toBe(true);
+    }
+    const teamRow = teamSeasonAggregates[0];
+    for (const key of ["shot_quality", "expected_points_per_shot", "rim_frequency", "corner_three_frequency", "above_break_three_frequency"]) {
+      expect(calculateTeamMetric(key, teamRow)).toBeNull();
+    }
+  });
+
+  it("calculates recent-game windows from official player game logs when loaded", () => {
+    if (dataSourceMetadata.coverage.regularSeasonPlayerGameLogs + dataSourceMetadata.coverage.playoffPlayerGameLogs === 0) return;
+    const row = playerSeasonAggregates.find((aggregate) => aggregate.recentGameScores.length >= 10);
+    expect(row).toBeTruthy();
+    const lastFive = row!.recentGameScores.slice(-5);
+    const lastTen = row!.recentGameScores.slice(-10);
+    expect(row!.recentGameScores.length).toBeLessThanOrEqual(30);
+    expect(calculatePlayerMetric("last_5_games", row!)).toBeCloseTo(lastFive.reduce((sum, game) => sum + game.pts, 0) / lastFive.length);
+    expect(calculatePlayerMetric("last_10_games", row!)).toBeCloseTo(lastTen.reduce((sum, game) => sum + game.pts, 0) / lastTen.length);
+    expect(calculatePlayerMetric("last_30_games", row!)).toBeGreaterThanOrEqual(0);
   });
 
   it("returns similarity matches with trait explanations", () => {

@@ -39,17 +39,9 @@ Metrics based directly on official box totals are active by default. Metrics tha
 
 ## Expected Shot Value
 
-The expected-shot model is intentionally transparent and testable, but it is not presented as official factual data unless a real shot-event/tracking feed is loaded. It starts with shot-zone baselines, then adjusts for:
+Expected-shot fields are registry definitions only until a real shot-event or tracking feed is connected. In the default official NBA Stats snapshot, expected FG%, shot quality, actual-minus-expected, rim/three/midrange shot quality, and clutch shot quality return `N/A` rather than locally estimated values.
 
-- defender distance
-- shot type
-- transition/catch-and-shoot/pull-up flags
-- player skill placeholder
-- shot clock
-- touch time and dribbles
-- clutch context
-
-The model returns `expectedFgPct` and `expectedPoints`. It is designed to be replaced later with logistic regression, gradient boosting, or a neural model.
+When a licensed or public event feed is added, the adapter must persist the source expected values or the complete shot-context inputs used to calculate them. The model output should be treated as Basketball Savant analysis, not an official NBA fact, unless the upstream source explicitly provides the value.
 
 ## Sample-Size Notes
 

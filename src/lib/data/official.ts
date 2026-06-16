@@ -464,7 +464,7 @@ for (const aggregate of officialPlayerSeasonAggregates) {
   aggregate.recentGameScores = officialPlayerGameStats
     .filter((line) => line.playerId === aggregate.player.id)
     .sort((a, b) => (gameDateById.get(a.gameId) ?? "").localeCompare(gameDateById.get(b.gameId) ?? ""))
-    .slice(-10)
+    .slice(-30)
     .map((line) => ({
       gameId: line.gameId,
       date: gameDateById.get(line.gameId) ?? "",

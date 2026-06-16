@@ -183,6 +183,17 @@ export function metricsByCategory(category: MetricDefinition["category"]): Metri
   return metricRegistry.filter((definition) => definition.category === category);
 }
 
+function recentAverage(row: PlayerSeasonAggregate, count: number): number | null {
+  const window = row.recentGameScores.slice(-count);
+  if (window.length === 0) return null;
+  return window.reduce((sum, game) => sum + game.pts, 0) / window.length;
+}
+
+function recentDeltaFromSeason(row: PlayerSeasonAggregate, games: number): number | null {
+  const average = recentAverage(row, 5);
+  return average === null ? null : average - row.pts / games;
+}
+
 export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): number | null {
   const hasEventOrTrackingData = row.expectedPoints > 0 || row.rimAttempts > 0 || row.touches > 0 || row.reboundChances > 0;
   const unavailableWithoutTracking = new Set([
@@ -260,14 +271,9 @@ export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): 
     "elbow_touches",
     "post_touches",
     "paint_touches",
-    "last_5_games",
-    "last_10_games",
-    "last_15_games",
-    "last_30_games",
     "rolling_75_possessions",
     "rolling_150_possessions",
-    "rolling_300_possessions",
-    "then_now_delta"
+    "rolling_300_possessions"
   ]);
   if (!hasEventOrTrackingData && unavailableWithoutTracking.has(key)) return null;
 
@@ -309,10 +315,10 @@ export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): 
     shot_quality: shotQuality(safeDiv(row.expectedPoints, row.fga) ?? 0),
     actual_minus_expected_fg: (percentage(row.fgm, row.fga) ?? 0) - row.expectedFgPct,
     actual_minus_expected_points: row.actualMinusExpectedPoints,
-    rim_shot_quality: 1.25 + row.player.skill * 0.08,
-    three_point_shot_quality: 1.03 + row.player.skill * 0.07,
-    midrange_shot_quality: 0.82 + row.player.skill * 0.05,
-    clutch_shot_quality: 0.96 + row.player.skill * 0.09,
+    rim_shot_quality: null,
+    three_point_shot_quality: null,
+    midrange_shot_quality: null,
+    clutch_shot_quality: null,
     rim_frequency: rimFrequency(row.rimAttempts, row.fga),
     short_midrange_frequency: safeDiv(row.shortMidAttempts, row.fga),
     long_midrange_frequency: safeDiv(row.longMidAttempts, row.fga),
@@ -327,61 +333,61 @@ export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): 
     assisted_shot_rate: safeDiv(row.assistedAttempts, row.fga),
     drives_per_75: per75(row.drives, row.possessions),
     paint_touches_per_75: per75(row.paintTouches, row.possessions),
-    rim_pressure_score: (per75(row.drives, row.possessions) ?? 0) * 0.55 + (safeDiv(row.rimAttempts, row.fga) ?? 0) * 42 + (row.fta / games) * 0.7,
+    rim_pressure_score: null,
     advantage_creation_rate: safeDiv(row.drives + row.potentialAssists + row.paintTouches, row.touches),
     potential_assists: row.potentialAssists / games,
     secondary_assists: row.secondaryAssists / games,
-    passes_per_touch: safeDiv(row.ast * 7.2 + row.potentialAssists, row.touches),
-    points_created_by_assist: (row.ast * 2.35) / games,
-    transition_ppp: 1.02 + row.player.skill * 0.13 + safeDiv(row.rimAttempts, row.fga)! * 0.18,
-    halfcourt_ppp: 0.91 + row.player.skill * 0.12,
-    pnr_handler_ppp: 0.85 + row.player.skill * 0.2 + (row.player.position === "PG" ? 0.08 : 0),
-    pnr_roll_man_ppp: 0.94 + row.player.skill * 0.13 + (row.player.position === "C" ? 0.12 : 0),
-    isolation_ppp: 0.82 + row.player.skill * 0.24,
-    post_up_ppp: 0.86 + row.player.skill * 0.12 + (row.player.position === "C" || row.player.position === "PF" ? 0.08 : 0),
-    handoff_ppp: 0.93 + row.player.skill * 0.14,
-    cut_ppp: 1.08 + row.player.skill * 0.1,
-    off_screen_ppp: 0.92 + row.player.skill * 0.16,
-    spot_up_ppp: 0.98 + row.player.skill * 0.14 + safeDiv(row.threePa, row.fga)! * 0.15,
-    putback_ppp: 1.04 + safeDiv(row.oreb, row.reb)! * 0.25,
+    passes_per_touch: null,
+    points_created_by_assist: null,
+    transition_ppp: null,
+    halfcourt_ppp: null,
+    pnr_handler_ppp: null,
+    pnr_roll_man_ppp: null,
+    isolation_ppp: null,
+    post_up_ppp: null,
+    handoff_ppp: null,
+    cut_ppp: null,
+    off_screen_ppp: null,
+    spot_up_ppp: null,
+    putback_ppp: null,
     opponent_expected_fg_pct: row.opponentExpectedFgPct,
     opponent_actual_minus_expected_fg: row.opponentActualMinusExpectedFg,
-    rim_deterrence: row.rimContests / games + (row.player.position === "C" ? 4 : 0),
-    rim_protection_value: (row.rimContests / games) * 0.42 + row.blk / games * 0.9,
+    rim_deterrence: null,
+    rim_protection_value: null,
     contest_rate: safeDiv(row.shotContests, row.possessions),
-    closeout_value: (row.shotContests / games) * 0.16 - row.opponentActualMinusExpectedFg * 20,
-    matchup_difficulty: 55 + row.player.skill * 22 + row.minutes / games * 0.45,
+    closeout_value: null,
+    matchup_difficulty: null,
     defensive_playmaking: (row.stl + row.blk + row.deflections + row.chargesDrawn) / games,
     deflections: row.deflections / games,
     stocks: (row.stl + row.blk) / games,
     charges_drawn: row.chargesDrawn / games,
-    screen_navigation_score: 50 + row.player.skill * 18 + (row.player.position === "PG" || row.player.position === "SG" ? 7 : 0),
+    screen_navigation_score: null,
     offensive_rebound_rate: safeDiv(row.oreb, row.reboundChances),
     defensive_rebound_rate: safeDiv(row.dreb, row.reboundChances),
     contested_rebound_rate: safeDiv(row.contestedRebounds, row.reb),
     rebound_chances: row.reboundChances / games,
     rebound_conversion_pct: reboundConversion(row.reb, row.reboundChances),
-    boxouts: (row.reb * 0.52) / games,
-    rebound_distance: 5.4 + (row.player.position === "PG" ? 2.5 : 0) + row.player.skill * 0.7,
-    average_speed: 4.2 + (row.player.position === "PG" ? 0.45 : 0) + row.player.skill * 0.24,
-    offensive_speed: 4.3 + row.player.skill * 0.28,
-    defensive_speed: 4.0 + row.player.skill * 0.22,
-    distance_traveled: (row.minutes / games) * (0.18 + row.player.skill * 0.01),
-    average_seconds_per_touch: safeDiv(row.minutes * 60, row.touches),
-    average_dribbles_per_touch: row.player.position === "PG" ? 3.8 + row.player.skill : 1.5 + row.player.skill * 0.8,
+    boxouts: null,
+    rebound_distance: null,
+    average_speed: null,
+    offensive_speed: null,
+    defensive_speed: null,
+    distance_traveled: null,
+    average_seconds_per_touch: null,
+    average_dribbles_per_touch: null,
     touches_per_75: per75(row.touches, row.possessions),
-    frontcourt_touches: (row.touches * 0.78) / games,
-    elbow_touches: (row.touches * (row.player.position === "C" ? 0.12 : 0.05)) / games,
-    post_touches: (row.touches * (row.player.position === "C" || row.player.position === "PF" ? 0.09 : 0.02)) / games,
+    frontcourt_touches: null,
+    elbow_touches: null,
+    post_touches: null,
     paint_touches: row.paintTouches / games,
-    last_5_games: row.recentGameScores.slice(-5).reduce((sum, game) => sum + game.pts, 0) / Math.max(row.recentGameScores.slice(-5).length, 1),
-    last_10_games: row.recentGameScores.slice(-10).reduce((sum, game) => sum + game.pts, 0) / Math.max(row.recentGameScores.slice(-10).length, 1),
-    last_15_games: row.recentGameScores.slice(-15).reduce((sum, game) => sum + game.pts, 0) / Math.max(row.recentGameScores.slice(-15).length, 1),
-    last_30_games: row.pts / games,
-    rolling_75_possessions: row.pts / games + row.player.skill * 2.2,
-    rolling_150_possessions: row.pts / games + row.player.skill * 1.6,
-    rolling_300_possessions: row.pts / games + row.player.skill * 1.1,
-    then_now_delta: (row.recentGameScores.slice(-5).reduce((sum, game) => sum + game.pts, 0) / Math.max(row.recentGameScores.slice(-5).length, 1)) - row.pts / games
+    last_5_games: recentAverage(row, 5),
+    last_10_games: recentAverage(row, 10),
+    last_15_games: recentAverage(row, 15),
+    last_30_games: recentAverage(row, 30),
+    rolling_75_possessions: null,
+    rolling_150_possessions: null,
+    rolling_300_possessions: null,
+    then_now_delta: recentDeltaFromSeason(row, games)
   };
 
   return values[key] ?? null;
@@ -389,7 +395,7 @@ export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): 
 
 export function calculateTeamMetric(key: string, row: TeamSeasonAggregate): number | null {
   const hasShotEventData = row.expectedPoints > 0 || row.rimFrequency > 0;
-  if (!hasShotEventData && ["shot_quality", "expected_points_per_shot", "rim_frequency"].includes(key)) return null;
+  if (!hasShotEventData && ["shot_quality", "expected_points_per_shot", "rim_frequency", "above_break_three_frequency", "corner_three_frequency"].includes(key)) return null;
   const games = row.games || 1;
   const off = offensiveRating(row.pts, row.possessions);
   const def = defensiveRating(row.ptsAllowed, row.possessions);
@@ -418,8 +424,8 @@ export function calculateTeamMetric(key: string, row: TeamSeasonAggregate): numb
     shot_quality: row.shotQuality,
     expected_points_per_shot: safeDiv(row.expectedPoints, row.fga),
     rim_frequency: row.rimFrequency,
-    above_break_three_frequency: row.threeFrequency * 0.72,
-    corner_three_frequency: row.threeFrequency * 0.28,
+    above_break_three_frequency: null,
+    corner_three_frequency: null,
     points_per_possession: safeDiv(row.pts, row.possessions)
   };
   return values[key] ?? null;

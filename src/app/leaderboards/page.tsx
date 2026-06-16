@@ -14,9 +14,9 @@ const categoryDefaults: Record<string, string> = {
   Playmaking: "ast",
   Defense: "stocks",
   Rebounding: "reb",
-  "Play Type": "points_per_possession",
+  "Play Type": "transition_ppp",
   Clutch: "ft_pct",
-  Lineups: "net_rating",
+  Lineups: "lineup_net_rating",
   Rolling: "last_10_games",
   Percentiles: "ts_pct"
 };
