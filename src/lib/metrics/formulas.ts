@@ -39,8 +39,19 @@ export function netRating(offRating: number | null, defRating: number | null): n
   return offRating - defRating;
 }
 
-export function usageRate(fga: number, fta: number, tov: number, teamPossessions: number): number | null {
-  return safeDiv(fga + 0.44 * fta + tov, teamPossessions);
+export function usageRate(
+  fga: number,
+  fta: number,
+  tov: number,
+  minutes: number,
+  teamFga: number,
+  teamFta: number,
+  teamTov: number,
+  teamMinutes: number
+): number | null {
+  const playerPlays = fga + 0.44 * fta + tov;
+  const teamPlays = teamFga + 0.44 * teamFta + teamTov;
+  return safeDiv(playerPlays * teamMinutes, minutes * teamPlays);
 }
 
 export function actualMinusExpectedPoints(actualPoints: number, expectedPoints: number): number {
@@ -59,7 +70,8 @@ export function rimFrequency(rimAttempts: number, totalFga: number): number | nu
   return safeDiv(rimAttempts, totalFga);
 }
 
-export function assistRate(assists: number, teammateMadeFieldGoalsWhileOnCourt: number): number | null {
+export function assistRate(assists: number, fgm: number, minutes: number, teamFgm: number, teamMinutes: number): number | null {
+  const teammateMadeFieldGoalsWhileOnCourt = (minutes / teamMinutes) * teamFgm - fgm;
   return safeDiv(assists, teammateMadeFieldGoalsWhileOnCourt);
 }
 

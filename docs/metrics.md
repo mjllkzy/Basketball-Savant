@@ -10,7 +10,8 @@ All metrics are defined in `src/lib/metrics/registry.ts`. Display code should ne
 - `Offensive Rating = Points Scored / Possessions * 100`
 - `Defensive Rating = Points Allowed / Possessions * 100`
 - `Net Rating = Offensive Rating - Defensive Rating`
-- `Usage Rate = (FGA + 0.44 * FTA + TOV) / Team Possessions`
+- `Usage Rate = NBA Stats USG_PCT when loaded; fallback = (FGA + 0.44 * FTA + TOV) * Team MIN / (MIN * (Team FGA + 0.44 * Team FTA + Team TOV))`
+- `AST%, OREB%, DREB%, REB%, PIE, Pace, Ratings, and Possessions = NBA Stats Advanced columns when loaded`
 - `Actual - Expected Points = Actual Points - Expected Points`
 - `Shot Quality = Expected Points Per Shot`
 - `Expected Points = Expected FG Probability * Points Value`
@@ -35,13 +36,19 @@ All metrics are defined in `src/lib/metrics/registry.ts`. Display code should ne
 
 ## Accuracy Boundary
 
-Metrics based directly on official box totals are active by default. Metrics that require tracking, matchup, play-type tagging, defender distance, pass location, touch time, or possession-level event detail are kept in the registry but return `N/A` until a real event/tracking source is connected.
+Metrics based directly on official box totals or NBA Stats Advanced tables are active by default. TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession counts use NBA Stats Advanced when present; Basketball Reference advanced-stat pages and glossary links are stored as public cross-reference sources.
+
+Metrics that require tracking, matchup, play-type tagging, defender distance, pass location, touch time, or possession-level event detail are kept in the registry but return `N/A` until a real event/tracking source is connected.
 
 ## Expected Shot Value
 
 Expected-shot fields are registry definitions only until a real shot-event or tracking feed is connected. In the default official NBA Stats snapshot, expected FG%, shot quality, actual-minus-expected, rim/three/midrange shot quality, and clutch shot quality return `N/A` rather than locally estimated values.
 
 When a licensed or public event feed is added, the adapter must persist the source expected values or the complete shot-context inputs used to calculate them. The model output should be treated as Basketball Savant analysis, not an official NBA fact, unless the upstream source explicitly provides the value.
+
+## Tracking Feed Requirements
+
+Shot quality, defender distance, play-type PPP, touch maps, pass networks, gravity, contest value, rebound chances, and matchup difficulty need row-level event/tracking data. The minimum useful feed includes NBA Stats-compatible game IDs, team IDs, player IDs, period/clock or event timestamps, shot x/y coordinates, shot zone/type, closest defender ID, defender distance, touch time, dribble count, shot clock, play type, pass events, rebound chances, boxouts, contests, matchup assignments, and terms that allow Basketball Savant to display derived results.
 
 ## Sample-Size Notes
 

@@ -1,6 +1,5 @@
 import type { MetricDefinition, PlayerSeasonAggregate, TeamSeasonAggregate } from "@/lib/types";
 import {
-  assistRate,
   defensiveRating,
   efgPercentage,
   netRating as netRatingFormula,
@@ -50,13 +49,16 @@ export const metricRegistry: MetricDefinition[] = [
   metric({ key: "ts_pct", label: "True Shooting Percentage", shortLabel: "TS%", category: "Efficiency", description: "Scoring efficiency including twos, threes, and free throws.", formula: "PTS / (2 * (FGA + 0.44 * FTA))", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Best with moderate scoring volume." }),
   metric({ key: "points_per_shot", label: "Points Per Shot", shortLabel: "PPS", category: "Efficiency", description: "Points divided by field goal attempts.", formula: "PTS / FGA", unit: "points", higherIsBetter: true, precision: 2, sourceType: "derived", requiresTracking: false, sampleQualifier: "Treat free throws separately." }),
   metric({ key: "points_per_possession", label: "Points Per Possession", shortLabel: "PPP", category: "Efficiency", description: "Points divided by possessions used.", formula: "PTS / Possessions", unit: "points", higherIsBetter: true, precision: 2, sourceType: "derived", requiresTracking: false, sampleQualifier: "Requires possession estimate." }),
-  metric({ key: "usage_rate", label: "Usage Rate", shortLabel: "USG%", category: "Efficiency", description: "Share of team possessions used by a player.", formula: "(FGA + 0.44 * FTA + TOV) / Team Possessions", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Calculated from aggregate box totals." }),
-  metric({ key: "assist_rate", label: "Assist Rate", shortLabel: "AST%", category: "Efficiency", description: "Assists divided by teammate field goals while on court.", formula: "AST / Teammate FGM", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Requires teammate field-goal context." }),
+  metric({ key: "usage_rate", label: "Usage Rate", shortLabel: "USG%", category: "Efficiency", description: "Share of team possessions used by a player.", formula: "NBA Stats USG_PCT; fallback with NBA Stats team minutes: (FGA + 0.44 * FTA + TOV) * Team MIN / (MIN * (Team FGA + 0.44 * Team FTA + Team TOV))", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Uses official NBA Stats Advanced when loaded." }),
+  metric({ key: "assist_rate", label: "Assist Rate", shortLabel: "AST%", category: "Efficiency", description: "Estimated percentage of teammate field goals assisted while on court.", formula: "NBA Stats AST_PCT", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Uses official NBA Stats Advanced when loaded." }),
+  metric({ key: "ast_pct", label: "Assist Percentage", shortLabel: "AST%", category: "Efficiency", description: "Estimated percentage of teammate field goals assisted while on court.", formula: "NBA Stats AST_PCT", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Cross-reference with Basketball Reference AST%." }),
   metric({ key: "turnover_rate", label: "Turnover Rate", shortLabel: "TOV%", category: "Efficiency", description: "Turnovers divided by possessions used.", formula: "TOV / Possessions Used", unit: "percentage", higherIsBetter: false, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Lower is better." }),
   metric({ key: "off_rating", label: "Offensive Rating", shortLabel: "ORtg", category: "Efficiency", description: "Points scored per 100 possessions.", formula: "PTS / Possessions * 100", unit: "rating", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Estimated on-court/team context." }),
   metric({ key: "def_rating", label: "Defensive Rating", shortLabel: "DRtg", category: "Efficiency", description: "Points allowed per 100 possessions.", formula: "Points Allowed / Possessions * 100", unit: "rating", higherIsBetter: false, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Estimated on-court/team context." }),
   metric({ key: "net_rating", label: "Net Rating", shortLabel: "Net", category: "Efficiency", description: "Offensive rating minus defensive rating.", formula: "ORtg - DRtg", unit: "rating", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Stable with larger possession samples." }),
   metric({ key: "pace", label: "Pace", shortLabel: "Pace", category: "Efficiency", description: "Possessions per 48 minutes.", formula: "48 * ((Team Poss + Opp Poss) / (2 * Team Minutes / 5))", unit: "rating", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Team-level display." }),
+  metric({ key: "pie", label: "Player Impact Estimate", shortLabel: "PIE", category: "Efficiency", description: "NBA Stats estimate of a player's share of game events.", formula: "NBA Stats PIE", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Uses official NBA Stats Advanced when loaded." }),
+  metric({ key: "possessions", label: "On-Court Possessions", shortLabel: "POSS", category: "Efficiency", description: "NBA Stats possessions for player or team context.", formula: "NBA Stats POSS", unit: "number", higherIsBetter: true, precision: 0, sourceType: "derived", requiresTracking: false, sampleQualifier: "Official advanced possession count." }),
 
   metric({ key: "expected_fg_pct", label: "Expected FG%", shortLabel: "xFG%", category: "Shot Quality", description: "Model-estimated make probability from shot context.", formula: "Rule-based expected shot model", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "model", requiresTracking: false, sampleQualifier: "Requires shot-context features." }),
   metric({ key: "expected_points_per_shot", label: "Expected Points Per Shot", shortLabel: "xPTS/Shot", category: "Shot Quality", description: "Expected shot points divided by shot attempts.", formula: "Expected Points / FGA", unit: "points", higherIsBetter: true, precision: 2, sourceType: "model", requiresTracking: false, sampleQualifier: "Shot-quality model output." }),
@@ -121,6 +123,9 @@ export const metricRegistry: MetricDefinition[] = [
 
   metric({ key: "offensive_rebound_rate", label: "Offensive Rebound Rate", shortLabel: "OREB%", category: "Rebounding", description: "Offensive rebounds divided by rebound chances.", formula: "OREB / Rebound Chances", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: true, sampleQualifier: "Requires rebound-chance tracking." }),
   metric({ key: "defensive_rebound_rate", label: "Defensive Rebound Rate", shortLabel: "DREB%", category: "Rebounding", description: "Defensive rebounds divided by rebound chances.", formula: "DREB / Rebound Chances", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: true, sampleQualifier: "Requires rebound-chance tracking." }),
+  metric({ key: "oreb_pct", label: "Offensive Rebound Percentage", shortLabel: "OREB%", category: "Rebounding", description: "Estimated share of available offensive rebounds collected.", formula: "NBA Stats OREB_PCT", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Cross-reference with Basketball Reference ORB%." }),
+  metric({ key: "dreb_pct", label: "Defensive Rebound Percentage", shortLabel: "DREB%", category: "Rebounding", description: "Estimated share of available defensive rebounds collected.", formula: "NBA Stats DREB_PCT", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Cross-reference with Basketball Reference DRB%." }),
+  metric({ key: "reb_pct", label: "Total Rebound Percentage", shortLabel: "REB%", category: "Rebounding", description: "Estimated share of available rebounds collected.", formula: "NBA Stats REB_PCT", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: false, sampleQualifier: "Cross-reference with Basketball Reference TRB%." }),
   metric({ key: "contested_rebound_rate", label: "Contested Rebound Rate", shortLabel: "Cont Reb%", category: "Rebounding", description: "Share of rebounds that were contested.", formula: "Contested Rebounds / Rebounds", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "event", requiresTracking: false, sampleQualifier: "Requires rebound-event tags." }),
   metric({ key: "rebound_chances", label: "Rebound Chances", shortLabel: "Reb Ch", category: "Rebounding", description: "Available rebound opportunities.", formula: "Rebound Chances", unit: "number", higherIsBetter: true, precision: 1, sourceType: "tracking", requiresTracking: true, sampleQualifier: "Requires rebound-chance tracking." }),
   metric({ key: "rebound_conversion_pct", label: "Rebound Conversion %", shortLabel: "Reb Conv", category: "Rebounding", description: "Rebounds divided by rebound chances.", formula: "REB / Rebound Chances", unit: "percentage", higherIsBetter: true, precision: 1, sourceType: "derived", requiresTracking: true, sampleQualifier: "Requires rebound-chance tracking." }),
@@ -197,11 +202,6 @@ function recentDeltaFromSeason(row: PlayerSeasonAggregate, games: number): numbe
 export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): number | null {
   const hasEventOrTrackingData = row.expectedPoints > 0 || row.rimAttempts > 0 || row.touches > 0 || row.reboundChances > 0;
   const unavailableWithoutTracking = new Set([
-    "assist_rate",
-    "off_rating",
-    "def_rating",
-    "net_rating",
-    "pace",
     "expected_fg_pct",
     "expected_points_per_shot",
     "shot_quality",
@@ -278,10 +278,13 @@ export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): 
   if (!hasEventOrTrackingData && unavailableWithoutTracking.has(key)) return null;
 
   const games = row.games || 1;
-  const teammateFgm = Math.max(row.fgm + row.ast * 1.9, 1);
   const possessionsUsed = row.fga + 0.44 * row.fta + row.tov;
-  const off = offensiveRating(row.pts, row.possessions);
-  const def = defensiveRating(row.pointsAllowedOnCourt, row.possessions);
+  const usage =
+    row.usagePct ??
+    usageRate(row.fga, row.fta, row.tov, row.minutes, row.teamFga, row.teamFta, row.teamTov, row.teamMinutes);
+  const off = row.offRating ?? offensiveRating(row.pts, row.possessions);
+  const def = row.defRating ?? (row.pointsAllowedOnCourt > 0 ? defensiveRating(row.pointsAllowedOnCourt, row.possessions) : null);
+  const net = row.netRating ?? netRatingFormula(off, def);
 
   const values: Record<string, number | null> = {
     pts: row.pts / games,
@@ -299,17 +302,20 @@ export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): 
     fg_pct: percentage(row.fgm, row.fga),
     three_pct: percentage(row.threePm, row.threePa),
     ft_pct: percentage(row.ftm, row.fta),
-    efg_pct: efgPercentage(row.fgm, row.threePm, row.fga),
-    ts_pct: trueShootingPercentage(row.pts, row.fga, row.fta),
+    efg_pct: row.officialEfgPct ?? efgPercentage(row.fgm, row.threePm, row.fga),
+    ts_pct: row.officialTsPct ?? trueShootingPercentage(row.pts, row.fga, row.fta),
     points_per_shot: safeDiv(row.pts, row.fga),
     points_per_possession: safeDiv(row.pts, row.possessions),
-    usage_rate: usageRate(row.fga, row.fta, row.tov, row.teamPossessions),
-    assist_rate: assistRate(row.ast, teammateFgm),
+    usage_rate: usage,
+    assist_rate: row.assistPct,
+    ast_pct: row.assistPct,
     turnover_rate: turnoverRate(row.tov, possessionsUsed),
     off_rating: off,
     def_rating: def,
-    net_rating: netRatingFormula(off, def),
-    pace: paceEstimate(row.teamPossessions, row.teamPossessions * 0.99, row.minutes),
+    net_rating: net,
+    pace: row.pace ?? paceEstimate(row.teamPossessions, row.teamPossessions * 0.99, row.teamMinutes),
+    pie: row.pie,
+    possessions: row.onCourtPossessions || row.possessions,
     expected_fg_pct: row.expectedFgPct,
     expected_points_per_shot: safeDiv(row.expectedPoints, row.fga),
     shot_quality: shotQuality(safeDiv(row.expectedPoints, row.fga) ?? 0),
@@ -364,6 +370,9 @@ export function calculatePlayerMetric(key: string, row: PlayerSeasonAggregate): 
     screen_navigation_score: null,
     offensive_rebound_rate: safeDiv(row.oreb, row.reboundChances),
     defensive_rebound_rate: safeDiv(row.dreb, row.reboundChances),
+    oreb_pct: row.offensiveReboundPct,
+    dreb_pct: row.defensiveReboundPct,
+    reb_pct: row.reboundPct,
     contested_rebound_rate: safeDiv(row.contestedRebounds, row.reb),
     rebound_chances: row.reboundChances / games,
     rebound_conversion_pct: reboundConversion(row.reb, row.reboundChances),
@@ -397,8 +406,8 @@ export function calculateTeamMetric(key: string, row: TeamSeasonAggregate): numb
   const hasShotEventData = row.expectedPoints > 0 || row.rimFrequency > 0;
   if (!hasShotEventData && ["shot_quality", "expected_points_per_shot", "rim_frequency", "above_break_three_frequency", "corner_three_frequency"].includes(key)) return null;
   const games = row.games || 1;
-  const off = offensiveRating(row.pts, row.possessions);
-  const def = defensiveRating(row.ptsAllowed, row.possessions);
+  const off = row.offRating ?? offensiveRating(row.pts, row.possessions);
+  const def = row.defRating ?? defensiveRating(row.ptsAllowed, row.possessions);
   const values: Record<string, number | null> = {
     pts: row.pts / games,
     reb: row.reb / games,
@@ -415,12 +424,20 @@ export function calculateTeamMetric(key: string, row: TeamSeasonAggregate): numb
     fg_pct: percentage(row.fgm, row.fga),
     three_pct: percentage(row.threePm, row.threePa),
     ft_pct: percentage(row.ftm, row.fta),
-    efg_pct: efgPercentage(row.fgm, row.threePm, row.fga),
-    ts_pct: trueShootingPercentage(row.pts, row.fga, row.fta),
+    efg_pct: row.officialEfgPct ?? efgPercentage(row.fgm, row.threePm, row.fga),
+    ts_pct: row.officialTsPct ?? trueShootingPercentage(row.pts, row.fga, row.fta),
+    assist_rate: row.assistPct,
+    ast_pct: row.assistPct,
+    turnover_rate: row.turnoverPct,
+    oreb_pct: row.offensiveReboundPct,
+    dreb_pct: row.defensiveReboundPct,
+    reb_pct: row.reboundPct,
     off_rating: off,
     def_rating: def,
-    net_rating: netRatingFormula(off, def),
+    net_rating: row.netRating ?? netRatingFormula(off, def),
     pace: row.pace,
+    pie: row.pie,
+    possessions: row.possessions,
     shot_quality: row.shotQuality,
     expected_points_per_shot: safeDiv(row.expectedPoints, row.fga),
     rim_frequency: row.rimFrequency,

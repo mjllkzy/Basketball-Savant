@@ -235,9 +235,32 @@ function baseDashParams(seasonType, teamId = 0) {
   };
 }
 
+function advancedDashParams(seasonType, teamId = 0) {
+  return {
+    ...baseDashParams(seasonType, teamId),
+    MeasureType: "Advanced"
+  };
+}
+
 function playerDashParams(seasonType, teamId = 0) {
   return {
     ...baseDashParams(seasonType, teamId),
+    PlayerExperience: "",
+    PlayerPosition: "",
+    StarterBench: "",
+    DraftYear: "",
+    DraftPick: "",
+    College: "",
+    Country: "",
+    Height: "",
+    Weight: "",
+    TwoWay: "0"
+  };
+}
+
+function playerAdvancedDashParams(seasonType, teamId = 0) {
+  return {
+    ...advancedDashParams(seasonType, teamId),
     PlayerExperience: "",
     PlayerPosition: "",
     StarterBench: "",
@@ -387,8 +410,12 @@ async function main() {
   const existingSnapshot = await readExistingSnapshot(output);
   const playerStatsRegularUrl = withParams("https://stats.nba.com/stats/leaguedashplayerstats", playerDashParams("Regular Season"));
   const playerStatsPlayoffsUrl = withParams("https://stats.nba.com/stats/leaguedashplayerstats", playerDashParams("Playoffs"));
+  const playerAdvancedRegularUrl = withParams("https://stats.nba.com/stats/leaguedashplayerstats", playerAdvancedDashParams("Regular Season"));
+  const playerAdvancedPlayoffsUrl = withParams("https://stats.nba.com/stats/leaguedashplayerstats", playerAdvancedDashParams("Playoffs"));
   const teamStatsRegularUrl = withParams("https://stats.nba.com/stats/leaguedashteamstats", baseDashParams("Regular Season"));
   const teamStatsPlayoffsUrl = withParams("https://stats.nba.com/stats/leaguedashteamstats", baseDashParams("Playoffs"));
+  const teamAdvancedRegularUrl = withParams("https://stats.nba.com/stats/leaguedashteamstats", advancedDashParams("Regular Season"));
+  const teamAdvancedPlayoffsUrl = withParams("https://stats.nba.com/stats/leaguedashteamstats", advancedDashParams("Playoffs"));
   const teamGameLogsRegularUrl = withParams("https://stats.nba.com/stats/teamgamelogs", gameLogParams("Regular Season"));
   const teamGameLogsPlayoffsUrl = withParams("https://stats.nba.com/stats/teamgamelogs", gameLogParams("Playoffs"));
   const playerGameLogsRegularUrl = withParams("https://stats.nba.com/stats/playergamelogs", playerGameLogParams("Regular Season"));
@@ -400,8 +427,12 @@ async function main() {
   const emptyTable = { resultSets: [{ headers: [], rowSet: [] }] };
   const playerStatsRegular = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "playerStatsRegular") : await fetchJson("regular player stats", playerStatsRegularUrl);
   const playerStatsPlayoffs = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "playerStatsPlayoffs") : await fetchOptionalJson("playoff player stats", playerStatsPlayoffsUrl) ?? emptyTable;
+  const playerAdvancedRegular = reuseExistingCore && existingSnapshot?.tables?.playerAdvancedRegular ? snapshotTableToJson(existingSnapshot, "playerAdvancedRegular") : await fetchJson("regular player advanced stats", playerAdvancedRegularUrl);
+  const playerAdvancedPlayoffs = reuseExistingCore && existingSnapshot?.tables?.playerAdvancedPlayoffs ? snapshotTableToJson(existingSnapshot, "playerAdvancedPlayoffs") : await fetchOptionalJson("playoff player advanced stats", playerAdvancedPlayoffsUrl) ?? emptyTable;
   const teamStatsRegular = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "teamStatsRegular") : await fetchJson("regular team stats", teamStatsRegularUrl);
   const teamStatsPlayoffs = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "teamStatsPlayoffs") : await fetchOptionalJson("playoff team stats", teamStatsPlayoffsUrl) ?? emptyTable;
+  const teamAdvancedRegular = reuseExistingCore && existingSnapshot?.tables?.teamAdvancedRegular ? snapshotTableToJson(existingSnapshot, "teamAdvancedRegular") : await fetchJson("regular team advanced stats", teamAdvancedRegularUrl);
+  const teamAdvancedPlayoffs = reuseExistingCore && existingSnapshot?.tables?.teamAdvancedPlayoffs ? snapshotTableToJson(existingSnapshot, "teamAdvancedPlayoffs") : await fetchOptionalJson("playoff team advanced stats", teamAdvancedPlayoffsUrl) ?? emptyTable;
   const playerBioStatsRegular = await fetchJson("regular player bio stats", playerBioStatsRegularUrl);
   const playerIndex = await fetchJson("player index", playerIndexUrl);
   const fetchRequestedJson = allowPartial ? fetchOptionalJson : fetchJson;
@@ -450,6 +481,8 @@ async function main() {
           ? [`Aggregate player and team tables were reused from the existing official snapshot generated at ${existingSnapshot.metadata.generatedAt}.`]
           : []),
         "Basketball Reference, NBA.com box scores, and ESPN game pages are listed as cross-reference sources for public score and series verification.",
+        "NBA Stats Advanced player and team tables provide official TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession fields.",
+        "Basketball Reference advanced-stat pages are tracked as public formula and value cross-reference sources; NBA Stats remains the machine-readable source.",
         "The publicReferenceGames metadata pins the currently displayed NBA Finals games to public NBA.com, Basketball Reference, and ESPN game pages.",
         "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
         "Basketball Savant derived metrics are calculated locally from official box score totals.",
@@ -463,13 +496,20 @@ async function main() {
         basketballReferencePlayoffs2026: "https://www.basketball-reference.com/playoffs/NBA_2026.html",
         basketballReferenceFinals2026: "https://www.basketball-reference.com/playoffs/2026-nba-finals-knicks-vs-spurs.html",
         basketballReferenceFinalsGame5: "https://www.basketball-reference.com/boxscores/202606130SAS.html",
+        basketballReferencePlayerAdvanced2026: "https://www.basketball-reference.com/leagues/NBA_2026_advanced.html",
+        basketballReferenceTeamAdvanced2026: "https://www.basketball-reference.com/leagues/NBA_2026.html#advanced-team",
+        basketballReferenceGlossary: "https://www.basketball-reference.com/about/glossary.html",
         espnFinalsGame5: "https://www.espn.com/nba/game/_/gameId/401859967/knicks-spurs",
         playerStatsRegularUrl,
         playerStatsPlayoffsUrl,
+        playerAdvancedRegularUrl,
+        playerAdvancedPlayoffsUrl,
         playerBioStatsRegularUrl,
         playerIndexUrl,
         teamStatsRegularUrl,
         teamStatsPlayoffsUrl,
+        teamAdvancedRegularUrl,
+        teamAdvancedPlayoffsUrl,
         teamGameLogsRegularUrl,
         teamGameLogsPlayoffsUrl,
         playerGameLogsRegularUrl,
@@ -478,11 +518,15 @@ async function main() {
       coverage: {
         regularSeasonPlayerStats: table(playerStatsRegular).rows.length,
         playoffPlayerStats: table(playerStatsPlayoffs).rows.length,
+        regularSeasonPlayerAdvanced: table(playerAdvancedRegular).rows.length,
+        playoffPlayerAdvanced: table(playerAdvancedPlayoffs).rows.length,
         regularSeasonPlayerBioStats: table(playerBioStatsRegular).rows.length,
         playerIndex: table(playerIndex).rows.length,
         externalPlayerBioOverrides: externalPlayerBioOverrides.length,
         regularSeasonTeamStats: table(teamStatsRegular).rows.length,
         playoffTeamStats: table(teamStatsPlayoffs).rows.length,
+        regularSeasonTeamAdvanced: table(teamAdvancedRegular).rows.length,
+        playoffTeamAdvanced: table(teamAdvancedPlayoffs).rows.length,
         regularSeasonTeamGameLogs: table(teamGameLogsRegular).rows.length,
         playoffTeamGameLogs: table(teamGameLogsPlayoffs).rows.length,
         regularSeasonPlayerGameLogs: table(playerGameLogsRegular).rows.length,
@@ -495,6 +539,8 @@ async function main() {
     tables: {
       playerStatsRegular: table(playerStatsRegular),
       playerStatsPlayoffs: table(playerStatsPlayoffs),
+      playerAdvancedRegular: table(playerAdvancedRegular),
+      playerAdvancedPlayoffs: table(playerAdvancedPlayoffs),
       playerBioStatsRegular: table(playerBioStatsRegular),
       playerIndex: table(playerIndex),
       playerBioOverrides: {
@@ -511,6 +557,8 @@ async function main() {
       },
       teamStatsRegular: table(teamStatsRegular),
       teamStatsPlayoffs: table(teamStatsPlayoffs),
+      teamAdvancedRegular: table(teamAdvancedRegular),
+      teamAdvancedPlayoffs: table(teamAdvancedPlayoffs),
       teamGameLogsRegular: table(teamGameLogsRegular),
       teamGameLogsPlayoffs: table(teamGameLogsPlayoffs),
       playerGameLogsRegular: table(playerGameLogsRegular),
@@ -528,10 +576,15 @@ async function main() {
     `Roster refresh requested ${teamIdList.length} team rosters but loaded ${loadedRosterCount}.`
   );
   const playerStatsRegularTable = table(playerStatsRegular);
+  const playerAdvancedRegularTable = table(playerAdvancedRegular);
   const playerBioStatsRegularTable = table(playerBioStatsRegular);
   const playerIndexTable = table(playerIndex);
+  const teamStatsRegularTable = table(teamStatsRegular);
+  const teamAdvancedRegularTable = table(teamAdvancedRegular);
   const missingBioStatsIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerBioStatsRegularTable, "PLAYER_ID");
   const missingPlayerIndexIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerIndexTable, "PERSON_ID");
+  const missingPlayerAdvancedIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerAdvancedRegularTable, "PLAYER_ID");
+  const missingTeamAdvancedIds = missingIds(teamStatsRegularTable, "TEAM_ID", teamAdvancedRegularTable, "TEAM_ID");
   assertCoverage(
     missingBioStatsIds.length === 0,
     `Player bio stats are missing ${missingBioStatsIds.length} regular-season player IDs: ${missingBioStatsIds.slice(0, 10).join(", ")}.`
@@ -539,6 +592,14 @@ async function main() {
   assertCoverage(
     missingPlayerIndexIds.length === 0,
     `Player index is missing ${missingPlayerIndexIds.length} regular-season player IDs: ${missingPlayerIndexIds.slice(0, 10).join(", ")}.`
+  );
+  assertCoverage(
+    missingPlayerAdvancedIds.length === 0,
+    `Player advanced stats are missing ${missingPlayerAdvancedIds.length} regular-season player IDs: ${missingPlayerAdvancedIds.slice(0, 10).join(", ")}.`
+  );
+  assertCoverage(
+    missingTeamAdvancedIds.length === 0,
+    `Team advanced stats are missing ${missingTeamAdvancedIds.length} regular-season team IDs: ${missingTeamAdvancedIds.slice(0, 10).join(", ")}.`
   );
   assertCoverage(
     !includeTeamGameLogs || table(teamStatsRegular).rows.length === 0 || table(teamGameLogsRegular).rows.length > 0,

@@ -13,12 +13,12 @@ const categoryDefaults: Record<string, string> = {
   Creation: "usage_rate",
   Playmaking: "ast",
   Defense: "stocks",
-  Rebounding: "reb",
+  Rebounding: "reb_pct",
   "Play Type": "transition_ppp",
   Clutch: "ft_pct",
   Lineups: "lineup_net_rating",
   Rolling: "last_10_games",
-  Percentiles: "ts_pct"
+  Percentiles: "pie"
 };
 
 export default function LeaderboardsPage({ searchParams }: { searchParams: RouteSearchParams }) {

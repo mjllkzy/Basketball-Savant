@@ -61,17 +61,21 @@ The app defaults to `src/lib/data/generated/official-snapshot.json`, refreshed f
 
 NBA Stats is the primary machine-readable source. Public box-score and series pages from Basketball Reference, NBA.com, and ESPN are tracked in snapshot metadata as cross-reference sources for score and series sanity checks.
 
+NBA Stats Advanced player and team tables are loaded for TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and official possession counts. Basketball Reference advanced-stat and glossary pages are tracked in metadata as public cross-reference sources for formulas and value checks.
+
 The checked-in snapshot also carries `metadata.publicReferenceGames`: a public reference fixture for the displayed 2026 NBA Finals games. Tests compare those expected dates, teams, scores, and source URLs against the game-log rows so the dashboard cannot silently drift back to generated or mismatched latest-game cards.
 
 Current default snapshot coverage:
 
 - 2025-26 regular-season player totals
 - 2025-26 playoff player totals
+- 2025-26 regular-season and playoff player advanced stats from NBA Stats Advanced
 - 2025-26 NBA player index rows for position, jersey, height, weight, country, college, roster status, and draft metadata
 - 2025-26 regular-season player bio-stat rows used as an official cross-check for height, weight, country, college, and draft metadata
 - Explicit Basketball Reference player-bio fallback rows only where NBA Stats leaves a displayed bio field blank
 - 2025-26 regular-season team totals
 - 2025-26 playoff team totals
+- 2025-26 regular-season and playoff team advanced stats from NBA Stats Advanced
 - 2025-26 regular-season team and player game logs when refreshed
 - 2025-26 playoff team and player game logs when refreshed
 - Best-effort team roster enrichment when `--include-rosters` is used
@@ -139,6 +143,10 @@ Persistent import is intentionally a TODO: wire the parser into a database adapt
 - Expected shot value exists as a model interface and testable baseline, but is not used as factual production data without a shot-event/tracking feed.
 - CSV import previews rows but does not persist them.
 - Playwright e2e script is present, but browser smoke coverage should be expanded after product flows stabilize.
+
+## Tracking Feed Requirements
+
+To turn on shot quality, defender distance, play type PPP, touch maps, pass networks, gravity, and rebound-chance metrics, Basketball Savant needs row-level event or tracking data with stable game IDs, player IDs, team IDs, event timestamps, shot coordinates, closest defender or matchup IDs, defender distance, touch time, dribble count, shot clock, play type tags, pass/rebound/contest events, and source licensing terms that allow display in the app. A CSV export, database URL, or licensed provider API can work as long as those fields are present and can be mapped to NBA Stats IDs.
 
 ## Roadmap
 

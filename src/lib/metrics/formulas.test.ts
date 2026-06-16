@@ -35,13 +35,13 @@ describe("basketball formula utilities", () => {
     expect(defensiveRating(101, 100)).toBeCloseTo(101);
     expect(netRating(112, 101)).toBe(11);
     expect(paceEstimate(100, 98, 240)).toBe(99);
-    expect(usageRate(20, 6, 3, 100)).toBeCloseTo(0.2564);
+    expect(usageRate(20, 6, 3, 36, 90, 24, 14, 48)).toBeCloseTo(0.2984, 4);
   });
 
   it("calculates event-derived rates", () => {
     expect(actualMinusExpectedPoints(12, 10.5)).toBe(1.5);
     expect(rimFrequency(12, 40)).toBe(0.3);
-    expect(assistRate(8, 22)).toBeCloseTo(0.3636);
+    expect(assistRate(8, 6, 36, 40, 48)).toBeCloseTo(0.3333);
     expect(turnoverRate(4, 28)).toBeCloseTo(0.1428);
     expect(reboundConversion(11, 20)).toBe(0.55);
   });

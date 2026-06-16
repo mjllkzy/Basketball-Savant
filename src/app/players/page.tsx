@@ -23,7 +23,9 @@ export default function PlayersPage({ searchParams }: { searchParams: Record<str
     min: (row.minutes / row.games).toFixed(1),
     pts: formatMetric("pts", calculatePlayerMetric("pts", row)),
     ts: formatMetric("ts_pct", calculatePlayerMetric("ts_pct", row)),
+    efg: formatMetric("efg_pct", calculatePlayerMetric("efg_pct", row)),
     usg: formatMetric("usage_rate", calculatePlayerMetric("usage_rate", row)),
+    pie: formatMetric("pie", calculatePlayerMetric("pie", row)),
     ast: formatMetric("ast", calculatePlayerMetric("ast", row)),
     stocks: formatMetric("stocks", calculatePlayerMetric("stocks", row))
   }));
@@ -42,7 +44,7 @@ export default function PlayersPage({ searchParams }: { searchParams: Record<str
           {positionOptions.map((position) => <option key={position}>{position}</option>)}
         </select>
         <select name="sort" defaultValue={searchParams.sort ?? "pts"} className="rounded border border-slate-300 px-3 py-2 text-sm">
-          {["pts", "ts_pct", "efg_pct", "three_pct", "usage_rate", "stocks"].map((metric) => <option key={metric} value={metric}>{metric}</option>)}
+          {["pts", "ts_pct", "efg_pct", "usage_rate", "pie", "reb_pct", "ast_pct", "three_pct", "stocks"].map((metric) => <option key={metric} value={metric}>{metric}</option>)}
         </select>
         <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Apply</button>
       </form>
@@ -55,7 +57,9 @@ export default function PlayersPage({ searchParams }: { searchParams: Record<str
           { key: "min", label: "MIN", align: "right" },
           { key: "pts", label: "PTS", align: "right" },
           { key: "ts", label: "TS%", align: "right" },
+          { key: "efg", label: "eFG%", align: "right" },
           { key: "usg", label: "USG%", align: "right" },
+          { key: "pie", label: "PIE", align: "right" },
           { key: "ast", label: "AST", align: "right" },
           { key: "stocks", label: "STOCKS", align: "right" }
         ]}

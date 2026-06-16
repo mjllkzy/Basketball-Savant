@@ -29,6 +29,8 @@ The default refresh writes `src/lib/data/generated/official-snapshot.json`.
 
 The snapshot metadata includes public reference game fixtures for high-visibility displayed games. Each fixture records the expected date, teams, score, NBA.com box-score URL, Basketball Reference box-score URL, and ESPN game URL so tests can cross-check the app's game-log mapping against public sources.
 
+The refresh also pulls NBA Stats Advanced player and team tables. Those tables supply official TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession counts. Basketball Reference advanced-stat and glossary URLs are stored in metadata as public formula/value cross-reference sources.
+
 ## Supported Import Preview
 
 `POST /api/import/csv` accepts a CSV body and returns a preview envelope:
@@ -120,6 +122,21 @@ Required fields:
 - expectedFgPct
 - expectedPoints
 
+Useful tracking/model fields:
+
+- defenderId
+- defenderDistance
+- closestDefender
+- contestLevel
+- shotClock
+- touchTime
+- dribblesBeforeShot
+- shotType
+- playType
+- isTransition
+- isCatchAndShoot
+- isPullUp
+
 ### passes
 
 Required fields:
@@ -128,6 +145,21 @@ Required fields:
 - possessionId
 - passerId
 - receiverId
+
+Useful tracking/model fields:
+
+- xStart
+- yStart
+- xEnd
+- yEnd
+- ledToShot
+- ledToAssist
+- potentialAssist
+- secondaryAssist
+
+### tracking requirements
+
+Shot quality, defender distance, play-type PPP, touch maps, pass networks, rebound chances, boxouts, contests, matchup difficulty, and gravity need row-level event/tracking data. A usable provider feed must include stable NBA-compatible IDs, period/clock or event timestamps, player/team/game IDs, coordinates where relevant, and display rights for derived metrics.
 - gameId
 - season
 - passType

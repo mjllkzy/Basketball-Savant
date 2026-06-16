@@ -13,7 +13,7 @@ import type {
   TeamGameStat,
   TeamSeasonAggregate
 } from "@/lib/types";
-import { estimatePossessions, trueShootingPercentage } from "@/lib/metrics/formulas";
+import { estimatePossessions, trueShootingPercentage, usageRate } from "@/lib/metrics/formulas";
 import { slugify } from "@/lib/utils";
 
 type SnapshotTable = {
@@ -25,8 +25,18 @@ type OfficialSnapshot = typeof snapshot;
 
 const officialSnapshot = snapshot as OfficialSnapshot;
 
-function table(name: keyof OfficialSnapshot["tables"]): SnapshotTable {
-  return officialSnapshot.tables[name] as SnapshotTable;
+function isSnapshotTable(candidate: unknown): candidate is SnapshotTable {
+  return (
+    typeof candidate === "object" &&
+    candidate !== null &&
+    Array.isArray((candidate as SnapshotTable).headers) &&
+    Array.isArray((candidate as SnapshotTable).rows)
+  );
+}
+
+function table(name: string): SnapshotTable {
+  const candidate = (officialSnapshot.tables as Record<string, unknown>)[name];
+  return isSnapshotTable(candidate) ? candidate : { headers: [], rows: [] };
 }
 
 function value<T = unknown>(tableData: SnapshotTable, row: unknown[], key: string): T {
@@ -114,6 +124,8 @@ function splitTeamName(teamName: string) {
 
 const teamTable = table("teamStatsRegular");
 const playerTable = table("playerStatsRegular");
+const playerAdvancedTable = table("playerAdvancedRegular");
+const teamAdvancedTable = table("teamAdvancedRegular");
 const playerBioStatsTable = table("playerBioStatsRegular");
 const playerIndexTable = table("playerIndex");
 const playerBioOverridesTable = table("playerBioOverrides");
@@ -146,6 +158,8 @@ export const officialTeams: Team[] = teamTable.rows.map((row) => {
 });
 
 const playerBioStatsById = new Map(playerBioStatsTable.rows.map((row) => [String(numberValue(playerBioStatsTable, row, "PLAYER_ID")), row]));
+const playerAdvancedById = new Map(playerAdvancedTable.rows.map((row) => [String(numberValue(playerAdvancedTable, row, "PLAYER_ID")), row]));
+const teamAdvancedById = new Map(teamAdvancedTable.rows.map((row) => [String(numberValue(teamAdvancedTable, row, "TEAM_ID")), row]));
 const playerIndexById = new Map(playerIndexTable.rows.map((row) => [String(numberValue(playerIndexTable, row, "PERSON_ID")), row]));
 const playerBioOverrideByIdAndField = new Map(
   playerBioOverridesTable.rows.map((row) => [`${stringValue(playerBioOverridesTable, row, "PLAYER_ID")}:${stringValue(playerBioOverridesTable, row, "FIELD")}`, row])
@@ -218,6 +232,7 @@ function playerAggregateFromRow(row: unknown[]): PlayerSeasonAggregate {
   const playerId = String(numberValue(playerTable, row, "PLAYER_ID"));
   const player = playerById.get(playerId)!;
   const team = teamById.get(player.teamId)!;
+  const advancedRow = playerAdvancedById.get(playerId);
   const gp = numberValue(playerTable, row, "GP");
   const fga = numberValue(playerTable, row, "FGA");
   const fta = numberValue(playerTable, row, "FTA");
@@ -226,7 +241,13 @@ function playerAggregateFromRow(row: unknown[]): PlayerSeasonAggregate {
   const possessions = estimatePossessions(fga, fta, oreb, tov);
   const pts = numberValue(playerTable, row, "PTS");
   const teamRow = teamTable.rows.find((teamStatsRow) => String(numberValue(teamTable, teamStatsRow, "TEAM_ID")) === player.teamId);
-  const teamPossessions = teamRow ? estimatePossessions(numberValue(teamTable, teamRow, "FGA"), numberValue(teamTable, teamRow, "FTA"), numberValue(teamTable, teamRow, "OREB"), numberValue(teamTable, teamRow, "TOV")) : 0;
+  const teamAdvancedRow = teamAdvancedById.get(player.teamId);
+  const estimatedTeamPossessions = teamRow ? estimatePossessions(numberValue(teamTable, teamRow, "FGA"), numberValue(teamTable, teamRow, "FTA"), numberValue(teamTable, teamRow, "OREB"), numberValue(teamTable, teamRow, "TOV")) : 0;
+  const teamPossessions = teamAdvancedRow ? optionalNumberValue(teamAdvancedTable, teamAdvancedRow, "POSS") ?? estimatedTeamPossessions : estimatedTeamPossessions;
+  const teamMinutes = teamRow ? numberValue(teamTable, teamRow, "MIN") : 0;
+  const teamFga = teamRow ? numberValue(teamTable, teamRow, "FGA") : 0;
+  const teamFta = teamRow ? numberValue(teamTable, teamRow, "FTA") : 0;
+  const teamTov = teamRow ? numberValue(teamTable, teamRow, "TOV") : 0;
 
   return {
     player,
@@ -251,7 +272,25 @@ function playerAggregateFromRow(row: unknown[]): PlayerSeasonAggregate {
     fta,
     plusMinus: numberValue(playerTable, row, "PLUS_MINUS"),
     possessions,
+    onCourtPossessions: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "POSS") ?? 0 : 0,
     teamPossessions,
+    teamMinutes,
+    teamFga,
+    teamFta,
+    teamTov,
+    officialEfgPct: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "EFG_PCT") ?? null : null,
+    officialTsPct: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "TS_PCT") ?? null : null,
+    usagePct: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "USG_PCT") ?? null : null,
+    assistPct: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "AST_PCT") ?? null : null,
+    offensiveReboundPct: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "OREB_PCT") ?? null : null,
+    defensiveReboundPct: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "DREB_PCT") ?? null : null,
+    reboundPct: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "REB_PCT") ?? null : null,
+    turnoverPct: null,
+    offRating: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "OFF_RATING") ?? null : null,
+    defRating: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "DEF_RATING") ?? null : null,
+    netRating: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "NET_RATING") ?? null : null,
+    pace: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "PACE") ?? null : null,
+    pie: advancedRow ? optionalNumberValue(playerAdvancedTable, advancedRow, "PIE") ?? null : null,
     pointsAllowedOnCourt: 0,
     expectedPoints: 0,
     actualMinusExpectedPoints: 0,
@@ -289,11 +328,13 @@ export const officialPlayerSeasonAggregates: PlayerSeasonAggregate[] = playerTab
 export const officialTeamSeasonAggregates: TeamSeasonAggregate[] = teamTable.rows.map((row) => {
   const teamId = String(numberValue(teamTable, row, "TEAM_ID"));
   const team = teamById.get(teamId)!;
+  const advancedRow = teamAdvancedById.get(teamId);
   const fga = numberValue(teamTable, row, "FGA");
   const fta = numberValue(teamTable, row, "FTA");
   const oreb = numberValue(teamTable, row, "OREB");
   const tov = numberValue(teamTable, row, "TOV");
-  const possessions = estimatePossessions(fga, fta, oreb, tov);
+  const estimatedPossessions = estimatePossessions(fga, fta, oreb, tov);
+  const possessions = advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "POSS") ?? estimatedPossessions : estimatedPossessions;
   const threePa = numberValue(teamTable, row, "FG3A");
   return {
     team,
@@ -317,10 +358,21 @@ export const officialTeamSeasonAggregates: TeamSeasonAggregate[] = teamTable.row
     blk: numberValue(teamTable, row, "BLK"),
     tov,
     possessions,
+    offRating: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "OFF_RATING") ?? null : null,
+    defRating: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "DEF_RATING") ?? null : null,
+    netRating: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "NET_RATING") ?? null : null,
+    assistPct: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "AST_PCT") ?? null : null,
+    offensiveReboundPct: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "OREB_PCT") ?? null : null,
+    defensiveReboundPct: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "DREB_PCT") ?? null : null,
+    reboundPct: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "REB_PCT") ?? null : null,
+    turnoverPct: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "TM_TOV_PCT") ?? null : null,
+    officialEfgPct: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "EFG_PCT") ?? null : null,
+    officialTsPct: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "TS_PCT") ?? null : null,
+    pie: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "PIE") ?? null : null,
     expectedPoints: 0,
     rimFrequency: 0,
     threeFrequency: fga ? threePa / fga : 0,
-    pace: possessions / Math.max(numberValue(teamTable, row, "GP"), 1),
+    pace: advancedRow ? optionalNumberValue(teamAdvancedTable, advancedRow, "PACE") ?? possessions / Math.max(numberValue(teamTable, row, "GP"), 1) : possessions / Math.max(numberValue(teamTable, row, "GP"), 1),
     shotQuality: 0
   };
 });
@@ -352,6 +404,7 @@ function teamGameRows(tableData: SnapshotTable, seasonType: Game["seasonType"]):
       gameId,
       teamId: team.id,
       opponentTeamId: opponent.id,
+      minutes: numberValue(tableData, row, "MIN"),
       pts: numberValue(tableData, row, "PTS"),
       fgm: numberValue(tableData, row, "FGM"),
       fga,
@@ -459,20 +512,24 @@ export const officialPlayerGameStats: PlayerGameStat[] = [
 ];
 
 const gameDateById = new Map(officialGames.map((game) => [game.id, game.date]));
+const teamGameStatByGameAndTeam = new Map(officialTeamGameStats.map((line) => [`${line.gameId}:${line.teamId}`, line]));
 
 for (const aggregate of officialPlayerSeasonAggregates) {
   aggregate.recentGameScores = officialPlayerGameStats
     .filter((line) => line.playerId === aggregate.player.id)
     .sort((a, b) => (gameDateById.get(a.gameId) ?? "").localeCompare(gameDateById.get(b.gameId) ?? ""))
     .slice(-30)
-    .map((line) => ({
-      gameId: line.gameId,
-      date: gameDateById.get(line.gameId) ?? "",
-      pts: line.pts,
-      ts: trueShootingPercentage(line.pts, line.fga, line.fta) ?? 0,
-      usage: 0,
-      net: line.plusMinus
-    }));
+    .map((line) => {
+      const teamLine = teamGameStatByGameAndTeam.get(`${line.gameId}:${line.teamId}`);
+      return {
+        gameId: line.gameId,
+        date: gameDateById.get(line.gameId) ?? "",
+        pts: line.pts,
+        ts: trueShootingPercentage(line.pts, line.fga, line.fta) ?? 0,
+        usage: teamLine ? usageRate(line.fga, line.fta, line.tov, line.minutes, teamLine.fga, teamLine.fta, teamLine.tov, teamLine.minutes) ?? 0 : 0,
+        net: line.plusMinus
+      };
+    });
 }
 
 export const officialShots: Shot[] = [];

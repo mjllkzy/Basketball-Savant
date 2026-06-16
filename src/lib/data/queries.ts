@@ -456,7 +456,7 @@ export function gameFlow(gameId: string) {
   });
 }
 
-export function topPerformers(metricKeys = ["pts", "ts_pct", "efg_pct", "three_pct", "ast", "stocks"]) {
+export function topPerformers(metricKeys = ["pts", "ts_pct", "efg_pct", "usage_rate", "ast", "stocks"]) {
   return metricKeys.map((metricKey) => {
     const leader = getPlayerLeaderboard(metricKey, { limit: 1 })[0];
     return { metric: getMetric(metricKey), leader };

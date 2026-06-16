@@ -50,6 +50,34 @@ describe("metric registry and official data", () => {
     expect(players.some((player) => player.jerseyNumber === "00")).toBe(true);
   });
 
+  it("loads official NBA Stats Advanced rows and Basketball Reference cross-reference links", () => {
+    expect(dataSourceMetadata.sources.playerAdvancedRegularUrl).toContain("MeasureType=Advanced");
+    expect(dataSourceMetadata.sources.teamAdvancedRegularUrl).toContain("MeasureType=Advanced");
+    expect(dataSourceMetadata.sources.basketballReferencePlayerAdvanced2026).toBe("https://www.basketball-reference.com/leagues/NBA_2026_advanced.html");
+    expect(dataSourceMetadata.sources.basketballReferenceGlossary).toBe("https://www.basketball-reference.com/about/glossary.html");
+    expect(dataSourceMetadata.coverage.regularSeasonPlayerAdvanced).toBe(playerSeasonAggregates.length);
+    expect(dataSourceMetadata.coverage.regularSeasonTeamAdvanced).toBe(teams.length);
+
+    const playerRow = playerSeasonAggregates.find((aggregate) => aggregate.usagePct !== null && aggregate.officialTsPct !== null && aggregate.officialEfgPct !== null);
+    expect(playerRow).toBeTruthy();
+    expect(calculatePlayerMetric("ts_pct", playerRow!)).toBe(playerRow!.officialTsPct);
+    expect(calculatePlayerMetric("efg_pct", playerRow!)).toBe(playerRow!.officialEfgPct);
+    expect(calculatePlayerMetric("usage_rate", playerRow!)).toBe(playerRow!.usagePct);
+    expect(calculatePlayerMetric("ast_pct", playerRow!)).toBe(playerRow!.assistPct);
+    expect(calculatePlayerMetric("off_rating", playerRow!)).toBe(playerRow!.offRating);
+    expect(calculatePlayerMetric("def_rating", playerRow!)).toBe(playerRow!.defRating);
+    expect(calculatePlayerMetric("net_rating", playerRow!)).toBe(playerRow!.netRating);
+    expect(calculatePlayerMetric("pie", playerRow!)).toBe(playerRow!.pie);
+    expect(calculatePlayerMetric("possessions", playerRow!)).toBe(playerRow!.onCourtPossessions);
+
+    const teamRow = teamSeasonAggregates.find((aggregate) => aggregate.officialTsPct !== null && aggregate.officialEfgPct !== null);
+    expect(teamRow).toBeTruthy();
+    expect(calculateTeamMetric("ts_pct", teamRow!)).toBe(teamRow!.officialTsPct);
+    expect(calculateTeamMetric("efg_pct", teamRow!)).toBe(teamRow!.officialEfgPct);
+    expect(calculateTeamMetric("pace", teamRow!)).toBe(teamRow!.pace);
+    expect(calculateTeamMetric("possessions", teamRow!)).toBe(teamRow!.possessions);
+  });
+
   it("does not fabricate official game IDs, scores, or game-log rows from season aggregates", () => {
     expect(games.every((game) => !game.id.startsWith("official-team-summary-"))).toBe(true);
     expect(playerGameStats.every((line) => !line.gameId.startsWith("official-team-summary-"))).toBe(true);
@@ -201,6 +229,10 @@ describe("query behavior", () => {
     const row = playerSeasonAggregates[0];
     expect(calculatePlayerMetric("efg_pct", row)).toBeGreaterThan(0);
     expect(calculatePlayerMetric("ts_pct", row)).toBeGreaterThan(0);
+    expect(calculatePlayerMetric("usage_rate", row)).toBeGreaterThan(0);
+    expect(calculatePlayerMetric("oreb_pct", row)).toBeGreaterThanOrEqual(0);
+    expect(calculatePlayerMetric("dreb_pct", row)).toBeGreaterThanOrEqual(0);
+    expect(calculatePlayerMetric("reb_pct", row)).toBeGreaterThanOrEqual(0);
     expect(calculatePlayerMetric("shot_quality", row)).toBeNull();
   });
 
@@ -227,6 +259,7 @@ describe("query behavior", () => {
     expect(calculatePlayerMetric("last_5_games", row!)).toBeCloseTo(lastFive.reduce((sum, game) => sum + game.pts, 0) / lastFive.length);
     expect(calculatePlayerMetric("last_10_games", row!)).toBeCloseTo(lastTen.reduce((sum, game) => sum + game.pts, 0) / lastTen.length);
     expect(calculatePlayerMetric("last_30_games", row!)).toBeGreaterThanOrEqual(0);
+    expect(row!.recentGameScores.some((game) => game.usage > 0)).toBe(true);
   });
 
   it("returns similarity matches with trait explanations", () => {

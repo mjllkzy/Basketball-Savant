@@ -270,6 +270,7 @@ export const teamGameStats: TeamGameStat[] = rawGames.flatMap((game) =>
       teamId,
       opponentTeamId: opponentTeamId(game, teamId),
       ...totals,
+      minutes: 48,
       reb: totals.oreb + totals.dreb,
       possessions
     };
