@@ -1,0 +1,65 @@
+import { notFound } from "next/navigation";
+import { LineupNetwork } from "@/components/charts/LineupNetwork";
+import { ShotChart } from "@/components/charts/ShotChart";
+import { ShotHeatmap } from "@/components/charts/ShotHeatmap";
+import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
+import { LineupTable } from "@/components/domain/LineupTable";
+import { TeamHeader } from "@/components/domain/TeamHeader";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { StatTable } from "@/components/ui/StatTable";
+import { getTeamProfile, players, teamSeasonAggregates } from "@/lib/data/queries";
+import { calculatePlayerMetric, calculateTeamMetric } from "@/lib/metrics/registry";
+import { formatMetric } from "@/lib/metrics/format";
+
+export default function TeamPage({ params }: { params: { teamId: string } }) {
+  const profile = getTeamProfile(params.teamId);
+  if (!profile) notFound();
+  const rosterRows = profile.rosterRows.map((row) => ({
+    player: row.player.name,
+    href: `/players/${row.player.slug}`,
+    pos: row.player.position,
+    role: row.player.role,
+    pts: formatMetric("pts", calculatePlayerMetric("pts", row)),
+    ts: formatMetric("ts_pct", calculatePlayerMetric("ts_pct", row)),
+    usg: formatMetric("usage_rate", calculatePlayerMetric("usage_rate", row)),
+    stocks: formatMetric("stocks", calculatePlayerMetric("stocks", row))
+  }));
+  const styleData = teamSeasonAggregates.map((row) => ({
+    name: row.team.abbreviation,
+    pace: calculateTeamMetric("pace", row) ?? 0,
+    shotQuality: calculateTeamMetric("efg_pct", row) ?? 0,
+    net: calculateTeamMetric("net_rating", row) ?? 0
+  }));
+  return (
+    <div className="grid gap-4">
+      <TeamHeader team={profile.team} record={`${profile.aggregate.wins}-${profile.aggregate.losses}`} />
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        {["off_rating", "def_rating", "net_rating", "pace", "efg_pct", "three_pct"].map((key, index) => (
+          <MetricCard key={key} label={key.replaceAll("_", " ").toUpperCase()} value={formatMetric(key, calculateTeamMetric(key, profile.aggregate))} accent={index % 2 ? "court" : "signal"} />
+        ))}
+      </section>
+      <section className="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
+        <ShotChart shots={profile.shots} colorBy="xpts" />
+        <ShotHeatmap shots={profile.shots} mode="efficiency" />
+      </section>
+      <section className="grid gap-4 xl:grid-cols-2">
+        <TeamStyleScatter data={styleData} />
+        <LineupNetwork lineups={profile.lineups} players={players} />
+      </section>
+      <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+        <div>
+          <h2 className="mb-2 text-lg font-black text-ink">Roster</h2>
+          <StatTable dense columns={[{ key: "player", label: "Player", hrefKey: "href" }, { key: "pos", label: "Pos" }, { key: "role", label: "Role" }, { key: "pts", label: "PTS", align: "right" }, { key: "ts", label: "TS%", align: "right" }, { key: "usg", label: "USG%", align: "right" }, { key: "stocks", label: "Stocks", align: "right" }]} rows={rosterRows} />
+        </div>
+        <div>
+          <h2 className="mb-2 text-lg font-black text-ink">Lineups</h2>
+          <LineupTable lineups={profile.lineups} />
+        </div>
+      </section>
+      <div>
+        <h2 className="mb-2 text-lg font-black text-ink">Game Logs</h2>
+        <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "result", label: "Result" }]} rows={profile.games.map((game) => ({ date: game.date, matchup: `${game.awayTeamId} at ${game.homeTeamId}`, href: `/games/${game.id}`, score: `${game.awayScore}-${game.homeScore}`, result: game.homeTeamId === profile.team.id ? (game.homeScore > game.awayScore ? "W" : "L") : (game.awayScore > game.homeScore ? "W" : "L") }))} />
+      </div>
+    </div>
+  );
+}

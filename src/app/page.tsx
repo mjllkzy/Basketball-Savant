@@ -1,0 +1,126 @@
+import Link from "next/link";
+import { BarChart3, Crosshair, GitCompare, Search, Target, Trophy } from "lucide-react";
+import { GameFlowChart } from "@/components/charts/GameFlowChart";
+import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatTable } from "@/components/ui/StatTable";
+import { featuredInsights, gameFlow, latestGames, teamSeasonAggregates, topPerformers } from "@/lib/data/queries";
+import { calculateTeamMetric } from "@/lib/metrics/registry";
+import { formatMetric } from "@/lib/metrics/format";
+
+const tools = [
+  { href: "/search", label: "Possession Search", icon: Search, body: "Filter shots and possessions by player, zone, defender, clock, and expected value." },
+  { href: "/leaderboards/custom", label: "Custom Leaderboards", icon: BarChart3, body: "Build player, team, or lineup tables with shareable columns and CSV export." },
+  { href: "/compare", label: "Player Comparison", icon: GitCompare, body: "Compare two to four players across profile, role, and impact metrics." },
+  { href: "/visuals", label: "Shot Chart Lab", icon: Crosshair, body: "Explore shot charts, heatmaps, pass networks, and team style maps." },
+  { href: "/games", label: "Gamefeed", icon: Target, body: "Review possession timelines, top possessions, lineups, and gameflow runs." },
+  { href: "/similarity", label: "Similarity Finder", icon: Trophy, body: "Find players with matching statistical fingerprints and role traits." }
+];
+
+export default function HomePage() {
+  const performers = topPerformers();
+  const games = latestGames(4);
+  const styleData = teamSeasonAggregates.map((row) => ({
+    name: row.team.abbreviation,
+    pace: calculateTeamMetric("pace", row) ?? 0,
+    shotQuality: calculateTeamMetric("efg_pct", row) ?? 0,
+    net: calculateTeamMetric("net_rating", row) ?? 0
+  }));
+  const firstGame = games[0];
+
+  return (
+    <div className="grid gap-4">
+      <PageHeader
+        eyebrow="Command Center"
+        title="Basketball Savant"
+        description="Advanced basketball search, leaderboards, visuals, and player intelligence powered by a modular seed-data analytics layer."
+      />
+
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        {performers.map(({ metric, leader }) => (
+          <MetricCard
+            key={metric.key}
+            label={metric.shortLabel}
+            value={leader ? formatMetric(metric.key, leader.value) : "N/A"}
+            sublabel={leader ? `${leader.player.name} · ${leader.team.abbreviation}` : "No leader"}
+            accent={metric.category === "Shot Quality" ? "court" : "signal"}
+          />
+        ))}
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-black text-ink">Today / Latest Games</h2>
+            <Link href="/games" className="text-sm font-bold text-signal hover:underline">All games</Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {games.map((game) => (
+              <Link key={game.id} href={`/games/${game.id}`} className="rounded border border-slate-200 p-3 hover:bg-slate-50">
+                <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{game.date}</div>
+                <div className="mt-2 grid grid-cols-[1fr_auto] gap-2 text-sm">
+                  <span>{game.awayTeamId}</span>
+                  <strong>{game.awayScore}</strong>
+                  <span>{game.homeTeamId}</span>
+                  <strong>{game.homeScore}</strong>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+        {firstGame ? <GameFlowChart data={gameFlow(firstGame.id)} /> : null}
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+        <TeamStyleScatter data={styleData} />
+        <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-lg font-black text-ink">Top Performers</h2>
+          <StatTable
+            dense
+            columns={[
+              { key: "category", label: "Category" },
+              { key: "player", label: "Player", hrefKey: "href" },
+              { key: "team", label: "Team" },
+              { key: "value", label: "Value", align: "right" },
+              { key: "pct", label: "Pctile", align: "right" }
+            ]}
+            rows={performers.map(({ metric, leader }) => ({
+              category: metric.category,
+              player: leader?.player.name,
+              href: leader ? `/players/${leader.player.slug}` : undefined,
+              team: leader?.team.abbreviation,
+              value: leader ? formatMetric(metric.key, leader.value) : "N/A",
+              pct: leader?.percentile
+            }))}
+          />
+        </div>
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {tools.map((tool) => {
+          const Icon = tool.icon;
+          return (
+            <Link key={tool.href} href={tool.href} className="rounded border border-slate-200 bg-white p-4 shadow-sm hover:border-signal">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-signal">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="font-black text-ink">{tool.label}</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-600">{tool.body}</p>
+            </Link>
+          );
+        })}
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        {featuredInsights().map((insight) => (
+          <Link key={insight.title} href={insight.href} className="rounded border border-slate-200 bg-white p-4 shadow-sm hover:border-court">
+            <div className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-court">Trending Insight</div>
+            <h3 className="font-black text-ink">{insight.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{insight.body}</p>
+          </Link>
+        ))}
+      </section>
+    </div>
+  );
+}
