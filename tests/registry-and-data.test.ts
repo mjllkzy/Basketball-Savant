@@ -122,6 +122,14 @@ describe("metric registry and official data", () => {
     expect(new Set(teams.map((team) => team.conference))).toEqual(new Set(["East", "West"]));
     expect(teams.every((team) => team.division !== "NBA")).toBe(true);
   });
+
+  it("preserves official multi-word team nicknames", () => {
+    expect(teams.find((team) => team.abbreviation === "POR")).toMatchObject({
+      city: "Portland",
+      name: "Trail Blazers",
+      slug: "portland-trail-blazers"
+    });
+  });
 });
 
 describe("query behavior", () => {

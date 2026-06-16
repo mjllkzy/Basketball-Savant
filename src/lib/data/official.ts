@@ -106,6 +106,7 @@ function rosterBio(playerId: string): { position: Player["position"]; height: st
 }
 
 function splitTeamName(teamName: string) {
+  if (teamName === "Portland Trail Blazers") return { city: "Portland", name: "Trail Blazers" };
   const parts = teamName.split(" ");
   if (parts.length <= 1) return { city: teamName, name: teamName };
   return { city: parts.slice(0, -1).join(" "), name: parts.at(-1) ?? teamName };
