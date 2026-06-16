@@ -96,21 +96,71 @@ describe("metric registry and official data", () => {
     }
   });
 
-  it("cross-checks the 2026 Finals clincher against public reference sources", () => {
+  it("cross-checks displayed 2026 Finals games against public reference sources", () => {
     expect(dataSourceMetadata.sources.nbaFinalsGame5BoxScore).toBe("https://www.nba.com/game/0042500405/box-score");
     expect(dataSourceMetadata.sources.basketballReferenceFinalsGame5).toBe("https://www.basketball-reference.com/boxscores/202606130SAS.html");
     expect(dataSourceMetadata.sources.espnFinalsGame5).toContain("gameId/401859967");
-    const finalsGame5 = games.find((game) => game.id === "0042500405");
-    expect(finalsGame5).toMatchObject({
-      date: "2026-06-13",
-      seasonType: "Playoffs",
-      awayTeamId: "1610612752",
-      homeTeamId: "1610612759",
-      awayScore: 94,
-      homeScore: 90,
-      status: "Final"
-    });
-    expect(finalsGame5 ? gameMatchupLabel(finalsGame5) : "").toBe("New York Knicks at San Antonio Spurs");
+    expect(dataSourceMetadata.publicReferenceGames).toEqual([
+      expect.objectContaining({
+        gameId: "0042500405",
+        date: "2026-06-13",
+        awayTeam: "New York Knicks",
+        awayScore: 94,
+        homeTeam: "San Antonio Spurs",
+        homeScore: 90
+      }),
+      expect.objectContaining({
+        gameId: "0042500404",
+        date: "2026-06-10",
+        awayTeam: "San Antonio Spurs",
+        awayScore: 106,
+        homeTeam: "New York Knicks",
+        homeScore: 107
+      }),
+      expect.objectContaining({
+        gameId: "0042500403",
+        date: "2026-06-08",
+        awayTeam: "San Antonio Spurs",
+        awayScore: 115,
+        homeTeam: "New York Knicks",
+        homeScore: 111
+      }),
+      expect.objectContaining({
+        gameId: "0042500402",
+        date: "2026-06-05",
+        awayTeam: "New York Knicks",
+        awayScore: 105,
+        homeTeam: "San Antonio Spurs",
+        homeScore: 104
+      }),
+      expect.objectContaining({
+        gameId: "0042500401",
+        date: "2026-06-03",
+        awayTeam: "New York Knicks",
+        awayScore: 105,
+        homeTeam: "San Antonio Spurs",
+        homeScore: 95
+      })
+    ]);
+
+    const latestReferenceGameIds = dataSourceMetadata.publicReferenceGames.map((reference) => reference.gameId);
+    expect(latestGames(5).map((game) => game.id)).toEqual(latestReferenceGameIds);
+    for (const reference of dataSourceMetadata.publicReferenceGames) {
+      expect(reference.sources.nba).toContain(reference.gameId);
+      expect(reference.sources.basketballReference).toContain("basketball-reference.com/boxscores/");
+      expect(reference.sources.espn).toContain("espn.com/nba/game/_/gameId/");
+      const game = games.find((item) => item.id === reference.gameId);
+      expect(game).toMatchObject({
+        date: reference.date,
+        seasonType: "Playoffs",
+        awayTeamId: reference.awayTeamId,
+        homeTeamId: reference.homeTeamId,
+        awayScore: reference.awayScore,
+        homeScore: reference.homeScore,
+        status: "Final"
+      });
+      expect(game ? gameMatchupLabel(game) : "").toBe(`${reference.awayTeam} at ${reference.homeTeam}`);
+    }
   });
 
   it("formats displayed dates as month/day/two-digit-year", () => {

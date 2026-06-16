@@ -27,6 +27,8 @@ npm run refresh:official:shots
 
 The default refresh writes `src/lib/data/generated/official-snapshot.json`.
 
+The snapshot metadata includes public reference game fixtures for high-visibility displayed games. Each fixture records the expected date, teams, score, NBA.com box-score URL, Basketball Reference box-score URL, and ESPN game URL so tests can cross-check the app's game-log mapping against public sources.
+
 ## Supported Import Preview
 
 `POST /api/import/csv` accepts a CSV body and returns a preview envelope:

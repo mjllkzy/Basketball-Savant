@@ -71,6 +71,89 @@ const externalPlayerBioOverrides = [
   }
 ];
 
+const publicReferenceGames = [
+  {
+    gameId: "0042500405",
+    label: "2026 NBA Finals Game 5",
+    date: "2026-06-13",
+    awayTeamId: "1610612752",
+    awayTeam: "New York Knicks",
+    awayScore: 94,
+    homeTeamId: "1610612759",
+    homeTeam: "San Antonio Spurs",
+    homeScore: 90,
+    sources: {
+      nba: "https://www.nba.com/game/0042500405/box-score",
+      basketballReference: "https://www.basketball-reference.com/boxscores/202606130SAS.html",
+      espn: "https://www.espn.com/nba/game/_/gameId/401859967/knicks-spurs"
+    }
+  },
+  {
+    gameId: "0042500404",
+    label: "2026 NBA Finals Game 4",
+    date: "2026-06-10",
+    awayTeamId: "1610612759",
+    awayTeam: "San Antonio Spurs",
+    awayScore: 106,
+    homeTeamId: "1610612752",
+    homeTeam: "New York Knicks",
+    homeScore: 107,
+    sources: {
+      nba: "https://www.nba.com/game/0042500404/box-score",
+      basketballReference: "https://www.basketball-reference.com/boxscores/202606100NYK.html",
+      espn: "https://www.espn.com/nba/game/_/gameId/401859966/spurs-knicks"
+    }
+  },
+  {
+    gameId: "0042500403",
+    label: "2026 NBA Finals Game 3",
+    date: "2026-06-08",
+    awayTeamId: "1610612759",
+    awayTeam: "San Antonio Spurs",
+    awayScore: 115,
+    homeTeamId: "1610612752",
+    homeTeam: "New York Knicks",
+    homeScore: 111,
+    sources: {
+      nba: "https://www.nba.com/game/0042500403/box-score",
+      basketballReference: "https://www.basketball-reference.com/boxscores/202606080NYK.html",
+      espn: "https://www.espn.com/nba/game/_/gameId/401859965/spurs-knicks"
+    }
+  },
+  {
+    gameId: "0042500402",
+    label: "2026 NBA Finals Game 2",
+    date: "2026-06-05",
+    awayTeamId: "1610612752",
+    awayTeam: "New York Knicks",
+    awayScore: 105,
+    homeTeamId: "1610612759",
+    homeTeam: "San Antonio Spurs",
+    homeScore: 104,
+    sources: {
+      nba: "https://www.nba.com/game/0042500402/box-score",
+      basketballReference: "https://www.basketball-reference.com/boxscores/202606050SAS.html",
+      espn: "https://www.espn.com/nba/game/_/gameId/401859964/knicks-spurs"
+    }
+  },
+  {
+    gameId: "0042500401",
+    label: "2026 NBA Finals Game 1",
+    date: "2026-06-03",
+    awayTeamId: "1610612752",
+    awayTeam: "New York Knicks",
+    awayScore: 105,
+    homeTeamId: "1610612759",
+    homeTeam: "San Antonio Spurs",
+    homeScore: 95,
+    sources: {
+      nba: "https://www.nba.com/game/0042500401/box-score",
+      basketballReference: "https://www.basketball-reference.com/boxscores/202606030SAS.html",
+      espn: "https://www.espn.com/nba/game/_/gameId/401859963/knicks-spurs"
+    }
+  }
+];
+
 const nbaHeaders = {
   "User-Agent":
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -367,10 +450,12 @@ async function main() {
           ? [`Aggregate player and team tables were reused from the existing official snapshot generated at ${existingSnapshot.metadata.generatedAt}.`]
           : []),
         "Basketball Reference, NBA.com box scores, and ESPN game pages are listed as cross-reference sources for public score and series verification.",
+        "The publicReferenceGames metadata pins the currently displayed NBA Finals games to public NBA.com, Basketball Reference, and ESPN game pages.",
         "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
         "Basketball Savant derived metrics are calculated locally from official box score totals.",
         "Tracking-only metrics are unavailable unless a licensed tracking source is connected."
       ],
+      publicReferenceGames,
       sources: {
         nbaStatsHome: "https://www.nba.com/stats",
         nbaFinalsGame5BoxScore: "https://www.nba.com/game/0042500405/box-score",

@@ -61,6 +61,8 @@ The app defaults to `src/lib/data/generated/official-snapshot.json`, refreshed f
 
 NBA Stats is the primary machine-readable source. Public box-score and series pages from Basketball Reference, NBA.com, and ESPN are tracked in snapshot metadata as cross-reference sources for score and series sanity checks.
 
+The checked-in snapshot also carries `metadata.publicReferenceGames`: a public reference fixture for the displayed 2026 NBA Finals games. Tests compare those expected dates, teams, scores, and source URLs against the game-log rows so the dashboard cannot silently drift back to generated or mismatched latest-game cards.
+
 Current default snapshot coverage:
 
 - 2025-26 regular-season player totals
