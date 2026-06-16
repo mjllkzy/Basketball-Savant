@@ -344,20 +344,25 @@ function gamesFromTeamGameRows(tableData: SnapshotTable, seasonType: Game["seaso
   return Array.from(grouped.entries()).flatMap(([gameId, rows]): Game[] => {
     const homeRow = rows.find((row) => stringValue(tableData, row, "MATCHUP").includes(" vs. "));
     const awayRow = rows.find((row) => stringValue(tableData, row, "MATCHUP").includes(" @ "));
-    if (!homeRow || !awayRow) return [];
-    const homeTeamId = String(numberValue(tableData, homeRow, "TEAM_ID"));
-    const awayTeamId = String(numberValue(tableData, awayRow, "TEAM_ID"));
+    const neutralSite = !homeRow && rows.length === 2 && rows.every((row) => stringValue(tableData, row, "MATCHUP").includes(" @ "));
+    const firstRow = neutralSite ? rows[0] : awayRow;
+    const secondRow = neutralSite ? rows[1] : homeRow;
+    if (!firstRow || !secondRow) return [];
+    const awayTeamId = String(numberValue(tableData, firstRow, "TEAM_ID"));
+    const homeTeamId = String(numberValue(tableData, secondRow, "TEAM_ID"));
     if (!teamById.has(homeTeamId) || !teamById.has(awayTeamId)) return [];
     return [{
       id: gameId,
-      date: normalizeGameDate(stringValue(tableData, homeRow, "GAME_DATE")),
+      date: normalizeGameDate(stringValue(tableData, secondRow, "GAME_DATE")),
       season: officialSnapshot.metadata.season,
       seasonType,
       homeTeamId,
       awayTeamId,
-      homeScore: numberValue(tableData, homeRow, "PTS"),
-      awayScore: numberValue(tableData, awayRow, "PTS"),
-      status: "Final"
+      homeScore: numberValue(tableData, secondRow, "PTS"),
+      awayScore: numberValue(tableData, firstRow, "PTS"),
+      status: "Final",
+      neutralSite: neutralSite || undefined,
+      arena: neutralSite ? "Neutral site" : undefined
     }];
   });
 }

@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const season = argValue("--season") ?? "2025-26";
@@ -8,8 +8,11 @@ const includePlayoffShots = !process.argv.includes("--no-playoff-shots");
 const includeRosters = process.argv.includes("--include-rosters");
 const includeTeamGameLogs = process.argv.includes("--include-team-game-logs");
 const includePlayerGameLogs = process.argv.includes("--include-player-game-logs");
+const allowPartial = process.argv.includes("--allow-partial");
+const reuseExistingCore = process.argv.includes("--reuse-existing-core");
 const output = argValue("--output") ?? "src/lib/data/generated/official-snapshot.json";
-const timeoutMs = Number(argValue("--timeoutMs") ?? 20000);
+const timeoutMs = Number(argValue("--timeoutMs") ?? 60000);
+const retryCount = Math.max(1, Number(argValue("--retries") ?? 3));
 
 const nbaHeaders = {
   "User-Agent":
@@ -34,7 +37,7 @@ function withParams(baseUrl, params) {
 }
 
 async function fetchJson(name, url) {
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  for (let attempt = 1; attempt <= retryCount; attempt += 1) {
     try {
       console.log(`Fetching ${name}${attempt > 1 ? ` (retry ${attempt})` : ""}`);
       const controller = new AbortController();
@@ -45,8 +48,8 @@ async function fetchJson(name, url) {
       }
       return await response.json();
     } catch (error) {
-      if (attempt === 2) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      if (attempt === retryCount) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1200 * attempt));
     }
   }
   throw new Error(`${name} failed`);
@@ -186,7 +189,38 @@ function table(json, index = 0) {
   return { headers: result.headers, rows: result.rowSet };
 }
 
+function snapshotOrResponseTable(json) {
+  if (Array.isArray(json?.headers) && Array.isArray(json?.rows)) return json;
+  return table(json);
+}
+
+function snapshotTableToJson(existingSnapshot, tableName) {
+  const snapshotTable = existingSnapshot?.tables?.[tableName];
+  if (!snapshotTable?.headers || !snapshotTable?.rows) {
+    throw new Error(`--reuse-existing-core requested, but ${tableName} is missing from ${output}.`);
+  }
+  return { resultSets: [{ headers: snapshotTable.headers, rowSet: snapshotTable.rows }] };
+}
+
+async function readExistingSnapshot(filePath) {
+  try {
+    return JSON.parse(await readFile(filePath, "utf8"));
+  } catch {
+    return undefined;
+  }
+}
+
+function assertCoverage(condition, message) {
+  if (condition) return;
+  if (allowPartial) {
+    console.warn(`Partial snapshot warning: ${message}`);
+    return;
+  }
+  throw new Error(`${message} Pass --allow-partial to write a partial snapshot intentionally.`);
+}
+
 async function main() {
+  const existingSnapshot = await readExistingSnapshot(output);
   const playerStatsRegularUrl = withParams("https://stats.nba.com/stats/leaguedashplayerstats", playerDashParams("Regular Season"));
   const playerStatsPlayoffsUrl = withParams("https://stats.nba.com/stats/leaguedashplayerstats", playerDashParams("Playoffs"));
   const teamStatsRegularUrl = withParams("https://stats.nba.com/stats/leaguedashteamstats", baseDashParams("Regular Season"));
@@ -198,14 +232,15 @@ async function main() {
 
   console.log(`Refreshing official NBA Stats snapshot for ${season}`);
   const emptyTable = { resultSets: [{ headers: [], rowSet: [] }] };
-  const playerStatsRegular = await fetchJson("regular player stats", playerStatsRegularUrl);
-  const playerStatsPlayoffs = await fetchOptionalJson("playoff player stats", playerStatsPlayoffsUrl) ?? emptyTable;
-  const teamStatsRegular = await fetchJson("regular team stats", teamStatsRegularUrl);
-  const teamStatsPlayoffs = await fetchOptionalJson("playoff team stats", teamStatsPlayoffsUrl) ?? emptyTable;
-  const teamGameLogsRegularMaybe = includeTeamGameLogs ? await fetchOptionalJson("regular team game logs", teamGameLogsRegularUrl) : undefined;
-  const teamGameLogsPlayoffsMaybe = includeTeamGameLogs ? await fetchOptionalJson("playoff team game logs", teamGameLogsPlayoffsUrl) : undefined;
-  const playerGameLogsRegularMaybe = includePlayerGameLogs ? await fetchOptionalJson("regular player game logs", playerGameLogsRegularUrl) : undefined;
-  const playerGameLogsPlayoffsMaybe = includePlayerGameLogs ? await fetchOptionalJson("playoff player game logs", playerGameLogsPlayoffsUrl) : undefined;
+  const playerStatsRegular = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "playerStatsRegular") : await fetchJson("regular player stats", playerStatsRegularUrl);
+  const playerStatsPlayoffs = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "playerStatsPlayoffs") : await fetchOptionalJson("playoff player stats", playerStatsPlayoffsUrl) ?? emptyTable;
+  const teamStatsRegular = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "teamStatsRegular") : await fetchJson("regular team stats", teamStatsRegularUrl);
+  const teamStatsPlayoffs = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "teamStatsPlayoffs") : await fetchOptionalJson("playoff team stats", teamStatsPlayoffsUrl) ?? emptyTable;
+  const fetchRequestedJson = allowPartial ? fetchOptionalJson : fetchJson;
+  const teamGameLogsRegularMaybe = includeTeamGameLogs ? await fetchRequestedJson("regular team game logs", teamGameLogsRegularUrl) : undefined;
+  const teamGameLogsPlayoffsMaybe = includeTeamGameLogs ? await fetchRequestedJson("playoff team game logs", teamGameLogsPlayoffsUrl) : undefined;
+  const playerGameLogsRegularMaybe = includePlayerGameLogs ? await fetchRequestedJson("regular player game logs", playerGameLogsRegularUrl) : undefined;
+  const playerGameLogsPlayoffsMaybe = includePlayerGameLogs ? await fetchRequestedJson("playoff player game logs", playerGameLogsPlayoffsUrl) : undefined;
   const teamGameLogsRegular = teamGameLogsRegularMaybe ?? emptyTable;
   const teamGameLogsPlayoffs = teamGameLogsPlayoffsMaybe ?? emptyTable;
   const playerGameLogsRegular = playerGameLogsRegularMaybe ?? emptyTable;
@@ -213,14 +248,16 @@ async function main() {
 
   const teamRows = table(teamStatsRegular).rows;
   const teamIdList = teamRows.map((row) => row[0]);
-  const rosters = {};
+  const rosters = includeRosters ? {} : existingSnapshot?.tables?.rosters ?? {};
   if (includeRosters) {
     for (const teamId of teamIdList) {
       const url = withParams("https://stats.nba.com/stats/commonteamroster", { LeagueID: "00", Season: season, TeamID: teamId });
-      const roster = await fetchOptionalJson(`roster ${teamId}`, url);
+      const roster = await fetchRequestedJson(`roster ${teamId}`, url);
       if (roster) rosters[teamId] = roster;
     }
   }
+  const rosterTables = Object.fromEntries(Object.entries(rosters).map(([teamId, json]) => [teamId, snapshotOrResponseTable(json)]));
+  const loadedRosterCount = Object.values(rosterTables).filter((rosterTable) => rosterTable.rows.length > 0).length;
 
   const shotCharts = {};
   if (includePlayoffShots) {
@@ -238,13 +275,24 @@ async function main() {
       season,
       primarySeasonType,
       dataProvider: "NBA Stats",
+      reusedCoreGeneratedAt: reuseExistingCore ? existingSnapshot?.metadata?.generatedAt : undefined,
       sourceNotes: [
         "Official NBA Stats public JSON endpoints.",
-        "Basketball-Reference-style derived metrics are calculated locally from official box score totals.",
+        ...(reuseExistingCore && existingSnapshot?.metadata?.generatedAt
+          ? [`Aggregate player and team tables were reused from the existing official snapshot generated at ${existingSnapshot.metadata.generatedAt}.`]
+          : []),
+        "Basketball Reference, NBA.com box scores, and ESPN game pages are listed as cross-reference sources for public score and series verification.",
+        "Basketball Savant derived metrics are calculated locally from official box score totals.",
         "Tracking-only metrics are unavailable unless a licensed tracking source is connected."
       ],
       sources: {
         nbaStatsHome: "https://www.nba.com/stats",
+        nbaFinalsGame5BoxScore: "https://www.nba.com/game/0042500405/box-score",
+        basketballReferenceHome: "https://www.basketball-reference.com/",
+        basketballReferencePlayoffs2026: "https://www.basketball-reference.com/playoffs/NBA_2026.html",
+        basketballReferenceFinals2026: "https://www.basketball-reference.com/playoffs/2026-nba-finals-knicks-vs-spurs.html",
+        basketballReferenceFinalsGame5: "https://www.basketball-reference.com/boxscores/202606130SAS.html",
+        espnFinalsGame5: "https://www.espn.com/nba/game/_/gameId/401859967/knicks-spurs",
         playerStatsRegularUrl,
         playerStatsPlayoffsUrl,
         teamStatsRegularUrl,
@@ -252,9 +300,7 @@ async function main() {
         teamGameLogsRegularUrl,
         teamGameLogsPlayoffsUrl,
         playerGameLogsRegularUrl,
-        playerGameLogsPlayoffsUrl,
-        finals: "https://www.nba.com/playoffs/2026/nba-finals",
-        finalsStats: "https://www.nba.com/playoffs/2026/nba-finals/stats"
+        playerGameLogsPlayoffsUrl
       },
       coverage: {
         regularSeasonPlayerStats: table(playerStatsRegular).rows.length,
@@ -265,7 +311,7 @@ async function main() {
         playoffTeamGameLogs: table(teamGameLogsPlayoffs).rows.length,
         regularSeasonPlayerGameLogs: table(playerGameLogsRegular).rows.length,
         playoffPlayerGameLogs: table(playerGameLogsPlayoffs).rows.length,
-        rosters: Object.keys(rosters).length,
+        rosters: loadedRosterCount,
         playoffShots: shotCharts.playoffs ? table(shotCharts.playoffs).rows.length : 0,
         regularSeasonShots: shotCharts.regularSeason ? table(shotCharts.regularSeason).rows.length : 0
       }
@@ -279,13 +325,34 @@ async function main() {
       teamGameLogsPlayoffs: table(teamGameLogsPlayoffs),
       playerGameLogsRegular: table(playerGameLogsRegular),
       playerGameLogsPlayoffs: table(playerGameLogsPlayoffs),
-      rosters: Object.fromEntries(Object.entries(rosters).map(([teamId, json]) => [teamId, table(json)])),
+      rosters: rosterTables,
       shotCharts: {
         playoffs: shotCharts.playoffs ? table(shotCharts.playoffs) : undefined,
         regularSeason: shotCharts.regularSeason ? table(shotCharts.regularSeason) : undefined
       }
     }
   };
+
+  assertCoverage(
+    !includeRosters || loadedRosterCount === teamIdList.length,
+    `Roster refresh requested ${teamIdList.length} team rosters but loaded ${loadedRosterCount}.`
+  );
+  assertCoverage(
+    !includeTeamGameLogs || table(teamStatsRegular).rows.length === 0 || table(teamGameLogsRegular).rows.length > 0,
+    "Regular-season team game logs were requested but no rows were loaded."
+  );
+  assertCoverage(
+    !includeTeamGameLogs || table(teamStatsPlayoffs).rows.length === 0 || table(teamGameLogsPlayoffs).rows.length > 0,
+    "Playoff team game logs were requested but no rows were loaded."
+  );
+  assertCoverage(
+    !includePlayerGameLogs || table(playerStatsRegular).rows.length === 0 || table(playerGameLogsRegular).rows.length > 0,
+    "Regular-season player game logs were requested but no rows were loaded."
+  );
+  assertCoverage(
+    !includePlayerGameLogs || table(playerStatsPlayoffs).rows.length === 0 || table(playerGameLogsPlayoffs).rows.length > 0,
+    "Playoff player game logs were requested but no rows were loaded."
+  );
 
   await mkdir(path.dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(snapshot)}\n`);

@@ -7,7 +7,8 @@ import { LineupTable } from "@/components/domain/LineupTable";
 import { TeamHeader } from "@/components/domain/TeamHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
-import { getTeamProfile, players, teamName, teamSeasonAggregates } from "@/lib/data/queries";
+import { gameMatchupLabel, getTeamProfile, players, teamSeasonAggregates } from "@/lib/data/queries";
+import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
@@ -58,7 +59,7 @@ export default function TeamPage({ params }: { params: { teamId: string } }) {
       <div>
         <h2 className="mb-2 text-lg font-black text-ink">Game Logs</h2>
         {profile.games.length ? (
-          <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "result", label: "Result" }]} rows={profile.games.map((game) => ({ date: game.date, matchup: `${teamName(game.awayTeamId)} at ${teamName(game.homeTeamId)}`, href: `/games/${game.id}`, score: `${game.awayScore}-${game.homeScore}`, result: game.homeTeamId === profile.team.id ? (game.homeScore > game.awayScore ? "W" : "L") : (game.awayScore > game.homeScore ? "W" : "L") }))} />
+          <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "result", label: "Result" }]} rows={profile.games.map((game) => ({ date: formatShortDate(game.date), matchup: gameMatchupLabel(game), href: `/games/${game.id}`, score: `${game.awayScore}-${game.homeScore}`, result: game.homeTeamId === profile.team.id ? (game.homeScore > game.awayScore ? "W" : "L") : (game.awayScore > game.homeScore ? "W" : "L") }))} />
         ) : (
           <div className="rounded border border-dashed border-slate-300 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
             Official team game logs are not loaded in this snapshot.

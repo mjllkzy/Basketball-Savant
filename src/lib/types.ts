@@ -45,6 +45,7 @@ export type Game = {
   homeScore: number;
   awayScore: number;
   status: "Final" | "Scheduled" | "Live";
+  neutralSite?: boolean;
   arena?: string;
 };
 

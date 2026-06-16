@@ -59,12 +59,16 @@ npm start
 
 The app defaults to `src/lib/data/generated/official-snapshot.json`, refreshed from official NBA Stats public JSON endpoints.
 
+NBA Stats is the primary machine-readable source. Public box-score and series pages from Basketball Reference, NBA.com, and ESPN are tracked in snapshot metadata as cross-reference sources for score and series sanity checks.
+
 Current default snapshot coverage:
 
 - 2025-26 regular-season player totals
 - 2025-26 playoff player totals
 - 2025-26 regular-season team totals
 - 2025-26 playoff team totals
+- 2025-26 regular-season team and player game logs when refreshed
+- 2025-26 playoff team and player game logs when refreshed
 - Best-effort team roster enrichment when `--include-rosters` is used
 
 Refresh commands:

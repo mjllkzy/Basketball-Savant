@@ -1,16 +1,17 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
-import { listGames, teamName } from "@/lib/data/queries";
+import { gameMatchupLabel, gameVenueLabel, listGames } from "@/lib/data/queries";
+import { formatShortDate } from "@/lib/date";
 
 export default function GamesPage() {
   const result = listGames({ pageSize: 100 });
   const rows = result.rows.map((game) => ({
-    date: game.date,
-    matchup: `${teamName(game.awayTeamId)} at ${teamName(game.homeTeamId)}`,
+    date: formatShortDate(game.date),
+    matchup: gameMatchupLabel(game),
     href: `/games/${game.id}`,
     score: `${game.awayScore}-${game.homeScore}`,
     status: game.status,
-    arena: game.arena
+    arena: gameVenueLabel(game)
   }));
   return (
     <div className="grid gap-4">

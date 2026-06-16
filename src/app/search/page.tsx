@@ -7,7 +7,8 @@ import { FilterPanel } from "@/components/ui/FilterPanel";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ShareUrlButton } from "@/components/ui/ShareUrlButton";
-import { filterShots, games, playerName, players, teamName, teams } from "@/lib/data/queries";
+import { filterShots, gameMatchupLabel, games, playerName, players, teamName, teams } from "@/lib/data/queries";
+import { formatShortDate } from "@/lib/date";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export default function SearchPage({ searchParams }: { searchParams: RouteSearchParams }) {
@@ -37,8 +38,8 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
     const opponentId = game.homeTeamId === shot.teamId ? game.awayTeamId : game.homeTeamId;
     return {
       id: shot.id,
-      date: game.date,
-      game: `${teamName(game.awayTeamId)} @ ${teamName(game.homeTeamId)}`,
+      date: formatShortDate(game.date),
+      game: gameMatchupLabel(game),
       quarter: `Q${shot.quarter}`,
       clock: shot.clock,
       player: playerName(shot.playerId),

@@ -11,6 +11,7 @@ import { SimilarPlayersTable } from "@/components/domain/SimilarPlayersTable";
 import { StatTable } from "@/components/ui/StatTable";
 import { PercentileBar } from "@/components/ui/PercentileBar";
 import { getPlayerProfile, lineups, players } from "@/lib/data/queries";
+import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
@@ -23,7 +24,7 @@ export default function PlayerPage({ params }: { params: { playerId: string } })
     percentile: profile.metricValues.find((value) => value.metricKey === key)?.percentile ?? 0
   }));
   const gameRows = profile.gameLog.map((line) => ({
-    date: line.game.date,
+    date: formatShortDate(line.game.date),
     game: `${line.opponent.abbreviation}`,
     pts: line.pts,
     reb: line.reb,
@@ -42,7 +43,7 @@ export default function PlayerPage({ params }: { params: { playerId: string } })
       <PlayerSnapshot aggregate={profile.aggregate} />
       <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
         <PercentileRadar data={radarData} />
-        <RollingLineChart data={profile.aggregate.recentGameScores.map((row) => ({ date: row.date.slice(5), pts: row.pts, ts: Math.round(row.ts * 100), usage: Math.round(row.usage * 100), net: row.net }))} lines={["pts", "net"]} />
+        <RollingLineChart data={profile.aggregate.recentGameScores.map((row) => ({ date: formatShortDate(row.date), pts: row.pts, ts: Math.round(row.ts * 100), usage: Math.round(row.usage * 100), net: row.net }))} lines={["pts", "net"]} />
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         <ShotChart shots={profile.shots} colorBy="xpts" />

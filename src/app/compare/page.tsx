@@ -3,6 +3,7 @@ import { StatTable } from "@/components/ui/StatTable";
 import { RollingLineChart } from "@/components/charts/RollingLineChart";
 import { PercentileBar } from "@/components/ui/PercentileBar";
 import { getPlayerProfile, players } from "@/lib/data/queries";
+import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
@@ -17,7 +18,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
     ...Object.fromEntries(profiles.map((profile) => [profile.player.name, formatMetric(key, calculatePlayerMetric(key, profile.aggregate))]))
   }));
   const chartData = profiles[0]?.aggregate.recentGameScores.map((game, index) => ({
-    date: game.date.slice(5),
+    date: formatShortDate(game.date),
     ...Object.fromEntries(profiles.map((profile) => [profile.player.name, profile.aggregate.recentGameScores[index]?.pts ?? 0]))
   })) ?? [];
 

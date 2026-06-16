@@ -134,6 +134,14 @@ export function teamName(teamId: string): string {
   return team ? `${team.city} ${team.name}` : teamId;
 }
 
+export function gameMatchupLabel(game: Game): string {
+  return `${teamName(game.awayTeamId)} ${game.neutralSite ? "vs." : "at"} ${teamName(game.homeTeamId)}`;
+}
+
+export function gameVenueLabel(game: Game): string {
+  return game.neutralSite ? "Neutral site" : game.arena ?? "";
+}
+
 export function playerName(playerId: string): string {
   return players.find((player) => player.id === playerId)?.name ?? playerId;
 }
@@ -383,7 +391,7 @@ export function searchAll(query: string, limit = 8) {
   const gameRows = games
     .filter((game) => `${game.id} ${teamName(game.homeTeamId)} ${teamName(game.awayTeamId)}`.toLowerCase().includes(q))
     .slice(0, limit)
-    .map((game) => ({ type: "game" as const, id: game.id, label: `${teamName(game.awayTeamId)} at ${teamName(game.homeTeamId)}`, href: `/games/${game.id}`, meta: game.date }));
+    .map((game) => ({ type: "game" as const, id: game.id, label: gameMatchupLabel(game), href: `/games/${game.id}`, meta: game.date }));
   return [...playerRows, ...teamRows, ...gameRows].slice(0, limit);
 }
 

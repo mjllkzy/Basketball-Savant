@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { dataSourceMetadata, filterShots, games, getPlayerLeaderboard, getSimilarPlayers, playerGameStats, players, playerSeasonAggregates, teamGameStats, teams } from "@/lib/data/queries";
+import { dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, playerGameStats, players, playerSeasonAggregates, teamGameStats, teams } from "@/lib/data/queries";
+import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
 
 describe("metric registry and official data", () => {
@@ -46,6 +47,60 @@ describe("metric registry and official data", () => {
       expect(playerGameStats).toHaveLength(0);
       expect(playerSeasonAggregates.every((row) => row.recentGameScores.length === 0)).toBe(true);
     }
+  });
+
+  it("maps loaded official game-log rows into real games and player trends", () => {
+    const loadedTeamGameRows = dataSourceMetadata.coverage.regularSeasonTeamGameLogs + dataSourceMetadata.coverage.playoffTeamGameLogs;
+    const loadedPlayerGameRows = dataSourceMetadata.coverage.regularSeasonPlayerGameLogs + dataSourceMetadata.coverage.playoffPlayerGameLogs;
+    const teamIds = new Set(teams.map((team) => team.id));
+
+    if (loadedTeamGameRows > 0) {
+      expect(teamGameStats).toHaveLength(loadedTeamGameRows);
+      expect(games.length).toBe(loadedTeamGameRows / 2);
+      expect(latestGames(5)).toHaveLength(5);
+      expect(games.some((game) => game.neutralSite)).toBe(true);
+      for (const game of games) {
+        expect(teamIds.has(game.homeTeamId)).toBe(true);
+        expect(teamIds.has(game.awayTeamId)).toBe(true);
+        expect(game.homeScore).toBeGreaterThanOrEqual(0);
+        expect(game.awayScore).toBeGreaterThanOrEqual(0);
+        expect(game.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      }
+    }
+
+    if (loadedPlayerGameRows > 0) {
+      expect(playerGameStats.length).toBeGreaterThan(0);
+      expect(playerSeasonAggregates.some((row) => row.recentGameScores.length > 0)).toBe(true);
+      const gameIds = new Set(games.map((game) => game.id));
+      for (const row of playerSeasonAggregates) {
+        for (const recent of row.recentGameScores) {
+          expect(gameIds.has(recent.gameId)).toBe(true);
+          expect(recent.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        }
+      }
+    }
+  });
+
+  it("cross-checks the 2026 Finals clincher against public reference sources", () => {
+    expect(dataSourceMetadata.sources.nbaFinalsGame5BoxScore).toBe("https://www.nba.com/game/0042500405/box-score");
+    expect(dataSourceMetadata.sources.basketballReferenceFinalsGame5).toBe("https://www.basketball-reference.com/boxscores/202606130SAS.html");
+    expect(dataSourceMetadata.sources.espnFinalsGame5).toContain("gameId/401859967");
+    const finalsGame5 = games.find((game) => game.id === "0042500405");
+    expect(finalsGame5).toMatchObject({
+      date: "2026-06-13",
+      seasonType: "Playoffs",
+      awayTeamId: "1610612752",
+      homeTeamId: "1610612759",
+      awayScore: 94,
+      homeScore: 90,
+      status: "Final"
+    });
+    expect(finalsGame5 ? gameMatchupLabel(finalsGame5) : "").toBe("New York Knicks at San Antonio Spurs");
+  });
+
+  it("formats displayed dates as month/day/two-digit-year", () => {
+    expect(formatShortDate("2026-06-13")).toBe("6/13/26");
+    expect(formatShortDate("2026-06-13T00:00:00")).toBe("6/13/26");
   });
 
   it("uses real team conference metadata instead of one default value", () => {

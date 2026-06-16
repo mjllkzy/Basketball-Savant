@@ -5,7 +5,8 @@ import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
-import { featuredInsights, gameFlow, latestGames, teamName, teamSeasonAggregates, topPerformers } from "@/lib/data/queries";
+import { featuredInsights, gameFlow, gameMatchupLabel, latestGames, teamName, teamSeasonAggregates, topPerformers } from "@/lib/data/queries";
+import { formatShortDate } from "@/lib/date";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
@@ -67,10 +68,10 @@ export default function HomePage() {
                 <Link
                   key={game.id}
                   href={`/games/${game.id}`}
-                  aria-label={`${awayTeamName} at ${homeTeamName}, ${game.awayScore} to ${game.homeScore}`}
+                  aria-label={`${gameMatchupLabel(game)}, ${game.awayScore} to ${game.homeScore}`}
                   className="rounded border border-slate-200 p-3 hover:bg-slate-50"
                 >
-                  <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{game.date}</div>
+                  <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{formatShortDate(game.date)}</div>
                   <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 text-sm">
                     <span className="min-w-0 leading-5 text-ink">{awayTeamName}</span>
                     <strong>{game.awayScore}</strong>

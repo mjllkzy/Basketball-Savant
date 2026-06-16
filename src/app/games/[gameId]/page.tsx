@@ -11,6 +11,8 @@ import { gameFlow, getGameReport, teamName } from "@/lib/data/queries";
 export default function GamePage({ params }: { params: { gameId: string } }) {
   const report = getGameReport(params.gameId);
   if (!report) notFound();
+  const awayCardLabel = report.game.neutralSite ? report.awayTeam.abbreviation : "Away";
+  const homeCardLabel = report.game.neutralSite ? report.homeTeam.abbreviation : "Home";
   const topPossessions = [...report.feed].sort((a, b) => Math.abs(b.actualMinusExpected) - Math.abs(a.actualMinusExpected)).slice(0, 10);
   const boxRows = report.boxScore.map((line) => ({
     player: line.player.name,
@@ -29,8 +31,8 @@ export default function GamePage({ params }: { params: { gameId: string } }) {
     <div className="grid gap-4">
       <GameHeader game={report.game} homeTeam={report.homeTeam} awayTeam={report.awayTeam} />
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard label="Away" value={report.game.awayScore} sublabel={teamName(report.game.awayTeamId)} />
-        <MetricCard label="Home" value={report.game.homeScore} sublabel={teamName(report.game.homeTeamId)} accent="court" />
+        <MetricCard label={awayCardLabel} value={report.game.awayScore} sublabel={teamName(report.game.awayTeamId)} />
+        <MetricCard label={homeCardLabel} value={report.game.homeScore} sublabel={teamName(report.game.homeTeamId)} accent="court" />
         <MetricCard label="Possessions" value={report.feed.length} sublabel="event feed rows" />
         <MetricCard label="Top A-xE" value={topPossessions[0]?.actualMinusExpected.toFixed(2) ?? "N/A"} sublabel={topPossessions[0]?.primaryPlayer.name} accent="ink" />
       </section>
