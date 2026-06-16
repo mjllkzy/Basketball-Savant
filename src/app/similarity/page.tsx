@@ -25,7 +25,7 @@ export default function SimilarityPage({ searchParams }: { searchParams: RouteSe
       <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
         <div className="text-xs font-black uppercase tracking-[0.14em] text-signal">Selected Player</div>
         <h2 className="mt-1 text-2xl font-black text-ink">{profile.player.name}</h2>
-        <p className="mt-1 text-sm text-slate-600">{profile.team.city} {profile.team.name} · {profile.player.position} · {profile.player.role}</p>
+        <p className="mt-1 text-sm text-slate-600">{profile.team.city} {profile.team.name} · {profile.player.position}</p>
       </div>
       <SimilarPlayersTable playerId={player.id} basis={basis} />
     </div>

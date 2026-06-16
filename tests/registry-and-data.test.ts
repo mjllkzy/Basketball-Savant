@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { filterShots, getPlayerLeaderboard, getSimilarPlayers, players, playerSeasonAggregates, teams } from "@/lib/data/queries";
+import { dataSourceMetadata, filterShots, games, getPlayerLeaderboard, getSimilarPlayers, playerGameStats, players, playerSeasonAggregates, teamGameStats, teams } from "@/lib/data/queries";
 import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
 
-describe("metric registry and seed data", () => {
+describe("metric registry and official data", () => {
   it("has unique metric keys and complete glossary metadata", () => {
     const keys = metricRegistry.map((metric) => metric.key);
     expect(new Set(keys).size).toBe(keys.length);
@@ -14,7 +14,14 @@ describe("metric registry and seed data", () => {
     }
   });
 
-  it("loads enough seed data for a meaningful demo", () => {
+  it("does not describe active metric documentation as synthetic or demo data", () => {
+    const unavailableLanguage = /\b(synthetic|fictional|seed|demo)\b/i;
+    for (const metric of metricRegistry) {
+      expect(`${metric.description} ${metric.sampleQualifier} ${metric.glossaryMarkdown}`).not.toMatch(unavailableLanguage);
+    }
+  });
+
+  it("loads enough official aggregate data for a meaningful app", () => {
     expect(teams.length).toBeGreaterThanOrEqual(8);
     expect(players.length).toBeGreaterThanOrEqual(80);
     expect(playerSeasonAggregates.length).toBe(players.length);
@@ -25,6 +32,25 @@ describe("metric registry and seed data", () => {
     for (const player of players) {
       expect(teamIds.has(player.teamId)).toBe(true);
     }
+  });
+
+  it("does not fabricate official game IDs, scores, or game-log rows from season aggregates", () => {
+    expect(games.every((game) => !game.id.startsWith("official-team-summary-"))).toBe(true);
+    expect(playerGameStats.every((line) => !line.gameId.startsWith("official-team-summary-"))).toBe(true);
+    expect(teamGameStats.every((line) => !line.gameId.startsWith("official-team-summary-"))).toBe(true);
+    if (dataSourceMetadata.coverage.regularSeasonTeamGameLogs + dataSourceMetadata.coverage.playoffTeamGameLogs === 0) {
+      expect(games).toHaveLength(0);
+      expect(teamGameStats).toHaveLength(0);
+    }
+    if (dataSourceMetadata.coverage.regularSeasonPlayerGameLogs + dataSourceMetadata.coverage.playoffPlayerGameLogs === 0) {
+      expect(playerGameStats).toHaveLength(0);
+      expect(playerSeasonAggregates.every((row) => row.recentGameScores.length === 0)).toBe(true);
+    }
+  });
+
+  it("uses real team conference metadata instead of one default value", () => {
+    expect(new Set(teams.map((team) => team.conference))).toEqual(new Set(["East", "West"]));
+    expect(teams.every((team) => team.division !== "NBA")).toBe(true);
   });
 });
 

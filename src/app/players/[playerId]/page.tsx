@@ -52,7 +52,7 @@ export default function PlayerPage({ params }: { params: { playerId: string } })
             {radarKeys.map((key) => <PercentileBar key={key} label={getMetric(key).label} value={profile.metricValues.find((value) => value.metricKey === key)?.percentile ?? 0} />)}
           </div>
           <div className="mt-4 rounded bg-slate-100 p-3 text-sm leading-6 text-slate-600">
-            {profile.player.name} is shown from an official NBA Stats snapshot. Box-score and Basketball-Reference-style derived metrics are live; tracking-only measures are marked N/A until a licensed event/tracking source is connected.
+            {profile.player.name} is shown from an official NBA Stats snapshot. Box-score and Basketball Savant derived metrics are live; tracking-only measures are marked N/A until a licensed event/tracking source is connected.
           </div>
         </div>
       </section>

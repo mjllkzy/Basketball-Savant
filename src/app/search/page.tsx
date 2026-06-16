@@ -72,7 +72,7 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
       <PageHeader
         eyebrow="Advanced Search"
         title="Possession and Shot Search"
-        description="Filter every seeded shot event by player, team, zone, play type, defender context, clutch state, expected points, and actual-over-expected value."
+        description="Filter official shot and possession events when those feeds are loaded; unavailable event-only fields stay empty rather than generated."
         actions={<><ShareUrlButton /><ExportCsvButton rows={tableRows} filename="basketball-savant-shot-search.csv" /></>}
       />
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">

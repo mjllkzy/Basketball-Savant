@@ -1,6 +1,6 @@
 # Data Import Guide
 
-The app starts with an official NBA Stats snapshot and a parser boundary for future imports from CSV, JSON, Basketball-Reference-style exports, or a database.
+The app starts with an official NBA Stats snapshot and a parser boundary for future imports from CSV, JSON, official exports, or a database.
 
 ## Location
 
@@ -27,7 +27,7 @@ npm run refresh:official:shots
 
 The default refresh writes `src/lib/data/generated/official-snapshot.json`.
 
-## Supported MVP Preview
+## Supported Import Preview
 
 `POST /api/import/csv` accepts a CSV body and returns a preview envelope:
 

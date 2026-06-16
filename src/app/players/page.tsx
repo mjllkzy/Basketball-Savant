@@ -1,10 +1,11 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
-import { listPlayers, teams } from "@/lib/data/queries";
+import { listPlayers, players, teams } from "@/lib/data/queries";
 import { calculatePlayerMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
 export default function PlayersPage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
+  const positionOptions = Array.from(new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"))).sort();
   const result = listPlayers({
     q: searchParams.q,
     teamId: searchParams.teamId,
@@ -18,7 +19,6 @@ export default function PlayersPage({ searchParams }: { searchParams: Record<str
     href: `/players/${row.player.slug}`,
     team: row.team.abbreviation,
     pos: row.player.position,
-    role: row.player.role,
     games: row.games,
     min: (row.minutes / row.games).toFixed(1),
     pts: formatMetric("pts", calculatePlayerMetric("pts", row)),
@@ -39,7 +39,7 @@ export default function PlayersPage({ searchParams }: { searchParams: Record<str
         </select>
         <select name="position" defaultValue={searchParams.position ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="">All positions</option>
-          {["PG", "SG", "SF", "PF", "C"].map((position) => <option key={position}>{position}</option>)}
+          {positionOptions.map((position) => <option key={position}>{position}</option>)}
         </select>
         <select name="sort" defaultValue={searchParams.sort ?? "pts"} className="rounded border border-slate-300 px-3 py-2 text-sm">
           {["pts", "ts_pct", "efg_pct", "three_pct", "usage_rate", "stocks"].map((metric) => <option key={metric} value={metric}>{metric}</option>)}
@@ -51,7 +51,6 @@ export default function PlayersPage({ searchParams }: { searchParams: Record<str
           { key: "player", label: "Player", hrefKey: "href" },
           { key: "team", label: "Team" },
           { key: "pos", label: "Pos" },
-          { key: "role", label: "Role" },
           { key: "games", label: "G", align: "right" },
           { key: "min", label: "MIN", align: "right" },
           { key: "pts", label: "PTS", align: "right" },

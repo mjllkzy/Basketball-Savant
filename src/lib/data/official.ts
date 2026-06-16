@@ -38,34 +38,66 @@ function numberValue(tableData: SnapshotTable, row: unknown[], key: string): num
   return typeof raw === "number" ? raw : Number(raw ?? 0);
 }
 
+function optionalNumberValue(tableData: SnapshotTable, row: unknown[], key: string): number | undefined {
+  if (!tableData.headers.includes(key)) return undefined;
+  const raw = value<unknown>(tableData, row, key);
+  if (raw === null || raw === undefined || raw === "") return undefined;
+  const numeric = typeof raw === "number" ? raw : Number(raw);
+  return Number.isFinite(numeric) ? numeric : undefined;
+}
+
 function stringValue(tableData: SnapshotTable, row: unknown[], key: string): string {
   const raw = value<unknown>(tableData, row, key);
   return raw === null || raw === undefined ? "" : String(raw);
 }
+
+const teamMetadataByAbbreviation: Record<string, Pick<Team, "conference" | "division" | "primaryColor" | "secondaryColor">> = {
+  ATL: { conference: "East", division: "Southeast", primaryColor: "#e03a3e", secondaryColor: "#c1d32f" },
+  BOS: { conference: "East", division: "Atlantic", primaryColor: "#007a33", secondaryColor: "#ba9653" },
+  BKN: { conference: "East", division: "Atlantic", primaryColor: "#000000", secondaryColor: "#ffffff" },
+  CHA: { conference: "East", division: "Southeast", primaryColor: "#1d1160", secondaryColor: "#00788c" },
+  CHI: { conference: "East", division: "Central", primaryColor: "#ce1141", secondaryColor: "#000000" },
+  CLE: { conference: "East", division: "Central", primaryColor: "#860038", secondaryColor: "#041e42" },
+  DAL: { conference: "West", division: "Southwest", primaryColor: "#00538c", secondaryColor: "#002b5e" },
+  DEN: { conference: "West", division: "Northwest", primaryColor: "#0e2240", secondaryColor: "#fec524" },
+  DET: { conference: "East", division: "Central", primaryColor: "#c8102e", secondaryColor: "#1d42ba" },
+  GSW: { conference: "West", division: "Pacific", primaryColor: "#1d428a", secondaryColor: "#ffc72c" },
+  HOU: { conference: "West", division: "Southwest", primaryColor: "#ce1141", secondaryColor: "#000000" },
+  IND: { conference: "East", division: "Central", primaryColor: "#002d62", secondaryColor: "#fdbb30" },
+  LAC: { conference: "West", division: "Pacific", primaryColor: "#c8102e", secondaryColor: "#1d428a" },
+  LAL: { conference: "West", division: "Pacific", primaryColor: "#552583", secondaryColor: "#fdb927" },
+  MEM: { conference: "West", division: "Southwest", primaryColor: "#5d76a9", secondaryColor: "#12173f" },
+  MIA: { conference: "East", division: "Southeast", primaryColor: "#98002e", secondaryColor: "#f9a01b" },
+  MIL: { conference: "East", division: "Central", primaryColor: "#00471b", secondaryColor: "#eee1c6" },
+  MIN: { conference: "West", division: "Northwest", primaryColor: "#0c2340", secondaryColor: "#78be20" },
+  NOP: { conference: "West", division: "Southwest", primaryColor: "#0c2340", secondaryColor: "#c8102e" },
+  NYK: { conference: "East", division: "Atlantic", primaryColor: "#006bb6", secondaryColor: "#f58426" },
+  OKC: { conference: "West", division: "Northwest", primaryColor: "#007ac1", secondaryColor: "#ef3b24" },
+  ORL: { conference: "East", division: "Southeast", primaryColor: "#0077c0", secondaryColor: "#c4ced4" },
+  PHI: { conference: "East", division: "Atlantic", primaryColor: "#006bb6", secondaryColor: "#ed174c" },
+  PHX: { conference: "West", division: "Pacific", primaryColor: "#1d1160", secondaryColor: "#e56020" },
+  POR: { conference: "West", division: "Northwest", primaryColor: "#e03a3e", secondaryColor: "#000000" },
+  SAC: { conference: "West", division: "Pacific", primaryColor: "#5a2d81", secondaryColor: "#63727a" },
+  SAS: { conference: "West", division: "Southwest", primaryColor: "#c4ced4", secondaryColor: "#000000" },
+  TOR: { conference: "East", division: "Atlantic", primaryColor: "#ce1141", secondaryColor: "#000000" },
+  UTA: { conference: "West", division: "Northwest", primaryColor: "#002b5c", secondaryColor: "#f9a01b" },
+  WAS: { conference: "East", division: "Southeast", primaryColor: "#002b5c", secondaryColor: "#e31837" }
+};
 
 function positionFromRoster(playerId: string): { position: Player["position"]; height: string; weight: number; jerseyNumber: number } {
   for (const rosterTable of Object.values(officialSnapshot.tables.rosters) as SnapshotTable[]) {
     const row = rosterTable.rows.find((item) => String(value(rosterTable, item, "PLAYER_ID")) === playerId);
     if (row) {
       const rawPosition = stringValue(rosterTable, row, "POSITION");
-      const mapped = rawPosition.includes("C")
-        ? "C"
-        : rawPosition.includes("F") && rawPosition.includes("G")
-          ? "SF"
-          : rawPosition.includes("F")
-            ? "PF"
-            : rawPosition.includes("G")
-              ? "PG"
-              : "SF";
       return {
-        position: mapped,
+        position: rawPosition || "N/A",
         height: stringValue(rosterTable, row, "HEIGHT") || "N/A",
         weight: Number(stringValue(rosterTable, row, "WEIGHT")) || 0,
         jerseyNumber: Number(stringValue(rosterTable, row, "NUM")) || 0
       };
     }
   }
-  return { position: "SF", height: "N/A", weight: 0, jerseyNumber: 0 };
+  return { position: "N/A", height: "N/A", weight: 0, jerseyNumber: 0 };
 }
 
 function splitTeamName(teamName: string) {
@@ -77,6 +109,10 @@ function splitTeamName(teamName: string) {
 const teamTable = table("teamStatsRegular");
 const playerTable = table("playerStatsRegular");
 const playoffPlayerTable = table("playerStatsPlayoffs");
+const teamGameLogsRegularTable = table("teamGameLogsRegular");
+const teamGameLogsPlayoffsTable = table("teamGameLogsPlayoffs");
+const playerGameLogsRegularTable = table("playerGameLogsRegular");
+const playerGameLogsPlayoffsTable = table("playerGameLogsPlayoffs");
 
 export const officialDatasetVersion = `official-nba-stats-${officialSnapshot.metadata.season}-${officialSnapshot.metadata.generatedAt}`;
 export const officialMetadata = officialSnapshot.metadata;
@@ -86,16 +122,17 @@ export const officialTeams: Team[] = teamTable.rows.map((row) => {
   const fullName = stringValue(teamTable, row, "TEAM_NAME");
   const parts = splitTeamName(fullName);
   const abbreviation = playerTable.rows.find((playerRow) => String(numberValue(playerTable, playerRow, "TEAM_ID")) === id)?.[playerTable.headers.indexOf("TEAM_ABBREVIATION")] as string | undefined;
+  const metadata = abbreviation ? teamMetadataByAbbreviation[abbreviation] : undefined;
   return {
     id,
     slug: slugify(fullName),
     name: parts.name,
     abbreviation: abbreviation ?? parts.name.slice(0, 3).toUpperCase(),
     city: parts.city,
-    conference: "East",
-    division: "NBA",
-    primaryColor: "#101820",
-    secondaryColor: "#0f766e"
+    conference: metadata?.conference ?? "East",
+    division: metadata?.division ?? "NBA",
+    primaryColor: metadata?.primaryColor ?? "#101820",
+    secondaryColor: metadata?.secondaryColor ?? "#0f766e"
   };
 });
 
@@ -128,6 +165,7 @@ export const officialPlayers: Player[] = playerTable.rows.map((row) => {
 });
 
 const teamById = new Map(officialTeams.map((team) => [team.id, team]));
+const teamByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team]));
 const playerById = new Map(officialPlayers.map((player) => [player.id, player]));
 
 function playerAggregateFromRow(row: unknown[]): PlayerSeasonAggregate {
@@ -143,14 +181,6 @@ function playerAggregateFromRow(row: unknown[]): PlayerSeasonAggregate {
   const pts = numberValue(playerTable, row, "PTS");
   const teamRow = teamTable.rows.find((teamStatsRow) => String(numberValue(teamTable, teamStatsRow, "TEAM_ID")) === player.teamId);
   const teamPossessions = teamRow ? estimatePossessions(numberValue(teamTable, teamRow, "FGA"), numberValue(teamTable, teamRow, "FTA"), numberValue(teamTable, teamRow, "OREB"), numberValue(teamTable, teamRow, "TOV")) : 0;
-  const recentGameScores = Array.from({ length: Math.min(10, Math.max(1, gp)) }, (_, index) => ({
-    gameId: `official-season-${playerId}-${index}`,
-    date: `2026-${String(Math.max(1, 4 - Math.floor(index / 6))).padStart(2, "0")}-${String(20 - index).padStart(2, "0")}`,
-    pts: pts / Math.max(gp, 1),
-    ts: trueShootingPercentage(pts, fga, fta) ?? 0,
-    usage: possessions / Math.max(teamPossessions, 1),
-    net: numberValue(playerTable, row, "PLUS_MINUS") / Math.max(gp, 1)
-  }));
 
   return {
     player,
@@ -204,7 +234,7 @@ function playerAggregateFromRow(row: unknown[]): PlayerSeasonAggregate {
     rimContests: 0,
     shotContests: 0,
     lineupNet: numberValue(playerTable, row, "PLUS_MINUS") / Math.max(gp, 1),
-    recentGameScores
+    recentGameScores: []
   };
 }
 
@@ -249,66 +279,150 @@ export const officialTeamSeasonAggregates: TeamSeasonAggregate[] = teamTable.row
   };
 });
 
-export const officialGames: Game[] = officialTeamSeasonAggregates.slice(0, 30).map((row, index) => ({
-  id: `official-team-summary-${row.team.id}`,
-  date: officialSnapshot.metadata.generatedAt.slice(0, 10),
-  season: officialSnapshot.metadata.season,
-  seasonType: "Regular Season",
-  homeTeamId: row.team.id,
-  awayTeamId: officialTeamSeasonAggregates[(index + 1) % officialTeamSeasonAggregates.length].team.id,
-  homeScore: Math.round(row.pts / Math.max(row.games, 1)),
-  awayScore: Math.round(officialTeamSeasonAggregates[(index + 1) % officialTeamSeasonAggregates.length].pts / Math.max(officialTeamSeasonAggregates[(index + 1) % officialTeamSeasonAggregates.length].games, 1)),
-  status: "Final",
-  arena: "Official team summary"
-}));
+function normalizeGameDate(rawDate: string): string {
+  const parsed = new Date(rawDate);
+  return Number.isNaN(parsed.getTime()) ? rawDate.slice(0, 10) : parsed.toISOString().slice(0, 10);
+}
 
-export const officialPlayerGameStats: PlayerGameStat[] = officialPlayerSeasonAggregates.slice(0, 240).map((row) => ({
-  id: `official-line-${row.player.id}`,
-  gameId: `official-team-summary-${row.team.id}`,
-  playerId: row.player.id,
-  teamId: row.team.id,
-  opponentTeamId: officialTeams.find((team) => team.id !== row.team.id)?.id ?? row.team.id,
-  minutes: row.minutes / Math.max(row.games, 1),
-  pts: row.pts / Math.max(row.games, 1),
-  reb: row.reb / Math.max(row.games, 1),
-  oreb: row.oreb / Math.max(row.games, 1),
-  dreb: row.dreb / Math.max(row.games, 1),
-  ast: row.ast / Math.max(row.games, 1),
-  stl: row.stl / Math.max(row.games, 1),
-  blk: row.blk / Math.max(row.games, 1),
-  tov: row.tov / Math.max(row.games, 1),
-  pf: row.pf / Math.max(row.games, 1),
-  fgm: row.fgm / Math.max(row.games, 1),
-  fga: row.fga / Math.max(row.games, 1),
-  threePm: row.threePm / Math.max(row.games, 1),
-  threePa: row.threePa / Math.max(row.games, 1),
-  ftm: row.ftm / Math.max(row.games, 1),
-  fta: row.fta / Math.max(row.games, 1),
-  plusMinus: row.plusMinus / Math.max(row.games, 1)
-}));
+function opponentFromMatchup(matchup: string): Team | undefined {
+  const abbreviation = matchup.split(/\s(?:vs\.|@)\s/).at(1)?.trim();
+  return abbreviation ? teamByAbbreviation.get(abbreviation) : undefined;
+}
 
-export const officialTeamGameStats: TeamGameStat[] = officialTeamSeasonAggregates.map((row) => ({
-  id: `official-team-line-${row.team.id}`,
-  gameId: `official-team-summary-${row.team.id}`,
-  teamId: row.team.id,
-  opponentTeamId: officialTeams.find((team) => team.id !== row.team.id)?.id ?? row.team.id,
-  pts: row.pts / Math.max(row.games, 1),
-  fgm: row.fgm / Math.max(row.games, 1),
-  fga: row.fga / Math.max(row.games, 1),
-  threePm: row.threePm / Math.max(row.games, 1),
-  threePa: row.threePa / Math.max(row.games, 1),
-  ftm: row.ftm / Math.max(row.games, 1),
-  fta: row.fta / Math.max(row.games, 1),
-  oreb: row.oreb / Math.max(row.games, 1),
-  dreb: row.dreb / Math.max(row.games, 1),
-  reb: row.reb / Math.max(row.games, 1),
-  ast: row.ast / Math.max(row.games, 1),
-  stl: row.stl / Math.max(row.games, 1),
-  blk: row.blk / Math.max(row.games, 1),
-  tov: row.tov / Math.max(row.games, 1),
-  pf: 0,
-  possessions: row.possessions / Math.max(row.games, 1)
-}));
+function teamGameRows(tableData: SnapshotTable, seasonType: Game["seasonType"]): TeamGameStat[] {
+  return tableData.rows.flatMap((row): TeamGameStat[] => {
+    const teamId = String(numberValue(tableData, row, "TEAM_ID"));
+    const team = teamById.get(teamId);
+    const gameId = stringValue(tableData, row, "GAME_ID");
+    const matchup = stringValue(tableData, row, "MATCHUP");
+    const opponent = opponentFromMatchup(matchup);
+    if (!team || !opponent || !gameId) return [];
+    const fga = numberValue(tableData, row, "FGA");
+    const fta = numberValue(tableData, row, "FTA");
+    const oreb = numberValue(tableData, row, "OREB");
+    const tov = numberValue(tableData, row, "TOV");
+    return [{
+      id: `official-team-game-${seasonType}-${gameId}-${teamId}`,
+      gameId,
+      teamId: team.id,
+      opponentTeamId: opponent.id,
+      pts: numberValue(tableData, row, "PTS"),
+      fgm: numberValue(tableData, row, "FGM"),
+      fga,
+      threePm: numberValue(tableData, row, "FG3M"),
+      threePa: numberValue(tableData, row, "FG3A"),
+      ftm: numberValue(tableData, row, "FTM"),
+      fta,
+      oreb,
+      dreb: numberValue(tableData, row, "DREB"),
+      reb: numberValue(tableData, row, "REB"),
+      ast: numberValue(tableData, row, "AST"),
+      stl: numberValue(tableData, row, "STL"),
+      blk: numberValue(tableData, row, "BLK"),
+      tov,
+      pf: optionalNumberValue(tableData, row, "PF") ?? 0,
+      possessions: estimatePossessions(fga, fta, oreb, tov)
+    }];
+  });
+}
+
+export const officialTeamGameStats: TeamGameStat[] = [
+  ...teamGameRows(teamGameLogsRegularTable, "Regular Season"),
+  ...teamGameRows(teamGameLogsPlayoffsTable, "Playoffs")
+];
+
+function gamesFromTeamGameRows(tableData: SnapshotTable, seasonType: Game["seasonType"]): Game[] {
+  const grouped = new Map<string, unknown[][]>();
+  for (const row of tableData.rows) {
+    const gameId = stringValue(tableData, row, "GAME_ID");
+    if (!gameId) continue;
+    const rows = grouped.get(gameId) ?? [];
+    rows.push(row);
+    grouped.set(gameId, rows);
+  }
+
+  return Array.from(grouped.entries()).flatMap(([gameId, rows]): Game[] => {
+    const homeRow = rows.find((row) => stringValue(tableData, row, "MATCHUP").includes(" vs. "));
+    const awayRow = rows.find((row) => stringValue(tableData, row, "MATCHUP").includes(" @ "));
+    if (!homeRow || !awayRow) return [];
+    const homeTeamId = String(numberValue(tableData, homeRow, "TEAM_ID"));
+    const awayTeamId = String(numberValue(tableData, awayRow, "TEAM_ID"));
+    if (!teamById.has(homeTeamId) || !teamById.has(awayTeamId)) return [];
+    return [{
+      id: gameId,
+      date: normalizeGameDate(stringValue(tableData, homeRow, "GAME_DATE")),
+      season: officialSnapshot.metadata.season,
+      seasonType,
+      homeTeamId,
+      awayTeamId,
+      homeScore: numberValue(tableData, homeRow, "PTS"),
+      awayScore: numberValue(tableData, awayRow, "PTS"),
+      status: "Final"
+    }];
+  });
+}
+
+export const officialGames: Game[] = [
+  ...gamesFromTeamGameRows(teamGameLogsRegularTable, "Regular Season"),
+  ...gamesFromTeamGameRows(teamGameLogsPlayoffsTable, "Playoffs")
+];
+
+function playerGameRows(tableData: SnapshotTable): PlayerGameStat[] {
+  return tableData.rows.flatMap((row): PlayerGameStat[] => {
+    const playerId = String(numberValue(tableData, row, "PLAYER_ID"));
+    const teamId = String(numberValue(tableData, row, "TEAM_ID"));
+    const gameId = stringValue(tableData, row, "GAME_ID");
+    const matchup = stringValue(tableData, row, "MATCHUP");
+    const opponent = opponentFromMatchup(matchup);
+    if (!playerById.has(playerId) || !teamById.has(teamId) || !opponent || !gameId) return [];
+    return [{
+      id: `official-player-game-${gameId}-${playerId}`,
+      gameId,
+      playerId,
+      teamId,
+      opponentTeamId: opponent.id,
+      minutes: numberValue(tableData, row, "MIN"),
+      pts: numberValue(tableData, row, "PTS"),
+      reb: numberValue(tableData, row, "REB"),
+      oreb: numberValue(tableData, row, "OREB"),
+      dreb: numberValue(tableData, row, "DREB"),
+      ast: numberValue(tableData, row, "AST"),
+      stl: numberValue(tableData, row, "STL"),
+      blk: numberValue(tableData, row, "BLK"),
+      tov: numberValue(tableData, row, "TOV"),
+      pf: optionalNumberValue(tableData, row, "PF") ?? 0,
+      fgm: numberValue(tableData, row, "FGM"),
+      fga: numberValue(tableData, row, "FGA"),
+      threePm: numberValue(tableData, row, "FG3M"),
+      threePa: numberValue(tableData, row, "FG3A"),
+      ftm: numberValue(tableData, row, "FTM"),
+      fta: numberValue(tableData, row, "FTA"),
+      plusMinus: numberValue(tableData, row, "PLUS_MINUS")
+    }];
+  });
+}
+
+export const officialPlayerGameStats: PlayerGameStat[] = [
+  ...playerGameRows(playerGameLogsRegularTable),
+  ...playerGameRows(playerGameLogsPlayoffsTable)
+];
+
+const gameDateById = new Map(officialGames.map((game) => [game.id, game.date]));
+
+for (const aggregate of officialPlayerSeasonAggregates) {
+  aggregate.recentGameScores = officialPlayerGameStats
+    .filter((line) => line.playerId === aggregate.player.id)
+    .sort((a, b) => (gameDateById.get(a.gameId) ?? "").localeCompare(gameDateById.get(b.gameId) ?? ""))
+    .slice(-10)
+    .map((line) => ({
+      gameId: line.gameId,
+      date: gameDateById.get(line.gameId) ?? "",
+      pts: line.pts,
+      ts: trueShootingPercentage(line.pts, line.fga, line.fta) ?? 0,
+      usage: 0,
+      net: line.plusMinus
+    }));
+}
 
 export const officialShots: Shot[] = [];
 export const officialPossessions: Possession[] = [];
@@ -328,7 +442,7 @@ export const officialInsights = [
     href: "/about"
   },
   {
-    title: "Basketball-Reference-style efficiency is calculated locally",
+    title: "Box-score efficiency is calculated locally",
     body: "eFG%, TS%, possession estimates, ratings, usage, and rates are derived from official NBA box totals.",
     href: "/glossary"
   }

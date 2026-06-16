@@ -18,7 +18,7 @@ export type Player = {
   name: string;
   slug: string;
   teamId: string;
-  position: "PG" | "SG" | "SF" | "PF" | "C";
+  position: string;
   height: string;
   weight: number;
   age: number;

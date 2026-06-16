@@ -14,8 +14,8 @@ It is an original product direction inspired by the depth of elite sports analyt
 - Zod validation for API query params
 - Vitest tests
 - Official NBA Stats snapshot adapter
-- Optional seed-data fallback/reference generator
-- Future adapters for PostgreSQL, DuckDB, Parquet, Basketball-Reference-style imports, or licensed data feeds
+- Development-only reference data generator
+- Future adapters for PostgreSQL, DuckDB, Parquet, official CSV imports, or licensed data feeds
 
 ## Setup
 
@@ -92,7 +92,7 @@ The official snapshot and adapter model:
 - team game stats
 - derived metric values
 
-Core types live in `src/lib/types.ts`. Official data mapping lives in `src/lib/data/official.ts`. Query and adapter-style helpers live in `src/lib/data/queries.ts`. The old synthetic seed file remains as a development reference only.
+Core types live in `src/lib/types.ts`. Official data mapping lives in `src/lib/data/official.ts`. Query and adapter-style helpers live in `src/lib/data/queries.ts`. The old generated sample file remains as a development reference only and is not used by the app.
 
 ## Metric Registry
 
@@ -120,7 +120,7 @@ Formula utilities live in `src/lib/metrics/formulas.ts`. The expected shot value
 
 ## Importing Data
 
-Place local CSV or JSON files in `data/imports/`. The MVP includes a CSV parser and a preview endpoint at `POST /api/import/csv`.
+Place local CSV or JSON files in `data/imports/`. The app includes a CSV parser and a preview endpoint at `POST /api/import/csv`.
 
 Persistent import is intentionally a TODO: wire the parser into a database adapter once the production data source is chosen.
 

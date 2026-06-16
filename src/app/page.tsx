@@ -34,7 +34,7 @@ export default function HomePage() {
       <PageHeader
         eyebrow="Command Center"
         title="Basketball Savant"
-        description="Advanced basketball search, leaderboards, visuals, and player intelligence powered by a modular seed-data analytics layer."
+        description="Advanced basketball search, leaderboards, visuals, and player intelligence powered by official NBA Stats snapshots and clearly marked unavailable feeds."
       />
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
@@ -56,7 +56,11 @@ export default function HomePage() {
             <Link href="/games" className="text-sm font-bold text-signal hover:underline">All games</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {games.map((game) => {
+            {games.length === 0 ? (
+              <div className="rounded border border-dashed border-slate-300 p-4 text-sm leading-6 text-slate-600 sm:col-span-2">
+                Official game-log scores are not loaded in the current NBA Stats snapshot. Basketball Savant will not display generated game dates or scores.
+              </div>
+            ) : games.map((game) => {
               const awayTeamName = teamName(game.awayTeamId);
               const homeTeamName = teamName(game.homeTeamId);
               return (
@@ -78,7 +82,16 @@ export default function HomePage() {
             })}
           </div>
         </div>
-        {firstGame ? <GameFlowChart data={gameFlow(firstGame.id)} /> : null}
+        {firstGame ? (
+          <GameFlowChart data={gameFlow(firstGame.id)} />
+        ) : (
+          <div className="h-72 rounded border border-slate-200 bg-white p-3 shadow-sm">
+            <h3 className="mb-2 text-sm font-black text-ink">Gameflow Runs</h3>
+            <div className="flex h-[88%] items-center justify-center rounded border border-dashed border-slate-200 px-6 text-center text-sm leading-6 text-slate-500">
+              Official possession-level gameflow is unavailable until a real play-by-play or possession feed is connected.
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">

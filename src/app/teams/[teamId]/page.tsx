@@ -7,7 +7,7 @@ import { LineupTable } from "@/components/domain/LineupTable";
 import { TeamHeader } from "@/components/domain/TeamHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
-import { getTeamProfile, players, teamSeasonAggregates } from "@/lib/data/queries";
+import { getTeamProfile, players, teamName, teamSeasonAggregates } from "@/lib/data/queries";
 import { calculatePlayerMetric, calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
@@ -18,7 +18,6 @@ export default function TeamPage({ params }: { params: { teamId: string } }) {
     player: row.player.name,
     href: `/players/${row.player.slug}`,
     pos: row.player.position,
-    role: row.player.role,
     pts: formatMetric("pts", calculatePlayerMetric("pts", row)),
     ts: formatMetric("ts_pct", calculatePlayerMetric("ts_pct", row)),
     usg: formatMetric("usage_rate", calculatePlayerMetric("usage_rate", row)),
@@ -49,7 +48,7 @@ export default function TeamPage({ params }: { params: { teamId: string } }) {
       <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
         <div>
           <h2 className="mb-2 text-lg font-black text-ink">Roster</h2>
-          <StatTable dense columns={[{ key: "player", label: "Player", hrefKey: "href" }, { key: "pos", label: "Pos" }, { key: "role", label: "Role" }, { key: "pts", label: "PTS", align: "right" }, { key: "ts", label: "TS%", align: "right" }, { key: "usg", label: "USG%", align: "right" }, { key: "stocks", label: "Stocks", align: "right" }]} rows={rosterRows} />
+          <StatTable dense columns={[{ key: "player", label: "Player", hrefKey: "href" }, { key: "pos", label: "Pos" }, { key: "pts", label: "PTS", align: "right" }, { key: "ts", label: "TS%", align: "right" }, { key: "usg", label: "USG%", align: "right" }, { key: "stocks", label: "Stocks", align: "right" }]} rows={rosterRows} />
         </div>
         <div>
           <h2 className="mb-2 text-lg font-black text-ink">Lineups</h2>
@@ -58,7 +57,13 @@ export default function TeamPage({ params }: { params: { teamId: string } }) {
       </section>
       <div>
         <h2 className="mb-2 text-lg font-black text-ink">Game Logs</h2>
-        <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "result", label: "Result" }]} rows={profile.games.map((game) => ({ date: game.date, matchup: `${game.awayTeamId} at ${game.homeTeamId}`, href: `/games/${game.id}`, score: `${game.awayScore}-${game.homeScore}`, result: game.homeTeamId === profile.team.id ? (game.homeScore > game.awayScore ? "W" : "L") : (game.awayScore > game.homeScore ? "W" : "L") }))} />
+        {profile.games.length ? (
+          <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "result", label: "Result" }]} rows={profile.games.map((game) => ({ date: game.date, matchup: `${teamName(game.awayTeamId)} at ${teamName(game.homeTeamId)}`, href: `/games/${game.id}`, score: `${game.awayScore}-${game.homeScore}`, result: game.homeTeamId === profile.team.id ? (game.homeScore > game.awayScore ? "W" : "L") : (game.awayScore > game.homeScore ? "W" : "L") }))} />
+        ) : (
+          <div className="rounded border border-dashed border-slate-300 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
+            Official team game logs are not loaded in this snapshot.
+          </div>
+        )}
       </div>
     </div>
   );

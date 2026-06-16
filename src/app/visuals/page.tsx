@@ -26,7 +26,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
   const latest = latestGames(1)[0];
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="Visualization Lab" title="Visuals" description="Shot charts, heatmaps, pass networks, touch-map proxy, rolling trends, radar, lineup network, and team style map." />
+      <PageHeader eyebrow="Visualization Lab" title="Visuals" description="Shot charts, heatmaps, pass networks, touch maps, rolling trends, radar, lineup network, and team style map when real feeds are loaded." />
       <div className="table-scroll flex gap-2 overflow-x-auto">
         {tabs.map((item) => <a key={item} href={`/visuals?tab=${encodeURIComponent(item)}`} className={`shrink-0 rounded border px-3 py-2 text-sm font-bold ${tab === item ? "border-signal bg-white text-signal" : "border-slate-200 bg-white text-slate-600"}`}>{item}</a>)}
       </div>
@@ -41,7 +41,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
         {latest ? <GameFlowChart data={gameFlow(latest.id)} /> : null}
       </section>
       <div className="rounded border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
-        Touch Map MVP note: touch locations are represented through paint touches, elbow/post touches, and pass-network endpoints until licensed tracking data is connected.
+        Touch maps require real tracking or event-location data. Basketball Savant leaves them unavailable until a licensed source is connected.
       </div>
     </div>
   );

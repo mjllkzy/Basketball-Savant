@@ -18,7 +18,7 @@
 
 ## V2
 
-- Basketball-Reference-style import adapter
+- Official CSV/import adapter
 - Deeper NBA Stats event adapters
 - PostgreSQL persistence
 - DuckDB or Parquet event query layer

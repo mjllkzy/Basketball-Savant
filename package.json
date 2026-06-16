@@ -2,7 +2,7 @@
   "name": "basketball-savant",
   "version": "0.1.0",
   "private": true,
-  "description": "A seed-data basketball analytics portal inspired by the depth of professional sports analytics tools.",
+  "description": "An official-data-first basketball analytics portal inspired by the depth of professional sports analytics tools.",
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p ${PORT:-3000}",
     "refresh:official": "node scripts/refresh-official-data.mjs",
