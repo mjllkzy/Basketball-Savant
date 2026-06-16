@@ -10,7 +10,7 @@ export default function GlossaryPage() {
     formula: metric.formula,
     unit: metric.unit,
     higher: metric.higherIsBetter ? "Yes" : "No",
-    data: metric.requiresTracking ? `${metric.sourceType} + tracking` : metric.sourceType,
+    data: metric.requiresTracking ? `${metric.sourceType} feed required` : metric.sourceType,
     notes: metric.sampleQualifier
   }));
   return (

@@ -126,6 +126,7 @@ const teamTable = table("teamStatsRegular");
 const playerTable = table("playerStatsRegular");
 const playerAdvancedTable = table("playerAdvancedRegular");
 const teamAdvancedTable = table("teamAdvancedRegular");
+const basketballReferencePlayerAdvancedCrosscheckTable = table("basketballReferencePlayerAdvancedCrosscheck");
 const playerBioStatsTable = table("playerBioStatsRegular");
 const playerIndexTable = table("playerIndex");
 const playerBioOverridesTable = table("playerBioOverrides");
@@ -137,6 +138,7 @@ const playerGameLogsPlayoffsTable = table("playerGameLogsPlayoffs");
 
 export const officialDatasetVersion = `official-nba-stats-${officialSnapshot.metadata.season}-${officialSnapshot.metadata.generatedAt}`;
 export const officialMetadata = officialSnapshot.metadata;
+export const officialBasketballReferencePlayerAdvancedCrosscheck = basketballReferencePlayerAdvancedCrosscheckTable;
 
 export const officialTeams: Team[] = teamTable.rows.map((row) => {
   const id = String(numberValue(teamTable, row, "TEAM_ID"));

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
+import { basketballReferencePlayerAdvancedCrosscheck, dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
 
@@ -54,9 +54,27 @@ describe("metric registry and official data", () => {
     expect(dataSourceMetadata.sources.playerAdvancedRegularUrl).toContain("MeasureType=Advanced");
     expect(dataSourceMetadata.sources.teamAdvancedRegularUrl).toContain("MeasureType=Advanced");
     expect(dataSourceMetadata.sources.basketballReferencePlayerAdvanced2026).toBe("https://www.basketball-reference.com/leagues/NBA_2026_advanced.html");
+    expect(dataSourceMetadata.sources.basketballReferencePlayerPerGame2026).toBe("https://www.basketball-reference.com/leagues/NBA_2026_per_game.html");
     expect(dataSourceMetadata.sources.basketballReferenceGlossary).toBe("https://www.basketball-reference.com/about/glossary.html");
     expect(dataSourceMetadata.coverage.regularSeasonPlayerAdvanced).toBe(playerSeasonAggregates.length);
     expect(dataSourceMetadata.coverage.regularSeasonTeamAdvanced).toBe(teams.length);
+    expect(dataSourceMetadata.coverage.basketballReferencePlayerAdvancedRows).toBeGreaterThan(playerSeasonAggregates.length);
+    expect(dataSourceMetadata.coverage.basketballReferencePlayerPerGameRows).toBeGreaterThan(playerSeasonAggregates.length);
+    expect(dataSourceMetadata.coverage.basketballReferencePlayerAdvancedCrosschecks).toBe(playerSeasonAggregates.length);
+    expect(dataSourceMetadata.coverage.basketballReferencePlayerAdvancedMatchedCrosschecks).toBeGreaterThanOrEqual(Math.floor(playerSeasonAggregates.length * 0.95));
+    expect(basketballReferencePlayerAdvancedCrosscheck.rows).toHaveLength(playerSeasonAggregates.length);
+
+    const crosscheckIndex = Object.fromEntries(basketballReferencePlayerAdvancedCrosscheck.headers.map((header, index) => [header, index]));
+    const amenCrosscheck = basketballReferencePlayerAdvancedCrosscheck.rows.find((row) => row[crosscheckIndex.PLAYER_NAME] === "Amen Thompson");
+    expect(amenCrosscheck).toBeTruthy();
+    expect(amenCrosscheck?.[crosscheckIndex.MATCH_STATUS]).toBe("matched");
+    expect(amenCrosscheck?.[crosscheckIndex.BREF_TS_PCT]).toBeGreaterThan(0.59);
+    expect(amenCrosscheck?.[crosscheckIndex.TS_PCT_ABS_DIFF]).toBeLessThan(0.001);
+    expect(amenCrosscheck?.[crosscheckIndex.EFG_PCT_ABS_DIFF]).toBeLessThan(0.001);
+
+    const initialsCrosscheck = basketballReferencePlayerAdvancedCrosscheck.rows.find((row) => row[crosscheckIndex.PLAYER_NAME] === "AJ Green");
+    expect(initialsCrosscheck?.[crosscheckIndex.MATCH_STATUS]).toBe("matched");
+    expect(initialsCrosscheck?.[crosscheckIndex.TS_PCT_ABS_DIFF]).toBeLessThan(0.001);
 
     const playerRow = playerSeasonAggregates.find((aggregate) => aggregate.usagePct !== null && aggregate.officialTsPct !== null && aggregate.officialEfgPct !== null);
     expect(playerRow).toBeTruthy();
@@ -239,7 +257,10 @@ describe("query behavior", () => {
   it("keeps event, tracking, model, location, and lineup metrics unavailable without real feeds", () => {
     expect(lineups).toHaveLength(0);
     const row = playerSeasonAggregates[0];
+    const metricByKey = new Map(metricRegistry.map((metric) => [metric.key, metric]));
     for (const key of ["expected_fg_pct", "shot_quality", "actual_minus_expected_points", "transition_ppp", "lineup_net_rating", "average_speed", "touches_per_75", "frontcourt_touches", "boxouts", "rim_pressure_score", "rim_protection_value", "passes_per_touch", "points_created_by_assist", "rim_frequency", "corner_three_frequency", "rolling_75_possessions"]) {
+      expect(metricByKey.get(key)?.requiresTracking).toBe(true);
+      expect(metricByKey.get(key)?.glossaryMarkdown).toContain("required event, lineup, model, or tracking feed");
       expect(calculatePlayerMetric(key, row)).toBeNull();
       expect(getPlayerLeaderboard(key, { limit: 5 }).every((leader) => leader.value === null)).toBe(true);
     }

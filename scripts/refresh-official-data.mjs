@@ -8,11 +8,14 @@ const includePlayoffShots = !process.argv.includes("--no-playoff-shots");
 const includeRosters = process.argv.includes("--include-rosters");
 const includeTeamGameLogs = process.argv.includes("--include-team-game-logs");
 const includePlayerGameLogs = process.argv.includes("--include-player-game-logs");
+const includeBasketballReferenceCrosscheck = !process.argv.includes("--skip-bref-crosscheck");
 const allowPartial = process.argv.includes("--allow-partial");
 const reuseExistingCore = process.argv.includes("--reuse-existing-core");
 const output = argValue("--output") ?? "src/lib/data/generated/official-snapshot.json";
 const timeoutMs = Number(argValue("--timeoutMs") ?? 60000);
 const retryCount = Math.max(1, Number(argValue("--retries") ?? 3));
+const basketballReferencePlayerAdvancedUrl = "https://www.basketball-reference.com/leagues/NBA_2026_advanced.html";
+const basketballReferencePlayerPerGameUrl = "https://www.basketball-reference.com/leagues/NBA_2026_per_game.html";
 
 const externalPlayerBioOverrides = [
   {
@@ -163,6 +166,13 @@ const nbaHeaders = {
   Referer: "https://www.nba.com/stats/"
 };
 
+const basketballReferenceHeaders = {
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9"
+};
+
 function argValue(name) {
   const item = process.argv.find((arg) => arg.startsWith(`${name}=`));
   return item ? item.slice(name.length + 1) : undefined;
@@ -202,6 +212,217 @@ async function fetchOptionalJson(name, url) {
     console.warn(`Skipping ${name}: ${error instanceof Error ? error.message : String(error)}`);
     return undefined;
   }
+}
+
+async function fetchText(name, url, headers) {
+  for (let attempt = 1; attempt <= retryCount; attempt += 1) {
+    try {
+      console.log(`Fetching ${name}${attempt > 1 ? ` (retry ${attempt})` : ""}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      const response = await fetch(url, { headers, signal: controller.signal }).finally(() => clearTimeout(timeout));
+      if (!response.ok) {
+        throw new Error(`${name} failed: ${response.status} ${response.statusText}`);
+      }
+      return await response.text();
+    } catch (error) {
+      if (attempt === retryCount) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1200 * attempt));
+    }
+  }
+  throw new Error(`${name} failed`);
+}
+
+async function fetchOptionalText(name, url, headers) {
+  try {
+    return await fetchText(name, url, headers);
+  } catch (error) {
+    console.warn(`Skipping ${name}: ${error instanceof Error ? error.message : String(error)}`);
+    return undefined;
+  }
+}
+
+function decodeHtml(value) {
+  return value
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, " ")
+    .trim();
+}
+
+function normalizePlayerName(value) {
+  return decodeHtml(String(value ?? ""))
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[.\u2019']/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\b(jr|sr|ii|iii|iv)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function basketballReferenceTeamForNba(teamAbbreviation) {
+  return (
+    {
+      BKN: "BRK",
+      CHA: "CHO",
+      PHX: "PHO"
+    }[teamAbbreviation] ?? teamAbbreviation
+  );
+}
+
+function cellHtml(rowHtml, stat) {
+  const match = rowHtml.match(new RegExp(`<(?:td|th)[^>]*data-stat="${stat}"[^>]*>[\\s\\S]*?<\\/(?:td|th)>`));
+  return match?.[0];
+}
+
+function cellText(rowHtml, stat) {
+  const cell = cellHtml(rowHtml, stat);
+  if (!cell) return "";
+  const inner = cell.replace(/^<[^>]+>/, "").replace(/<\/(?:td|th)>$/, "");
+  return decodeHtml(inner);
+}
+
+function cellNumericValue(rowHtml, stat) {
+  const cell = cellHtml(rowHtml, stat);
+  if (!cell) return null;
+  const raw = cell.match(/csk="([^"]*)"/)?.[1] ?? cellText(rowHtml, stat);
+  if (raw === "") return null;
+  const numeric = Number(raw);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function parseBasketballReferenceRows(html, tableId, fields) {
+  const withoutComments = html.replace(/<!--/g, "").replace(/-->/g, "");
+  const tableHtml = withoutComments.match(new RegExp(`<table[^>]+id="${tableId}"[\\s\\S]*?<\\/table>`))?.[0] ?? "";
+  return [...tableHtml.matchAll(/<tr[\s\S]*?<\/tr>/g)]
+    .map((match) => match[0])
+    .filter((rowHtml) => rowHtml.includes("<td") && rowHtml.includes('data-stat="name_display"'))
+    .map((rowHtml) => {
+      const row = {
+        playerName: cellText(rowHtml, "name_display"),
+        normalizedPlayerName: normalizePlayerName(cellText(rowHtml, "name_display")),
+        teamAbbreviation: cellText(rowHtml, "team_name_abbr"),
+        games: cellNumericValue(rowHtml, "games"),
+        minutes: cellNumericValue(rowHtml, "mp")
+      };
+      for (const [outputKey, stat] of Object.entries(fields)) {
+        row[outputKey] = cellNumericValue(rowHtml, stat);
+      }
+      return row;
+    });
+}
+
+function basketballReferenceRowsByName(rows) {
+  const byName = new Map();
+  for (const row of rows) {
+    if (!row.normalizedPlayerName) continue;
+    const existing = byName.get(row.normalizedPlayerName) ?? [];
+    existing.push(row);
+    byName.set(row.normalizedPlayerName, existing);
+  }
+  return byName;
+}
+
+function findBasketballReferenceMatch(rowsByName, playerName, teamAbbreviation, teamCount) {
+  const candidates = rowsByName.get(normalizePlayerName(playerName)) ?? [];
+  if (candidates.length === 0) return undefined;
+  const aggregateTeams = new Set(["TOT", "2TM", "3TM", "4TM", "5TM"]);
+  if (Number(teamCount) > 1) {
+    const aggregate = candidates.find((row) => aggregateTeams.has(row.teamAbbreviation));
+    if (aggregate) return aggregate;
+  }
+  const basketballReferenceTeam = basketballReferenceTeamForNba(teamAbbreviation);
+  return (
+    candidates.find((row) => row.teamAbbreviation === basketballReferenceTeam) ??
+    candidates.find((row) => aggregateTeams.has(row.teamAbbreviation)) ??
+    (candidates.length === 1 ? candidates[0] : undefined)
+  );
+}
+
+function diff(nbaValue, referenceValue) {
+  if (nbaValue === null || nbaValue === undefined || referenceValue === null || referenceValue === undefined) return null;
+  return Number(Math.abs(Number(nbaValue) - Number(referenceValue)).toFixed(6));
+}
+
+function buildBasketballReferenceCrosscheck(playerAdvancedRegular, advancedRows, perGameRows) {
+  const nbaTable = table(playerAdvancedRegular);
+  const advancedByName = basketballReferenceRowsByName(advancedRows);
+  const perGameByName = basketballReferenceRowsByName(perGameRows);
+  const headerIndex = Object.fromEntries(nbaTable.headers.map((header, index) => [header, index]));
+  const rows = nbaTable.rows.map((row) => {
+    const playerId = String(row[headerIndex.PLAYER_ID]);
+    const playerName = row[headerIndex.PLAYER_NAME];
+    const nbaTeam = row[headerIndex.TEAM_ABBREVIATION];
+    const teamCount = row[headerIndex.TEAM_COUNT];
+    const advancedMatch = findBasketballReferenceMatch(advancedByName, playerName, nbaTeam, teamCount);
+    const perGameMatch = findBasketballReferenceMatch(perGameByName, playerName, nbaTeam, teamCount);
+    const status = advancedMatch && perGameMatch ? "matched" : advancedMatch ? "missing_per_game" : perGameMatch ? "missing_advanced" : "unmatched";
+    return [
+      playerId,
+      playerName,
+      nbaTeam,
+      advancedMatch?.teamAbbreviation ?? "",
+      perGameMatch?.teamAbbreviation ?? "",
+      status,
+      row[headerIndex.TS_PCT],
+      advancedMatch?.tsPct ?? null,
+      diff(row[headerIndex.TS_PCT], advancedMatch?.tsPct),
+      row[headerIndex.EFG_PCT],
+      perGameMatch?.efgPct ?? null,
+      diff(row[headerIndex.EFG_PCT], perGameMatch?.efgPct),
+      row[headerIndex.USG_PCT],
+      advancedMatch?.usagePct ?? null,
+      diff(row[headerIndex.USG_PCT], advancedMatch?.usagePct),
+      row[headerIndex.AST_PCT],
+      advancedMatch?.assistPct ?? null,
+      diff(row[headerIndex.AST_PCT], advancedMatch?.assistPct),
+      row[headerIndex.OREB_PCT],
+      advancedMatch?.offensiveReboundPct ?? null,
+      diff(row[headerIndex.OREB_PCT], advancedMatch?.offensiveReboundPct),
+      row[headerIndex.DREB_PCT],
+      advancedMatch?.defensiveReboundPct ?? null,
+      diff(row[headerIndex.DREB_PCT], advancedMatch?.defensiveReboundPct),
+      row[headerIndex.REB_PCT],
+      advancedMatch?.reboundPct ?? null,
+      diff(row[headerIndex.REB_PCT], advancedMatch?.reboundPct)
+    ];
+  });
+  return {
+    headers: [
+      "PLAYER_ID",
+      "PLAYER_NAME",
+      "NBA_TEAM_ABBREVIATION",
+      "BREF_ADVANCED_TEAM_ABBREVIATION",
+      "BREF_PER_GAME_TEAM_ABBREVIATION",
+      "MATCH_STATUS",
+      "NBA_TS_PCT",
+      "BREF_TS_PCT",
+      "TS_PCT_ABS_DIFF",
+      "NBA_EFG_PCT",
+      "BREF_EFG_PCT",
+      "EFG_PCT_ABS_DIFF",
+      "NBA_USG_PCT",
+      "BREF_USG_PCT",
+      "USG_PCT_ABS_DIFF",
+      "NBA_AST_PCT",
+      "BREF_AST_PCT",
+      "AST_PCT_ABS_DIFF",
+      "NBA_OREB_PCT",
+      "BREF_ORB_PCT",
+      "OREB_PCT_ABS_DIFF",
+      "NBA_DREB_PCT",
+      "BREF_DRB_PCT",
+      "DREB_PCT_ABS_DIFF",
+      "NBA_REB_PCT",
+      "BREF_TRB_PCT",
+      "REB_PCT_ABS_DIFF"
+    ],
+    rows
+  };
 }
 
 function baseDashParams(seasonType, teamId = 0) {
@@ -468,6 +689,35 @@ async function main() {
     shotCharts.regularSeason = await fetchJson("regular season shot chart", url);
   }
 
+  const fetchRequestedText = allowPartial ? fetchOptionalText : fetchText;
+  const basketballReferenceAdvancedHtml = includeBasketballReferenceCrosscheck
+    ? await fetchRequestedText("Basketball Reference player advanced stats", basketballReferencePlayerAdvancedUrl, basketballReferenceHeaders)
+    : undefined;
+  const basketballReferencePerGameHtml = includeBasketballReferenceCrosscheck
+    ? await fetchRequestedText("Basketball Reference player per-game stats", basketballReferencePlayerPerGameUrl, basketballReferenceHeaders)
+    : undefined;
+  const basketballReferencePlayerAdvancedRows = basketballReferenceAdvancedHtml
+    ? parseBasketballReferenceRows(basketballReferenceAdvancedHtml, "advanced", {
+        tsPct: "ts_pct",
+        usagePct: "usg_pct",
+        assistPct: "ast_pct",
+        offensiveReboundPct: "orb_pct",
+        defensiveReboundPct: "drb_pct",
+        reboundPct: "trb_pct"
+      })
+    : [];
+  const basketballReferencePlayerPerGameRows = basketballReferencePerGameHtml
+    ? parseBasketballReferenceRows(basketballReferencePerGameHtml, "per_game_stats", {
+        efgPct: "efg_pct"
+      })
+    : [];
+  const basketballReferencePlayerAdvancedCrosscheck = buildBasketballReferenceCrosscheck(
+    playerAdvancedRegular,
+    basketballReferencePlayerAdvancedRows,
+    basketballReferencePlayerPerGameRows
+  );
+  const basketballReferencePlayerCrosscheckMatches = basketballReferencePlayerAdvancedCrosscheck.rows.filter((row) => row[5] === "matched").length;
+
   const snapshot = {
     metadata: {
       generatedAt: new Date().toISOString(),
@@ -482,7 +732,7 @@ async function main() {
           : []),
         "Basketball Reference, NBA.com box scores, and ESPN game pages are listed as cross-reference sources for public score and series verification.",
         "NBA Stats Advanced player and team tables provide official TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession fields.",
-        "Basketball Reference advanced-stat pages are tracked as public formula and value cross-reference sources; NBA Stats remains the machine-readable source.",
+        "Basketball Reference advanced and per-game pages are parsed into a lightweight cross-check table for TS%, eFG%, USG%, AST%, ORB%, DRB%, and TRB%; NBA Stats remains the machine-readable source.",
         "The publicReferenceGames metadata pins the currently displayed NBA Finals games to public NBA.com, Basketball Reference, and ESPN game pages.",
         "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
         "Basketball Savant derived metrics are calculated locally from official box score totals.",
@@ -496,7 +746,8 @@ async function main() {
         basketballReferencePlayoffs2026: "https://www.basketball-reference.com/playoffs/NBA_2026.html",
         basketballReferenceFinals2026: "https://www.basketball-reference.com/playoffs/2026-nba-finals-knicks-vs-spurs.html",
         basketballReferenceFinalsGame5: "https://www.basketball-reference.com/boxscores/202606130SAS.html",
-        basketballReferencePlayerAdvanced2026: "https://www.basketball-reference.com/leagues/NBA_2026_advanced.html",
+        basketballReferencePlayerAdvanced2026: basketballReferencePlayerAdvancedUrl,
+        basketballReferencePlayerPerGame2026: basketballReferencePlayerPerGameUrl,
         basketballReferenceTeamAdvanced2026: "https://www.basketball-reference.com/leagues/NBA_2026.html#advanced-team",
         basketballReferenceGlossary: "https://www.basketball-reference.com/about/glossary.html",
         espnFinalsGame5: "https://www.espn.com/nba/game/_/gameId/401859967/knicks-spurs",
@@ -520,6 +771,10 @@ async function main() {
         playoffPlayerStats: table(playerStatsPlayoffs).rows.length,
         regularSeasonPlayerAdvanced: table(playerAdvancedRegular).rows.length,
         playoffPlayerAdvanced: table(playerAdvancedPlayoffs).rows.length,
+        basketballReferencePlayerAdvancedRows: basketballReferencePlayerAdvancedRows.length,
+        basketballReferencePlayerPerGameRows: basketballReferencePlayerPerGameRows.length,
+        basketballReferencePlayerAdvancedCrosschecks: basketballReferencePlayerAdvancedCrosscheck.rows.length,
+        basketballReferencePlayerAdvancedMatchedCrosschecks: basketballReferencePlayerCrosscheckMatches,
         regularSeasonPlayerBioStats: table(playerBioStatsRegular).rows.length,
         playerIndex: table(playerIndex).rows.length,
         externalPlayerBioOverrides: externalPlayerBioOverrides.length,
@@ -541,6 +796,7 @@ async function main() {
       playerStatsPlayoffs: table(playerStatsPlayoffs),
       playerAdvancedRegular: table(playerAdvancedRegular),
       playerAdvancedPlayoffs: table(playerAdvancedPlayoffs),
+      basketballReferencePlayerAdvancedCrosscheck,
       playerBioStatsRegular: table(playerBioStatsRegular),
       playerIndex: table(playerIndex),
       playerBioOverrides: {
@@ -585,6 +841,18 @@ async function main() {
   const missingPlayerIndexIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerIndexTable, "PERSON_ID");
   const missingPlayerAdvancedIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerAdvancedRegularTable, "PLAYER_ID");
   const missingTeamAdvancedIds = missingIds(teamStatsRegularTable, "TEAM_ID", teamAdvancedRegularTable, "TEAM_ID");
+  assertCoverage(
+    !includeBasketballReferenceCrosscheck || basketballReferencePlayerAdvancedRows.length > 0,
+    "Basketball Reference player advanced cross-check was requested but no advanced rows were parsed."
+  );
+  assertCoverage(
+    !includeBasketballReferenceCrosscheck || basketballReferencePlayerPerGameRows.length > 0,
+    "Basketball Reference player per-game cross-check was requested but no per-game rows were parsed."
+  );
+  assertCoverage(
+    !includeBasketballReferenceCrosscheck || basketballReferencePlayerCrosscheckMatches >= Math.floor(playerAdvancedRegularTable.rows.length * 0.85),
+    `Basketball Reference player cross-check matched ${basketballReferencePlayerCrosscheckMatches} of ${playerAdvancedRegularTable.rows.length} NBA Stats player advanced rows.`
+  );
   assertCoverage(
     missingBioStatsIds.length === 0,
     `Player bio stats are missing ${missingBioStatsIds.length} regular-season player IDs: ${missingBioStatsIds.slice(0, 10).join(", ")}.`
