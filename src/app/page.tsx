@@ -52,7 +52,7 @@ export default function HomePage() {
       <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-black text-ink">Today / Latest Games</h2>
+            <h2 className="text-lg font-black text-ink">Latest Games</h2>
             <Link href="/games" className="text-sm font-bold text-signal hover:underline">All games</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
