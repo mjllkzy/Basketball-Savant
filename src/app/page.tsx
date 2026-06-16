@@ -5,7 +5,7 @@ import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
-import { featuredInsights, gameFlow, latestGames, teamSeasonAggregates, topPerformers } from "@/lib/data/queries";
+import { featuredInsights, gameFlow, latestGames, teamName, teamSeasonAggregates, topPerformers } from "@/lib/data/queries";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
@@ -56,17 +56,26 @@ export default function HomePage() {
             <Link href="/games" className="text-sm font-bold text-signal hover:underline">All games</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {games.map((game) => (
-              <Link key={game.id} href={`/games/${game.id}`} className="rounded border border-slate-200 p-3 hover:bg-slate-50">
-                <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{game.date}</div>
-                <div className="mt-2 grid grid-cols-[1fr_auto] gap-2 text-sm">
-                  <span>{game.awayTeamId}</span>
-                  <strong>{game.awayScore}</strong>
-                  <span>{game.homeTeamId}</span>
-                  <strong>{game.homeScore}</strong>
-                </div>
-              </Link>
-            ))}
+            {games.map((game) => {
+              const awayTeamName = teamName(game.awayTeamId);
+              const homeTeamName = teamName(game.homeTeamId);
+              return (
+                <Link
+                  key={game.id}
+                  href={`/games/${game.id}`}
+                  aria-label={`${awayTeamName} at ${homeTeamName}, ${game.awayScore} to ${game.homeScore}`}
+                  className="rounded border border-slate-200 p-3 hover:bg-slate-50"
+                >
+                  <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{game.date}</div>
+                  <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 text-sm">
+                    <span className="min-w-0 leading-5 text-ink">{awayTeamName}</span>
+                    <strong>{game.awayScore}</strong>
+                    <span className="min-w-0 leading-5 text-ink">{homeTeamName}</span>
+                    <strong>{game.homeScore}</strong>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
         {firstGame ? <GameFlowChart data={gameFlow(firstGame.id)} /> : null}
