@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { basketballReferencePlayerAdvancedCrosscheck, dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
+import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
 
@@ -62,7 +62,11 @@ describe("metric registry and official data", () => {
     expect(dataSourceMetadata.coverage.basketballReferencePlayerPerGameRows).toBeGreaterThan(playerSeasonAggregates.length);
     expect(dataSourceMetadata.coverage.basketballReferencePlayerAdvancedCrosschecks).toBe(playerSeasonAggregates.length);
     expect(dataSourceMetadata.coverage.basketballReferencePlayerAdvancedMatchedCrosschecks).toBeGreaterThanOrEqual(Math.floor(playerSeasonAggregates.length * 0.95));
+    expect(dataSourceMetadata.coverage.basketballReferenceTeamAdvancedRows).toBe(teams.length);
+    expect(dataSourceMetadata.coverage.basketballReferenceTeamAdvancedCrosschecks).toBe(teams.length);
+    expect(dataSourceMetadata.coverage.basketballReferenceTeamAdvancedMatchedCrosschecks).toBe(teams.length);
     expect(basketballReferencePlayerAdvancedCrosscheck.rows).toHaveLength(playerSeasonAggregates.length);
+    expect(basketballReferenceTeamAdvancedCrosscheck.rows).toHaveLength(teams.length);
 
     const crosscheckIndex = Object.fromEntries(basketballReferencePlayerAdvancedCrosscheck.headers.map((header, index) => [header, index]));
     const amenCrosscheck = basketballReferencePlayerAdvancedCrosscheck.rows.find((row) => row[crosscheckIndex.PLAYER_NAME] === "Amen Thompson");
@@ -75,6 +79,13 @@ describe("metric registry and official data", () => {
     const initialsCrosscheck = basketballReferencePlayerAdvancedCrosscheck.rows.find((row) => row[crosscheckIndex.PLAYER_NAME] === "AJ Green");
     expect(initialsCrosscheck?.[crosscheckIndex.MATCH_STATUS]).toBe("matched");
     expect(initialsCrosscheck?.[crosscheckIndex.TS_PCT_ABS_DIFF]).toBeLessThan(0.001);
+
+    const teamCrosscheckIndex = Object.fromEntries(basketballReferenceTeamAdvancedCrosscheck.headers.map((header, index) => [header, index]));
+    const clippersCrosscheck = basketballReferenceTeamAdvancedCrosscheck.rows.find((row) => row[teamCrosscheckIndex.NBA_TEAM_NAME] === "LA Clippers");
+    expect(clippersCrosscheck?.[teamCrosscheckIndex.BREF_TEAM_NAME]).toBe("Los Angeles Clippers");
+    expect(clippersCrosscheck?.[teamCrosscheckIndex.MATCH_STATUS]).toBe("matched");
+    expect(clippersCrosscheck?.[teamCrosscheckIndex.TS_PCT_ABS_DIFF]).toBe(0);
+    expect(clippersCrosscheck?.[teamCrosscheckIndex.EFG_PCT_ABS_DIFF]).toBe(0);
 
     const playerRow = playerSeasonAggregates.find((aggregate) => aggregate.usagePct !== null && aggregate.officialTsPct !== null && aggregate.officialEfgPct !== null);
     expect(playerRow).toBeTruthy();

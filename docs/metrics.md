@@ -36,7 +36,7 @@ All metrics are defined in `src/lib/metrics/registry.ts`. Display code should ne
 
 ## Accuracy Boundary
 
-Metrics based directly on official box totals or NBA Stats Advanced tables are active by default. TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession counts use NBA Stats Advanced when present. Basketball Reference advanced and per-game pages are parsed into a snapshot cross-check table for player TS%, eFG%, USG%, AST%, ORB%, DRB%, and TRB%, and the glossary URL remains the public formula reference.
+Metrics based directly on official box totals or NBA Stats Advanced tables are active by default. TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession counts use NBA Stats Advanced when present. Basketball Reference player advanced, player per-game, and team advanced pages are parsed into snapshot cross-check tables for overlapping player and team efficiency/rate stats, and the glossary URL remains the public formula reference.
 
 Metrics that require tracking, matchup, play-type tagging, defender distance, pass location, touch time, lineup stints, model inputs, or possession-level event detail are kept in the registry but return `N/A` until a real event/tracking/model source is connected. Their registry metadata is feed-gated so API consumers can distinguish them from active box-score metrics.
 

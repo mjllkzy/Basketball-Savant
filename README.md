@@ -61,7 +61,7 @@ The app defaults to `src/lib/data/generated/official-snapshot.json`, refreshed f
 
 NBA Stats is the primary machine-readable source. Public box-score and series pages from Basketball Reference, NBA.com, and ESPN are tracked in snapshot metadata as cross-reference sources for score and series sanity checks.
 
-NBA Stats Advanced player and team tables are loaded for TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and official possession counts. Basketball Reference advanced and per-game pages are parsed into a lightweight cross-check table for player TS%, eFG%, USG%, AST%, ORB%, DRB%, and TRB%; NBA Stats remains the primary machine-readable source.
+NBA Stats Advanced player and team tables are loaded for TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and official possession counts. Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables for player and team efficiency/rate stats; NBA Stats remains the primary machine-readable source.
 
 The checked-in snapshot also carries `metadata.publicReferenceGames`: a public reference fixture for the displayed 2026 NBA Finals games. Tests compare those expected dates, teams, scores, and source URLs against the game-log rows so the dashboard cannot silently drift back to generated or mismatched latest-game cards.
 
@@ -77,6 +77,7 @@ Current default snapshot coverage:
 - 2025-26 regular-season team totals
 - 2025-26 playoff team totals
 - 2025-26 regular-season and playoff team advanced stats from NBA Stats Advanced
+- 2025-26 Basketball Reference team advanced rows for source cross-checks
 - 2025-26 regular-season team and player game logs when refreshed
 - 2025-26 playoff team and player game logs when refreshed
 - Best-effort team roster enrichment when `--include-rosters` is used

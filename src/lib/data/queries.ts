@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 import {
   officialBasketballReferencePlayerAdvancedCrosscheck,
+  officialBasketballReferenceTeamAdvancedCrosscheck,
   officialDatasetVersion,
   officialGames,
   officialInsights,
@@ -34,6 +35,7 @@ import { cosineSimilarity, minMaxNormalize } from "@/lib/models/similarity";
 export const datasetVersion = officialDatasetVersion;
 export const dataSourceMetadata = officialMetadata;
 export const basketballReferencePlayerAdvancedCrosscheck = officialBasketballReferencePlayerAdvancedCrosscheck;
+export const basketballReferenceTeamAdvancedCrosscheck = officialBasketballReferenceTeamAdvancedCrosscheck;
 export const defensiveEvents: never[] = [];
 export const games = officialGames;
 export const insights = officialInsights;

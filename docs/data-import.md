@@ -29,7 +29,7 @@ The default refresh writes `src/lib/data/generated/official-snapshot.json`.
 
 The snapshot metadata includes public reference game fixtures for high-visibility displayed games. Each fixture records the expected date, teams, score, NBA.com box-score URL, Basketball Reference box-score URL, and ESPN game URL so tests can cross-check the app's game-log mapping against public sources.
 
-The refresh also pulls NBA Stats Advanced player and team tables. Those tables supply official TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession counts. Basketball Reference player advanced and per-game pages are parsed into `basketballReferencePlayerAdvancedCrosscheck`, which records matched BRef values and absolute deltas for TS%, eFG%, USG%, AST%, ORB%, DRB%, and TRB%. NBA Stats remains the primary machine-readable source; Basketball Reference is the public cross-reference and formula source.
+The refresh also pulls NBA Stats Advanced player and team tables. Those tables supply official TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession counts. Basketball Reference player advanced and per-game pages are parsed into `basketballReferencePlayerAdvancedCrosscheck`, which records matched BRef values and absolute deltas for TS%, eFG%, USG%, AST%, ORB%, DRB%, and TRB%. Basketball Reference team advanced rows are parsed into `basketballReferenceTeamAdvancedCrosscheck`, which compares team ratings, pace, TS%, eFG%, turnover percentage, ORB%, and DRB%. NBA Stats remains the primary machine-readable source; Basketball Reference is the public cross-reference and formula source.
 
 ## Supported Import Preview
 
