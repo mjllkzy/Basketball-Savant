@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { ShareUrlButton } from "@/components/ui/ShareUrlButton";
 import { filterShots, gameMatchupLabel, games, playerName, players, teamName, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
+import { formatMetric } from "@/lib/metrics/format";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export default function SearchPage({ searchParams }: { searchParams: RouteSearchParams }) {
@@ -53,7 +54,7 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
       dribbles: shot.dribblesBeforeShot,
       touchTime: `${shot.touchTime.toFixed(1)}s`,
       shotClock: shot.shotClock,
-      xfg: `${Math.round(shot.expectedFgPct * 100)}%`,
+      xfg: formatMetric("expected_fg_pct", shot.expectedFgPct),
       xpts: shot.expectedPoints.toFixed(2),
       result: shot.made ? "Made" : "Miss",
       points: shot.made ? shot.pointsValue : 0,
@@ -117,7 +118,7 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
           <FilterChipBar chips={chips} />
           <div className="grid gap-3 sm:grid-cols-4">
             <MetricCard label="Attempts" value={result.meta.total} />
-            <MetricCard label="Make Rate" value={`${Math.round((makes / Math.max(result.rows.length, 1)) * 100)}%`} />
+            <MetricCard label="Make Rate" value={formatMetric("fg_pct", makes / Math.max(result.rows.length, 1))} />
             <MetricCard label="xPTS / Shot" value={(expected / Math.max(result.rows.length, 1)).toFixed(2)} accent="court" />
             <MetricCard label="A - xPTS" value={actualMinusExpected.toFixed(1)} accent="ink" />
           </div>

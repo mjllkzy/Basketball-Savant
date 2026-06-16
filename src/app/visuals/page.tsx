@@ -9,6 +9,7 @@ import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { gameFlow, getPlayerProfile, latestGames, lineups, passes, players, shots, teamSeasonAggregates } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
+import { toPercentagePoints } from "@/lib/metrics/format";
 import { calculateTeamMetric, getMetric } from "@/lib/metrics/registry";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
@@ -20,7 +21,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
   const styleData = teamSeasonAggregates.map((row) => ({
     name: row.team.abbreviation,
     pace: calculateTeamMetric("pace", row) ?? 0,
-    shotQuality: calculateTeamMetric("efg_pct", row) ?? 0,
+    shotQuality: toPercentagePoints(calculateTeamMetric("efg_pct", row)) ?? 0,
     net: calculateTeamMetric("net_rating", row) ?? 0
   }));
   const radarKeys = ["pts", "reb", "ast", "ts_pct", "usage_rate", "stocks"];
@@ -35,7 +36,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
         <ShotChart shots={featuredPlayer.shots} colorBy="xpts" />
         <ShotHeatmap shots={featuredPlayer.shots} mode={tab === "Shot Heatmap" ? "efficiency" : "frequency"} />
         <PassNetwork passes={passes} players={players.filter((player) => player.teamId === featuredPlayer.team.id)} />
-        <RollingLineChart data={featuredPlayer.aggregate.recentGameScores.map((row) => ({ date: formatShortDate(row.date), pts: row.pts, ts: Math.round(row.ts * 100), usage: Math.round(row.usage * 100) }))} lines={["pts", "ts", "usage"]} />
+        <RollingLineChart data={featuredPlayer.aggregate.recentGameScores.map((row) => ({ date: formatShortDate(row.date), pts: row.pts, ts: toPercentagePoints(row.ts) ?? 0, usage: toPercentagePoints(row.usage) ?? 0 }))} lines={["pts", "ts", "usage"]} />
         <PercentileRadar data={radarKeys.map((key) => ({ metric: getMetric(key).shortLabel, percentile: featuredPlayer.metricValues.find((metricValue) => metricValue.metricKey === key)?.percentile ?? 0 }))} />
         <LineupNetwork lineups={lineups} players={players} />
         <TeamStyleScatter data={styleData} />

@@ -2,6 +2,7 @@ import type { ShotZone } from "@/lib/types";
 import type { Shot } from "@/lib/types";
 import { BasketballCourt } from "@/components/charts/BasketballCourt";
 import { safeDiv } from "@/lib/metrics/formulas";
+import { formatMetric } from "@/lib/metrics/format";
 
 const zones: Array<{ zone: ShotZone; x: number; y: number; width: number; height: number }> = [
   { zone: "Rim", x: 205, y: 62, width: 90, height: 70 },
@@ -32,7 +33,7 @@ export function ShotHeatmap({ shots, mode = "frequency" }: { shots: Shot[]; mode
                 {zone.zone}
               </text>
               <text x={zone.x + zone.width / 2} y={zone.y + zone.height / 2 + 18} textAnchor="middle" fill="#475569" fontSize="11" fontWeight="700">
-                {zoneShots.length} · {Math.round(efficiency * 100)}%
+                {zoneShots.length} · {formatMetric("fg_pct", efficiency)}
               </text>
             </g>
           );

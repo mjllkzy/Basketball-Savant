@@ -9,7 +9,7 @@ export function TeamStyleScatter({ data }: { data: Array<{ name: string; pace: n
       <ResponsiveContainer width="100%" height="88%">
         <ScatterChart>
           <XAxis dataKey="pace" name="Pace" tick={{ fontSize: 11 }} />
-          <YAxis dataKey="shotQuality" name="Shot Quality" tick={{ fontSize: 11 }} />
+          <YAxis dataKey="shotQuality" name="eFG%" tick={{ fontSize: 11 }} />
           <ZAxis dataKey="net" range={[60, 180]} />
           <Tooltip cursor={{ strokeDasharray: "3 3" }} />
           <Scatter data={data} fill="#0f766e" />

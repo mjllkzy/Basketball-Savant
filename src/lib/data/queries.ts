@@ -29,7 +29,7 @@ import {
   officialTeams
 } from "@/lib/data/official";
 import { calculatePlayerMetric, calculateTeamMetric, getMetric, metricRegistry } from "@/lib/metrics/registry";
-import { percentileRank, roundMetric } from "@/lib/metrics/formulas";
+import { percentileRank } from "@/lib/metrics/formulas";
 import { cosineSimilarity, minMaxNormalize } from "@/lib/models/similarity";
 
 export const datasetVersion = officialDatasetVersion;
@@ -478,13 +478,13 @@ export function featuredInsights() {
 export function playerMetricSnapshot(playerId: string, keys: string[]) {
   const aggregate = playerSeasonAggregates.find((row) => row.player.id === playerId);
   if (!aggregate) return [];
-  return keys.map((key) => ({ metric: getMetric(key), value: roundMetric(calculatePlayerMetric(key, aggregate), getMetric(key).precision) }));
+  return keys.map((key) => ({ metric: getMetric(key), value: calculatePlayerMetric(key, aggregate) }));
 }
 
 export function teamMetricSnapshot(teamId: string, keys: string[]) {
   const aggregate = teamSeasonAggregates.find((row) => row.team.id === teamId);
   if (!aggregate) return [];
-  return keys.map((key) => ({ metric: getMetric(key), value: roundMetric(calculateTeamMetric(key, aggregate), getMetric(key).precision) }));
+  return keys.map((key) => ({ metric: getMetric(key), value: calculateTeamMetric(key, aggregate) }));
 }
 
 export function lineupPlayers(lineup: Lineup) {

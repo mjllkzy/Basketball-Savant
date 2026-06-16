@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatMetric } from "@/lib/metrics/format";
+import { formatMetric, formatPercentage, toPercentagePoints } from "@/lib/metrics/format";
 
 describe("metric formatting", () => {
   it("formats percentage metrics after converting to percentage points", () => {
@@ -17,5 +17,10 @@ describe("metric formatting", () => {
   it("keeps non-percentage precision unchanged", () => {
     expect(formatMetric("pts", 27.345)).toBe("27.3");
     expect(formatMetric("points_per_shot", 1.234)).toBe("1.23");
+  });
+
+  it("shares percentage conversion helpers for non-registry UI displays", () => {
+    expect(toPercentagePoints(0.5537)).toBe(55.4);
+    expect(formatPercentage(0.5537)).toBe("55.4%");
   });
 });

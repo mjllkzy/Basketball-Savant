@@ -12,8 +12,9 @@ import { StatTable } from "@/components/ui/StatTable";
 import { PercentileBar } from "@/components/ui/PercentileBar";
 import { getPlayerProfile, lineups, players } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
+import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
-import { formatMetric } from "@/lib/metrics/format";
+import { formatMetric, toPercentagePoints } from "@/lib/metrics/format";
 
 export default function PlayerPage({ params }: { params: { playerId: string } }) {
   const profile = getPlayerProfile(params.playerId);
@@ -32,7 +33,7 @@ export default function PlayerPage({ params }: { params: { playerId: string } })
     stl: line.stl,
     blk: line.blk,
     tov: line.tov,
-    ts: `${Math.round((line.pts / (2 * (line.fga + 0.44 * line.fta))) * 100)}%`,
+    ts: formatMetric("ts_pct", trueShootingPercentage(line.pts, line.fga, line.fta)),
     pm: line.plusMinus
   }));
   const playerLineups = lineups.filter((lineup) => [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].includes(profile.player.id));
@@ -43,7 +44,7 @@ export default function PlayerPage({ params }: { params: { playerId: string } })
       <PlayerSnapshot aggregate={profile.aggregate} />
       <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
         <PercentileRadar data={radarData} />
-        <RollingLineChart data={profile.aggregate.recentGameScores.map((row) => ({ date: formatShortDate(row.date), pts: row.pts, ts: Math.round(row.ts * 100), usage: Math.round(row.usage * 100), net: row.net }))} lines={["pts", "net"]} />
+        <RollingLineChart data={profile.aggregate.recentGameScores.map((row) => ({ date: formatShortDate(row.date), pts: row.pts, ts: toPercentagePoints(row.ts) ?? 0, usage: toPercentagePoints(row.usage) ?? 0, net: row.net }))} lines={["pts", "net"]} />
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         <ShotChart shots={profile.shots} colorBy="xpts" />
