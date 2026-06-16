@@ -84,7 +84,12 @@ const teamMetadataByAbbreviation: Record<string, Pick<Team, "conference" | "divi
   WAS: { conference: "East", division: "Southeast", primaryColor: "#002b5c", secondaryColor: "#e31837" }
 };
 
-function positionFromRoster(playerId: string): { position: Player["position"]; height: string; weight: number; jerseyNumber: number } {
+function parseDraftValue(raw: unknown): number {
+  const numeric = Number(raw);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function rosterBio(playerId: string): { position: Player["position"]; height: string; weight: number; jerseyNumber: string } {
   for (const rosterTable of Object.values(officialSnapshot.tables.rosters) as SnapshotTable[]) {
     const row = rosterTable.rows.find((item) => String(value(rosterTable, item, "PLAYER_ID")) === playerId);
     if (row) {
@@ -93,11 +98,11 @@ function positionFromRoster(playerId: string): { position: Player["position"]; h
         position: rawPosition || "N/A",
         height: stringValue(rosterTable, row, "HEIGHT") || "N/A",
         weight: Number(stringValue(rosterTable, row, "WEIGHT")) || 0,
-        jerseyNumber: Number(stringValue(rosterTable, row, "NUM")) || 0
+        jerseyNumber: stringValue(rosterTable, row, "NUM")
       };
     }
   }
-  return { position: "N/A", height: "N/A", weight: 0, jerseyNumber: 0 };
+  return { position: "N/A", height: "N/A", weight: 0, jerseyNumber: "" };
 }
 
 function splitTeamName(teamName: string) {
@@ -108,6 +113,9 @@ function splitTeamName(teamName: string) {
 
 const teamTable = table("teamStatsRegular");
 const playerTable = table("playerStatsRegular");
+const playerBioStatsTable = table("playerBioStatsRegular");
+const playerIndexTable = table("playerIndex");
+const playerBioOverridesTable = table("playerBioOverrides");
 const playoffPlayerTable = table("playerStatsPlayoffs");
 const teamGameLogsRegularTable = table("teamGameLogsRegular");
 const teamGameLogsPlayoffsTable = table("teamGameLogsPlayoffs");
@@ -136,27 +144,64 @@ export const officialTeams: Team[] = teamTable.rows.map((row) => {
   };
 });
 
+const playerBioStatsById = new Map(playerBioStatsTable.rows.map((row) => [String(numberValue(playerBioStatsTable, row, "PLAYER_ID")), row]));
+const playerIndexById = new Map(playerIndexTable.rows.map((row) => [String(numberValue(playerIndexTable, row, "PERSON_ID")), row]));
+const playerBioOverrideByIdAndField = new Map(
+  playerBioOverridesTable.rows.map((row) => [`${stringValue(playerBioOverridesTable, row, "PLAYER_ID")}:${stringValue(playerBioOverridesTable, row, "FIELD")}`, row])
+);
+
+function playerBioOverrideNumber(playerId: string, field: string): number | undefined {
+  const row = playerBioOverrideByIdAndField.get(`${playerId}:${field}`);
+  return row ? optionalNumberValue(playerBioOverridesTable, row, "VALUE") : undefined;
+}
+
+function playerBio(playerId: string) {
+  const indexRow = playerIndexById.get(playerId);
+  const bioRow = playerBioStatsById.get(playerId);
+  const fallback = rosterBio(playerId);
+  const position = indexRow ? stringValue(playerIndexTable, indexRow, "POSITION") : "";
+  const height = indexRow ? stringValue(playerIndexTable, indexRow, "HEIGHT") : "";
+  const bioHeight = bioRow ? stringValue(playerBioStatsTable, bioRow, "PLAYER_HEIGHT") : "";
+  const weight = indexRow ? optionalNumberValue(playerIndexTable, indexRow, "WEIGHT") : undefined;
+  const bioWeight = bioRow ? optionalNumberValue(playerBioStatsTable, bioRow, "PLAYER_WEIGHT") : undefined;
+  return {
+    position: position || fallback.position,
+    height: height || bioHeight || fallback.height,
+    weight: weight ?? bioWeight ?? playerBioOverrideNumber(playerId, "weight") ?? fallback.weight,
+    jerseyNumber: indexRow ? stringValue(playerIndexTable, indexRow, "JERSEY_NUMBER") : fallback.jerseyNumber,
+    draftYear: parseDraftValue(indexRow ? value(playerIndexTable, indexRow, "DRAFT_YEAR") : bioRow ? value(playerBioStatsTable, bioRow, "DRAFT_YEAR") : undefined),
+    draftRound: parseDraftValue(indexRow ? value(playerIndexTable, indexRow, "DRAFT_ROUND") : bioRow ? value(playerBioStatsTable, bioRow, "DRAFT_ROUND") : undefined),
+    draftPick: parseDraftValue(indexRow ? value(playerIndexTable, indexRow, "DRAFT_NUMBER") : bioRow ? value(playerBioStatsTable, bioRow, "DRAFT_NUMBER") : undefined),
+    college: (indexRow ? stringValue(playerIndexTable, indexRow, "COLLEGE").trim() : "") || (bioRow ? stringValue(playerBioStatsTable, bioRow, "COLLEGE").trim() : "") || undefined,
+    country: (indexRow ? stringValue(playerIndexTable, indexRow, "COUNTRY").trim() : "") || (bioRow ? stringValue(playerBioStatsTable, bioRow, "COUNTRY").trim() : "") || undefined,
+    rosterStatus: indexRow ? String(value(playerIndexTable, indexRow, "ROSTER_STATUS") ?? "") : undefined
+  };
+}
+
 export const officialPlayers: Player[] = playerTable.rows.map((row) => {
   const id = String(numberValue(playerTable, row, "PLAYER_ID"));
   const teamId = String(numberValue(playerTable, row, "TEAM_ID"));
   const name = stringValue(playerTable, row, "PLAYER_NAME");
-  const roster = positionFromRoster(id);
+  const bio = playerBio(id);
   return {
     id,
     name,
     slug: slugify(`${name}-${id}`),
     teamId,
-    position: roster.position,
-    height: roster.height,
-    weight: roster.weight,
+    position: bio.position,
+    height: bio.height,
+    weight: bio.weight,
     age: numberValue(playerTable, row, "AGE"),
-    draftYear: 0,
-    draftRound: 0,
-    draftPick: 0,
+    draftYear: bio.draftYear,
+    draftRound: bio.draftRound,
+    draftPick: bio.draftPick,
+    college: bio.college,
+    country: bio.country,
+    rosterStatus: bio.rosterStatus,
     headshotUrl: "/headshots/placeholder.svg",
     active: true,
     handedness: undefined,
-    jerseyNumber: roster.jerseyNumber,
+    jerseyNumber: bio.jerseyNumber,
     role: "Official NBA Stats player",
     skill: 0,
     createdAt: officialSnapshot.metadata.generatedAt,

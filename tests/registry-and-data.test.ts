@@ -35,6 +35,21 @@ describe("metric registry and official data", () => {
     }
   });
 
+  it("loads official player bio facts for every stat-table player", () => {
+    expect(dataSourceMetadata.sources.playerBioStatsRegularUrl).toContain("leaguedashplayerbiostats");
+    expect(dataSourceMetadata.sources.playerIndexUrl).toContain("playerindex");
+    expect(dataSourceMetadata.coverage.regularSeasonPlayerBioStats).toBe(playerSeasonAggregates.length);
+    expect(dataSourceMetadata.coverage.playerIndex).toBeGreaterThanOrEqual(players.length);
+    expect(dataSourceMetadata.coverage.externalPlayerBioOverrides).toBe(6);
+    for (const player of players) {
+      expect(player.position).not.toBe("N/A");
+      expect(player.height).toMatch(/^\d-\d{1,2}$/);
+      expect(player.weight).toBeGreaterThan(0);
+      expect(typeof player.jerseyNumber).toBe("string");
+    }
+    expect(players.some((player) => player.jerseyNumber === "00")).toBe(true);
+  });
+
   it("does not fabricate official game IDs, scores, or game-log rows from season aggregates", () => {
     expect(games.every((game) => !game.id.startsWith("official-team-summary-"))).toBe(true);
     expect(playerGameStats.every((line) => !line.gameId.startsWith("official-team-summary-"))).toBe(true);

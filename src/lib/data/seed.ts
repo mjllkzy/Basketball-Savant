@@ -122,7 +122,7 @@ export const players: Player[] = teams.flatMap((team, teamIndex) =>
       headshotUrl: "/headshots/placeholder.svg",
       active: true,
       handedness: stableHash(`${name}-hand`) % 5 === 0 ? "Left" : "Right",
-      jerseyNumber: (stableHash(`${team.id}-${name}-jersey`) % 98) + 1,
+      jerseyNumber: String((stableHash(`${team.id}-${name}-jersey`) % 98) + 1),
       role: roles[rosterIndex],
       skill: Math.max(-0.25, Math.min(0.95, baseSkill)),
       createdAt: now,

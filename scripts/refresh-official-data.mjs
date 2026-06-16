@@ -14,6 +14,63 @@ const output = argValue("--output") ?? "src/lib/data/generated/official-snapshot
 const timeoutMs = Number(argValue("--timeoutMs") ?? 60000);
 const retryCount = Math.max(1, Number(argValue("--retries") ?? 3));
 
+const externalPlayerBioOverrides = [
+  {
+    playerId: "1642959",
+    playerName: "Chris Youngblood",
+    field: "weight",
+    value: 221,
+    sourceName: "Basketball Reference",
+    sourceUrl: "https://www.basketball-reference.com/players/y/youngch01.html",
+    note: "NBA Stats player index and player bio stats leave weight blank."
+  },
+  {
+    playerId: "1643141",
+    playerName: "Jahmyl Telfort",
+    field: "weight",
+    value: 225,
+    sourceName: "Basketball Reference",
+    sourceUrl: "https://www.basketball-reference.com/players/t/telfoja01.html",
+    note: "NBA Stats player index and player bio stats leave weight blank."
+  },
+  {
+    playerId: "1642377",
+    playerName: "Jaylen Wells",
+    field: "weight",
+    value: 206,
+    sourceName: "Basketball Reference",
+    sourceUrl: "https://www.basketball-reference.com/players/w/wellsja01.html",
+    note: "NBA Stats player index and player bio stats leave weight blank."
+  },
+  {
+    playerId: "1643018",
+    playerName: "LJ Cryer",
+    field: "weight",
+    value: 200,
+    sourceName: "Basketball Reference G League",
+    sourceUrl: "https://www.basketball-reference.com/gleague/players/c/cryerlj01d.html",
+    note: "NBA Stats player index and player bio stats leave weight blank."
+  },
+  {
+    playerId: "1643133",
+    playerName: "Lawson Lovering",
+    field: "weight",
+    value: 245,
+    sourceName: "Basketball Reference",
+    sourceUrl: "https://www.basketball-reference.com/players/l/loverla01.html",
+    note: "NBA Stats player index and player bio stats leave weight blank."
+  },
+  {
+    playerId: "1642449",
+    playerName: "Tolu Smith",
+    field: "weight",
+    value: 254,
+    sourceName: "Basketball Reference",
+    sourceUrl: "https://www.basketball-reference.com/players/s/smithto05.html",
+    note: "NBA Stats player index and player bio stats leave weight blank."
+  }
+];
+
 const nbaHeaders = {
   "User-Agent":
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -146,6 +203,23 @@ function playerGameLogParams(seasonType, teamId = 0) {
   };
 }
 
+function playerBioStatsParams(seasonType) {
+  return {
+    LeagueID: "00",
+    Season: season,
+    SeasonType: seasonType,
+    PerMode: "Totals"
+  };
+}
+
+function playerIndexParams() {
+  return {
+    LeagueID: "00",
+    Season: season,
+    Historical: "0"
+  };
+}
+
 function shotChartParams(seasonType, teamId = 0) {
   return {
     AheadBehind: "",
@@ -219,6 +293,13 @@ function assertCoverage(condition, message) {
   throw new Error(`${message} Pass --allow-partial to write a partial snapshot intentionally.`);
 }
 
+function missingIds(primaryTable, primaryKey, lookupTable, lookupKey) {
+  const lookupIds = new Set(lookupTable.rows.map((row) => String(row[lookupTable.headers.indexOf(lookupKey)])));
+  return primaryTable.rows
+    .map((row) => String(row[primaryTable.headers.indexOf(primaryKey)]))
+    .filter((id) => !lookupIds.has(id));
+}
+
 async function main() {
   const existingSnapshot = await readExistingSnapshot(output);
   const playerStatsRegularUrl = withParams("https://stats.nba.com/stats/leaguedashplayerstats", playerDashParams("Regular Season"));
@@ -229,6 +310,8 @@ async function main() {
   const teamGameLogsPlayoffsUrl = withParams("https://stats.nba.com/stats/teamgamelogs", gameLogParams("Playoffs"));
   const playerGameLogsRegularUrl = withParams("https://stats.nba.com/stats/playergamelogs", playerGameLogParams("Regular Season"));
   const playerGameLogsPlayoffsUrl = withParams("https://stats.nba.com/stats/playergamelogs", playerGameLogParams("Playoffs"));
+  const playerBioStatsRegularUrl = withParams("https://stats.nba.com/stats/leaguedashplayerbiostats", playerBioStatsParams("Regular Season"));
+  const playerIndexUrl = withParams("https://stats.nba.com/stats/playerindex", playerIndexParams());
 
   console.log(`Refreshing official NBA Stats snapshot for ${season}`);
   const emptyTable = { resultSets: [{ headers: [], rowSet: [] }] };
@@ -236,6 +319,8 @@ async function main() {
   const playerStatsPlayoffs = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "playerStatsPlayoffs") : await fetchOptionalJson("playoff player stats", playerStatsPlayoffsUrl) ?? emptyTable;
   const teamStatsRegular = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "teamStatsRegular") : await fetchJson("regular team stats", teamStatsRegularUrl);
   const teamStatsPlayoffs = reuseExistingCore ? snapshotTableToJson(existingSnapshot, "teamStatsPlayoffs") : await fetchOptionalJson("playoff team stats", teamStatsPlayoffsUrl) ?? emptyTable;
+  const playerBioStatsRegular = await fetchJson("regular player bio stats", playerBioStatsRegularUrl);
+  const playerIndex = await fetchJson("player index", playerIndexUrl);
   const fetchRequestedJson = allowPartial ? fetchOptionalJson : fetchJson;
   const teamGameLogsRegularMaybe = includeTeamGameLogs ? await fetchRequestedJson("regular team game logs", teamGameLogsRegularUrl) : undefined;
   const teamGameLogsPlayoffsMaybe = includeTeamGameLogs ? await fetchRequestedJson("playoff team game logs", teamGameLogsPlayoffsUrl) : undefined;
@@ -282,6 +367,7 @@ async function main() {
           ? [`Aggregate player and team tables were reused from the existing official snapshot generated at ${existingSnapshot.metadata.generatedAt}.`]
           : []),
         "Basketball Reference, NBA.com box scores, and ESPN game pages are listed as cross-reference sources for public score and series verification.",
+        "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
         "Basketball Savant derived metrics are calculated locally from official box score totals.",
         "Tracking-only metrics are unavailable unless a licensed tracking source is connected."
       ],
@@ -295,6 +381,8 @@ async function main() {
         espnFinalsGame5: "https://www.espn.com/nba/game/_/gameId/401859967/knicks-spurs",
         playerStatsRegularUrl,
         playerStatsPlayoffsUrl,
+        playerBioStatsRegularUrl,
+        playerIndexUrl,
         teamStatsRegularUrl,
         teamStatsPlayoffsUrl,
         teamGameLogsRegularUrl,
@@ -305,6 +393,9 @@ async function main() {
       coverage: {
         regularSeasonPlayerStats: table(playerStatsRegular).rows.length,
         playoffPlayerStats: table(playerStatsPlayoffs).rows.length,
+        regularSeasonPlayerBioStats: table(playerBioStatsRegular).rows.length,
+        playerIndex: table(playerIndex).rows.length,
+        externalPlayerBioOverrides: externalPlayerBioOverrides.length,
         regularSeasonTeamStats: table(teamStatsRegular).rows.length,
         playoffTeamStats: table(teamStatsPlayoffs).rows.length,
         regularSeasonTeamGameLogs: table(teamGameLogsRegular).rows.length,
@@ -319,6 +410,20 @@ async function main() {
     tables: {
       playerStatsRegular: table(playerStatsRegular),
       playerStatsPlayoffs: table(playerStatsPlayoffs),
+      playerBioStatsRegular: table(playerBioStatsRegular),
+      playerIndex: table(playerIndex),
+      playerBioOverrides: {
+        headers: ["PLAYER_ID", "PLAYER_NAME", "FIELD", "VALUE", "SOURCE_NAME", "SOURCE_URL", "NOTE"],
+        rows: externalPlayerBioOverrides.map((override) => [
+          override.playerId,
+          override.playerName,
+          override.field,
+          override.value,
+          override.sourceName,
+          override.sourceUrl,
+          override.note
+        ])
+      },
       teamStatsRegular: table(teamStatsRegular),
       teamStatsPlayoffs: table(teamStatsPlayoffs),
       teamGameLogsRegular: table(teamGameLogsRegular),
@@ -336,6 +441,19 @@ async function main() {
   assertCoverage(
     !includeRosters || loadedRosterCount === teamIdList.length,
     `Roster refresh requested ${teamIdList.length} team rosters but loaded ${loadedRosterCount}.`
+  );
+  const playerStatsRegularTable = table(playerStatsRegular);
+  const playerBioStatsRegularTable = table(playerBioStatsRegular);
+  const playerIndexTable = table(playerIndex);
+  const missingBioStatsIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerBioStatsRegularTable, "PLAYER_ID");
+  const missingPlayerIndexIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerIndexTable, "PERSON_ID");
+  assertCoverage(
+    missingBioStatsIds.length === 0,
+    `Player bio stats are missing ${missingBioStatsIds.length} regular-season player IDs: ${missingBioStatsIds.slice(0, 10).join(", ")}.`
+  );
+  assertCoverage(
+    missingPlayerIndexIds.length === 0,
+    `Player index is missing ${missingPlayerIndexIds.length} regular-season player IDs: ${missingPlayerIndexIds.slice(0, 10).join(", ")}.`
   );
   assertCoverage(
     !includeTeamGameLogs || table(teamStatsRegular).rows.length === 0 || table(teamGameLogsRegular).rows.length > 0,

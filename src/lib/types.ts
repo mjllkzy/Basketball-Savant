@@ -25,10 +25,13 @@ export type Player = {
   draftYear: number;
   draftRound: number;
   draftPick: number;
+  college?: string;
+  country?: string;
+  rosterStatus?: string;
   headshotUrl: string;
   active: boolean;
   handedness?: "Left" | "Right";
-  jerseyNumber: number;
+  jerseyNumber: string;
   role: string;
   skill: number;
   createdAt: string;

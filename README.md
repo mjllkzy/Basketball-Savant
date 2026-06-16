@@ -65,6 +65,9 @@ Current default snapshot coverage:
 
 - 2025-26 regular-season player totals
 - 2025-26 playoff player totals
+- 2025-26 NBA player index rows for position, jersey, height, weight, country, college, roster status, and draft metadata
+- 2025-26 regular-season player bio-stat rows used as an official cross-check for height, weight, country, college, and draft metadata
+- Explicit Basketball Reference player-bio fallback rows only where NBA Stats leaves a displayed bio field blank
 - 2025-26 regular-season team totals
 - 2025-26 playoff team totals
 - 2025-26 regular-season team and player game logs when refreshed
