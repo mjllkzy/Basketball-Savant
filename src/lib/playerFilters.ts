@@ -1,5 +1,5 @@
 export const defaultMinMinutes = 500;
-export const defaultMinGames = 41;
+export const defaultMinGames = 30;
 export const maxMinMinutes = 3000;
 export const maxMinGames = 82;
 

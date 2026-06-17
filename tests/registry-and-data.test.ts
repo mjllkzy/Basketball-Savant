@@ -279,9 +279,9 @@ describe("query behavior", () => {
   });
 
   it("filters player tables by minimum total minutes and games played", () => {
-    const result = listPlayers({ minMinutes: 500, minGames: 41, pageSize: 100 });
+    const result = listPlayers({ minMinutes: 500, minGames: 30, pageSize: 100 });
     expect(result.rows.length).toBeGreaterThan(0);
-    expect(result.rows.every((row) => row.minutes >= 500 && row.games >= 41)).toBe(true);
+    expect(result.rows.every((row) => row.minutes >= 500 && row.games >= 30)).toBe(true);
   });
 
   it("keeps default leaderboard tabs on loaded official metrics", () => {
