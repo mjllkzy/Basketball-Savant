@@ -3,6 +3,7 @@ import type {
   Lineup,
   MetricValue,
   Player,
+  PlayerGameStat,
   PlayerSeasonAggregate,
   Possession,
   Shot,
@@ -148,6 +149,20 @@ export function gameVenueLabel(game: Game): string {
 
 export function playerName(playerId: string): string {
   return players.find((player) => player.id === playerId)?.name ?? playerId;
+}
+
+export function getGameLeadingScorer(gameId: string): { line: PlayerGameStat; player: Player; team: Team; points: number } | null {
+  const leader = playerGameStats
+    .filter((line) => line.gameId === gameId)
+    .map((line) => {
+      const player = players.find((item) => item.id === line.playerId);
+      const team = teams.find((item) => item.id === line.teamId);
+      return player && team ? { line, player, team } : null;
+    })
+    .filter((row): row is { line: PlayerGameStat; player: Player; team: Team } => row !== null)
+    .sort((a, b) => b.line.pts - a.line.pts || b.line.minutes - a.line.minutes || a.player.name.localeCompare(b.player.name))[0];
+
+  return leader ? { ...leader, points: leader.line.pts } : null;
 }
 
 function compareNullable(a: number | null, b: number | null, direction: "asc" | "desc") {

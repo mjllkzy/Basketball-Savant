@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameMatchupLabel, games, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
+import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameMatchupLabel, games, getGameLeadingScorer, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
 
@@ -223,6 +223,19 @@ describe("metric registry and official data", () => {
   it("formats displayed dates as month/day/two-digit-year", () => {
     expect(formatShortDate("2026-06-13")).toBe("6/13/26");
     expect(formatShortDate("2026-06-13T00:00:00")).toBe("6/13/26");
+  });
+
+  it("gets game leading scorers from official player game logs", () => {
+    const game = latestGames(1)[0];
+    const gameLines = game ? playerGameStats.filter((line) => line.gameId === game.id) : [];
+    if (gameLines.length === 0) return;
+
+    const leader = getGameLeadingScorer(game!.id);
+    const maxPoints = Math.max(...gameLines.map((line) => line.pts));
+    expect(leader).not.toBeNull();
+    expect(leader?.points).toBe(maxPoints);
+    expect(leader?.player.name).toBeTruthy();
+    expect(leader?.team.abbreviation).toBeTruthy();
   });
 
   it("uses real team conference metadata instead of one default value", () => {
