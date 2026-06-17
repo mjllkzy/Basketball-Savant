@@ -23,7 +23,7 @@ function CellImage({ src, alt, fallback }: { src: string; alt: string; fallback:
   const [failed, setFailed] = useState(false);
   return (
     <span className="relative inline-grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-[9px] font-black text-slate-500">
-      <span aria-hidden="true">{fallback}</span>
+      {failed ? <span aria-hidden="true">{fallback}</span> : null}
       {!failed ? (
         <Image
           src={src}
