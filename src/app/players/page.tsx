@@ -1,19 +1,30 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
+import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
 import { listPlayers, players, teams } from "@/lib/data/queries";
 import { calculatePlayerMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
+import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
+import { numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 const sortMetrics = ["pts", "ts_pct", "efg_pct", "usage_rate", "pie", "reb_pct", "ast_pct", "three_pct", "stocks"];
 
-export default function PlayersPage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
+export default function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const positionOptions = Array.from(new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"))).sort();
+  const q = singleParam(searchParams, "q");
+  const teamId = singleParam(searchParams, "teamId");
+  const position = singleParam(searchParams, "position");
+  const sort = singleParam(searchParams, "sort") ?? "pts";
+  const minMinutes = boundedNumber(numberParam(searchParams, "minMinutes"), defaultMinMinutes, 0, maxMinMinutes);
+  const minGames = boundedNumber(numberParam(searchParams, "minGames"), defaultMinGames, 0, maxMinGames);
   const result = listPlayers({
-    q: searchParams.q,
-    teamId: searchParams.teamId,
-    position: searchParams.position,
-    sort: searchParams.sort ?? "pts",
+    q,
+    teamId,
+    position,
+    sort,
     order: (searchParams.order as "asc" | "desc") ?? "desc",
+    minGames,
+    minMinutes,
     pageSize: 100
   });
   const rows = result.rows.map((row) => ({
@@ -40,21 +51,20 @@ export default function PlayersPage({ searchParams }: { searchParams: Record<str
   return (
     <div className="grid gap-4">
       <PageHeader eyebrow="Player Index" title="Players" description="Sortable official player table with physical profile, volume, efficiency, creation, rebounding, and impact metrics." />
-      <form className="grid gap-3 rounded border border-slate-200 bg-white p-3 shadow-sm md:grid-cols-5">
-        <input name="q" defaultValue={searchParams.q} placeholder="Search player" className="rounded border border-slate-300 px-3 py-2 text-sm" />
-        <select name="teamId" defaultValue={searchParams.teamId ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
-          <option value="">All teams</option>
-          {teams.map((team) => <option key={team.id} value={team.id}>{team.abbreviation}</option>)}
-        </select>
-        <select name="position" defaultValue={searchParams.position ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
-          <option value="">All positions</option>
-          {positionOptions.map((position) => <option key={position}>{position}</option>)}
-        </select>
-        <select name="sort" defaultValue={searchParams.sort ?? "pts"} className="rounded border border-slate-300 px-3 py-2 text-sm">
-          {sortMetrics.map((metric) => <option key={metric} value={metric}>{metric}</option>)}
-        </select>
-        <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Apply</button>
-      </form>
+      <PlayerFilterForm
+        q={q}
+        teamId={teamId}
+        position={position}
+        sort={sort}
+        minMinutes={minMinutes}
+        minGames={minGames}
+        teamOptions={teams.map((team) => ({ label: team.abbreviation, value: team.id }))}
+        positionOptions={positionOptions}
+        sortMetrics={sortMetrics}
+      />
+      <div className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
+        Showing <strong className="text-ink">{result.meta.total}</strong> players with at least <strong className="text-ink">{minMinutes.toLocaleString()}</strong> total minutes and <strong className="text-ink">{minGames}</strong> games played.
+      </div>
       <StatTable
         columns={[
           { key: "player", label: "Player", hrefKey: "href" },

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameContextLabel, gameMatchupLabel, games, getGameLeadingScorer, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
+import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameContextLabel, gameMatchupLabel, games, getGameLeadingScorer, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, listPlayers, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { activeLeaderboardTabs, feedRequiredLeaderboardTabs, isLeaderboardMetricFeedRequired } from "@/lib/leaderboards";
 import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
@@ -276,6 +276,12 @@ describe("query behavior", () => {
     const rows = getPlayerLeaderboard("pts", { limit: 20 });
     const values = rows.map((row) => row.value ?? 0);
     expect(values).toEqual([...values].sort((a, b) => b - a));
+  });
+
+  it("filters player tables by minimum total minutes and games played", () => {
+    const result = listPlayers({ minMinutes: 500, minGames: 41, pageSize: 100 });
+    expect(result.rows.length).toBeGreaterThan(0);
+    expect(result.rows.every((row) => row.minutes >= 500 && row.games >= 41)).toBe(true);
   });
 
   it("keeps default leaderboard tabs on loaded official metrics", () => {
