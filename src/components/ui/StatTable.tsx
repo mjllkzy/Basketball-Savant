@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type Row, type SortingState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
+import { compareStatTableValues } from "@/lib/tableSorting";
 
 export type StatTableColumn = {
   key: string;
@@ -47,6 +48,8 @@ export function StatTable({ columns, rows, dense = false }: { columns: StatTable
       columns.map((column) => ({
         accessorKey: column.key,
         header: column.label,
+        sortingFn: (rowA: Row<StatTableRow>, rowB: Row<StatTableRow>, columnId: string) =>
+          compareStatTableValues(rowA.getValue(columnId), rowB.getValue(columnId)),
         cell: (info: { getValue: () => unknown; row: { original: StatTableRow } }) => {
           const value = info.getValue();
           const formatted = value === null || value === undefined ? "N/A" : String(value);
