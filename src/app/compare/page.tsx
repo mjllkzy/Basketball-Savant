@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Minus } from "lucide-react";
+import { ArrowLeft, ArrowRight, GitCompare, Minus, Radar } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PercentileBar } from "@/components/ui/PercentileBar";
 import { getPlayerProfile, playerSeasonAggregates, players, teams } from "@/lib/data/queries";
@@ -69,6 +69,7 @@ function PlayerCard({ profile }: { profile: NonNullable<ReturnType<typeof getPla
 }
 
 export default function ComparePage({ searchParams }: { searchParams: RouteSearchParams }) {
+  const mode = singleParam(searchParams, "mode");
   const defaultLeftSlug = defaultSlugById("1629029", 0);
   const defaultRightSlug = defaultSlugById("203999", 1);
   const leftSlug = selectedSlug(searchParams, "left", defaultLeftSlug);
@@ -80,6 +81,52 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
   const rows = comparisonRows(leftProfile.aggregate, rightProfile.aggregate);
   const matches = similarPlayers(similarityProfile.aggregate, playerSeasonAggregates, 8);
 
+  if (mode !== "compare") {
+    return (
+      <div className="grid min-h-[calc(100vh-220px)] gap-4 lg:grid-cols-2">
+        <Link
+          href={`/compare?mode=compare&left=${leftProfile.player.slug}&right=${rightProfile.player.slug}&similarity=${similarityProfile.player.slug}`}
+          className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_42%)]" />
+          <div className="relative flex h-full w-full flex-col justify-between">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
+              <GitCompare className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.16em] text-white/75">Side-by-side</div>
+              <h1 className="mt-2 text-5xl font-black tracking-normal">Compare</h1>
+              <p className="mt-3 max-w-md text-base leading-7 text-white/85">Player vs player edges across scoring, efficiency, creation, defense, and role stats.</p>
+            </div>
+            <div className="inline-flex items-center gap-2 text-sm font-black text-white">
+              Open comparison <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/similarity?player=${similarityProfile.player.slug}`}
+          className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-ink/20 bg-ink p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(244,162,97,0.32),transparent_44%)]" />
+          <div className="relative flex h-full w-full flex-col justify-between">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
+              <Radar className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.16em] text-white/75">Player matching</div>
+              <h1 className="mt-2 text-5xl font-black tracking-normal">Similarity</h1>
+              <p className="mt-3 max-w-md text-base leading-7 text-white/85">Find player comps using stats, physical profile, position, and role-based similarity scoring.</p>
+            </div>
+            <div className="inline-flex items-center gap-2 text-sm font-black text-white">
+              Open similarity <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+            </div>
+          </div>
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-5">
       <PageHeader eyebrow="Compare" title="Player Comparison" description="Side-by-side player edges and similarity scoring from official box, advanced, physical, and role data." />
@@ -87,6 +134,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
       <section className="rounded border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-xl font-black text-ink">Side-by-Side</h2>
         <form className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_120px]">
+          <input type="hidden" name="mode" value="compare" />
           <PlayerSelect name="left" label="Left Player" value={leftProfile.player.slug} />
           <PlayerSelect name="right" label="Right Player" value={rightProfile.player.slug} />
           <input type="hidden" name="similarity" value={similarityProfile.player.slug} />
@@ -129,6 +177,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
             </p>
           </div>
           <form className="grid min-w-0 gap-3 lg:grid-cols-[320px_110px]">
+            <input type="hidden" name="mode" value="compare" />
             <input type="hidden" name="left" value={leftProfile.player.slug} />
             <input type="hidden" name="right" value={rightProfile.player.slug} />
             <PlayerSelect name="similarity" label="Find Similar To" value={similarityProfile.player.slug} />
