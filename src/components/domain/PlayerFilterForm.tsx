@@ -12,24 +12,22 @@ type PlayerFilterFormProps = {
   q?: string;
   teamId?: string;
   position?: string;
-  sort: string;
+  statView: "standard" | "advanced";
   minMinutes: number;
   minGames: number;
   teamOptions: Option[];
   positionOptions: string[];
-  sortMetrics: string[];
 };
 
 export function PlayerFilterForm({
   q,
   teamId,
   position,
-  sort,
+  statView,
   minMinutes,
   minGames,
   teamOptions,
-  positionOptions,
-  sortMetrics
+  positionOptions
 }: PlayerFilterFormProps) {
   const [minutes, setMinutes] = useState(minMinutes);
   const [games, setGames] = useState(minGames);
@@ -46,8 +44,9 @@ export function PlayerFilterForm({
           <option value="">All positions</option>
           {positionOptions.map((item) => <option key={item}>{item}</option>)}
         </select>
-        <select name="sort" defaultValue={sort} className="rounded border border-slate-300 px-3 py-2 text-sm">
-          {sortMetrics.map((metric) => <option key={metric} value={metric}>{metric}</option>)}
+        <select name="view" defaultValue={statView} aria-label="Stat view" className="rounded border border-slate-300 px-3 py-2 text-sm">
+          <option value="standard">Standard Stats</option>
+          <option value="advanced">Advanced Stats</option>
         </select>
         <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Apply</button>
       </div>
