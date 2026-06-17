@@ -7,14 +7,15 @@ import { formatMetric } from "@/lib/metrics/format";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import { numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
-const sortMetrics = ["pts", "ts_pct", "efg_pct", "usage_rate", "pie", "reb_pct", "ast_pct", "three_pct", "stocks"];
+const sortMetrics = ["pts", "reb", "ast", "stl", "blk", "ts_pct", "efg_pct", "usage_rate", "pie", "reb_pct", "ast_pct", "three_pct"];
 
 export default function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const positionOptions = Array.from(new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"))).sort();
   const q = singleParam(searchParams, "q");
   const teamId = singleParam(searchParams, "teamId");
   const position = singleParam(searchParams, "position");
-  const sort = singleParam(searchParams, "sort") ?? "pts";
+  const requestedSort = singleParam(searchParams, "sort") ?? "pts";
+  const sort = sortMetrics.includes(requestedSort) ? requestedSort : "pts";
   const minMinutes = boundedNumber(numberParam(searchParams, "minMinutes"), defaultMinMinutes, 0, maxMinMinutes);
   const minGames = boundedNumber(numberParam(searchParams, "minGames"), defaultMinGames, 0, maxMinGames);
   const result = listPlayers({
@@ -39,13 +40,14 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
     pts: formatMetric("pts", calculatePlayerMetric("pts", row)),
     reb: formatMetric("reb", calculatePlayerMetric("reb", row)),
     ast: formatMetric("ast", calculatePlayerMetric("ast", row)),
+    stl: formatMetric("stl", calculatePlayerMetric("stl", row)),
+    blk: formatMetric("blk", calculatePlayerMetric("blk", row)),
     ts: formatMetric("ts_pct", calculatePlayerMetric("ts_pct", row)),
     efg: formatMetric("efg_pct", calculatePlayerMetric("efg_pct", row)),
     usg: formatMetric("usage_rate", calculatePlayerMetric("usage_rate", row)),
     astPct: formatMetric("ast_pct", calculatePlayerMetric("ast_pct", row)),
     rebPct: formatMetric("reb_pct", calculatePlayerMetric("reb_pct", row)),
-    pie: formatMetric("pie", calculatePlayerMetric("pie", row)),
-    stocks: formatMetric("stocks", calculatePlayerMetric("stocks", row))
+    pie: formatMetric("pie", calculatePlayerMetric("pie", row))
   }));
 
   return (
@@ -77,13 +79,14 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
           { key: "pts", label: "PTS", align: "right" },
           { key: "reb", label: "REB", align: "right" },
           { key: "ast", label: "AST", align: "right" },
+          { key: "stl", label: "STL", align: "right" },
+          { key: "blk", label: "BLK", align: "right" },
           { key: "ts", label: "TS%", align: "right" },
           { key: "efg", label: "eFG%", align: "right" },
           { key: "usg", label: "USG%", align: "right" },
           { key: "astPct", label: "AST%", align: "right" },
           { key: "rebPct", label: "REB%", align: "right" },
-          { key: "pie", label: "PIE", align: "right" },
-          { key: "stocks", label: "Stocks", align: "right" }
+          { key: "pie", label: "PIE", align: "right" }
         ]}
         rows={rows}
       />
