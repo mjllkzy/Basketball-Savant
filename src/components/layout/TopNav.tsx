@@ -15,7 +15,6 @@ const links = [
 ];
 
 const leaderboardItems = ["Scoring", "Shooting", "Shot Quality", "Playmaking", "Defense", "Rebounding", "Play Type", "Clutch", "Lineups", "Rolling Windows", "Percentiles", "Custom"];
-const visualItems = ["Shot Chart", "Shot Heatmap", "Pass Map", "Touch Map", "Lineup Network", "Rolling Trends", "Player Radar", "Team Style Map"];
 
 export function TopNav() {
   return (
@@ -48,18 +47,6 @@ export function TopNav() {
             <div className="invisible absolute left-0 top-10 z-50 grid w-56 gap-1 rounded border border-slate-200 bg-white p-2 opacity-0 shadow-card transition group-hover:visible group-hover:opacity-100">
               {leaderboardItems.map((item) => (
                 <Link key={item} href={item === "Custom" ? "/leaderboards/custom" : `/leaderboards?category=${encodeURIComponent(item)}`} className="rounded px-3 py-2 text-xs hover:bg-slate-50">
-                  {item}
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div className="group relative shrink-0">
-            <Link href="/visuals" className="inline-flex min-h-9 items-center gap-2 rounded border border-slate-200 px-3 hover:bg-slate-50">
-              Visual Lab
-            </Link>
-            <div className="invisible absolute left-0 top-10 z-50 grid w-56 gap-1 rounded border border-slate-200 bg-white p-2 opacity-0 shadow-card transition group-hover:visible group-hover:opacity-100">
-              {visualItems.map((item) => (
-                <Link key={item} href={`/visuals?tab=${encodeURIComponent(item)}`} className="rounded px-3 py-2 text-xs hover:bg-slate-50">
                   {item}
                 </Link>
               ))}
