@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight, GitCompare, Minus, Radar } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PercentileBar } from "@/components/ui/PercentileBar";
@@ -6,6 +7,7 @@ import { getPlayerProfile, players, teams } from "@/lib/data/queries";
 import { comparisonRows, heightToInches, type ComparisonWinner } from "@/lib/comparison";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
+import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
 
 function selectedSlug(searchParams: RouteSearchParams, key: string, fallback: string) {
   return singleParam(searchParams, key) ?? fallback;
@@ -45,11 +47,25 @@ function WinnerIcon({ winner }: { winner: ComparisonWinner }) {
 
 function PlayerCard({ profile }: { profile: NonNullable<ReturnType<typeof getPlayerProfile>> }) {
   const heightInches = heightToInches(profile.player.height);
+  const logoUrl = nbaTeamLogoUrl(profile.team.id);
+  const accentColor = teamAccentColor(profile.team);
   return (
-    <div className="rounded border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded border border-slate-200 bg-white p-5 shadow-sm" style={teamTintStyle(profile.team)}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-xs font-black uppercase tracking-[0.14em] text-signal">{profile.team.abbreviation} · {profile.player.position}</div>
+          <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em]" style={{ color: accentColor }}>
+            <span className="inline-grid h-7 w-7 place-items-center rounded-full border border-white/70 bg-white/85 shadow-sm">
+              <Image
+                src={logoUrl}
+                alt={`${profile.team.city} ${profile.team.name} logo`}
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
+                unoptimized
+              />
+            </span>
+            <span>{profile.team.abbreviation} · {profile.player.position}</span>
+          </div>
           <h2 className="mt-1 text-2xl font-black text-ink">{profile.player.name}</h2>
           <p className="mt-1 text-sm text-slate-600">
             {profile.player.height} · {profile.player.weight || "N/A"} lb · Age {profile.player.age}

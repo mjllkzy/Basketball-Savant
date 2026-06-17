@@ -3,10 +3,7 @@ import { StatTable } from "@/components/ui/StatTable";
 import { teamSeasonAggregates } from "@/lib/data/queries";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
-
-function nbaTeamLogoUrl(teamId: string) {
-  return `https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`;
-}
+import { nbaTeamLogoUrl } from "@/lib/teamBranding";
 
 export default function TeamsPage() {
   const rows = teamSeasonAggregates.map((row) => ({
