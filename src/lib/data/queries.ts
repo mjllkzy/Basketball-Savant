@@ -200,6 +200,13 @@ function textMatch(value: string, query?: string) {
   return value.toLowerCase().includes(query.trim().toLowerCase());
 }
 
+function positionMatches(playerPosition: string, requestedPosition?: string) {
+  if (!requestedPosition) return true;
+  if (requestedPosition === "G") return playerPosition === "PG" || playerPosition === "SG";
+  if (requestedPosition === "F") return playerPosition === "SF" || playerPosition === "PF";
+  return playerPosition === requestedPosition;
+}
+
 export const playerSeasonAggregates: PlayerSeasonAggregate[] = officialPlayerSeasonAggregates;
 export const teamSeasonAggregates: TeamSeasonAggregate[] = officialTeamSeasonAggregates;
 
@@ -216,7 +223,7 @@ export function listPlayers(params: PlayerFilters = {}) {
   let rows = [...playerSeasonAggregates];
   rows = rows.filter((row) => textMatch(`${row.player.name} ${row.team.city} ${row.team.name} ${row.player.position}`, params.q));
   if (params.teamId) rows = rows.filter((row) => row.team.id === params.teamId || row.team.slug === params.teamId);
-  if (params.position) rows = rows.filter((row) => row.player.position === params.position);
+  if (params.position) rows = rows.filter((row) => positionMatches(row.player.position, params.position));
   if (params.minGames) rows = rows.filter((row) => row.games >= params.minGames!);
   if (params.minMinutes) rows = rows.filter((row) => row.minutes >= params.minMinutes!);
   const sortKey = params.sort ?? "name";

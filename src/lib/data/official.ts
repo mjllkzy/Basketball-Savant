@@ -61,6 +61,13 @@ function stringValue(tableData: SnapshotTable, row: unknown[], key: string): str
   return raw === null || raw === undefined ? "" : String(raw);
 }
 
+function optionalStringValue(tableData: SnapshotTable, row: unknown[], key: string): string | undefined {
+  if (!tableData.headers.includes(key)) return undefined;
+  const raw = value<unknown>(tableData, row, key);
+  if (raw === null || raw === undefined || raw === "") return undefined;
+  return String(raw);
+}
+
 const teamMetadataByAbbreviation: Record<string, Pick<Team, "conference" | "division" | "primaryColor" | "secondaryColor">> = {
   ATL: { conference: "East", division: "Southeast", primaryColor: "#e03a3e", secondaryColor: "#c1d32f" },
   BOS: { conference: "East", division: "Atlantic", primaryColor: "#007a33", secondaryColor: "#ba9653" },
@@ -142,6 +149,21 @@ export const officialMetadata = officialSnapshot.metadata;
 export const officialBasketballReferencePlayerAdvancedCrosscheck = basketballReferencePlayerAdvancedCrosscheckTable;
 export const officialBasketballReferenceTeamAdvancedCrosscheck = basketballReferenceTeamAdvancedCrosscheckTable;
 
+function primaryBasketballReferencePosition(raw: string | undefined): string | undefined {
+  const validPositions = new Set(["PG", "SG", "SF", "PF", "C"]);
+  const primary = raw?.split(/[-/, ]+/).find((token) => validPositions.has(token));
+  return primary;
+}
+
+const basketballReferencePrimaryPositionById = new Map(
+  basketballReferencePlayerAdvancedCrosscheckTable.rows
+    .map((row) => [
+      stringValue(basketballReferencePlayerAdvancedCrosscheckTable, row, "PLAYER_ID"),
+      primaryBasketballReferencePosition(optionalStringValue(basketballReferencePlayerAdvancedCrosscheckTable, row, "BREF_POSITION"))
+    ] as const)
+    .filter((entry): entry is readonly [string, string] => Boolean(entry[0] && entry[1]))
+);
+
 export const officialTeams: Team[] = teamTable.rows.map((row) => {
   const id = String(numberValue(teamTable, row, "TEAM_ID"));
   const fullName = stringValue(teamTable, row, "TEAM_NAME");
@@ -183,8 +205,9 @@ function playerBio(playerId: string) {
   const bioHeight = bioRow ? stringValue(playerBioStatsTable, bioRow, "PLAYER_HEIGHT") : "";
   const weight = indexRow ? optionalNumberValue(playerIndexTable, indexRow, "WEIGHT") : undefined;
   const bioWeight = bioRow ? optionalNumberValue(playerBioStatsTable, bioRow, "PLAYER_WEIGHT") : undefined;
+  const basketballReferencePosition = basketballReferencePrimaryPositionById.get(playerId);
   return {
-    position: position || fallback.position,
+    position: basketballReferencePosition || position || fallback.position,
     height: height || bioHeight || fallback.height,
     weight: weight ?? bioWeight ?? playerBioOverrideNumber(playerId, "weight") ?? fallback.weight,
     jerseyNumber: indexRow ? stringValue(playerIndexTable, indexRow, "JERSEY_NUMBER") : fallback.jerseyNumber,

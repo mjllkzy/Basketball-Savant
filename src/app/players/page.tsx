@@ -9,6 +9,7 @@ import { numberParam, singleParam, type RouteSearchParams } from "@/lib/searchPa
 
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
+const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
 
 const baseColumns: StatTableColumn[] = [
   { key: "player", label: "Player", hrefKey: "href" },
@@ -49,10 +50,12 @@ const advancedColumns: StatTableColumn[] = [
 ];
 
 export default function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const positionOptions = Array.from(new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"))).sort();
+  const loadedPositions = new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"));
+  const positionOptions = primaryPositionOrder.filter((position) => loadedPositions.has(position));
   const q = singleParam(searchParams, "q");
   const teamId = singleParam(searchParams, "teamId");
   const position = singleParam(searchParams, "position");
+  const selectedPosition = positionOptions.includes(position ?? "") ? position : undefined;
   const statView = singleParam(searchParams, "view") === "advanced" ? "advanced" : "standard";
   const sortMetrics = statView === "advanced" ? advancedSortMetrics : standardSortMetrics;
   const defaultSort = statView === "advanced" ? "pie" : "pts";
@@ -108,7 +111,7 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
       <PlayerFilterForm
         q={q}
         teamId={teamId}
-        position={position}
+        position={selectedPosition}
         statView={statView}
         minMinutes={minMinutes}
         minGames={minGames}

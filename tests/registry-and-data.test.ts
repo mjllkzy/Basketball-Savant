@@ -37,6 +37,7 @@ describe("metric registry and official data", () => {
   });
 
   it("loads official player bio facts for every stat-table player", () => {
+    const primaryPositions = new Set(["PG", "SG", "SF", "PF", "C"]);
     expect(dataSourceMetadata.sources.playerBioStatsRegularUrl).toContain("leaguedashplayerbiostats");
     expect(dataSourceMetadata.sources.playerIndexUrl).toContain("playerindex");
     expect(dataSourceMetadata.coverage.regularSeasonPlayerBioStats).toBe(playerSeasonAggregates.length);
@@ -44,6 +45,7 @@ describe("metric registry and official data", () => {
     expect(dataSourceMetadata.coverage.externalPlayerBioOverrides).toBe(6);
     for (const player of players) {
       expect(player.position).not.toBe("N/A");
+      expect(primaryPositions.has(player.position)).toBe(true);
       expect(player.height).toMatch(/^\d-\d{1,2}$/);
       expect(player.weight).toBeGreaterThan(0);
       expect(typeof player.jerseyNumber).toBe("string");
@@ -63,6 +65,7 @@ describe("metric registry and official data", () => {
     expect(dataSourceMetadata.coverage.basketballReferencePlayerPerGameRows).toBeGreaterThan(playerSeasonAggregates.length);
     expect(dataSourceMetadata.coverage.basketballReferencePlayerAdvancedCrosschecks).toBe(playerSeasonAggregates.length);
     expect(dataSourceMetadata.coverage.basketballReferencePlayerAdvancedMatchedCrosschecks).toBeGreaterThanOrEqual(Math.floor(playerSeasonAggregates.length * 0.95));
+    expect(dataSourceMetadata.coverage.basketballReferencePrimaryPositionMatches).toBe(playerSeasonAggregates.length);
     expect(dataSourceMetadata.coverage.basketballReferenceTeamAdvancedRows).toBe(teams.length);
     expect(dataSourceMetadata.coverage.basketballReferenceTeamAdvancedCrosschecks).toBe(teams.length);
     expect(dataSourceMetadata.coverage.basketballReferenceTeamAdvancedMatchedCrosschecks).toBe(teams.length);
@@ -73,13 +76,19 @@ describe("metric registry and official data", () => {
     const amenCrosscheck = basketballReferencePlayerAdvancedCrosscheck.rows.find((row) => row[crosscheckIndex.PLAYER_NAME] === "Amen Thompson");
     expect(amenCrosscheck).toBeTruthy();
     expect(amenCrosscheck?.[crosscheckIndex.MATCH_STATUS]).toBe("matched");
+    expect(amenCrosscheck?.[crosscheckIndex.BREF_POSITION]).toBe("PG");
     expect(amenCrosscheck?.[crosscheckIndex.BREF_TS_PCT]).toBeGreaterThan(0.59);
     expect(amenCrosscheck?.[crosscheckIndex.TS_PCT_ABS_DIFF]).toBeLessThan(0.001);
     expect(amenCrosscheck?.[crosscheckIndex.EFG_PCT_ABS_DIFF]).toBeLessThan(0.001);
 
     const initialsCrosscheck = basketballReferencePlayerAdvancedCrosscheck.rows.find((row) => row[crosscheckIndex.PLAYER_NAME] === "AJ Green");
     expect(initialsCrosscheck?.[crosscheckIndex.MATCH_STATUS]).toBe("matched");
+    expect(initialsCrosscheck?.[crosscheckIndex.BREF_POSITION]).toBe("SG");
     expect(initialsCrosscheck?.[crosscheckIndex.TS_PCT_ABS_DIFF]).toBeLessThan(0.001);
+
+    expect(players.find((player) => player.name === "Shai Gilgeous-Alexander")?.position).toBe("PG");
+    expect(players.find((player) => player.name === "Donovan Mitchell")?.position).toBe("SG");
+    expect(players.find((player) => player.name === "Nikola Jokić")?.position).toBe("C");
 
     const teamCrosscheckIndex = Object.fromEntries(basketballReferenceTeamAdvancedCrosscheck.headers.map((header, index) => [header, index]));
     const clippersCrosscheck = basketballReferenceTeamAdvancedCrosscheck.rows.find((row) => row[teamCrosscheckIndex.NBA_TEAM_NAME] === "LA Clippers");
@@ -282,6 +291,14 @@ describe("query behavior", () => {
     const result = listPlayers({ minMinutes: 500, minGames: 30, pageSize: 100 });
     expect(result.rows.length).toBeGreaterThan(0);
     expect(result.rows.every((row) => row.minutes >= 500 && row.games >= 30)).toBe(true);
+  });
+
+  it("filters broad legacy position groups against primary Basketball Reference positions", () => {
+    const guards = listPlayers({ position: "G", minMinutes: 500, minGames: 30, pageSize: 100 });
+    const pointGuards = listPlayers({ position: "PG", minMinutes: 500, minGames: 30, pageSize: 100 });
+    expect(guards.rows.length).toBeGreaterThan(pointGuards.rows.length);
+    expect(guards.rows.every((row) => row.player.position === "PG" || row.player.position === "SG")).toBe(true);
+    expect(pointGuards.rows.every((row) => row.player.position === "PG")).toBe(true);
   });
 
   it("keeps default leaderboard tabs on loaded official metrics", () => {

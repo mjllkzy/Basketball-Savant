@@ -174,6 +174,12 @@ const basketballReferenceHeaders = {
   "Accept-Language": "en-US,en;q=0.9"
 };
 
+const basketballReferencePlayerNameAliases = {
+  "adama bal": ["adama alpha bal"],
+  "ronald holland": ["ron holland"],
+  "trevon scott": ["tre scott"]
+};
+
 function argValue(name) {
   const item = process.argv.find((arg) => arg.startsWith(`${name}=`));
   return item ? item.slice(name.length + 1) : undefined;
@@ -255,6 +261,7 @@ function decodeHtml(value) {
 
 function normalizePlayerName(value) {
   return decodeHtml(String(value ?? ""))
+    .replace(/[ёЁ]/g, "e")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[.\u2019']/g, "")
@@ -320,6 +327,7 @@ function parseBasketballReferenceRows(html, tableId, fields) {
         playerName: cellText(rowHtml, "name_display"),
         normalizedPlayerName: normalizePlayerName(cellText(rowHtml, "name_display")),
         teamAbbreviation: cellText(rowHtml, "team_name_abbr"),
+        position: cellText(rowHtml, "pos"),
         games: cellNumericValue(rowHtml, "games"),
         minutes: cellNumericValue(rowHtml, "mp")
       };
@@ -342,7 +350,9 @@ function basketballReferenceRowsByName(rows) {
 }
 
 function findBasketballReferenceMatch(rowsByName, playerName, teamAbbreviation, teamCount) {
-  const candidates = rowsByName.get(normalizePlayerName(playerName)) ?? [];
+  const normalizedPlayerName = normalizePlayerName(playerName);
+  const aliasCandidates = (basketballReferencePlayerNameAliases[normalizedPlayerName] ?? []).flatMap((alias) => rowsByName.get(normalizePlayerName(alias)) ?? []);
+  const candidates = [...(rowsByName.get(normalizedPlayerName) ?? []), ...aliasCandidates];
   if (candidates.length === 0) return undefined;
   const aggregateTeams = new Set(["TOT", "2TM", "3TM", "4TM", "5TM"]);
   if (Number(teamCount) > 1) {
@@ -382,6 +392,7 @@ function buildBasketballReferenceCrosscheck(playerAdvancedRegular, advancedRows,
       advancedMatch?.teamAbbreviation ?? "",
       perGameMatch?.teamAbbreviation ?? "",
       status,
+      perGameMatch?.position ?? "",
       row[headerIndex.TS_PCT],
       advancedMatch?.tsPct ?? null,
       diff(row[headerIndex.TS_PCT], advancedMatch?.tsPct),
@@ -413,6 +424,7 @@ function buildBasketballReferenceCrosscheck(playerAdvancedRegular, advancedRows,
       "BREF_ADVANCED_TEAM_ABBREVIATION",
       "BREF_PER_GAME_TEAM_ABBREVIATION",
       "MATCH_STATUS",
+      "BREF_POSITION",
       "NBA_TS_PCT",
       "BREF_TS_PCT",
       "TS_PCT_ABS_DIFF",
@@ -777,10 +789,10 @@ async function main() {
   const teamGameLogsPlayoffsMaybe = includeTeamGameLogs ? await fetchRequestedJson("playoff team game logs", teamGameLogsPlayoffsUrl) : undefined;
   const playerGameLogsRegularMaybe = includePlayerGameLogs ? await fetchRequestedJson("regular player game logs", playerGameLogsRegularUrl) : undefined;
   const playerGameLogsPlayoffsMaybe = includePlayerGameLogs ? await fetchRequestedJson("playoff player game logs", playerGameLogsPlayoffsUrl) : undefined;
-  const teamGameLogsRegular = teamGameLogsRegularMaybe ?? emptyTable;
-  const teamGameLogsPlayoffs = teamGameLogsPlayoffsMaybe ?? emptyTable;
-  const playerGameLogsRegular = playerGameLogsRegularMaybe ?? emptyTable;
-  const playerGameLogsPlayoffs = playerGameLogsPlayoffsMaybe ?? emptyTable;
+  const teamGameLogsRegular = teamGameLogsRegularMaybe ?? (reuseExistingCore && existingSnapshot?.tables?.teamGameLogsRegular ? snapshotTableToJson(existingSnapshot, "teamGameLogsRegular") : emptyTable);
+  const teamGameLogsPlayoffs = teamGameLogsPlayoffsMaybe ?? (reuseExistingCore && existingSnapshot?.tables?.teamGameLogsPlayoffs ? snapshotTableToJson(existingSnapshot, "teamGameLogsPlayoffs") : emptyTable);
+  const playerGameLogsRegular = playerGameLogsRegularMaybe ?? (reuseExistingCore && existingSnapshot?.tables?.playerGameLogsRegular ? snapshotTableToJson(existingSnapshot, "playerGameLogsRegular") : emptyTable);
+  const playerGameLogsPlayoffs = playerGameLogsPlayoffsMaybe ?? (reuseExistingCore && existingSnapshot?.tables?.playerGameLogsPlayoffs ? snapshotTableToJson(existingSnapshot, "playerGameLogsPlayoffs") : emptyTable);
 
   const teamRows = table(teamStatsRegular).rows;
   const teamIdList = teamRows.map((row) => row[0]);
@@ -836,6 +848,7 @@ async function main() {
     basketballReferencePlayerPerGameRows
   );
   const basketballReferencePlayerCrosscheckMatches = basketballReferencePlayerAdvancedCrosscheck.rows.filter((row) => row[5] === "matched").length;
+  const basketballReferencePrimaryPositionMatches = basketballReferencePlayerAdvancedCrosscheck.rows.filter((row) => typeof row[6] === "string" && row[6].length > 0).length;
   const basketballReferenceTeamAdvancedRows = basketballReferenceTeamAdvancedHtml
     ? parseBasketballReferenceTeamAdvancedRows(basketballReferenceTeamAdvancedHtml)
     : [];
@@ -859,7 +872,7 @@ async function main() {
           : []),
         "Basketball Reference, NBA.com box scores, and ESPN game pages are listed as cross-reference sources for public score and series verification.",
         "NBA Stats Advanced player and team tables provide official TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession fields.",
-        "Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables; NBA Stats remains the machine-readable source.",
+        "Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables; Basketball Reference per-game Pos supplies primary PG/SG/SF/PF/C player positions.",
         "The publicReferenceGames metadata pins the currently displayed NBA Finals games to public NBA.com, Basketball Reference, and ESPN game pages.",
         "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
         "Basketball Savant derived metrics are calculated locally from official box score totals.",
@@ -902,6 +915,7 @@ async function main() {
         basketballReferencePlayerPerGameRows: basketballReferencePlayerPerGameRows.length,
         basketballReferencePlayerAdvancedCrosschecks: basketballReferencePlayerAdvancedCrosscheck.rows.length,
         basketballReferencePlayerAdvancedMatchedCrosschecks: basketballReferencePlayerCrosscheckMatches,
+        basketballReferencePrimaryPositionMatches,
         regularSeasonPlayerBioStats: table(playerBioStatsRegular).rows.length,
         playerIndex: table(playerIndex).rows.length,
         externalPlayerBioOverrides: externalPlayerBioOverrides.length,
