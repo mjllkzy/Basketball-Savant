@@ -9,7 +9,7 @@ const endpoints = [
   ["GET", "/api/players/:id/metrics", "Metric values, ranks, and percentiles"],
   ["GET", "/api/players/:id/shots", "Player shot events"],
   ["GET", "/api/players/:id/rolling", "Recent game trend rows"],
-  ["GET", "/api/players/:id/similar", "Cosine-similarity results"],
+  ["GET", "/api/players/:id/similar", "Blended similarity scores with physical, role, ratio, and per-minute components"],
   ["GET", "/api/teams", "Team list"],
   ["GET", "/api/teams/:id", "Team profile"],
   ["GET", "/api/games", "Game list"],

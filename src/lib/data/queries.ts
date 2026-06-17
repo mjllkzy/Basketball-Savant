@@ -31,7 +31,7 @@ import {
 } from "@/lib/data/official";
 import { calculatePlayerMetric, calculateTeamMetric, getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { percentileRank } from "@/lib/metrics/formulas";
-import { cosineSimilarity, minMaxNormalize } from "@/lib/models/similarity";
+import { similarPlayers } from "@/lib/comparison";
 
 export const datasetVersion = officialDatasetVersion;
 export const dataSourceMetadata = officialMetadata;
@@ -440,44 +440,22 @@ export function searchAll(query: string, limit = 8) {
 export type SimilarityBasis = "Overall" | "Scoring style" | "Shot profile" | "Playmaking" | "Defense" | "Physical/role";
 
 export function getSimilarPlayers(playerId: string, basis: SimilarityBasis = "Overall") {
-  const basisKeys: Record<SimilarityBasis, string[]> = {
-    Overall: ["pts", "reb", "ast", "ts_pct", "usage_rate", "three_pct", "stocks", "turnover_rate"],
-    "Scoring style": ["pts", "fga", "three_pa", "fta", "usage_rate", "points_per_shot"],
-    "Shot profile": ["fga", "three_pa", "three_pct", "fg_pct", "efg_pct", "ts_pct"],
-    Playmaking: ["ast", "tov", "usage_rate", "turnover_rate", "points_per_possession"],
-    Defense: ["stl", "blk", "stocks", "reb", "tov"],
-    "Physical/role": ["reb", "fga", "fta", "usage_rate", "stocks"]
-  };
-  const keys = basisKeys[basis];
-  const matrix = playerSeasonAggregates.map((row) => ({
-    playerId: row.player.id,
-    ...Object.fromEntries(keys.map((key) => [key, calculatePlayerMetric(key, row) ?? 0]))
+  const target = playerSeasonAggregates.find((row) => row.player.id === playerId);
+  if (!target) return [];
+  return similarPlayers(target, playerSeasonAggregates, 10).map((row) => ({
+    player: row.aggregate.player,
+    team: row.aggregate.team,
+    score: row.score,
+    basis,
+    matchingTraits: row.traits,
+    aggregate: row.aggregate,
+    ratioScore: row.ratioScore,
+    perMinuteScore: row.perMinuteScore,
+    physicalScore: row.physicalScore,
+    roleScore: row.roleScore,
+    buildScore: row.buildScore,
+    summary: row.candidateSummary
   }));
-  const normalized = minMaxNormalize(matrix.map(({ playerId: _playerId, ...metrics }) => metrics as Record<string, number>), keys);
-  const targetIndex = matrix.findIndex((row) => row.playerId === playerId);
-  if (targetIndex < 0) return [];
-  const targetVector = keys.map((key) => normalized[targetIndex][key]);
-  return matrix
-    .map((row, index) => {
-      const aggregate = playerSeasonAggregates.find((item) => item.player.id === row.playerId)!;
-      const vector = keys.map((key) => normalized[index][key]);
-      const matchingTraits = keys
-        .map((key) => ({ key, delta: Math.abs(normalized[targetIndex][key] - normalized[index][key]) }))
-        .sort((a, b) => a.delta - b.delta)
-        .slice(0, 3)
-        .map((trait) => getMetric(trait.key).shortLabel);
-      return {
-        player: aggregate.player,
-        team: aggregate.team,
-        score: row.playerId === playerId ? 0 : cosineSimilarity(targetVector, vector),
-        basis,
-        matchingTraits,
-        aggregate
-      };
-    })
-    .filter((row) => row.player.id !== playerId)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
 }
 
 export function gameFlow(gameId: string) {
