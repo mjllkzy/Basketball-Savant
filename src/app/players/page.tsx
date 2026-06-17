@@ -10,43 +10,53 @@ import { numberParam, singleParam, type RouteSearchParams } from "@/lib/searchPa
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
+const standardTableMinWidth = "1440px";
+const advancedTableMinWidth = "1580px";
+
+function identityColumn(key: string, label: string, width: string): StatTableColumn {
+  return { key, label, width, align: "center" };
+}
+
+function metricColumn(key: string, label: string, width = "82px"): StatTableColumn {
+  return { key, label, width, align: "right" };
+}
 
 const baseColumns: StatTableColumn[] = [
-  { key: "player", label: "Player", hrefKey: "href" },
-  { key: "team", label: "Team" },
-  { key: "pos", label: "Pos" },
-  { key: "height", label: "Height" },
-  { key: "weight", label: "Weight" },
-  { key: "age", label: "Age", align: "right" },
-  { key: "games", label: "G", align: "right" },
-  { key: "min", label: "MIN", align: "right" }
+  { key: "player", label: "Player", hrefKey: "href", width: "260px", truncate: true },
+  identityColumn("team", "Team", "72px"),
+  identityColumn("pos", "Pos", "66px"),
+  identityColumn("height", "Height", "82px"),
+  identityColumn("weight", "Weight", "86px"),
+  identityColumn("age", "Age", "64px"),
+  identityColumn("games", "G", "58px"),
+  metricColumn("min", "MIN", "74px")
 ];
 
 const standardColumns: StatTableColumn[] = [
   ...baseColumns,
-  { key: "pts", label: "PTS", align: "right" },
-  { key: "reb", label: "REB", align: "right" },
-  { key: "ast", label: "AST", align: "right" },
-  { key: "stl", label: "STL", align: "right" },
-  { key: "blk", label: "BLK", align: "right" },
-  { key: "tov", label: "TOV", align: "right" },
-  { key: "fg", label: "FG%", align: "right" },
-  { key: "three", label: "3P%", align: "right" },
-  { key: "ft", label: "FT%", align: "right" }
+  metricColumn("pts", "PTS", "74px"),
+  metricColumn("reb", "REB", "74px"),
+  metricColumn("ast", "AST", "74px"),
+  metricColumn("stl", "STL", "70px"),
+  metricColumn("blk", "BLK", "70px"),
+  metricColumn("tov", "TOV", "70px"),
+  metricColumn("fg", "FG%", "82px"),
+  metricColumn("three", "3P%", "82px"),
+  metricColumn("ft", "FT%", "82px")
 ];
 
 const advancedColumns: StatTableColumn[] = [
   ...baseColumns,
-  { key: "ts", label: "TS%", align: "right" },
-  { key: "efg", label: "eFG%", align: "right" },
-  { key: "usg", label: "USG%", align: "right" },
-  { key: "astPct", label: "AST%", align: "right" },
-  { key: "rebPct", label: "REB%", align: "right" },
-  { key: "tovPct", label: "TOV%", align: "right" },
-  { key: "ortg", label: "ORtg", align: "right" },
-  { key: "drtg", label: "DRtg", align: "right" },
-  { key: "net", label: "Net", align: "right" },
-  { key: "pie", label: "PIE", align: "right" }
+  metricColumn("ts", "TS%", "82px"),
+  metricColumn("efg", "eFG%", "82px"),
+  metricColumn("usg", "USG%", "86px"),
+  metricColumn("astPct", "AST%", "86px"),
+  metricColumn("rebPct", "REB%", "86px"),
+  metricColumn("tovPct", "TOV%", "86px"),
+  metricColumn("ortg", "ORtg", "78px"),
+  metricColumn("drtg", "DRtg", "78px"),
+  metricColumn("net", "Net", "74px"),
+  metricColumn("pie", "PIE", "78px")
 ];
 
 export default function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
@@ -104,6 +114,7 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
     pie: formatMetric("pie", calculatePlayerMetric("pie", row))
   }));
   const columns = statView === "advanced" ? advancedColumns : standardColumns;
+  const tableMinWidth = statView === "advanced" ? advancedTableMinWidth : standardTableMinWidth;
 
   return (
     <div className="grid gap-4">
@@ -124,6 +135,8 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
       <StatTable
         columns={columns}
         rows={rows}
+        layout="fixed"
+        minWidth={tableMinWidth}
       />
     </div>
   );

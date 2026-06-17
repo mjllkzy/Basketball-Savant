@@ -10,6 +10,9 @@ export type StatTableColumn = {
   key: string;
   label: string;
   align?: "left" | "right" | "center";
+  width?: string;
+  minWidth?: string;
+  truncate?: boolean;
   hrefKey?: string;
   imageKey?: string;
   imageAltKey?: string;
@@ -41,8 +44,43 @@ function CellImage({ src, alt, fallback }: { src: string; alt: string; fallback:
   );
 }
 
-export function StatTable({ columns, rows, dense = false }: { columns: StatTableColumn[]; rows: StatTableRow[]; dense?: boolean }) {
+function alignmentClasses(align?: StatTableColumn["align"]) {
+  if (align === "right") {
+    return {
+      cell: "text-right tabular-nums",
+      header: "text-right",
+      button: "justify-end"
+    };
+  }
+  if (align === "center") {
+    return {
+      cell: "text-center",
+      header: "text-center",
+      button: "justify-center"
+    };
+  }
+  return {
+    cell: "text-left",
+    header: "text-left",
+    button: "justify-start"
+  };
+}
+
+export function StatTable({
+  columns,
+  rows,
+  dense = false,
+  layout = "auto",
+  minWidth
+}: {
+  columns: StatTableColumn[];
+  rows: StatTableRow[];
+  dense?: boolean;
+  layout?: "auto" | "fixed";
+  minWidth?: string;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const hasColumnSizing = columns.some((column) => column.width || column.minWidth);
   const tableColumns = useMemo(
     () =>
       columns.map((column) => ({
@@ -58,7 +96,7 @@ export function StatTable({ columns, rows, dense = false }: { columns: StatTable
           const imageAlt = column.imageAltKey ? info.row.original[column.imageAltKey] : undefined;
           const imageFallback = column.imageFallbackKey ? info.row.original[column.imageFallbackKey] : undefined;
           const content = (
-            <span className={imageUrl ? "inline-flex min-h-7 items-center gap-2" : undefined}>
+            <span className={imageUrl ? `inline-flex min-h-7 max-w-full items-center gap-2 ${column.truncate ? "min-w-0" : ""}` : column.truncate ? "block truncate" : undefined}>
               {imageUrl ? (
                 <CellImage
                   src={String(imageUrl)}
@@ -66,10 +104,10 @@ export function StatTable({ columns, rows, dense = false }: { columns: StatTable
                   fallback={imageFallback ? String(imageFallback) : ""}
                 />
               ) : null}
-              <span>{formatted}</span>
+              <span className={column.truncate ? "min-w-0 truncate" : undefined}>{formatted}</span>
             </span>
           );
-          return href ? <Link href={String(href)} className="font-bold text-signal hover:underline">{content}</Link> : content;
+          return href ? <Link href={String(href)} className={`font-bold text-signal hover:underline ${column.truncate ? "block truncate" : ""}`}>{content}</Link> : content;
         }
       })),
     [columns]
@@ -85,32 +123,48 @@ export function StatTable({ columns, rows, dense = false }: { columns: StatTable
 
   return (
     <div className="table-scroll overflow-x-auto rounded border border-slate-200 bg-white shadow-sm">
-      <table className="min-w-full border-collapse text-sm">
+      <table
+        className={`w-full min-w-full border-collapse text-sm ${layout === "fixed" ? "table-fixed" : ""}`}
+        style={minWidth ? { minWidth } : undefined}
+      >
+        {hasColumnSizing ? (
+          <colgroup>
+            {columns.map((column) => (
+              <col key={column.key} style={column.width || column.minWidth ? { width: column.width, minWidth: column.minWidth } : undefined} />
+            ))}
+          </colgroup>
+        ) : null}
         <thead className="bg-slate-100 text-xs uppercase tracking-[0.08em] text-slate-600">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => (
-                <th
-                  key={header.id}
-                  className={`whitespace-nowrap border-b border-slate-200 px-3 ${dense ? "py-2" : "py-3"} text-left font-black ${columns[index]?.align === "right" ? "text-right" : columns[index]?.align === "center" ? "text-center" : ""}`}
-                >
-                  <button type="button" onClick={header.column.getToggleSortingHandler()} className="inline-flex items-center gap-1">
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    <span className="text-slate-400">{header.column.getIsSorted() === "asc" ? "▲" : header.column.getIsSorted() === "desc" ? "▼" : ""}</span>
-                  </button>
-                </th>
-              ))}
+              {headerGroup.headers.map((header, index) => {
+                const align = alignmentClasses(columns[index]?.align);
+                return (
+                  <th
+                    key={header.id}
+                    className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 align-middle ${dense ? "py-2" : "py-3"} font-black ${align.header}`}
+                  >
+                    <button type="button" onClick={header.column.getToggleSortingHandler()} className={`inline-flex w-full items-center gap-1 ${align.button}`}>
+                      <span className="truncate">{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                      <span className="shrink-0 text-slate-400">{header.column.getIsSorted() === "asc" ? "▲" : header.column.getIsSorted() === "desc" ? "▼" : ""}</span>
+                    </button>
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
-              {row.getVisibleCells().map((cell, index) => (
-                <td key={cell.id} className={`whitespace-nowrap px-3 ${dense ? "py-2" : "py-3"} ${columns[index]?.align === "right" ? "text-right tabular-nums" : columns[index]?.align === "center" ? "text-center" : ""}`}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+              {row.getVisibleCells().map((cell, index) => {
+                const align = alignmentClasses(columns[index]?.align);
+                return (
+                  <td key={cell.id} className={`h-14 overflow-hidden whitespace-nowrap px-3 align-middle ${dense ? "py-2" : "py-3"} ${align.cell}`}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
