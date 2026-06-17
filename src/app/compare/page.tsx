@@ -36,12 +36,12 @@ function PlayerSelect({ name, label, value }: { name: string; label: string; val
 
 function WinnerIcon({ winner }: { winner: ComparisonWinner }) {
   if (winner === "left") {
-    return <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-xs font-black text-emerald-700"><ArrowLeft className="h-3 w-3" /> Left</span>;
+    return <span aria-label="Left player wins" className="inline-flex h-9 w-12 items-center justify-center rounded bg-emerald-50 text-emerald-700"><ArrowLeft className="h-6 w-6" /></span>;
   }
   if (winner === "right") {
-    return <span className="inline-flex items-center gap-1 rounded bg-red-50 px-2 py-1 text-xs font-black text-red-700">Right <ArrowRight className="h-3 w-3" /></span>;
+    return <span aria-label="Right player wins" className="inline-flex h-9 w-12 items-center justify-center rounded bg-red-50 text-red-700"><ArrowRight className="h-6 w-6" /></span>;
   }
-  return <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs font-black text-slate-500"><Minus className="h-3 w-3" /> Tie</span>;
+  return <span aria-label="Tie" className="inline-flex h-9 w-12 items-center justify-center rounded bg-slate-100 text-slate-500"><Minus className="h-6 w-6" /></span>;
 }
 
 function PlayerCard({ profile }: { profile: NonNullable<ReturnType<typeof getPlayerProfile>> }) {
