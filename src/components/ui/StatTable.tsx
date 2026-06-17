@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 
@@ -9,9 +10,35 @@ export type StatTableColumn = {
   label: string;
   align?: "left" | "right" | "center";
   hrefKey?: string;
+  imageKey?: string;
+  imageAltKey?: string;
+  imageFallbackKey?: string;
 };
 
 export type StatTableRow = Record<string, string | number | null | undefined>;
+
+function CellImage({ src, alt, fallback }: { src: string; alt: string; fallback: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  return (
+    <span className="relative inline-grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-[9px] font-black text-slate-500">
+      <span aria-hidden="true">{fallback}</span>
+      {!failed ? (
+        <Image
+          src={src}
+          alt={alt}
+          width={28}
+          height={28}
+          className={`absolute inset-0 h-7 w-7 object-contain transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
+          unoptimized
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+        />
+      ) : null}
+    </span>
+  );
+}
 
 export function StatTable({ columns, rows, dense = false }: { columns: StatTableColumn[]; rows: StatTableRow[]; dense?: boolean }) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -24,13 +51,22 @@ export function StatTable({ columns, rows, dense = false }: { columns: StatTable
           const value = info.getValue();
           const formatted = value === null || value === undefined ? "N/A" : String(value);
           const href = column.hrefKey ? info.row.original[column.hrefKey] : undefined;
-          return href ? (
-            <Link href={String(href)} className="font-bold text-signal hover:underline">
-              {formatted}
-            </Link>
-          ) : (
-            formatted
+          const imageUrl = column.imageKey ? info.row.original[column.imageKey] : undefined;
+          const imageAlt = column.imageAltKey ? info.row.original[column.imageAltKey] : undefined;
+          const imageFallback = column.imageFallbackKey ? info.row.original[column.imageFallbackKey] : undefined;
+          const content = (
+            <span className={imageUrl ? "inline-flex min-h-7 items-center gap-2" : undefined}>
+              {imageUrl ? (
+                <CellImage
+                  src={String(imageUrl)}
+                  alt={imageAlt ? String(imageAlt) : ""}
+                  fallback={imageFallback ? String(imageFallback) : ""}
+                />
+              ) : null}
+              <span>{formatted}</span>
+            </span>
           );
+          return href ? <Link href={String(href)} className="font-bold text-signal hover:underline">{content}</Link> : content;
         }
       })),
     [columns]

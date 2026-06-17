@@ -4,9 +4,16 @@ import { teamSeasonAggregates } from "@/lib/data/queries";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
+function nbaTeamLogoUrl(teamId: string) {
+  return `https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`;
+}
+
 export default function TeamsPage() {
   const rows = teamSeasonAggregates.map((row) => ({
     team: `${row.team.city} ${row.team.name}`,
+    teamLogo: nbaTeamLogoUrl(row.team.id),
+    teamLogoAlt: `${row.team.city} ${row.team.name} logo`,
+    teamLogoFallback: row.team.abbreviation,
     href: `/teams/${row.team.slug}`,
     conf: row.team.conference,
     record: `${row.wins}-${row.losses}`,
@@ -22,7 +29,7 @@ export default function TeamsPage() {
       <PageHeader eyebrow="Team Index" title="Teams" description="Team style, four factors, shot diet, lineup performance, and roster contribution entry point." />
       <StatTable
         columns={[
-          { key: "team", label: "Team", hrefKey: "href" },
+          { key: "team", label: "Team", hrefKey: "href", imageKey: "teamLogo", imageAltKey: "teamLogoAlt", imageFallbackKey: "teamLogoFallback" },
           { key: "conf", label: "Conf" },
           { key: "record", label: "Record" },
           { key: "ortg", label: "ORtg", align: "right" },
