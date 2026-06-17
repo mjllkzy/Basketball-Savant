@@ -15,7 +15,7 @@ const baseColumns: StatTableColumn[] = [
   { key: "team", label: "Team" },
   { key: "pos", label: "Pos" },
   { key: "height", label: "Height" },
-  { key: "weight", label: "Weight", align: "right" },
+  { key: "weight", label: "Weight" },
   { key: "age", label: "Age", align: "right" },
   { key: "games", label: "G", align: "right" },
   { key: "min", label: "MIN", align: "right" }
