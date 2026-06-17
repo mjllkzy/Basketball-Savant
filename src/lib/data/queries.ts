@@ -147,6 +147,29 @@ export function gameVenueLabel(game: Game): string {
   return game.neutralSite ? "Neutral site" : game.arena ?? "";
 }
 
+export function gameContextLabel(game: Game): string {
+  if (game.seasonType === "Regular Season") return "Regular Season";
+
+  const match = game.id.match(/^004\d{2}00([1-4])([0-7])([1-7])$/);
+  if (!match) return game.seasonType;
+
+  const round = Number(match[1]);
+  const gameNumber = Number(match[3]);
+  if (round === 4) return `NBA Finals Game ${gameNumber}`;
+
+  const homeTeam = teams.find((team) => team.id === game.homeTeamId);
+  const awayTeam = teams.find((team) => team.id === game.awayTeamId);
+  const conference = homeTeam && awayTeam && homeTeam.conference === awayTeam.conference ? homeTeam.conference : undefined;
+
+  if (round === 3) {
+    const conferenceFinals = conference === "East" ? "ECF" : conference === "West" ? "WCF" : "Conference Finals";
+    return `${conferenceFinals} Game ${gameNumber}`;
+  }
+  if (round === 2) return `${conference ? `${conference} Semifinals` : "Conference Semifinals"} Game ${gameNumber}`;
+  if (round === 1) return `${conference ? `${conference} First Round` : "First Round"} Game ${gameNumber}`;
+  return `Playoffs Game ${gameNumber}`;
+}
+
 export function playerName(playerId: string): string {
   return players.find((player) => player.id === playerId)?.name ?? playerId;
 }

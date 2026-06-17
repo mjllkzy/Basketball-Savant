@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameMatchupLabel, games, getGameLeadingScorer, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
+import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameContextLabel, gameMatchupLabel, games, getGameLeadingScorer, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
 
@@ -236,6 +236,16 @@ describe("metric registry and official data", () => {
     expect(leader?.points).toBe(maxPoints);
     expect(leader?.player.name).toBeTruthy();
     expect(leader?.team.abbreviation).toBeTruthy();
+  });
+
+  it("labels game context from official season type and playoff game IDs", () => {
+    expect(gameContextLabel(games.find((game) => game.id === "0042500405")!)).toBe("NBA Finals Game 5");
+    expect(gameContextLabel(games.find((game) => game.id === "0042500301")!)).toBe("ECF Game 1");
+    expect(gameContextLabel(games.find((game) => game.id === "0042500317")!)).toBe("WCF Game 7");
+
+    const regularSeasonGame = games.find((game) => game.seasonType === "Regular Season");
+    expect(regularSeasonGame).toBeTruthy();
+    expect(gameContextLabel(regularSeasonGame!)).toBe("Regular Season");
   });
 
   it("uses real team conference metadata instead of one default value", () => {
