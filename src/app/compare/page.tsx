@@ -140,13 +140,19 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
           <PlayerCard profile={rightProfile} />
         </div>
         <div className="table-scroll mt-4 overflow-x-auto rounded border border-slate-200">
-          <table className="min-w-full border-collapse bg-white text-sm">
+          <table className="min-w-full table-fixed border-collapse bg-white text-sm">
+            <colgroup>
+              <col className="w-[40%]" />
+              <col className="w-[22%]" />
+              <col className="w-[14%]" />
+              <col className="w-[24%]" />
+            </colgroup>
             <thead className="bg-slate-100 text-xs uppercase tracking-[0.08em] text-slate-600">
               <tr>
                 <th className="border-b border-slate-200 px-3 py-3 text-left font-black">Metric</th>
                 <th className="border-b border-slate-200 px-3 py-3 text-right font-black">{leftProfile.player.name}</th>
                 <th className="border-b border-slate-200 px-3 py-3 text-center font-black">Edge</th>
-                <th className="border-b border-slate-200 px-3 py-3 text-right font-black">{rightProfile.player.name}</th>
+                <th className="border-b border-slate-200 px-3 py-3 text-left font-black">{rightProfile.player.name}</th>
               </tr>
             </thead>
             <tbody>
@@ -155,7 +161,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
                   <td className="px-3 py-3 font-semibold text-ink">{row.metric.label}</td>
                   <td className={`px-3 py-3 text-right tabular-nums ${row.winner === "left" ? "font-black text-emerald-700" : ""}`}>{formatMetric(row.key, row.leftValue)}</td>
                   <td className="px-3 py-3 text-center"><WinnerIcon winner={row.winner} /></td>
-                  <td className={`px-3 py-3 text-right tabular-nums ${row.winner === "right" ? "font-black text-red-700" : ""}`}>{formatMetric(row.key, row.rightValue)}</td>
+                  <td className={`px-3 py-3 text-left tabular-nums ${row.winner === "right" ? "font-black text-red-700" : ""}`}>{formatMetric(row.key, row.rightValue)}</td>
                 </tr>
               ))}
             </tbody>
