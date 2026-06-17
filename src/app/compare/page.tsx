@@ -2,9 +2,8 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, GitCompare, Minus, Radar } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PercentileBar } from "@/components/ui/PercentileBar";
-import { getPlayerProfile, playerSeasonAggregates, players, teams } from "@/lib/data/queries";
-import { comparisonRows, heightToInches, similarPlayers, type ComparisonWinner } from "@/lib/comparison";
-import { calculatePlayerMetric } from "@/lib/metrics/registry";
+import { getPlayerProfile, players, teams } from "@/lib/data/queries";
+import { comparisonRows, heightToInches, type ComparisonWinner } from "@/lib/comparison";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
@@ -74,18 +73,15 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
   const defaultRightSlug = defaultSlugById("203999", 1);
   const leftSlug = selectedSlug(searchParams, "left", defaultLeftSlug);
   const rightSlug = selectedSlug(searchParams, "right", defaultRightSlug);
-  const similaritySlug = selectedSlug(searchParams, "similarity", leftSlug);
   const leftProfile = getPlayerProfile(leftSlug) ?? getPlayerProfile(players[0].slug)!;
   const rightProfile = getPlayerProfile(rightSlug) ?? getPlayerProfile(players[1]?.slug ?? players[0].slug)!;
-  const similarityProfile = getPlayerProfile(similaritySlug) ?? leftProfile;
   const rows = comparisonRows(leftProfile.aggregate, rightProfile.aggregate);
-  const matches = similarPlayers(similarityProfile.aggregate, playerSeasonAggregates, 8);
 
   if (mode !== "compare") {
     return (
       <div className="grid min-h-[calc(100vh-220px)] gap-4 lg:grid-cols-2">
         <Link
-          href={`/compare?mode=compare&left=${leftProfile.player.slug}&right=${rightProfile.player.slug}&similarity=${similarityProfile.player.slug}`}
+          href={`/compare?mode=compare&left=${leftProfile.player.slug}&right=${rightProfile.player.slug}`}
           className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_42%)]" />
@@ -105,7 +101,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
         </Link>
 
         <Link
-          href={`/similarity?player=${similarityProfile.player.slug}`}
+          href={`/similarity?player=${leftProfile.player.slug}`}
           className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-ink/20 bg-ink p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(244,162,97,0.32),transparent_44%)]" />
@@ -129,7 +125,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
 
   return (
     <div className="grid gap-5">
-      <PageHeader eyebrow="Compare" title="Player Comparison" description="Side-by-side player edges and similarity scoring from official box, advanced, physical, and role data." />
+      <PageHeader eyebrow="Compare" title="Player Comparison" description="Side-by-side player edges from official box, advanced, physical, and role data." />
 
       <section className="rounded border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-xl font-black text-ink">Side-by-Side</h2>
@@ -137,7 +133,6 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
           <input type="hidden" name="mode" value="compare" />
           <PlayerSelect name="left" label="Left Player" value={leftProfile.player.slug} />
           <PlayerSelect name="right" label="Right Player" value={rightProfile.player.slug} />
-          <input type="hidden" name="similarity" value={similarityProfile.player.slug} />
           <button className="self-end rounded bg-ink px-3 py-2 text-sm font-black text-white">Compare</button>
         </form>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -165,41 +160,6 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
               ))}
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section className="rounded border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h2 className="text-xl font-black text-ink">Player Similarity</h2>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-              Scores combine 55% statistical profile, 25% physical profile, and 20% position/role similarity from loaded official fields.
-            </p>
-          </div>
-          <form className="grid min-w-0 gap-3 lg:grid-cols-[320px_110px]">
-            <input type="hidden" name="mode" value="compare" />
-            <input type="hidden" name="left" value={leftProfile.player.slug} />
-            <input type="hidden" name="right" value={rightProfile.player.slug} />
-            <PlayerSelect name="similarity" label="Find Similar To" value={similarityProfile.player.slug} />
-            <button className="self-end rounded bg-ink px-3 py-2 text-sm font-black text-white">Find</button>
-          </form>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {matches.map((match) => (
-            <Link key={match.aggregate.player.id} href={`/players/${match.aggregate.player.slug}`} className="rounded border border-slate-200 p-4 hover:border-signal hover:bg-slate-50">
-              <div className="text-xs font-black uppercase tracking-[0.14em] text-signal">{match.aggregate.team.abbreviation} · {match.aggregate.player.position}</div>
-              <h3 className="mt-1 text-lg font-black text-ink">{match.aggregate.player.name}</h3>
-              <div className="mt-3 text-3xl font-black text-ink">{match.score}</div>
-              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Similarity Score</div>
-              <div className="mt-3 grid gap-1 text-xs text-slate-600">
-                <div>Stats {match.statScore} · Physical {match.physicalScore} · Role {match.roleScore}</div>
-                <div className="font-semibold text-slate-700">Traits: {match.traits.join(", ")}</div>
-              </div>
-              <div className="mt-3 text-xs text-slate-500">
-                {formatMetric("pts", calculatePlayerMetric("pts", match.aggregate))} PTS · {formatMetric("ts_pct", calculatePlayerMetric("ts_pct", match.aggregate))} TS · {match.aggregate.player.height}
-              </div>
-            </Link>
-          ))}
         </div>
       </section>
     </div>
