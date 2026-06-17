@@ -10,7 +10,7 @@ import { numberParam, singleParam, type RouteSearchParams } from "@/lib/searchPa
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
-const standardTableMinWidth = "1440px";
+const standardTableMinWidth = "1500px";
 const advancedTableMinWidth = "1580px";
 
 function identityColumn(key: string, label: string, width: string): StatTableColumn {
@@ -18,7 +18,7 @@ function identityColumn(key: string, label: string, width: string): StatTableCol
 }
 
 function metricColumn(key: string, label: string, width = "82px"): StatTableColumn {
-  return { key, label, width, align: "right" };
+  return { key, label, width, align: "center" };
 }
 
 const baseColumns: StatTableColumn[] = [
@@ -34,12 +34,12 @@ const baseColumns: StatTableColumn[] = [
 
 const standardColumns: StatTableColumn[] = [
   ...baseColumns,
-  metricColumn("pts", "PTS", "74px"),
-  metricColumn("reb", "REB", "74px"),
-  metricColumn("ast", "AST", "74px"),
-  metricColumn("stl", "STL", "70px"),
-  metricColumn("blk", "BLK", "70px"),
-  metricColumn("tov", "TOV", "70px"),
+  metricColumn("pts", "PTS"),
+  metricColumn("reb", "REB"),
+  metricColumn("ast", "AST"),
+  metricColumn("stl", "STL"),
+  metricColumn("blk", "BLK"),
+  metricColumn("tov", "TOV"),
   metricColumn("fg", "FG%", "82px"),
   metricColumn("three", "3P%", "82px"),
   metricColumn("ft", "FT%", "82px")
@@ -49,14 +49,14 @@ const advancedColumns: StatTableColumn[] = [
   ...baseColumns,
   metricColumn("ts", "TS%", "82px"),
   metricColumn("efg", "eFG%", "82px"),
-  metricColumn("usg", "USG%", "86px"),
-  metricColumn("astPct", "AST%", "86px"),
-  metricColumn("rebPct", "REB%", "86px"),
-  metricColumn("tovPct", "TOV%", "86px"),
-  metricColumn("ortg", "ORtg", "78px"),
-  metricColumn("drtg", "DRtg", "78px"),
-  metricColumn("net", "Net", "74px"),
-  metricColumn("pie", "PIE", "78px")
+  metricColumn("usg", "USG%", "82px"),
+  metricColumn("astPct", "AST%", "82px"),
+  metricColumn("rebPct", "REB%", "82px"),
+  metricColumn("tovPct", "TOV%", "82px"),
+  metricColumn("ortg", "ORtg", "82px"),
+  metricColumn("drtg", "DRtg", "82px"),
+  metricColumn("net", "Net", "82px"),
+  metricColumn("pie", "PIE", "82px")
 ];
 
 export default function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {

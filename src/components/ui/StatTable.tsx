@@ -49,20 +49,23 @@ function alignmentClasses(align?: StatTableColumn["align"]) {
     return {
       cell: "text-right tabular-nums",
       header: "text-right",
-      button: "justify-end"
+      button: "justify-end",
+      icon: ""
     };
   }
   if (align === "center") {
     return {
-      cell: "text-center",
+      cell: "text-center tabular-nums",
       header: "text-center",
-      button: "justify-center"
+      button: "justify-center",
+      icon: "absolute right-0"
     };
   }
   return {
     cell: "text-left",
     header: "text-left",
-    button: "justify-start"
+    button: "justify-start",
+    icon: ""
   };
 }
 
@@ -144,9 +147,9 @@ export function StatTable({
                     key={header.id}
                     className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 align-middle ${dense ? "py-2" : "py-3"} font-black ${align.header}`}
                   >
-                    <button type="button" onClick={header.column.getToggleSortingHandler()} className={`inline-flex w-full items-center gap-1 ${align.button}`}>
+                    <button type="button" onClick={header.column.getToggleSortingHandler()} className={`relative inline-flex w-full items-center gap-1 ${align.button}`}>
                       <span className="truncate">{flexRender(header.column.columnDef.header, header.getContext())}</span>
-                      <span className="shrink-0 text-slate-400">{header.column.getIsSorted() === "asc" ? "▲" : header.column.getIsSorted() === "desc" ? "▼" : ""}</span>
+                      <span className={`shrink-0 text-slate-400 ${align.icon}`}>{header.column.getIsSorted() === "asc" ? "▲" : header.column.getIsSorted() === "desc" ? "▼" : ""}</span>
                     </button>
                   </th>
                 );
