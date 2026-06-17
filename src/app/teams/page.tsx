@@ -21,12 +21,16 @@ export default function TeamsPage() {
     drtg: formatMetric("def_rating", calculateTeamMetric("def_rating", row)),
     net: formatMetric("net_rating", calculateTeamMetric("net_rating", row)),
     pace: formatMetric("pace", calculateTeamMetric("pace", row)),
+    ts: formatMetric("ts_pct", calculateTeamMetric("ts_pct", row)),
     efg: formatMetric("efg_pct", calculateTeamMetric("efg_pct", row)),
-    three: formatMetric("three_pct", calculateTeamMetric("three_pct", row))
+    three: formatMetric("three_pct", calculateTeamMetric("three_pct", row)),
+    ast: formatMetric("ast_pct", calculateTeamMetric("ast_pct", row)),
+    reb: formatMetric("reb_pct", calculateTeamMetric("reb_pct", row)),
+    tov: formatMetric("turnover_rate", calculateTeamMetric("turnover_rate", row))
   }));
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="Team Index" title="Teams" description="Team style, four factors, shot diet, lineup performance, and roster contribution entry point." />
+      <PageHeader eyebrow="Team Index" title="Teams" description="Official team records, ratings, pace, shooting, ball movement, and rebounding context." />
       <StatTable
         columns={[
           { key: "team", label: "Team", hrefKey: "href", imageKey: "teamLogo", imageAltKey: "teamLogoAlt", imageFallbackKey: "teamLogoFallback" },
@@ -36,8 +40,12 @@ export default function TeamsPage() {
           { key: "drtg", label: "DRtg", align: "right" },
           { key: "net", label: "Net", align: "right" },
           { key: "pace", label: "Pace", align: "right" },
+          { key: "ts", label: "TS%", align: "right" },
           { key: "efg", label: "eFG%", align: "right" },
-          { key: "three", label: "3P%", align: "right" }
+          { key: "three", label: "3P%", align: "right" },
+          { key: "ast", label: "AST%", align: "right" },
+          { key: "reb", label: "REB%", align: "right" },
+          { key: "tov", label: "TOV%", align: "right" }
         ]}
         rows={rows}
       />

@@ -1,19 +1,6 @@
 import Link from "next/link";
-import { Activity, BarChart3, BookOpen, GitCompare, Home, Search, Shield, Users, Workflow } from "lucide-react";
 import { CommandSearch } from "@/components/layout/CommandSearch";
-import { leaderboardTabs } from "@/lib/leaderboards";
-
-const links = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/leaderboards", label: "Leaderboards", icon: BarChart3 },
-  { href: "/players", label: "Players", icon: Users },
-  { href: "/teams", label: "Teams", icon: Shield },
-  { href: "/games", label: "Games", icon: Activity },
-  { href: "/visuals", label: "Visuals", icon: Workflow },
-  { href: "/compare", label: "Compare", icon: GitCompare },
-  { href: "/glossary", label: "Glossary", icon: BookOpen }
-];
+import { coreNavLinks } from "@/lib/navigation";
 
 export function TopNav() {
   return (
@@ -21,7 +8,7 @@ export function TopNav() {
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-3 px-3 py-3 sm:px-5 lg:px-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded bg-ink text-sm font-black text-white">BS</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-ink text-sm font-black text-white shadow-sm">BS</div>
             <div>
               <div className="text-base font-black uppercase tracking-[0.18em] text-ink">Basketball Savant</div>
               <div className="text-xs font-medium text-slate-500">Advanced Basketball Breakdowns</div>
@@ -30,7 +17,7 @@ export function TopNav() {
           <CommandSearch />
         </div>
         <nav className="table-scroll flex gap-1 overflow-x-auto pb-1 text-sm font-semibold text-slate-700">
-          {links.map((item) => {
+          {coreNavLinks.map((item) => {
             const Icon = item.icon;
             return (
               <Link key={item.href} href={item.href} className="inline-flex min-h-9 shrink-0 items-center gap-2 rounded border border-transparent px-3 hover:border-slate-200 hover:bg-slate-50">
@@ -39,21 +26,6 @@ export function TopNav() {
               </Link>
             );
           })}
-          <div className="group relative shrink-0">
-            <Link href="/leaderboards/custom" className="inline-flex min-h-9 items-center gap-2 rounded border border-slate-200 px-3 hover:bg-slate-50">
-              Custom
-            </Link>
-            <div className="invisible absolute left-0 top-10 z-50 grid w-56 gap-1 rounded border border-slate-200 bg-white p-2 opacity-0 shadow-card transition group-hover:visible group-hover:opacity-100">
-              {leaderboardTabs.map((item) => (
-                <Link key={item.category} href={`/leaderboards?category=${encodeURIComponent(item.category)}&metric=${item.metricKey}`} className="rounded px-3 py-2 text-xs hover:bg-slate-50">
-                  {item.category}
-                </Link>
-              ))}
-              <Link href="/leaderboards/custom" className="rounded px-3 py-2 text-xs hover:bg-slate-50">
-                Custom
-              </Link>
-            </div>
-          </div>
         </nav>
       </div>
     </header>

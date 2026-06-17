@@ -1,148 +1,70 @@
+import Image from "next/image";
 import Link from "next/link";
-import { BarChart3, Crosshair, GitCompare, Search, Target, Trophy } from "lucide-react";
-import { GameFlowChart } from "@/components/charts/GameFlowChart";
-import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
-import { MetricCard } from "@/components/ui/MetricCard";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { StatTable } from "@/components/ui/StatTable";
-import { featuredInsights, gameFlow, gameMatchupLabel, latestGames, teamName, teamSeasonAggregates, topPerformers } from "@/lib/data/queries";
-import { formatShortDate } from "@/lib/date";
-import { calculateTeamMetric } from "@/lib/metrics/registry";
-import { formatMetric } from "@/lib/metrics/format";
+import { ArrowRight, BarChart3, GitCompare, ShieldCheck, Users } from "lucide-react";
+import { dataSourceMetadata, players, teams } from "@/lib/data/queries";
 
 const tools = [
-  { href: "/search", label: "Event Search", icon: Search, body: "Inspect shot and possession rows when an event feed is connected." },
-  { href: "/leaderboards/custom", label: "Custom Leaderboards", icon: BarChart3, body: "Build player, team, or lineup tables with shareable columns and CSV export." },
-  { href: "/compare", label: "Player Comparison", icon: GitCompare, body: "Compare two to four players across profile, role, and impact metrics." },
-  { href: "/visuals", label: "Official Visuals", icon: Crosshair, body: "Explore team style, player trends, radar, and scoring leaders from loaded stats." },
-  { href: "/games", label: "Gamefeed", icon: Target, body: "Review official scores, game context, box scores, leaders, and gameflow when loaded." },
-  { href: "/similarity", label: "Similarity Finder", icon: Trophy, body: "Find players with matching statistical fingerprints and role traits." }
+  { href: "/players", label: "Player Intelligence", icon: Users, body: "Search every loaded player by role, team, volume, efficiency, creation, and impact." },
+  { href: "/teams", label: "Team Index", icon: BarChart3, body: "Compare team records, ratings, pace, shooting profile, and possession context." },
+  { href: "/compare", label: "Compare + Similarity", icon: GitCompare, body: "Put two players side by side, then find statistically and physically similar players." }
 ];
 
 export default function HomePage() {
-  const performers = topPerformers();
-  const games = latestGames(4);
-  const styleData = teamSeasonAggregates.map((row) => ({
-    name: row.team.abbreviation,
-    pace: calculateTeamMetric("pace", row) ?? 0,
-    shotQuality: calculateTeamMetric("efg_pct", row) ?? 0,
-    net: calculateTeamMetric("net_rating", row) ?? 0
-  }));
-  const firstGame = games[0];
-
   return (
-    <div className="grid gap-4">
-      <PageHeader
-        eyebrow="Command Center"
-        title="Basketball Savant"
-        description="Advanced basketball search, leaderboards, visuals, and player intelligence powered by official NBA Stats snapshots and clearly marked unavailable feeds."
-      />
-
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-        {performers.map(({ metric, leader }) => (
-          <MetricCard
-            key={metric.key}
-            label={metric.shortLabel}
-            value={leader ? formatMetric(metric.key, leader.value) : "N/A"}
-            sublabel={leader ? `${leader.player.name} · ${leader.team.abbreviation}` : "No leader"}
-            accent={metric.category === "Shot Quality" ? "court" : "signal"}
-          />
-        ))}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-black text-ink">Latest Games</h2>
-            <Link href="/games" className="text-sm font-bold text-signal hover:underline">All games</Link>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {games.length === 0 ? (
-              <div className="rounded border border-dashed border-slate-300 p-4 text-sm leading-6 text-slate-600 sm:col-span-2">
-                Official game-log scores are not loaded in the current NBA Stats snapshot. Basketball Savant will not display generated game dates or scores.
-              </div>
-            ) : games.map((game) => {
-              const awayTeamName = teamName(game.awayTeamId);
-              const homeTeamName = teamName(game.homeTeamId);
-              return (
-                <Link
-                  key={game.id}
-                  href={`/games/${game.id}`}
-                  aria-label={`${gameMatchupLabel(game)}, ${game.awayScore} to ${game.homeScore}`}
-                  className="rounded border border-slate-200 p-3 hover:bg-slate-50"
-                >
-                  <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{formatShortDate(game.date)}</div>
-                  <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 text-sm">
-                    <span className="min-w-0 leading-5 text-ink">{awayTeamName}</span>
-                    <strong>{game.awayScore}</strong>
-                    <span className="min-w-0 leading-5 text-ink">{homeTeamName}</span>
-                    <strong>{game.homeScore}</strong>
-                  </div>
-                </Link>
-              );
-            })}
+    <div className="grid gap-6">
+      <section className="relative min-h-[520px] overflow-hidden rounded border border-slate-200 bg-ink text-white shadow-card">
+        <Image src="/brand/basketball-savant-hero.png" alt="" fill priority className="object-cover opacity-60" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,24,32,0.18),rgba(16,24,32,0.9))]" />
+        <div className="relative z-10 mx-auto flex min-h-[520px] max-w-5xl flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="mb-5 flex h-20 w-20 items-center justify-center rounded border border-white/20 bg-white/12 text-2xl font-black tracking-[0.12em] shadow-card backdrop-blur">BS</div>
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.28em] text-teal-200">Official Basketball Intelligence</p>
+          <h1 className="max-w-4xl text-5xl font-black tracking-normal sm:text-7xl">Basketball Savant</h1>
+          <p className="mt-5 max-w-3xl text-base leading-7 text-slate-100 sm:text-lg">
+            A focused basketball analytics workspace for comparing players, understanding teams, and finding similar profiles using official NBA Stats snapshots with Basketball Reference cross-checks.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/players" className="inline-flex min-h-11 items-center gap-2 rounded bg-white px-5 text-sm font-black text-ink hover:bg-slate-100">
+              Explore Players <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/compare" className="inline-flex min-h-11 items-center gap-2 rounded border border-white/25 bg-white/10 px-5 text-sm font-black text-white backdrop-blur hover:bg-white/15">
+              Compare Players
+            </Link>
           </div>
         </div>
-        {firstGame ? (
-          <GameFlowChart data={gameFlow(firstGame.id)} />
-        ) : (
-          <div className="h-72 rounded border border-slate-200 bg-white p-3 shadow-sm">
-            <h3 className="mb-2 text-sm font-black text-ink">Gameflow Runs</h3>
-            <div className="flex h-[88%] items-center justify-center rounded border border-dashed border-slate-200 px-6 text-center text-sm leading-6 text-slate-500">
-              Official possession-level gameflow is unavailable until a real play-by-play or possession feed is connected.
-            </div>
-          </div>
-        )}
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <TeamStyleScatter data={styleData} />
-        <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-lg font-black text-ink">Top Performers</h2>
-          <StatTable
-            dense
-            columns={[
-              { key: "category", label: "Category" },
-              { key: "player", label: "Player", hrefKey: "href" },
-              { key: "team", label: "Team" },
-              { key: "value", label: "Value", align: "right" },
-              { key: "pct", label: "Pctile", align: "right" }
-            ]}
-            rows={performers.map(({ metric, leader }) => ({
-              category: metric.category,
-              player: leader?.player.name,
-              href: leader ? `/players/${leader.player.slug}` : undefined,
-              team: leader?.team.abbreviation,
-              value: leader ? formatMetric(metric.key, leader.value) : "N/A",
-              pct: leader?.percentile
-            }))}
-          />
-        </div>
-      </section>
-
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-4 lg:grid-cols-3">
         {tools.map((tool) => {
           const Icon = tool.icon;
           return (
-            <Link key={tool.href} href={tool.href} className="rounded border border-slate-200 bg-white p-4 shadow-sm hover:border-signal">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-signal">
-                <Icon className="h-5 w-5" />
-              </div>
-              <h3 className="font-black text-ink">{tool.label}</h3>
-              <p className="mt-1 text-sm leading-6 text-slate-600">{tool.body}</p>
+            <Link key={tool.href} href={tool.href} className="rounded border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-card">
+              <Icon className="h-6 w-6 text-signal" />
+              <h2 className="mt-4 text-xl font-black text-ink">{tool.label}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{tool.body}</p>
             </Link>
           );
         })}
       </section>
 
-      <section className="grid gap-3 md:grid-cols-3">
-        {featuredInsights().map((insight) => (
-          <Link key={insight.title} href={insight.href} className="rounded border border-slate-200 bg-white p-4 shadow-sm hover:border-court">
-            <div className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-court">Trending Insight</div>
-            <h3 className="font-black text-ink">{insight.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{insight.body}</p>
-          </Link>
-        ))}
+      <section className="grid gap-4 rounded border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-3">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Players Loaded</div>
+          <div className="mt-1 text-3xl font-black text-signal">{players.length}</div>
+        </div>
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Teams Loaded</div>
+          <div className="mt-1 text-3xl font-black text-signal">{teams.length}</div>
+        </div>
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Source Status</div>
+          <div className="mt-2 inline-flex items-center gap-2 rounded bg-teal-50 px-3 py-2 text-sm font-black text-signal">
+            <ShieldCheck className="h-4 w-4" />
+            NBA Stats + Basketball Reference
+          </div>
+        </div>
+        <p className="text-sm leading-6 text-slate-600 md:col-span-3">
+          Current snapshot generated {new Date(dataSourceMetadata.generatedAt).toLocaleDateString("en-US")}. Tracking-only metrics stay hidden until a real event or optical data source is connected.
+        </p>
       </section>
     </div>
   );

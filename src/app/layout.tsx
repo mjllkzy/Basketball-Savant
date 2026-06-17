@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
   title: "Basketball Savant",
-  description: "Advanced basketball search, leaderboards, visuals, and player intelligence."
+  description: "Premium basketball player, team, comparison, and similarity analytics powered by official data."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
