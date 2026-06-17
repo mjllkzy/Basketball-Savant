@@ -7,7 +7,7 @@ import { FilterPanel } from "@/components/ui/FilterPanel";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ShareUrlButton } from "@/components/ui/ShareUrlButton";
-import { filterShots, gameMatchupLabel, games, playerName, players, teamName, teams } from "@/lib/data/queries";
+import { filterShots, gameMatchupLabel, games, playerName, players, shots, teamName, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { formatMetric } from "@/lib/metrics/format";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
@@ -31,6 +31,7 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
     pageSize: 120
   };
   const result = filterShots(filters);
+  const hasShotFeed = shots.length > 0;
   const makes = result.rows.filter((shot) => shot.made).length;
   const expected = result.rows.reduce((sum, shot) => sum + shot.expectedPoints, 0);
   const actualMinusExpected = result.rows.reduce((sum, shot) => sum + shot.actualMinusExpected, 0);
@@ -116,17 +117,26 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
         </FilterPanel>
         <div className="grid gap-4">
           <FilterChipBar chips={chips} />
-          <div className="grid gap-3 sm:grid-cols-4">
-            <MetricCard label="Attempts" value={result.meta.total} />
-            <MetricCard label="Make Rate" value={formatMetric("fg_pct", makes / Math.max(result.rows.length, 1))} />
-            <MetricCard label="xPTS / Shot" value={(expected / Math.max(result.rows.length, 1)).toFixed(2)} accent="court" />
-            <MetricCard label="A - xPTS" value={actualMinusExpected.toFixed(1)} accent="ink" />
-          </div>
-          <section className="grid gap-4 xl:grid-cols-2">
-            <ShotChart shots={result.rows} />
-            <ShotHeatmap shots={result.rows} />
-          </section>
-          <ShotSearchResults rows={tableRows} />
+          {hasShotFeed ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-4">
+                <MetricCard label="Attempts" value={result.meta.total} />
+                <MetricCard label="Make Rate" value={formatMetric("fg_pct", makes / Math.max(result.rows.length, 1))} />
+                <MetricCard label="xPTS / Shot" value={(expected / Math.max(result.rows.length, 1)).toFixed(2)} accent="court" />
+                <MetricCard label="A - xPTS" value={actualMinusExpected.toFixed(1)} accent="ink" />
+              </div>
+              <section className="grid gap-4 xl:grid-cols-2">
+                <ShotChart shots={result.rows} />
+                <ShotHeatmap shots={result.rows} />
+              </section>
+              <ShotSearchResults rows={tableRows} />
+            </>
+          ) : (
+            <div className="rounded border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600 shadow-sm">
+              <h2 className="mb-2 text-lg font-black text-ink">Shot Event Feed Required</h2>
+              <p>Shot search needs row-level shot events with player, team, game, location, result, and shot-context fields. The current snapshot keeps this page empty instead of producing estimated shot records.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

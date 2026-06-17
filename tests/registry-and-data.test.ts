@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameContextLabel, gameMatchupLabel, games, getGameLeadingScorer, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
+import { activeLeaderboardTabs, feedRequiredLeaderboardTabs, isLeaderboardMetricFeedRequired } from "@/lib/leaderboards";
 import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
 
 describe("metric registry and official data", () => {
@@ -275,6 +276,17 @@ describe("query behavior", () => {
     const rows = getPlayerLeaderboard("pts", { limit: 20 });
     const values = rows.map((row) => row.value ?? 0);
     expect(values).toEqual([...values].sort((a, b) => b - a));
+  });
+
+  it("keeps default leaderboard tabs on loaded official metrics", () => {
+    for (const tab of activeLeaderboardTabs) {
+      expect(isLeaderboardMetricFeedRequired(tab.metricKey)).toBe(false);
+      expect(getPlayerLeaderboard(tab.metricKey, { limit: 10 }).some((row) => row.value !== null)).toBe(true);
+    }
+    for (const tab of feedRequiredLeaderboardTabs) {
+      expect(isLeaderboardMetricFeedRequired(tab.metricKey)).toBe(true);
+      expect(getPlayerLeaderboard(tab.metricKey, { limit: 10 }).every((row) => row.value === null)).toBe(true);
+    }
   });
 
   it("calculates custom metric values from aggregate rows", () => {

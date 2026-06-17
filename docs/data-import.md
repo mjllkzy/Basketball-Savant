@@ -160,9 +160,21 @@ Useful tracking/model fields:
 ### tracking requirements
 
 Shot quality, defender distance, play-type PPP, touch maps, pass networks, rebound chances, boxouts, contests, matchup difficulty, and gravity need row-level event/tracking data. A usable provider feed must include stable NBA-compatible IDs, period/clock or event timestamps, player/team/game IDs, coordinates where relevant, and display rights for derived metrics.
-- gameId
-- season
-- passType
+
+Basketball Reference and public NBA Stats aggregate tables are credible sources for box-score totals, advanced rate stats, team ratings, and formula cross-checks, but they do not provide the complete row-level optical/event feed needed for shot quality, defender distance, touch location, or lineup stint modeling. To enable those metrics, provide one of these:
+
+- Licensed API credentials or scheduled exports from a provider that permits derived public display.
+- CSV/JSON exports with stable NBA-compatible `gameId`, `teamId`, and `playerId` values.
+- A clear data dictionary for coordinates, timestamps, shot context, possession context, and lineup stint definitions.
+- Confirmation that Basketball Savant can store raw rows and show derived metrics on a public Railway deployment.
+
+Minimum fields for tracking/event metrics:
+
+- shot rows: game, period, clock, shooter, team, opponent, x/y coordinates, zone, shot type, result, points value, defender, defender distance, shot clock, touch time, dribbles, assist/pull-up/catch-and-shoot/transition flags
+- possession rows: game, period, clock, offense, defense, lineup ids, play type, primary player, result type, points, expected points when available
+- pass rows: passer, receiver, possession, start/end coordinates, potential assist, secondary assist, led-to-shot, led-to-assist
+- rebound/defense rows: rebound chances, contested rebounds, boxouts, contests, matchup assignments, expected points allowed, actual points allowed
+- lineup rows: five player ids, stint/game id, possessions, offensive rating, defensive rating, net rating, pace, and shooting/four-factor values when available
 
 ### defensive_events
 

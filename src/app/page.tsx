@@ -11,11 +11,11 @@ import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
 const tools = [
-  { href: "/search", label: "Possession Search", icon: Search, body: "Filter shots and possessions by player, zone, defender, clock, and expected value." },
+  { href: "/search", label: "Event Search", icon: Search, body: "Inspect shot and possession rows when an event feed is connected." },
   { href: "/leaderboards/custom", label: "Custom Leaderboards", icon: BarChart3, body: "Build player, team, or lineup tables with shareable columns and CSV export." },
   { href: "/compare", label: "Player Comparison", icon: GitCompare, body: "Compare two to four players across profile, role, and impact metrics." },
-  { href: "/visuals", label: "Shot Chart Lab", icon: Crosshair, body: "Explore shot charts, heatmaps, pass networks, and team style maps." },
-  { href: "/games", label: "Gamefeed", icon: Target, body: "Review possession timelines, top possessions, lineups, and gameflow runs." },
+  { href: "/visuals", label: "Official Visuals", icon: Crosshair, body: "Explore team style, player trends, radar, and scoring leaders from loaded stats." },
+  { href: "/games", label: "Gamefeed", icon: Target, body: "Review official scores, game context, box scores, leaders, and gameflow when loaded." },
   { href: "/similarity", label: "Similarity Finder", icon: Trophy, body: "Find players with matching statistical fingerprints and role traits." }
 ];
 

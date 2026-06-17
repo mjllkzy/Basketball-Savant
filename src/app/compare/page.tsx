@@ -71,7 +71,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
       <RollingLineChart data={chartData} lines={profiles.map((profile) => profile.player.name)} />
       <StatTable columns={[{ key: "metric", label: "Metric" }, ...profiles.map((profile) => ({ key: profile.player.name, label: profile.player.name, align: "right" as const }))]} rows={rows} />
       <div className="rounded border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
-        Edge summary: compare shot quality and usage together. A player with high shot quality and lower usage is often a scalable finisher, while high usage with positive actual-over-expected points signals harder self-created shotmaking.
+        Edge summary: compare TS%, eFG%, USG%, AST%, PIE, and recent scoring together. Shot-quality and actual-over-expected metrics stay out of this comparison until a real shot-context feed is loaded.
       </div>
     </div>
   );

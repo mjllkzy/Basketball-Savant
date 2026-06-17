@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Activity, BarChart3, BookOpen, GitCompare, Home, Search, Shield, Users, Workflow } from "lucide-react";
 import { CommandSearch } from "@/components/layout/CommandSearch";
+import { leaderboardTabs } from "@/lib/leaderboards";
 
 const links = [
   { href: "/", label: "Home", icon: Home },
@@ -13,8 +14,6 @@ const links = [
   { href: "/compare", label: "Compare", icon: GitCompare },
   { href: "/glossary", label: "Glossary", icon: BookOpen }
 ];
-
-const leaderboardItems = ["Scoring", "Shooting", "Shot Quality", "Playmaking", "Defense", "Rebounding", "Play Type", "Clutch", "Lineups", "Rolling Windows", "Percentiles", "Custom"];
 
 export function TopNav() {
   return (
@@ -45,11 +44,14 @@ export function TopNav() {
               Custom
             </Link>
             <div className="invisible absolute left-0 top-10 z-50 grid w-56 gap-1 rounded border border-slate-200 bg-white p-2 opacity-0 shadow-card transition group-hover:visible group-hover:opacity-100">
-              {leaderboardItems.map((item) => (
-                <Link key={item} href={item === "Custom" ? "/leaderboards/custom" : `/leaderboards?category=${encodeURIComponent(item)}`} className="rounded px-3 py-2 text-xs hover:bg-slate-50">
-                  {item}
+              {leaderboardTabs.map((item) => (
+                <Link key={item.category} href={`/leaderboards?category=${encodeURIComponent(item.category)}&metric=${item.metricKey}`} className="rounded px-3 py-2 text-xs hover:bg-slate-50">
+                  {item.category}
                 </Link>
               ))}
+              <Link href="/leaderboards/custom" className="rounded px-3 py-2 text-xs hover:bg-slate-50">
+                Custom
+              </Link>
             </div>
           </div>
         </nav>

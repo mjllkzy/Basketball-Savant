@@ -50,6 +50,8 @@ When a licensed or public event feed is added, the adapter must persist the sour
 
 Shot quality, defender distance, play-type PPP, touch maps, pass networks, gravity, contest value, rebound chances, and matchup difficulty need row-level event/tracking data. The minimum useful feed includes NBA Stats-compatible game IDs, team IDs, player IDs, period/clock or event timestamps, shot x/y coordinates, shot zone/type, closest defender ID, defender distance, touch time, dribble count, shot clock, play type, pass events, rebound chances, boxouts, contests, matchup assignments, and terms that allow Basketball Savant to display derived results.
 
+Basketball Reference is used as a public cross-check and formula reference for overlapping advanced/rate stats. It does not include the row-level optical tracking fields needed for defender distance, shot quality models, touch maps, pass maps, lineup networks, or matchup assignments.
+
 ## Sample-Size Notes
 
 Small samples can make rate stats and actual-over-expected values noisy. Leaderboards should use minimum games, minutes, possessions, or attempts before exposing production claims.
