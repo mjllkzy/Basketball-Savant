@@ -16,6 +16,7 @@ import type {
 import { estimatePossessions, trueShootingPercentage, usageRate } from "@/lib/metrics/formulas";
 import { nbaPlayerHeadshotUrl } from "@/lib/playerImages";
 import { slugify } from "@/lib/utils";
+import { mapNbaShotChartTable } from "@/lib/data/shotChartMapper";
 
 type SnapshotTable = {
   headers: string[];
@@ -37,6 +38,12 @@ function isSnapshotTable(candidate: unknown): candidate is SnapshotTable {
 
 function table(name: string): SnapshotTable {
   const candidate = (officialSnapshot.tables as Record<string, unknown>)[name];
+  return isSnapshotTable(candidate) ? candidate : { headers: [], rows: [] };
+}
+
+function shotChartTable(name: "regularSeason" | "playoffs"): SnapshotTable {
+  const shotCharts = (officialSnapshot.tables as { shotCharts?: Record<string, unknown> }).shotCharts;
+  const candidate = shotCharts?.[name];
   return isSnapshotTable(candidate) ? candidate : { headers: [], rows: [] };
 }
 
@@ -560,7 +567,10 @@ for (const aggregate of officialPlayerSeasonAggregates) {
     });
 }
 
-export const officialShots: Shot[] = [];
+export const officialShots: Shot[] = [
+  ...mapNbaShotChartTable(shotChartTable("regularSeason"), officialSnapshot.metadata.season),
+  ...mapNbaShotChartTable(shotChartTable("playoffs"), officialSnapshot.metadata.season)
+];
 export const officialPossessions: Possession[] = [];
 export const officialPasses: Pass[] = [];
 export const officialRebounds: Rebound[] = [];

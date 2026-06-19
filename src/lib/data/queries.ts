@@ -349,8 +349,8 @@ export function getCustomLeaderboard(entityType: "players" | "teams" | "lineups"
   }));
 }
 
-export function filterShots(params: ShotFilters = {}) {
-  let rows = [...shots];
+export function filterShotRows(sourceRows: Shot[], params: ShotFilters = {}) {
+  let rows = [...sourceRows];
   if (params.playerId) {
     const playerId = params.playerId;
     const resolvedPlayerId = getPlayerByIdOrSlug(playerId)?.id;
@@ -379,9 +379,9 @@ export function filterShots(params: ShotFilters = {}) {
   if (params.maxActualMinusExpected !== undefined) rows = rows.filter((shot) => shot.actualMinusExpected <= params.maxActualMinusExpected!);
   if (params.q) {
     rows = rows.filter((shot) => {
-      const player = players.find((item) => item.id === shot.playerId)!;
-      const team = teams.find((item) => item.id === shot.teamId)!;
-      return textMatch(`${player.name} ${team.city} ${team.name} ${shot.playType} ${shot.shotZone}`, params.q);
+      const player = players.find((item) => item.id === shot.playerId);
+      const team = teams.find((item) => item.id === shot.teamId);
+      return textMatch(`${player?.name ?? shot.playerId} ${team?.city ?? ""} ${team?.name ?? shot.teamId} ${shot.playType} ${shot.shotZone}`, params.q);
     });
   }
   const sort = params.sort ?? "expectedPoints";
@@ -393,6 +393,10 @@ export function filterShots(params: ShotFilters = {}) {
     return a.id.localeCompare(b.id);
   });
   return paginate(rows, params);
+}
+
+export function filterShots(params: ShotFilters = {}) {
+  return filterShotRows(shots, params);
 }
 
 export function filterPossessions(params: ShotFilters = {}) {

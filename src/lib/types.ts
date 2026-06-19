@@ -121,7 +121,7 @@ export type Shot = {
   y: number;
   shotDistance: number;
   shotZone: ShotZone;
-  shotType: "Layup" | "Dunk" | "Floater" | "Pull-Up" | "Catch-and-Shoot" | "Stepback" | "Hook";
+  shotType: "Layup" | "Dunk" | "Floater" | "Pull-Up" | "Catch-and-Shoot" | "Stepback" | "Hook" | "Jump Shot";
   pointsValue: 2 | 3;
   made: boolean;
   assisted: boolean;

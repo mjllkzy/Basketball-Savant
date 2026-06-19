@@ -7,14 +7,17 @@ import { LineupTable } from "@/components/domain/LineupTable";
 import { TeamHeader } from "@/components/domain/TeamHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
+import { getLiveTeamShotChart } from "@/lib/data/liveShotCharts";
 import { gameMatchupLabel, getTeamProfile, players, teamSeasonAggregates } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
-export default function TeamPage({ params }: { params: { teamId: string } }) {
+export default async function TeamPage({ params }: { params: { teamId: string } }) {
   const profile = getTeamProfile(params.teamId);
   if (!profile) notFound();
+  const liveShots = await getLiveTeamShotChart(profile.team.id);
+  const chartShots = liveShots.length ? liveShots : profile.shots;
   const rosterRows = profile.rosterRows.map((row) => ({
     player: row.player.name,
     href: `/players/${row.player.slug}`,
@@ -39,8 +42,8 @@ export default function TeamPage({ params }: { params: { teamId: string } }) {
         ))}
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
-        <ShotChart shots={profile.shots} colorBy="xpts" />
-        <ShotHeatmap shots={profile.shots} mode="efficiency" />
+        <ShotChart shots={chartShots} colorBy="result" />
+        <ShotHeatmap shots={chartShots} mode="efficiency" />
       </section>
       <section className="grid gap-4 xl:grid-cols-2">
         <TeamStyleScatter data={styleData} />

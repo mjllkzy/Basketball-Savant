@@ -10,12 +10,20 @@ export function ShotChart({ shots, colorBy = "result", maxShots = 260 }: { shots
         <span className="text-xs font-bold text-slate-500">{shots.length} attempts</span>
       </div>
       <BasketballCourt className="h-auto w-full">
+        {!visible.length ? (
+          <text x="250" y="258" textAnchor="middle" fill="#64748b" fontSize="15" fontWeight="800">
+            Official shot events unavailable
+          </text>
+        ) : null}
         {visible.map((shot) => {
           const point = courtPoint(shot.x, shot.y);
           const color = colorBy === "xpts" ? `rgba(15, 118, 110, ${Math.max(0.35, Math.min(0.95, shot.expectedPoints / 1.5))})` : shot.made ? "#15803d" : "#b91c1c";
+          const title = colorBy === "xpts"
+            ? `${shot.shotZone} · ${shot.made ? "Make" : "Miss"} · xPTS ${shot.expectedPoints.toFixed(2)}`
+            : `${shot.shotZone} · ${shot.made ? "Make" : "Miss"} · ${shot.shotDistance} ft`;
           return (
             <circle key={shot.id} cx={point.cx} cy={point.cy} r={shot.made ? 5 : 4} fill={color} stroke="#fff" strokeWidth="1.2" opacity="0.92">
-              <title>{`${shot.shotZone} · ${shot.made ? "Make" : "Miss"} · xPTS ${shot.expectedPoints.toFixed(2)}`}</title>
+              <title>{title}</title>
             </circle>
           );
         })}

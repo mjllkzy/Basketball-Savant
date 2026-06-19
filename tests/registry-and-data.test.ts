@@ -273,12 +273,12 @@ describe("metric registry and official data", () => {
 });
 
 describe("query behavior", () => {
-  it("returns a valid empty shot result when no official shot-event feed is loaded", () => {
-    const firstTeam = teams[0];
-    const result = filterShots({ teamId: firstTeam.id, shotZone: "Rim", result: "made", pageSize: 100 });
+  it("returns official shot-event rows when a shot chart feed is loaded", () => {
+    const result = filterShots({ shotZone: "Rim", result: "made", pageSize: 100 });
     expect(Array.isArray(result.rows)).toBe(true);
-    expect(result.rows.length).toBe(0);
-    expect(result.meta.total).toBe(0);
+    expect(result.rows.length).toBeGreaterThan(0);
+    expect(result.meta.total).toBeGreaterThanOrEqual(result.rows.length);
+    expect(result.rows.every((shot) => shot.shotZone === "Rim" && shot.made)).toBe(true);
   });
 
   it("sorts leaderboards in descending metric order", () => {
