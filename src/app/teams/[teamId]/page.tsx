@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { LineupNetwork } from "@/components/charts/LineupNetwork";
-import { ShotChart } from "@/components/charts/ShotChart";
-import { ShotHeatmap } from "@/components/charts/ShotHeatmap";
+import { TeamShotMap } from "@/components/charts/TeamShotMap";
 import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
 import { LineupTable } from "@/components/domain/LineupTable";
 import { TeamHeader } from "@/components/domain/TeamHeader";
@@ -41,9 +40,8 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
           <MetricCard key={key} label={key.replaceAll("_", " ").toUpperCase()} value={formatMetric(key, calculateTeamMetric(key, profile.aggregate))} accent={index % 2 ? "court" : "signal"} />
         ))}
       </section>
-      <section className="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
-        <ShotChart shots={chartShots} colorBy="result" />
-        <ShotHeatmap shots={chartShots} mode="efficiency" />
+      <section>
+        <TeamShotMap shots={chartShots} />
       </section>
       <section className="grid gap-4 xl:grid-cols-2">
         <TeamStyleScatter data={styleData} />
