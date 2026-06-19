@@ -6,6 +6,34 @@ export type ShotChartTable = {
   rows: unknown[][];
 };
 
+export type CompactShot = [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  number,
+  string,
+  number,
+  number,
+  number,
+  ShotZone,
+  Shot["shotType"],
+  2 | 3,
+  0 | 1,
+  string,
+  number,
+  number,
+  number,
+  0 | 1,
+  0 | 1,
+  0 | 1,
+  0 | 1,
+  0 | 1,
+  0 | 1
+];
+
 function value(table: ShotChartTable, row: unknown[], key: string): unknown {
   const index = table.headers.indexOf(key);
   return index === -1 ? undefined : row[index];
@@ -123,5 +151,73 @@ export function nbaShotChartResultSetToTable(resultSet: unknown): ShotChartTable
   return {
     headers: Array.isArray(maybeResultSet.headers) ? maybeResultSet.headers.map(String) : [],
     rows: Array.isArray(rows) ? (rows as unknown[][]) : []
+  };
+}
+
+export function compactShotForStorage(shot: Shot): CompactShot {
+  return [
+    shot.id,
+    shot.possessionId,
+    shot.gameId,
+    shot.season,
+    shot.playerId,
+    shot.teamId,
+    shot.quarter,
+    shot.clock,
+    shot.x,
+    shot.y,
+    shot.shotDistance,
+    shot.shotZone,
+    shot.shotType,
+    shot.pointsValue,
+    shot.made ? 1 : 0,
+    shot.playType,
+    shot.expectedFgPct,
+    shot.expectedPoints,
+    shot.actualMinusExpected,
+    shot.isTransition ? 1 : 0,
+    shot.isCatchAndShoot ? 1 : 0,
+    shot.isPullUp ? 1 : 0,
+    shot.isAtRim ? 1 : 0,
+    shot.isCornerThree ? 1 : 0,
+    shot.isAboveBreakThree ? 1 : 0
+  ];
+}
+
+export function expandCompactShot(row: CompactShot): Shot {
+  return {
+    id: row[0],
+    possessionId: row[1],
+    gameId: row[2],
+    season: row[3],
+    playerId: row[4],
+    teamId: row[5],
+    quarter: row[6],
+    clock: row[7],
+    x: row[8],
+    y: row[9],
+    shotDistance: row[10],
+    shotZone: row[11],
+    shotType: row[12],
+    pointsValue: row[13],
+    made: row[14] === 1,
+    assisted: false,
+    dribblesBeforeShot: row[20] === 1 ? 0 : row[21] === 1 ? 4 : 1,
+    touchTime: row[20] === 1 ? 1.2 : row[21] === 1 ? 4 : 2.5,
+    defenderDistance: 0,
+    closestDefender: "Not loaded",
+    contestLevel: "Open",
+    shotClock: 12,
+    expectedFgPct: row[16],
+    expectedPoints: row[17],
+    actualMinusExpected: row[18],
+    playType: row[15],
+    isClutch: false,
+    isTransition: row[19] === 1,
+    isCatchAndShoot: row[20] === 1,
+    isPullUp: row[21] === 1,
+    isAtRim: row[22] === 1,
+    isCornerThree: row[23] === 1,
+    isAboveBreakThree: row[24] === 1
   };
 }

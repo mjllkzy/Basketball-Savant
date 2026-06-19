@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { nbaShotChartResultSetToTable, mapNbaShotChartTable } from "@/lib/data/shotChartMapper";
 import { officialMetadata } from "@/lib/data/official";
 import type { Shot } from "@/lib/types";
@@ -49,6 +50,9 @@ function firstResultSet(payload: unknown) {
 }
 
 export const getLiveTeamShotChart = cache(async (teamId: string): Promise<Shot[]> => {
+  const cachedShots = getCachedTeamShotChart(teamId);
+  if (cachedShots.length) return cachedShots;
+
   try {
     const response = await fetch(teamShotChartUrl(teamId, "Regular Season"), {
       headers: nbaStatsHeaders,
