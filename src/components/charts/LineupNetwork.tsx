@@ -6,7 +6,7 @@ export function LineupNetwork({ lineups, players }: { lineups: Lineup[]; players
     <div className="rounded border border-slate-200 bg-white p-3 shadow-sm">
       <h3 className="mb-2 text-sm font-black text-ink">Lineup Network</h3>
       <div className="grid gap-2">
-        {top.map((lineup) => {
+        {top.length ? top.map((lineup) => {
           const lineupPlayers = [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].map((id) => players.find((player) => player.id === id)!);
           return (
             <div key={lineup.id} className="rounded border border-slate-200 p-2">
@@ -23,7 +23,11 @@ export function LineupNetwork({ lineups, players }: { lineups: Lineup[]; players
               </div>
             </div>
           );
-        })}
+        }) : (
+          <div className="rounded border border-dashed border-slate-300 bg-slate-50 p-3 text-sm font-semibold leading-6 text-slate-600">
+            Official lineup combinations are not loaded for this team yet.
+          </div>
+        )}
       </div>
     </div>
   );

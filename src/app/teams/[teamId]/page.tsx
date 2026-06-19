@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { LineupNetwork } from "@/components/charts/LineupNetwork";
 import { TeamShotMap } from "@/components/charts/TeamShotMap";
-import { TeamStyleScatter } from "@/components/charts/TeamStyleScatter";
+import { TeamStyleProfile } from "@/components/charts/TeamStyleProfile";
 import { LineupTable } from "@/components/domain/LineupTable";
 import { TeamHeader } from "@/components/domain/TeamHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -26,12 +26,6 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
     usg: formatMetric("usage_rate", calculatePlayerMetric("usage_rate", row)),
     stocks: formatMetric("stocks", calculatePlayerMetric("stocks", row))
   }));
-  const styleData = teamSeasonAggregates.map((row) => ({
-    name: row.team.abbreviation,
-    pace: calculateTeamMetric("pace", row) ?? 0,
-    shotQuality: calculateTeamMetric("efg_pct", row) ?? 0,
-    net: calculateTeamMetric("net_rating", row) ?? 0
-  }));
   return (
     <div className="grid gap-4">
       <TeamHeader team={profile.team} record={`${profile.aggregate.wins}-${profile.aggregate.losses}`} />
@@ -44,7 +38,7 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
         <TeamShotMap shots={chartShots} />
       </section>
       <section className="grid gap-4 xl:grid-cols-2">
-        <TeamStyleScatter data={styleData} />
+        <TeamStyleProfile team={profile.aggregate} teams={teamSeasonAggregates} />
         <LineupNetwork lineups={profile.lineups} players={players} />
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
