@@ -1,6 +1,29 @@
 import type { Player, Team } from "@/lib/types";
 import { PlayerHeadshot } from "@/components/domain/PlayerHeadshot";
 
+type PlayerFactSource = Pick<Player, "age" | "college" | "country" | "draftYear" | "draftPick" | "handedness">;
+
+function cleanBioValue(value?: string) {
+  const trimmed = value?.trim();
+  return trimmed && trimmed !== "N/A" ? trimmed : undefined;
+}
+
+export function playerHeaderFacts(player: PlayerFactSource) {
+  const college = cleanBioValue(player.college);
+  const country = cleanBioValue(player.country);
+  const draftFact = player.draftYear
+    ? `Draft: ${player.draftYear}${player.draftPick ? ` · Pick ${player.draftPick}` : ""}`
+    : "Undrafted";
+
+  return [
+    Number.isFinite(player.age) && player.age > 0 ? `Age ${player.age}` : undefined,
+    college ? `College: ${college}` : country ? `Country: ${country}` : "Bio background pending",
+    draftFact,
+    college && country ? `Country: ${country}` : undefined,
+    player.handedness ? `${player.handedness}-handed` : undefined
+  ].filter(Boolean);
+}
+
 export function PlayerHeader({ player, team }: { player: Player; team: Team }) {
   const bioLine = [
     player.jerseyNumber ? `#${player.jerseyNumber}` : undefined,
@@ -8,12 +31,7 @@ export function PlayerHeader({ player, team }: { player: Player; team: Team }) {
     player.height !== "N/A" ? player.height : undefined,
     player.weight ? `${player.weight} lb` : undefined
   ].filter(Boolean);
-  const facts = [
-    Number.isFinite(player.age) && player.age > 0 ? `Age ${player.age}` : undefined,
-    player.draftYear ? `Draft ${player.draftYear}` : undefined,
-    player.draftPick ? `Pick ${player.draftPick}` : undefined,
-    player.handedness
-  ].filter(Boolean);
+  const facts = playerHeaderFacts(player);
 
   return (
     <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
@@ -30,9 +48,8 @@ export function PlayerHeader({ player, team }: { player: Player; team: Team }) {
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
           {facts.map((fact) => (
-            <span key={fact} className="rounded bg-slate-100 px-3 py-2 font-bold">{fact}</span>
+            <span key={fact} className="flex min-h-12 items-center rounded bg-slate-100 px-3 py-2 font-bold leading-snug">{fact}</span>
           ))}
-          <span className="rounded bg-slate-100 px-3 py-2 font-bold">NBA Stats snapshot</span>
         </div>
       </div>
     </div>
