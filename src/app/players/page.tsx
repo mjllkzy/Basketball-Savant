@@ -13,8 +13,8 @@ const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
 const standardTableMinWidth = "1500px";
 const advancedTableMinWidth = "1580px";
 
-function identityColumn(key: string, label: string, width: string): StatTableColumn {
-  return { key, label, width, align: "center" };
+function identityColumn(key: string, label: string, width: string, sortOrder?: string[]): StatTableColumn {
+  return { key, label, width, align: "center", sortOrder };
 }
 
 function metricColumn(key: string, label: string, width = "82px"): StatTableColumn {
@@ -24,7 +24,7 @@ function metricColumn(key: string, label: string, width = "82px"): StatTableColu
 const baseColumns: StatTableColumn[] = [
   { key: "player", label: "Player", hrefKey: "href", width: "260px", truncate: true },
   identityColumn("team", "Team", "72px"),
-  identityColumn("pos", "Pos", "66px"),
+  identityColumn("pos", "Pos", "66px", primaryPositionOrder),
   identityColumn("height", "Height", "82px"),
   identityColumn("weight", "Weight", "86px"),
   identityColumn("age", "Age", "64px"),

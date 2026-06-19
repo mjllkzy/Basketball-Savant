@@ -39,13 +39,26 @@ export function compareStatTableValues(a: SortableTableValue, b: SortableTableVa
   return String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true, sensitivity: "base" });
 }
 
-export function compareStatTableValuesForSort(a: SortableTableValue, b: SortableTableValue, direction: SortDirection): number {
+function compareCustomOrderedValues(a: SortableTableValue, b: SortableTableValue, sortOrder?: string[]) {
+  if (!sortOrder || sortOrder.length === 0) return null;
+
+  const order = new Map(sortOrder.map((value, index) => [value.trim().toLowerCase(), index]));
+  const aRank = order.get(String(a ?? "").trim().toLowerCase());
+  const bRank = order.get(String(b ?? "").trim().toLowerCase());
+
+  if (aRank !== undefined && bRank !== undefined) return aRank - bRank;
+  if (aRank !== undefined) return -1;
+  if (bRank !== undefined) return 1;
+  return null;
+}
+
+export function compareStatTableValuesForSort(a: SortableTableValue, b: SortableTableValue, direction: SortDirection, sortOrder?: string[]): number {
   const aMissing = isMissingSortableValue(a);
   const bMissing = isMissingSortableValue(b);
   if (aMissing && bMissing) return 0;
   if (aMissing) return 1;
   if (bMissing) return -1;
 
-  const compared = compareStatTableValues(a, b);
+  const compared = compareCustomOrderedValues(a, b, sortOrder) ?? compareStatTableValues(a, b);
   return direction === "asc" ? compared : -compared;
 }

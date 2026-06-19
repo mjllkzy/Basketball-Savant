@@ -20,6 +20,21 @@ describe("table sorting", () => {
     expect([...values].sort((a, b) => compareStatTableValuesForSort(a, b, "desc"))).toEqual(["12.0", "5.0", "N/A", null, "--"]);
   });
 
+  it("sorts custom ordered values before falling back to text sorting", () => {
+    const positions = ["C", "SG", "PF", "PG", "SF"];
+    const positionOrder = ["PG", "SG", "SF", "PF", "C"];
+
+    expect([...positions].sort((a, b) => compareStatTableValuesForSort(a, b, "asc", positionOrder))).toEqual(["PG", "SG", "SF", "PF", "C"]);
+    expect([...positions].sort((a, b) => compareStatTableValuesForSort(a, b, "desc", positionOrder))).toEqual(["C", "PF", "SF", "SG", "PG"]);
+  });
+
+  it("keeps missing values below custom ordered values", () => {
+    const positions = ["N/A", "C", "SG", null, "PG"];
+    const positionOrder = ["PG", "SG", "SF", "PF", "C"];
+
+    expect([...positions].sort((a, b) => compareStatTableValuesForSort(a, b, "asc", positionOrder))).toEqual(["PG", "SG", "C", "N/A", null]);
+  });
+
   it("classifies only true missing placeholders as missing", () => {
     expect(isMissingSortableValue("N/A")).toBe(true);
     expect(isMissingSortableValue("--")).toBe(true);

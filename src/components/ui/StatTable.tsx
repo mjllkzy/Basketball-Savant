@@ -13,6 +13,7 @@ export type StatTableColumn = {
   width?: string;
   minWidth?: string;
   truncate?: boolean;
+  sortOrder?: string[];
   hrefKey?: string;
   imageKey?: string;
   imageAltKey?: string;
@@ -89,12 +90,13 @@ export function StatTable({
 
     return rows.slice().sort((a, b) => {
       for (const sort of sorting) {
-        const compared = compareStatTableValuesForSort(a[sort.id], b[sort.id], sort.desc ? "desc" : "asc");
+        const column = columns.find((item) => item.key === sort.id);
+        const compared = compareStatTableValuesForSort(a[sort.id], b[sort.id], sort.desc ? "desc" : "asc", column?.sortOrder);
         if (compared !== 0) return compared;
       }
       return 0;
     });
-  }, [rows, sorting]);
+  }, [columns, rows, sorting]);
   const tableColumns = useMemo(
     () =>
       columns.map((column) => ({
