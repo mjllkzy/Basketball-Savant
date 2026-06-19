@@ -25,15 +25,15 @@ function CellImage({ src, alt, fallback }: { src: string; alt: string; fallback:
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   return (
-    <span className="relative inline-grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-[9px] font-black text-slate-500">
-      {failed ? <span aria-hidden="true">{fallback}</span> : null}
+    <span className="inline-grid h-8 w-8 shrink-0 place-items-center overflow-hidden bg-transparent text-[9px] font-black text-slate-500">
+      {failed ? <span aria-hidden="true" className="leading-none">{fallback}</span> : null}
       {!failed ? (
         <Image
           src={src}
           alt={alt}
-          width={28}
-          height={28}
-          className={`absolute inset-0 h-7 w-7 object-contain transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
+          width={32}
+          height={32}
+          className={`h-8 w-8 object-contain transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
           unoptimized
           loading="lazy"
           onLoad={() => setLoaded(true)}
