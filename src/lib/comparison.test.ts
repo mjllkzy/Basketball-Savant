@@ -71,6 +71,6 @@ describe("comparison helpers", () => {
   });
 
   it("keeps core navigation focused on finished product tabs", () => {
-    expect(coreNavLinks.map((link) => link.href)).toEqual(["/", "/players", "/teams", "/compare"]);
+    expect(coreNavLinks.map((link) => link.href)).toEqual(["/", "/players", "/teams", "/compare", "/news"]);
   });
 });

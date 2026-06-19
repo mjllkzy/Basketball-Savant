@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BarChart3, GitCompare, ShieldCheck, Users } from "lucide-react";
-import { dataSourceMetadata, players, teams } from "@/lib/data/queries";
+import { ArrowRight, BarChart3, ExternalLink, GitCompare, Newspaper, Users } from "lucide-react";
+import { categoryTone, formatNewsDate, getRecentNews } from "@/lib/news";
 
 const tools = [
   { href: "/players", label: "Player Intelligence", icon: Users, body: "Search every loaded player by role, team, volume, efficiency, creation, and impact." },
@@ -10,6 +10,8 @@ const tools = [
 ];
 
 export default function HomePage() {
+  const latestNews = getRecentNews(3);
+
   return (
     <div className="grid gap-6">
       <section className="relative min-h-[520px] overflow-hidden rounded border border-slate-200 bg-ink text-white shadow-card">
@@ -46,25 +48,36 @@ export default function HomePage() {
         })}
       </section>
 
-      <section className="grid gap-4 rounded border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-3">
-        <div>
-          <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Players Loaded</div>
-          <div className="mt-1 text-3xl font-black text-signal">{players.length}</div>
-        </div>
-        <div>
-          <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Teams Loaded</div>
-          <div className="mt-1 text-3xl font-black text-signal">{teams.length}</div>
-        </div>
-        <div>
-          <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Source Status</div>
-          <div className="mt-2 inline-flex items-center gap-2 rounded bg-teal-50 px-3 py-2 text-sm font-black text-signal">
-            <ShieldCheck className="h-4 w-4" />
-            NBA Stats + Basketball Reference
+      <section className="rounded border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-signal">
+              <Newspaper className="h-4 w-4" />
+              Latest News
+            </div>
+            <h2 className="mt-1 text-2xl font-black text-ink">League Pulse</h2>
           </div>
+          <Link href="/news" className="inline-flex min-h-10 items-center gap-2 rounded border border-slate-200 px-4 text-sm font-black text-ink hover:bg-slate-50">
+            View News
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-        <p className="text-sm leading-6 text-slate-600 md:col-span-3">
-          Current snapshot generated {new Date(dataSourceMetadata.generatedAt).toLocaleDateString("en-US")}. Tracking-only metrics stay hidden until a real event or optical data source is connected.
-        </p>
+        <div className="grid gap-3 lg:grid-cols-3">
+          {latestNews.map((item) => (
+            <article key={item.id} className="rounded border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <span className={`rounded border px-2 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${categoryTone(item.category)}`}>{item.category}</span>
+                <span className="text-xs font-bold text-slate-500">{formatNewsDate(item.publishedAt)}</span>
+              </div>
+              <h3 className="text-base font-black leading-tight text-ink">{item.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{item.summary}</p>
+              <Link href={item.sourceUrl} className="mt-3 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-signal hover:text-ink">
+                {item.sourceName}
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </article>
+          ))}
+        </div>
       </section>
     </div>
   );
