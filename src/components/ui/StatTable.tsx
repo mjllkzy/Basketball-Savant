@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type Row, type SortingState } from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, useReactTable, type Row, type SortingState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { compareStatTableValues } from "@/lib/tableSorting";
+import { compareStatTableValues, compareStatTableValuesForSort } from "@/lib/tableSorting";
 
 export type StatTableColumn = {
   key: string;
@@ -84,6 +84,17 @@ export function StatTable({
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const hasColumnSizing = columns.some((column) => column.width || column.minWidth);
+  const sortedRows = useMemo(() => {
+    if (sorting.length === 0) return rows;
+
+    return rows.slice().sort((a, b) => {
+      for (const sort of sorting) {
+        const compared = compareStatTableValuesForSort(a[sort.id], b[sort.id], sort.desc ? "desc" : "asc");
+        if (compared !== 0) return compared;
+      }
+      return 0;
+    });
+  }, [rows, sorting]);
   const tableColumns = useMemo(
     () =>
       columns.map((column) => ({
@@ -116,12 +127,12 @@ export function StatTable({
     [columns]
   );
   const table = useReactTable({
-    data: rows,
+    data: sortedRows,
     columns: tableColumns,
     state: { sorting },
     onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel()
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel()
   });
 
   return (
