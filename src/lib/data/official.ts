@@ -14,6 +14,7 @@ import type {
   TeamSeasonAggregate
 } from "@/lib/types";
 import { estimatePossessions, trueShootingPercentage, usageRate } from "@/lib/metrics/formulas";
+import { nbaPlayerHeadshotUrl } from "@/lib/playerImages";
 import { slugify } from "@/lib/utils";
 
 type SnapshotTable = {
@@ -240,7 +241,7 @@ export const officialPlayers: Player[] = playerTable.rows.map((row) => {
     college: bio.college,
     country: bio.country,
     rosterStatus: bio.rosterStatus,
-    headshotUrl: "/headshots/placeholder.svg",
+    headshotUrl: nbaPlayerHeadshotUrl(id),
     active: true,
     handedness: undefined,
     jerseyNumber: bio.jerseyNumber,
