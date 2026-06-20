@@ -9,7 +9,7 @@ import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export default function CustomLeaderboardPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const entityType = (singleParam(searchParams, "entityType") ?? "players") as "players" | "teams" | "lineups";
-  const metricKeys = (singleParam(searchParams, "metrics") ?? "pts,reb,ast,ts_pct,efg_pct,usage_rate,stocks").split(",").filter(Boolean);
+  const metricKeys = (singleParam(searchParams, "metrics") ?? "pts,reb,ast,stl,blk,ts_pct,efg_pct,usage_rate").split(",").filter(Boolean);
   const rows = getCustomLeaderboard(entityType, metricKeys).map((row, index) => ({
     rank: index + 1,
     entity: row.label,

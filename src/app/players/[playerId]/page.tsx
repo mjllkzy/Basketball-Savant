@@ -28,7 +28,7 @@ function FeedRequiredPanel({ title, detail }: { title: string; detail: string })
 export default function PlayerPage({ params }: { params: { playerId: string } }) {
   const profile = getPlayerProfile(params.playerId);
   if (!profile) notFound();
-  const radarKeys = ["pts", "reb", "ast", "ts_pct", "usage_rate", "three_pct", "stocks"];
+  const radarKeys = ["pts", "reb", "ast", "stl", "blk", "ts_pct", "usage_rate", "three_pct"];
   const radarData = radarKeys.map((key) => ({
     metric: getMetric(key).shortLabel,
     percentile: profile.metricValues.find((value) => value.metricKey === key)?.percentile ?? 0

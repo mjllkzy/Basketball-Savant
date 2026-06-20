@@ -89,7 +89,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
     net: numberValue(row.net, 1)
   }));
 
-  const radarKeys = ["pts", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "stocks", "pie"];
+  const radarKeys = ["pts", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "stl", "blk", "pie"];
   const radarData = radarKeys.map((key) => ({
     metric: getMetric(key).shortLabel,
     percentile: selectedProfile.metricValues.find((metricValue) => metricValue.metricKey === key)?.percentile ?? 0

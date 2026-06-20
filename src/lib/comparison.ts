@@ -16,7 +16,8 @@ export type ComparisonMetricKey =
   | "off_rating"
   | "def_rating"
   | "net_rating"
-  | "stocks"
+  | "stl"
+  | "blk"
   | "turnover_rate";
 
 export const comparisonMetricKeys: ComparisonMetricKey[] = [
@@ -32,7 +33,8 @@ export const comparisonMetricKeys: ComparisonMetricKey[] = [
   "off_rating",
   "def_rating",
   "net_rating",
-  "stocks",
+  "stl",
+  "blk",
   "turnover_rate"
 ];
 

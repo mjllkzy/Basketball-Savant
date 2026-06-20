@@ -3,7 +3,7 @@ import { StatTable } from "@/components/ui/StatTable";
 import { metricRegistry } from "@/lib/metrics/registry";
 
 export default function GlossaryPage() {
-  const rows = metricRegistry.map((metric) => ({
+  const rows = metricRegistry.filter((metric) => metric.key !== "stocks").map((metric) => ({
     name: metric.label,
     short: metric.shortLabel,
     category: metric.category,
