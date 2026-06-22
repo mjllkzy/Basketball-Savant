@@ -1,83 +1,119 @@
 [
   {
-    "id": "knicks-2026-championship-parade",
-    "title": "Knicks celebrate 2026 championship with New York parade",
-    "category": "League",
-    "publishedAt": "2026-06-18T17:22:00.000Z",
+    "id": "devin-booker-jersey-number-15",
+    "title": "Suns' Devin Booker changes jersey number to No. 15 in honor of his father",
+    "category": "Roster",
+    "publishedAt": "2026-06-21T23:05:00.000Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/live-updates-new-york-knicks-parade-2026",
-    "summary": "New York celebrated the Knicks' first championship since 1973 with a parade route through Lower Manhattan and City Hall speeches from Jalen Brunson, Mike Brown, and other team figures."
+    "sourceUrl": "https://www.nba.com/news/suns-all-star-guard-devin-booker-changes-jersey-number-to-no-15-in-honor-of-his-dad-melvin",
+    "summary": "Phoenix announced that Booker will switch from No. 1 to No. 15 for 2026-27, honoring his father Melvin Booker and the family number he previously wore with Team USA."
   },
   {
-    "id": "magic-sean-sweeney-intro",
-    "title": "Sean Sweeney takes over as Magic head coach",
+    "id": "reports-suns-re-sign-gillespie-goodwin",
+    "title": "Reports: Suns plan to re-sign Collin Gillespie and Jordan Goodwin",
+    "category": "Free Agency",
+    "publishedAt": "2026-06-21T21:57:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/suns-resign-collin-gillespie-jordan-goodwin",
+    "summary": "NBA.com, citing ESPN's Shams Charania and The Athletic, reported that Phoenix intends to keep both guards on new multi-year deals after their breakout reserve roles this season."
+  },
+  {
+    "id": "reports-hawks-bring-back-cj-mccollum",
+    "title": "Reports: Hawks bring back CJ McCollum on one-year deal",
+    "category": "Free Agency",
+    "publishedAt": "2026-06-21T21:55:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/hawks-resign-cj-mccollum",
+    "summary": "NBA.com, citing ESPN's Shams Charania and The Athletic, reported that Atlanta agreed to a one-year extension with McCollum after his strong finish to the season and playoff run."
+  },
+  {
+    "id": "consensus-mock-draft-final-week-2026",
+    "title": "Consensus Mock Draft: Where things stand entering final week before 2026 NBA Draft",
+    "category": "Draft",
+    "publishedAt": "2026-06-19T13:41:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/2026-consensus-mock-draft",
+    "summary": "NBA.com's June 19 consensus roundup keeps AJ Dybantsa and Darryn Peterson at the top of the class as the league enters the final weekend before the June 23-24 draft."
+  },
+  {
+    "id": "summer-league-2026-las-vegas-dates",
+    "title": "NBA Summer League 2026 returns to Las Vegas on July 9-19",
+    "category": "League",
+    "publishedAt": "2026-06-19T13:35:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/nba-summer-league-returns-las-vegas-july-9-19-2026",
+    "summary": "The league confirmed Las Vegas Summer League will run July 9-19 at Thomas & Mack Center and Cox Pavilion with all 30 teams participating."
+  },
+  {
+    "id": "tiago-splitter-bulls-coach-introduction",
+    "title": "Tiago Splitter takes over as Bulls coach, promises team will compete",
+    "category": "Coaching",
+    "publishedAt": "2026-06-19T11:20:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/bulls-hire-tiago-splitter-as-coach",
+    "summary": "Chicago formally introduced Tiago Splitter as the franchise's 25th head coach, with the former Spurs big man and recent Blazers interim coach emphasizing competition and culture."
+  },
+  {
+    "id": "michigan-big-three-draft-night",
+    "title": "Michigan's big three ready to hear their names called on Draft night",
+    "category": "Draft",
+    "publishedAt": "2026-06-18T22:18:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/michigan-big-three-nba-draft",
+    "summary": "NBA.com projects Michigan teammates Aday Mara, Yaxel Lendeborg and Morez Johnson Jr. as first-round selections after the trio helped power a national championship run."
+  },
+  {
+    "id": "sean-sweeney-magic-head-coach-fit",
+    "title": "Sean Sweeney takes over in Orlando after being convinced the fit was right",
     "category": "Coaching",
     "publishedAt": "2026-06-18T21:09:00.000Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/sean-sweeney-head-coach-magic-right-fit",
-    "summary": "Orlando introduced Sean Sweeney after the Spurs' Finals run, with the new coach framing the Magic opening as the right basketball and organizational fit."
+    "summary": "Orlando introduced Sean Sweeney as head coach after the Spurs' Finals run, with Sweeney saying the Magic job stood out as the right organizational and basketball fit."
   },
   {
-    "id": "bulls-tiago-splitter-compete",
-    "title": "Tiago Splitter begins Bulls tenure with compete-first message",
-    "category": "Coaching",
-    "publishedAt": "2026-06-18T16:00:00.000Z",
+    "id": "knicks-championship-parade-nyc",
+    "title": "Recap: Knicks' championship parade in NYC",
+    "category": "League",
+    "publishedAt": "2026-06-18T17:22:00.000Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/bulls-hire-tiago-splitter-as-coach",
-    "summary": "Chicago's new head coach leaned on his playing and coaching background while laying out an early message that the Bulls expect to compete immediately."
+    "sourceUrl": "https://www.nba.com/news/live-updates-new-york-knicks-parade-2026",
+    "summary": "New York celebrated the Knicks' first championship since 1973 with a Lower Manhattan ticker-tape parade and a City Hall ceremony for the 2026 title team."
   },
   {
-    "id": "free-agency-2026-harden-lebron",
-    "title": "Harden and LeBron headline early 2026 free-agency watch",
+    "id": "free-agents-2026-numbers-to-know",
+    "title": "Numbers to know: 20 intriguing free agents to watch this summer",
     "category": "Free Agency",
-    "publishedAt": "2026-06-17T22:50:00.000Z",
+    "publishedAt": "2026-06-17T18:50:00.000Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/numbers-to-know-free-agents-2026",
-    "summary": "NBA.com's free-agent preview highlights James Harden, LeBron James, and other major offseason decision points as teams begin planning before signings can become official."
+    "summary": "NBA.com's offseason preview spotlights 20 notable free agents, with LeBron James and James Harden headlining the class before teams can sign deals starting July 6."
   },
   {
-    "id": "darryn-peterson-jazz-fit-report",
-    "title": "Report frames Darryn Peterson's Jazz hesitation around roster fit",
-    "category": "Draft Rumor",
-    "publishedAt": "2026-06-17T17:00:00.000Z",
-    "sourceName": "Bleacher Report",
-    "sourceUrl": "https://bleacherreport.com/articles/25441634-new-nba-rumors-reveal-darryn-petersons-motivation-avoid-jazz-2026-draft",
-    "summary": "Bleacher Report, citing Jake Fischer, says Peterson's camp may have concerns about a Utah fit because of overlap with Keyonte George. This is tracked as a report, not a settled team or player statement."
-  },
-  {
-    "id": "offseason-injury-tracker-june-16",
-    "title": "Offseason injury trackers list several June 16 status updates",
-    "category": "Injury",
-    "publishedAt": "2026-06-16T20:00:00.000Z",
-    "sourceName": "CBS Sports",
-    "sourceUrl": "https://www.cbssports.com/nba/injuries/",
-    "summary": "The CBS Sports injury board shows multiple updated offseason designations from June 16. Basketball Savant treats these as status-feed items and cross-checks injury language against official reporting when game availability is involved."
-  },
-  {
-    "id": "finals-2026-viewership-record",
-    "title": "Knicks-Spurs Finals deliver strongest viewership since 1998",
+    "id": "finals-viewership-most-watched-since-1998",
+    "title": "Knicks-Spurs delivers most-watched NBA Finals since 1998",
     "category": "League",
-    "publishedAt": "2026-06-17T01:27:00.000Z",
+    "publishedAt": "2026-06-16T21:27:00.000Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/nba-finals-2026-viewership-most-watched-28-years",
-    "summary": "The 2026 NBA Finals averaged more than 20 million viewers on ABC and ESPN, making it the league's most-watched Finals series in 28 years."
+    "summary": "The league said Knicks-Spurs averaged 20.6 million viewers on ABC and ESPN, making it the most-watched NBA Finals and postseason on those networks since 1998."
   },
   {
-    "id": "draft-2026-early-entry-withdrawals",
-    "title": "NBA trims early-entry field before June 23-24 Draft",
+    "id": "alex-sarr-right-foot-surgery",
+    "title": "Wizards' Alex Sarr broke right foot in offseason workout but is expected to recover before next season",
+    "category": "Injury",
+    "publishedAt": "2026-06-16T03:49:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/wizards-alex-sarr-broke-right-foot-in-offseason-workout-but-is-expected-to-recover-before-next-season",
+    "summary": "Washington announced Alex Sarr underwent surgery to repair a broken right foot suffered in an offseason workout and is expected back before next season."
+  },
+  {
+    "id": "early-entry-withdrawals-june-15",
+    "title": "Three additional early entry candidates withdraw from NBA Draft 2026",
     "category": "Draft",
-    "publishedAt": "2026-06-16T01:18:00.000Z",
+    "publishedAt": "2026-06-15T21:18:00.000Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/three-additional-early-entry-candidates-withdraw-from-nba-draft-2026",
-    "summary": "The league announced three additional international withdrawals, leaving 26 college early-entry candidates and five international early-entry candidates in the 2026 Draft pool."
-  },
-  {
-    "id": "brandon-clarke-passes-away",
-    "title": "NBA and Grizzlies mourn Brandon Clarke",
-    "category": "League",
-    "publishedAt": "2026-05-14T02:12:00.000Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/brandon-clarke-passes-away-29-years-old",
-    "summary": "NBA.com confirmed the passing of Memphis forward Brandon Clarke at 29. Commissioner Adam Silver, the Grizzlies, and the NBPA released statements remembering Clarke's impact."
+    "summary": "The NBA said three more international prospects withdrew from the 2026 draft, leaving 26 college early entrants and five international early entrants in the pool."
   }
 ]
