@@ -50,6 +50,7 @@ export const teams = officialTeams;
 export type PageParams = {
   page?: number;
   pageSize?: number;
+  all?: boolean;
 };
 
 export type SortParams = {
@@ -108,9 +109,9 @@ export function datasetSummary() {
 }
 
 export function paginate<T>(rows: T[], params: PageParams = {}) {
-  const page = Math.max(1, params.page ?? 1);
-  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
   const total = rows.length;
+  const page = params.all ? 1 : Math.max(1, params.page ?? 1);
+  const pageSize = params.all ? Math.max(1, total) : Math.min(100, Math.max(1, params.pageSize ?? 20));
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const start = (page - 1) * pageSize;
   return {

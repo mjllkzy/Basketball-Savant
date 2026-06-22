@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
@@ -5,7 +6,7 @@ import { listPlayers, players, teams } from "@/lib/data/queries";
 import { calculatePlayerMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
-import { numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
+import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
@@ -59,6 +60,18 @@ const advancedColumns: StatTableColumn[] = [
   metricColumn("pie", "PIE", "82px")
 ];
 
+function playersHref(searchParams: RouteSearchParams, showAll: boolean) {
+  const params = new URLSearchParams();
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (key === "showAll") return;
+    const current = Array.isArray(value) ? value[0] : value;
+    if (current) params.set(key, current);
+  });
+  if (showAll) params.set("showAll", "true");
+  const query = params.toString();
+  return query ? `/players?${query}` : "/players";
+}
+
 export default function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const loadedPositions = new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"));
   const positionOptions = primaryPositionOrder.filter((position) => loadedPositions.has(position));
@@ -73,15 +86,18 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
   const sort = sortMetrics.includes(requestedSort) ? requestedSort : defaultSort;
   const minMinutes = boundedNumber(numberParam(searchParams, "minMinutes"), defaultMinMinutes, 0, maxMinMinutes);
   const minGames = boundedNumber(numberParam(searchParams, "minGames"), defaultMinGames, 0, maxMinGames);
+  const showAll = booleanParam(searchParams, "showAll") === true;
+  const order = singleParam(searchParams, "order") === "asc" ? "asc" : "desc";
   const result = listPlayers({
     q,
     teamId,
     position,
     sort,
-    order: (searchParams.order as "asc" | "desc") ?? "desc",
+    order,
     minGames,
     minMinutes,
-    pageSize: 100
+    pageSize: 100,
+    all: showAll
   });
   const rows = result.rows.map((row) => ({
     player: row.player.name,
@@ -138,6 +154,20 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
         layout="fixed"
         minWidth={tableMinWidth}
       />
+      <div className="flex flex-col items-center justify-between gap-3 rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm sm:flex-row">
+        <span>
+          Displaying <strong className="text-ink">{rows.length}</strong> of <strong className="text-ink">{result.meta.total}</strong> matching players.
+        </span>
+        {showAll ? (
+          <Link href={playersHref(searchParams, false)} className="inline-flex min-h-10 items-center justify-center rounded border border-slate-300 px-4 text-sm font-black text-ink hover:bg-slate-50">
+            Show first 100
+          </Link>
+        ) : (
+          <Link href={playersHref(searchParams, true)} className="inline-flex min-h-10 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-slate-800">
+            Show all rows
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
