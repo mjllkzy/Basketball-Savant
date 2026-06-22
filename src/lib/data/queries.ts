@@ -13,15 +13,11 @@ import type {
 import {
   officialBasketballReferencePlayerAdvancedCrosscheck,
   officialBasketballReferenceTeamAdvancedCrosscheck,
-  officialDatasetVersion,
   officialGames,
   officialInsights,
   officialLineups,
-  officialMetadata,
   officialPasses,
   officialPlayerGameStats,
-  officialPlayers,
-  officialPlayerSeasonAggregates,
   officialPossessions,
   officialRebounds,
   officialShots,
@@ -29,12 +25,13 @@ import {
   officialTeamSeasonAggregates,
   officialTeams
 } from "@/lib/data/official";
+import { masterDatasetVersion, masterMetadata, masterPlayerAliasBySlug, masterPlayers, masterPlayerSeasonAggregates } from "@/lib/data/master";
 import { calculatePlayerMetric, calculateTeamMetric, getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { percentileRank } from "@/lib/metrics/formulas";
 import { similarPlayers } from "@/lib/comparison";
 
-export const datasetVersion = officialDatasetVersion;
-export const dataSourceMetadata = officialMetadata;
+export const datasetVersion = masterDatasetVersion;
+export const dataSourceMetadata = masterMetadata;
 export const basketballReferencePlayerAdvancedCrosscheck = officialBasketballReferencePlayerAdvancedCrosscheck;
 export const basketballReferenceTeamAdvancedCrosscheck = officialBasketballReferenceTeamAdvancedCrosscheck;
 export const defensiveEvents: never[] = [];
@@ -43,7 +40,7 @@ export const insights = officialInsights;
 export const lineups = officialLineups;
 export const passes = officialPasses;
 export const playerGameStats = officialPlayerGameStats;
-export const players = officialPlayers;
+export const players = masterPlayers;
 export const possessions = officialPossessions;
 export const rebounds = officialRebounds;
 export const shots = officialShots;
@@ -127,7 +124,8 @@ export function getTeamByIdOrSlug(idOrSlug: string): Team | undefined {
 }
 
 export function getPlayerByIdOrSlug(idOrSlug: string): Player | undefined {
-  return players.find((player) => player.id === idOrSlug || player.slug === idOrSlug);
+  const aliasPlayerId = masterPlayerAliasBySlug.get(idOrSlug);
+  return players.find((player) => player.id === idOrSlug || player.id === aliasPlayerId || player.slug === idOrSlug);
 }
 
 export function getGame(id: string): Game | undefined {
@@ -207,7 +205,7 @@ function positionMatches(playerPosition: string, requestedPosition?: string) {
   return playerPosition === requestedPosition;
 }
 
-export const playerSeasonAggregates: PlayerSeasonAggregate[] = officialPlayerSeasonAggregates;
+export const playerSeasonAggregates: PlayerSeasonAggregate[] = masterPlayerSeasonAggregates;
 export const teamSeasonAggregates: TeamSeasonAggregate[] = officialTeamSeasonAggregates;
 
 export function listTeams(params: PageParams & SortParams & { q?: string; conference?: string; division?: string } = {}) {

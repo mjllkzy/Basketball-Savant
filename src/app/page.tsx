@@ -22,7 +22,7 @@ export default function HomePage() {
           <p className="mb-3 text-xs font-black uppercase tracking-[0.28em] text-teal-200">Official Basketball Intelligence</p>
           <h1 className="max-w-4xl text-5xl font-black tracking-normal sm:text-7xl">Basketball Savant</h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-slate-100 sm:text-lg">
-            A focused basketball analytics workspace for comparing players, understanding teams, and finding similar profiles using official NBA Stats snapshots with Basketball Reference cross-checks.
+            A focused basketball analytics workspace for comparing players, understanding teams, and finding similar profiles from the 2025-26 Excel masterfile, official NBA Stats snapshots, and Basketball Reference cross-checks.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href="/players" className="inline-flex min-h-11 items-center gap-2 rounded bg-white px-5 text-sm font-black text-ink hover:bg-slate-100">

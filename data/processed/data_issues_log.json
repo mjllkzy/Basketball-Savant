@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T07:02:36+00:00",
+  "generated_at": "2026-06-22T07:32:58+00:00",
   "source_workbook": "/Users/johnnypark/Documents/Codex/2026-06-16/aribradshaw-johnnystuff-https-github-com-aribradshaw/outputs/basketball-savant/data/raw/nba_data_2025_26.xlsx",
   "source_workbook_sha256": "196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169",
   "season": "2025-26",
@@ -110,14 +110,15 @@
     "skippedSheetNames": []
   },
   "ingestion_summary": {
-    "sheets_imported": 49,
-    "sheets_skipped": 18,
+    "sheets_imported": 51,
+    "sheets_skipped": 16,
     "unique_players_found": 582,
-    "total_stat_rows_created": 387838,
-    "column_dictionary_entries": 903,
-    "issues_logged": 40
+    "total_stat_rows_created": 414610,
+    "column_dictionary_entries": 953,
+    "issues_logged": 49
   },
   "sheets_imported": [
+    "General - Traditional",
     "General - Advanced",
     "General - Misc",
     "General - Scoring",
@@ -166,11 +167,11 @@
     "Defense Dashboard - <10ft",
     "Defense Dashboard - >15ft",
     "Hustle",
-    "Box Outs"
+    "Box Outs",
+    "Bios"
   ],
   "sheets_skipped": [
     "General - Official Leaders",
-    "General - Traditional",
     "General - Estimated Advanced",
     "Clutch - Traditional",
     "Sheet69",
@@ -185,19 +186,32 @@
     "Shooting - By Zone",
     "Opponent Shooting - 5ft Range",
     "Opponent Shooting - 8ft Range",
-    "Opponent Shooting - By Zone",
-    "Bios"
+    "Opponent Shooting - By Zone"
   ],
   "issues": [
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
       "details": {
-        "sheetName": "General - Official Leaders",
-        "decision": "review",
+        "sheetName": "General - Traditional",
+        "reviewNote": "Reviewed after audit: NBA.com Per Game export with one time-formatted 3PM header.",
         "auditIssues": [
           "non_text_header_values",
+          "blank_header_columns",
+          "blank_rows"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Bios",
+        "reviewNote": "Reviewed after audit: NBA.com bio export with height cells sometimes formatted as Excel dates.",
+        "auditIssues": [
+          "height_serial_or_date_values",
           "blank_rows"
         ]
       }
@@ -207,11 +221,10 @@
       "type": "sheet_skipped_not_importable",
       "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
       "details": {
-        "sheetName": "General - Traditional",
+        "sheetName": "General - Official Leaders",
         "decision": "review",
         "auditIssues": [
           "non_text_header_values",
-          "blank_header_columns",
           "blank_rows"
         ]
       }
@@ -430,19 +443,6 @@
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
-      "details": {
-        "sheetName": "Bios",
-        "decision": "review",
-        "auditIssues": [
-          "height_serial_or_date_values",
-          "blank_rows"
-        ]
-      }
-    },
-    {
-      "severity": "warning",
       "type": "blank_header_column_skipped",
       "message": "A blank header column was skipped during ingestion.",
       "details": {
@@ -572,6 +572,39 @@
       }
     },
     {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "weight",
+        "originalColumnName": "Weight",
+        "count": 6
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "draft_round",
+        "originalColumnName": "DRAFT ROUND",
+        "count": 1
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "draft_number",
+        "originalColumnName": "DRAFT NUMBER",
+        "count": 2
+      }
+    },
+    {
       "severity": "warning",
       "type": "non_numeric_stat_values",
       "message": "Non-numeric stat values were preserved raw with null numeric values.",
@@ -635,6 +668,72 @@
         "cleanedColumnName": "position",
         "originalColumnName": "POSITION",
         "count": 579
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "non_numeric_stat_values",
+      "message": "Non-numeric stat values were preserved raw with null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "height",
+        "originalColumnName": "Height",
+        "count": 582
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "non_numeric_stat_values",
+      "message": "Non-numeric stat values were preserved raw with null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "college",
+        "originalColumnName": "COLLEGE",
+        "count": 582
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "non_numeric_stat_values",
+      "message": "Non-numeric stat values were preserved raw with null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "country",
+        "originalColumnName": "COUNTRY",
+        "count": 582
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "non_numeric_stat_values",
+      "message": "Non-numeric stat values were preserved raw with null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "draft_year",
+        "originalColumnName": "DRAFT YEAR",
+        "count": 150
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "non_numeric_stat_values",
+      "message": "Non-numeric stat values were preserved raw with null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "draft_round",
+        "originalColumnName": "DRAFT ROUND",
+        "count": 150
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "non_numeric_stat_values",
+      "message": "Non-numeric stat values were preserved raw with null numeric values.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "draft_number",
+        "originalColumnName": "DRAFT NUMBER",
+        "count": 150
       }
     },
     {

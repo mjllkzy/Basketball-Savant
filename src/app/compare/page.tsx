@@ -141,7 +141,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
 
   return (
     <div className="grid gap-5">
-      <PageHeader eyebrow="Compare" title="Player Comparison" description="Side-by-side player edges from official box, advanced, physical, and role data." />
+      <PageHeader eyebrow="Compare" title="Player Comparison" description="Side-by-side player edges from masterfile box, advanced, physical, and role data." />
 
       <section className="rounded border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-xl font-black text-ink">Side-by-Side</h2>

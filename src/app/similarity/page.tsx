@@ -15,7 +15,7 @@ export default function SimilarityPage({ searchParams }: { searchParams: RouteSe
   const summary = playerSimilaritySummary(profile.aggregate);
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="Similarity" title="Player Similarity Finder" description="Find the closest player profiles using per-minute production, scoring ratios, playmaking ratios, physical build, and position context." />
+      <PageHeader eyebrow="Similarity" title="Player Similarity Finder" description="Find the closest player profiles using masterfile production, scoring ratios, playmaking ratios, physical build, and position context." />
       <form className="grid gap-3 rounded border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[1fr_120px]">
         <select name="player" defaultValue={player.slug} className="rounded border border-slate-300 px-3 py-2 text-sm">
           {players.map((option) => <option key={option.id} value={option.slug}>{option.name}</option>)}

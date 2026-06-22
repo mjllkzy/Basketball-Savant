@@ -130,7 +130,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
   }));
 
   const coverageRows = [
-    { feed: "Player aggregates", source: "NBA Stats", status: "Loaded", rows: coverage.regularSeasonPlayerStats + coverage.playoffPlayerStats },
+    { feed: "Player aggregates", source: "Excel masterfile", status: "Loaded", rows: coverage.regularSeasonPlayerStats },
     { feed: "Team aggregates", source: "NBA Stats", status: "Loaded", rows: coverage.regularSeasonTeamStats + coverage.playoffTeamStats },
     { feed: "Basketball Reference cross-checks", source: "Basketball Reference", status: "Loaded", rows: coverage.basketballReferencePlayerAdvancedMatchedCrosschecks + coverage.basketballReferenceTeamAdvancedMatchedCrosschecks },
     { feed: "Player game logs", source: "NBA Stats", status: "Loaded", rows: coverage.regularSeasonPlayerGameLogs + coverage.playoffPlayerGameLogs },
@@ -146,7 +146,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
       <PageHeader
         eyebrow="Visualization Studio"
         title="Visuals"
-        description="Official NBA Stats and Basketball Reference cross-checks rendered into team, player, scoring, trend, and data-coverage views."
+        description="Excel masterfile player data, official NBA Stats feeds, and Basketball Reference cross-checks rendered into team, player, scoring, trend, and data-coverage views."
       />
 
       <div className="table-scroll flex gap-2 overflow-x-auto">
@@ -222,7 +222,7 @@ export default function VisualsPage({ searchParams }: { searchParams: RouteSearc
       {tab === "Data Coverage" ? (
         <>
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard label="NBA Stats Snapshot" value={dataSourceMetadata.generatedAt.slice(0, 10)} sublabel={dataSourceMetadata.season} accent="ink" />
+            <MetricCard label="Masterfile Base" value={dataSourceMetadata.coverage.regularSeasonPlayerStats} sublabel={`${dataSourceMetadata.season} players`} accent="ink" />
             <MetricCard label="BR Player Matches" value={coverage.basketballReferencePlayerAdvancedMatchedCrosschecks} sublabel="Advanced rows cross-checked" />
             <MetricCard label="Shot Events" value={shots.length} sublabel="Unavailable in current snapshot" accent="court" />
             <MetricCard label="Tracking Events" value={passes.length + possessions.length + lineups.length} sublabel="Requires connected feed" />

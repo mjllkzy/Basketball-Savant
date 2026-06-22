@@ -118,7 +118,7 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
 
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="Player Index" title="Players" description="Sortable official player table with physical profile, volume, efficiency, creation, rebounding, and impact metrics." />
+      <PageHeader eyebrow="Player Index" title="Players" description="Sortable masterfile-backed player table with physical profile, volume, efficiency, creation, rebounding, and impact metrics." />
       <PlayerFilterForm
         q={q}
         teamId={teamId}

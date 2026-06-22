@@ -30,6 +30,7 @@ DEFAULT_COLUMN_DICTIONARY = ROOT / "data" / "processed" / "column_dictionary.jso
 DEFAULT_ISSUES_LOG = ROOT / "data" / "processed" / "data_issues_log.json"
 DEFAULT_PLAYERS_JSON = ROOT / "public" / "data" / "players.json"
 DEFAULT_PROFILE_DIR = ROOT / "public" / "data" / "player_profiles"
+DEFAULT_RUNTIME_SUMMARIES = ROOT / "src" / "lib" / "data" / "generated" / "master-player-summaries.json"
 
 SEASON = "2025-26"
 SEASON_TYPE = "Regular Season"
@@ -37,6 +38,25 @@ PROFILE_STAT_LIMIT = None
 MISSING_MARKERS = {"", "-", "--", "—", "n/a", "na", "null"}
 PLAYER_HEADER_NAMES = {"player", "vs_player"}
 TEAM_HEADER_NAMES = {"team"}
+REVIEWED_IMPORT_SHEETS = {
+    "General - Traditional": "Reviewed after audit: NBA.com Per Game export with one time-formatted 3PM header.",
+    "Bios": "Reviewed after audit: NBA.com bio export with height cells sometimes formatted as Excel dates.",
+}
+REVIEWED_HEADER_REPLACEMENTS = {
+    "General - Traditional": {
+        1: "Rank",
+        13: "3PM",
+        30: "+/-",
+    }
+}
+RUNTIME_SUMMARY_SHEETS = {
+    "General - Traditional",
+    "General - Advanced",
+    "Bios",
+    "General - Defense",
+    "General - Misc",
+    "General - Usage",
+}
 
 
 def now_iso() -> str:
@@ -169,6 +189,13 @@ def find_role_columns(headers: list[Any]) -> tuple[int | None, int | None]:
         if team_col is None and normalized in TEAM_HEADER_NAMES:
             team_col = idx
     return player_col, team_col
+
+
+def reviewed_headers(sheet_name: str, headers: list[Any]) -> list[Any]:
+    replacements = REVIEWED_HEADER_REPLACEMENTS.get(sheet_name, {})
+    if not replacements:
+        return headers
+    return [replacements.get(idx, header) for idx, header in enumerate(headers, start=1)]
 
 
 def prepare_columns(
@@ -331,6 +358,37 @@ def write_json(path: Path, data: Any, *, compact: bool = False) -> None:
         path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def runtime_value(record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "raw": record["raw_value"],
+        "numeric": record["numeric_value"],
+        "original_column_name": record["original_column_name"],
+    }
+
+
+def build_runtime_summary(profile: dict[str, Any], primary_team: str | None) -> dict[str, Any]:
+    sheets: dict[str, dict[str, dict[str, Any]]] = {}
+    for record in profile["stats"]:
+        sheet_name = record["source_sheet"]
+        if sheet_name not in RUNTIME_SUMMARY_SHEETS:
+            continue
+        sheet = sheets.setdefault(sheet_name, {})
+        cleaned_name = record["cleaned_column_name"]
+        if cleaned_name not in sheet:
+            sheet[cleaned_name] = runtime_value(record)
+
+    return {
+        "player_name": profile["player_name"],
+        "player_slug": profile["player_slug"],
+        "season": SEASON,
+        "season_type": SEASON_TYPE,
+        "primary_team": primary_team,
+        "teams": sorted(team for team in profile["teams"] if team),
+        "source_sheets": sorted(profile["source_sheets"]),
+        "sheets": sheets,
+    }
+
+
 def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     workbook_path = args.workbook.resolve()
     if not workbook_path.exists():
@@ -339,9 +397,28 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     generated_at = now_iso()
     audit = build_audit(workbook_path)
     sheet_decisions = load_sheet_decisions(audit)
-    importable_sheet_names = [sheet["sheetName"] for sheet in audit["sheets"] if sheet["decision"] == "import"]
-    skipped_sheet_names = [sheet["sheetName"] for sheet in audit["sheets"] if sheet["decision"] != "import"]
+    importable_sheet_names = [
+        sheet["sheetName"]
+        for sheet in audit["sheets"]
+        if sheet["decision"] == "import" or sheet["sheetName"] in REVIEWED_IMPORT_SHEETS
+    ]
+    skipped_sheet_names = [
+        sheet["sheetName"]
+        for sheet in audit["sheets"]
+        if sheet["decision"] != "import" and sheet["sheetName"] not in REVIEWED_IMPORT_SHEETS
+    ]
     issues: list[dict[str, Any]] = []
+    for sheet_name, review_note in REVIEWED_IMPORT_SHEETS.items():
+        if sheet_name in sheet_decisions:
+            add_issue(
+                issues,
+                "info",
+                "reviewed_sheet_imported",
+                "A sheet marked review by the audit was explicitly imported after deterministic review.",
+                sheetName=sheet_name,
+                reviewNote=review_note,
+                auditIssues=[item["type"] for item in sheet_decisions[sheet_name]["issues"]],
+            )
     for sheet_name in skipped_sheet_names:
         sheet = sheet_decisions[sheet_name]
         add_issue(
@@ -392,7 +469,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
                 )
                 continue
 
-            headers = [cell.value for cell in next(ws.iter_rows(min_row=header_row, max_row=header_row))]
+            headers = reviewed_headers(sheet_name, [cell.value for cell in next(ws.iter_rows(min_row=header_row, max_row=header_row))])
             player_col, team_col = find_role_columns(headers)
             if player_col is None or team_col is None:
                 add_issue(
@@ -662,6 +739,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
 
     player_rows: list[tuple[Any, ...]] = []
     players_json: list[dict[str, Any]] = []
+    runtime_summaries: list[dict[str, Any]] = []
     for player_slug, player in sorted(players.items(), key=lambda item: item[1]["player_name"].lower()):
         teams_counter: Counter[str] = player["teams"]
         ordered_teams = [team for team, _ in teams_counter.most_common() if team]
@@ -683,6 +761,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
             "stats": profile["stats"],
         }
         write_json(args.profile_dir / f"{player_slug}.json", profile_out, compact=True)
+        runtime_summaries.append(build_runtime_summary(profile_out, primary_team))
         player_rows.append(
             (
                 player_slug,
@@ -739,6 +818,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     }
     write_json(args.column_dictionary, column_dictionary)
     write_json(args.players_json, players_json)
+    write_json(args.runtime_summaries, runtime_summaries, compact=True)
 
     issue_log = {
         "generated_at": generated_at,
@@ -783,6 +863,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
             "issues_log": str(args.issues_log),
             "players_json": str(args.players_json),
             "profile_dir": str(args.profile_dir),
+            "runtime_summaries": str(args.runtime_summaries),
         },
     }
 
@@ -795,6 +876,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--issues-log", type=Path, default=DEFAULT_ISSUES_LOG)
     parser.add_argument("--players-json", type=Path, default=DEFAULT_PLAYERS_JSON)
     parser.add_argument("--profile-dir", type=Path, default=DEFAULT_PROFILE_DIR)
+    parser.add_argument("--runtime-summaries", type=Path, default=DEFAULT_RUNTIME_SUMMARIES)
     return parser.parse_args()
 
 

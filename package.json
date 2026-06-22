@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "An official-data-first basketball analytics portal inspired by the depth of professional sports analytics tools.",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p ${PORT:-3000}",
     "refresh:official": "node scripts/refresh-official-data.mjs",
