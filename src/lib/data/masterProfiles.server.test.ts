@@ -32,6 +32,12 @@ describe("master profile data access", () => {
     }
   });
 
+  it("resolves generated profiles from canonical and route-facing player identifiers", () => {
+    expect(getMasterPlayerIndexEntry(" LUKA-DONCIC ")?.player_name).toBe("Luka Dončić");
+    expect(getMasterPlayerIndexEntry({ slug: "luka-don-i-1629029", playerName: "Luka Dončić" })?.player_slug).toBe("luka-doncic");
+    expect(loadMasterPlayerProfile({ slug: "luka-don-i-1629029", playerName: "Luka Dončić" })?.player_slug).toBe("luka-doncic");
+  });
+
   it("loads full player profiles without loading every profile into player tables", () => {
     const profile = loadMasterPlayerProfile("luka-doncic");
     expect(profile?.player_name).toBe("Luka Dončić");

@@ -57,7 +57,7 @@ export type MasterProfileKeyStat = {
 
 export const masterPlayerIndex = publicPlayerIndexJson as unknown as MasterPlayerIndexEntry[];
 
-const indexBySlug = new Map(masterPlayerIndex.map((entry) => [entry.player_slug, entry]));
+const indexBySlug = new Map(masterPlayerIndex.map((entry) => [entry.player_slug.toLowerCase(), entry]));
 const indexByName = new Map(masterPlayerIndex.map((entry) => [normalizeName(entry.player_name), entry]));
 const profileCache = new Map<string, MasterPlayerProfile | null>();
 
@@ -70,9 +70,17 @@ function normalizeName(value: string) {
     .trim();
 }
 
+function findBySlug(slug: string | undefined) {
+  if (!slug) return undefined;
+  const normalizedSlug = slug.trim().toLowerCase();
+  if (!normalizedSlug) return undefined;
+  return indexBySlug.get(normalizedSlug) ?? indexBySlug.get(normalizedSlug.replace(/-\d+$/, ""));
+}
+
 export function getMasterPlayerIndexEntry(input: string | { slug?: string; playerName?: string }): MasterPlayerIndexEntry | undefined {
-  if (typeof input === "string") return indexBySlug.get(input);
-  if (input.slug && indexBySlug.has(input.slug)) return indexBySlug.get(input.slug);
+  if (typeof input === "string") return findBySlug(input);
+  const slugEntry = findBySlug(input.slug);
+  if (slugEntry) return slugEntry;
   if (input.playerName) return indexByName.get(normalizeName(input.playerName));
   return undefined;
 }
@@ -103,6 +111,10 @@ export function loadMasterPlayerProfile(input: string | { slug?: string; playerN
 
   try {
     const parsed = JSON.parse(fs.readFileSync(filePath, "utf8")) as MasterPlayerProfile;
+    if (!parsed || parsed.player_slug !== entry.player_slug || !Array.isArray(parsed.stats)) {
+      profileCache.set(entry.player_slug, null);
+      return null;
+    }
     profileCache.set(entry.player_slug, parsed);
     return parsed;
   } catch {

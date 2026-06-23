@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameContextLabel, gameMatchupLabel, games, getGameLeadingScorer, getPlayerLeaderboard, getSimilarPlayers, latestGames, lineups, listPlayers, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
+import { basketballReferencePlayerAdvancedCrosscheck, basketballReferenceTeamAdvancedCrosscheck, dataSourceMetadata, filterShots, gameContextLabel, gameMatchupLabel, games, getGameLeadingScorer, getPlayerByIdOrSlug, getPlayerLeaderboard, getPlayerProfile, getSimilarPlayers, getTeamByIdOrSlug, getTeamProfile, latestGames, lineups, listPlayers, playerGameStats, players, playerSeasonAggregates, teamGameStats, teamSeasonAggregates, teams } from "@/lib/data/queries";
 import { formatShortDate } from "@/lib/date";
 import { activeLeaderboardTabs, feedRequiredLeaderboardTabs, isLeaderboardMetricFeedRequired } from "@/lib/leaderboards";
 import { calculatePlayerMetric, calculateTeamMetric, metricRegistry } from "@/lib/metrics/registry";
@@ -273,6 +273,21 @@ describe("metric registry and official data", () => {
 });
 
 describe("query behavior", () => {
+  it("resolves player and team routes with trimmed and case-insensitive slugs", () => {
+    const player = getPlayerByIdOrSlug(" LUKA-DONCIC ");
+    expect(player?.name).toBe("Luka Dončić");
+
+    const teamBySlug = getTeamByIdOrSlug(" Los-Angeles-Lakers ");
+    const teamByAbbreviation = getTeamByIdOrSlug("lal");
+    expect(teamBySlug?.abbreviation).toBe("LAL");
+    expect(teamByAbbreviation?.slug).toBe("los-angeles-lakers");
+  });
+
+  it("returns undefined instead of throwing for missing profiles", () => {
+    expect(getPlayerProfile("not-a-real-player")).toBeUndefined();
+    expect(getTeamProfile("not-a-real-team")).toBeUndefined();
+  });
+
   it("returns official shot-event rows when a shot chart feed is loaded", () => {
     const result = filterShots({ shotZone: "Rim", result: "made", pageSize: 100 });
     expect(Array.isArray(result.rows)).toBe(true);

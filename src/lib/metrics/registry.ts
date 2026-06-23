@@ -16,15 +16,15 @@ import {
   usageRate
 } from "@/lib/metrics/formulas";
 
-type DefinitionSeed = Omit<MetricDefinition, "id" | "glossaryMarkdown"> & { glossaryMarkdown?: string };
+type MetricDefinitionInput = Omit<MetricDefinition, "id" | "glossaryMarkdown"> & { glossaryMarkdown?: string };
 
-function metric(seed: DefinitionSeed): MetricDefinition {
+function metric(definition: MetricDefinitionInput): MetricDefinition {
   return {
-    ...seed,
-    id: seed.key,
+    ...definition,
+    id: definition.key,
     glossaryMarkdown:
-      seed.glossaryMarkdown ??
-      `${seed.label} belongs to the ${seed.category} family. Formula: ${seed.formula}. Sample note: ${seed.sampleQualifier}.`
+      definition.glossaryMarkdown ??
+      `${definition.label} belongs to the ${definition.category} family. Formula: ${definition.formula}. Sample note: ${definition.sampleQualifier}.`
   };
 }
 

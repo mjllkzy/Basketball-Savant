@@ -47,6 +47,16 @@ export const shots = officialShots;
 export const teamGameStats = officialTeamGameStats;
 export const teams = officialTeams;
 
+const playerById = new Map(players.map((player) => [player.id, player]));
+const playerBySlug = new Map(players.map((player) => [player.slug.toLowerCase(), player]));
+const teamById = new Map(teams.map((team) => [team.id, team]));
+const teamBySlug = new Map(teams.map((team) => [team.slug.toLowerCase(), team]));
+const teamByAbbreviation = new Map(teams.map((team) => [team.abbreviation.toLowerCase(), team]));
+
+function normalizeLookupValue(value: string) {
+  return value.trim().toLowerCase();
+}
+
 export type PageParams = {
   page?: number;
   pageSize?: number;
@@ -121,12 +131,17 @@ export function paginate<T>(rows: T[], params: PageParams = {}) {
 }
 
 export function getTeamByIdOrSlug(idOrSlug: string): Team | undefined {
-  return teams.find((team) => team.id === idOrSlug || team.slug === idOrSlug || team.abbreviation.toLowerCase() === idOrSlug.toLowerCase());
+  const rawValue = idOrSlug.trim();
+  const normalizedValue = normalizeLookupValue(rawValue);
+  return teamById.get(rawValue) ?? teamBySlug.get(normalizedValue) ?? teamByAbbreviation.get(normalizedValue);
 }
 
 export function getPlayerByIdOrSlug(idOrSlug: string): Player | undefined {
-  const aliasPlayerId = masterPlayerAliasBySlug.get(idOrSlug);
-  return players.find((player) => player.id === idOrSlug || player.id === aliasPlayerId || player.slug === idOrSlug);
+  const rawValue = idOrSlug.trim();
+  if (!rawValue) return undefined;
+  const normalizedValue = normalizeLookupValue(rawValue);
+  const aliasPlayerId = masterPlayerAliasBySlug.get(rawValue) ?? masterPlayerAliasBySlug.get(normalizedValue);
+  return playerById.get(rawValue) ?? (aliasPlayerId ? playerById.get(aliasPlayerId) : undefined) ?? playerBySlug.get(normalizedValue);
 }
 
 export function getGame(id: string): Game | undefined {
@@ -134,7 +149,7 @@ export function getGame(id: string): Game | undefined {
 }
 
 export function teamName(teamId: string): string {
-  const team = teams.find((item) => item.id === teamId);
+  const team = teamById.get(teamId);
   return team ? `${team.city} ${team.name}` : teamId;
 }
 
@@ -156,8 +171,8 @@ export function gameContextLabel(game: Game): string {
   const gameNumber = Number(match[3]);
   if (round === 4) return `NBA Finals Game ${gameNumber}`;
 
-  const homeTeam = teams.find((team) => team.id === game.homeTeamId);
-  const awayTeam = teams.find((team) => team.id === game.awayTeamId);
+  const homeTeam = teamById.get(game.homeTeamId);
+  const awayTeam = teamById.get(game.awayTeamId);
   const conference = homeTeam && awayTeam && homeTeam.conference === awayTeam.conference ? homeTeam.conference : undefined;
 
   if (round === 3) {
@@ -170,15 +185,15 @@ export function gameContextLabel(game: Game): string {
 }
 
 export function playerName(playerId: string): string {
-  return players.find((player) => player.id === playerId)?.name ?? playerId;
+  return playerById.get(playerId)?.name ?? playerId;
 }
 
 export function getGameLeadingScorer(gameId: string): { line: PlayerGameStat; player: Player; team: Team; points: number } | null {
   const leader = playerGameStats
     .filter((line) => line.gameId === gameId)
     .map((line) => {
-      const player = players.find((item) => item.id === line.playerId);
-      const team = teams.find((item) => item.id === line.teamId);
+      const player = playerById.get(line.playerId);
+      const team = teamById.get(line.teamId);
       return player && team ? { line, player, team } : null;
     })
     .filter((row): row is { line: PlayerGameStat; player: Player; team: Team } => row !== null)
@@ -208,6 +223,8 @@ function positionMatches(playerPosition: string, requestedPosition?: string) {
 
 export const playerSeasonAggregates: PlayerSeasonAggregate[] = masterPlayerSeasonAggregates;
 export const teamSeasonAggregates: TeamSeasonAggregate[] = officialTeamSeasonAggregates;
+const playerSeasonAggregateByPlayerId = new Map(playerSeasonAggregates.map((row) => [row.player.id, row]));
+const teamSeasonAggregateByTeamId = new Map(teamSeasonAggregates.map((row) => [row.team.id, row]));
 
 export function listTeams(params: PageParams & SortParams & { q?: string; conference?: string; division?: string } = {}) {
   let rows = [...teams];
@@ -221,7 +238,10 @@ export function listTeams(params: PageParams & SortParams & { q?: string; confer
 export function listPlayers(params: PlayerFilters = {}) {
   let rows = [...playerSeasonAggregates];
   rows = rows.filter((row) => textMatch(`${row.player.name} ${row.team.city} ${row.team.name} ${row.player.position}`, params.q));
-  if (params.teamId) rows = rows.filter((row) => row.team.id === params.teamId || row.team.slug === params.teamId);
+  if (params.teamId) {
+    const requestedTeamId = getTeamByIdOrSlug(params.teamId)?.id ?? params.teamId;
+    rows = rows.filter((row) => row.team.id === requestedTeamId || row.team.slug === params.teamId);
+  }
   if (params.position) rows = rows.filter((row) => positionMatches(row.player.position, params.position));
   if (params.minGames) rows = rows.filter((row) => row.games >= params.minGames!);
   if (params.minMinutes) rows = rows.filter((row) => row.minutes >= params.minMinutes!);
@@ -239,10 +259,16 @@ export function listPlayers(params: PlayerFilters = {}) {
 export function getPlayerProfile(idOrSlug: string) {
   const player = getPlayerByIdOrSlug(idOrSlug);
   if (!player) return undefined;
-  const aggregate = playerSeasonAggregates.find((row) => row.player.id === player.id)!;
+  const aggregate = playerSeasonAggregateByPlayerId.get(player.id);
+  if (!aggregate) return undefined;
   const gameLog = playerGameStats
     .filter((line) => line.playerId === player.id)
-    .map((line) => ({ ...line, game: games.find((game) => game.id === line.gameId)!, opponent: teams.find((team) => team.id === line.opponentTeamId)! }))
+    .map((line) => {
+      const game = games.find((item) => item.id === line.gameId);
+      const opponent = teamById.get(line.opponentTeamId);
+      return game && opponent ? { ...line, game, opponent } : null;
+    })
+    .filter((line): line is PlayerGameStat & { game: Game; opponent: Team } => line !== null)
     .sort((a, b) => b.game.date.localeCompare(a.game.date));
   const playerShots = shots.filter((shot) => shot.playerId === player.id);
   const metricValues = getMetricValuesForPlayer(player.id);
@@ -261,7 +287,8 @@ export function getPlayerProfile(idOrSlug: string) {
 export function getTeamProfile(idOrSlug: string) {
   const team = getTeamByIdOrSlug(idOrSlug);
   if (!team) return undefined;
-  const aggregate = teamSeasonAggregates.find((row) => row.team.id === team.id)!;
+  const aggregate = teamSeasonAggregateByTeamId.get(team.id);
+  if (!aggregate) return undefined;
   const rosterRows = playerSeasonAggregates.filter((row) => row.team.id === team.id);
   const teamGames = games
     .filter((game) => game.homeTeamId === team.id || game.awayTeamId === team.id)
@@ -283,24 +310,35 @@ export function listGames(params: PageParams & { teamId?: string; status?: strin
 export function getGameReport(gameId: string) {
   const game = getGame(gameId);
   if (!game) return undefined;
-  const homeTeam = teams.find((team) => team.id === game.homeTeamId)!;
-  const awayTeam = teams.find((team) => team.id === game.awayTeamId)!;
+  const homeTeam = teamById.get(game.homeTeamId);
+  const awayTeam = teamById.get(game.awayTeamId);
+  if (!homeTeam || !awayTeam) return undefined;
   const boxScore = playerGameStats
     .filter((line) => line.gameId === game.id)
-    .map((line) => ({ ...line, player: players.find((player) => player.id === line.playerId)!, team: teams.find((team) => team.id === line.teamId)! }))
+    .flatMap((line): Array<PlayerGameStat & { player: Player; team: Team }> => {
+      const player = playerById.get(line.playerId);
+      const team = teamById.get(line.teamId);
+      return player && team ? [{ ...line, player, team }] : [];
+    })
     .sort((a, b) => b.pts - a.pts);
   const teamStats = teamGameStats.filter((line) => line.gameId === game.id);
   const feed = possessions
     .filter((possession) => possession.gameId === game.id)
     .slice(0, 160)
-    .map((possession) => ({
-      ...possession,
-      offense: teams.find((team) => team.id === possession.offenseTeamId)!,
-      defense: teams.find((team) => team.id === possession.defenseTeamId)!,
-      primaryPlayer: players.find((player) => player.id === possession.primaryPlayerId)!,
-      defender: possession.defenderPlayerId ? players.find((player) => player.id === possession.defenderPlayerId) : undefined,
-      lineup: lineups.find((lineup) => lineup.id === possession.lineupOffenseId)
-    }));
+    .flatMap((possession): Array<Possession & { offense: Team; defense: Team; primaryPlayer: Player; defender?: Player; lineup?: Lineup }> => {
+      const offense = teamById.get(possession.offenseTeamId);
+      const defense = teamById.get(possession.defenseTeamId);
+      const primaryPlayer = playerById.get(possession.primaryPlayerId);
+      if (!offense || !defense || !primaryPlayer) return [];
+      return [{
+        ...possession,
+        offense,
+        defense,
+        primaryPlayer,
+        defender: possession.defenderPlayerId ? playerById.get(possession.defenderPlayerId) : undefined,
+        lineup: lineups.find((lineup) => lineup.id === possession.lineupOffenseId)
+      }];
+    });
   const gameShots = shots.filter((shot) => shot.gameId === game.id);
   return { game, homeTeam, awayTeam, boxScore, teamStats, feed, shots: gameShots, lineups: lineups.filter((lineup) => lineup.gameId === game.id) };
 }
@@ -336,17 +374,23 @@ export function getCustomLeaderboard(entityType: "players" | "teams" | "lineups"
     return lineups
       .slice()
       .sort((a, b) => b.netRating - a.netRating)
-      .map((lineup) => ({
-        id: lineup.id,
-        label: [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].map(playerName).join(" / "),
-        team: teams.find((team) => team.id === lineup.teamId)!,
-        values: {
-          lineup_off_rating: lineup.offensiveRating,
-          lineup_def_rating: lineup.defensiveRating,
-          lineup_net_rating: lineup.netRating,
-          lineup_pace: lineup.possessions
-        }
-      }));
+      .flatMap((lineup): Array<{ id: string; label: string; team: Team; values: Record<string, number> }> => {
+        const team = teamById.get(lineup.teamId);
+        return team
+          ? [{
+              id: lineup.id,
+              label: [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].map(playerName).join(" / "),
+              team,
+              values: {
+                lineup_off_rating: lineup.offensiveRating,
+                lineup_def_rating: lineup.defensiveRating,
+                lineup_net_rating: lineup.netRating,
+                lineup_pace: lineup.possessions
+              }
+            }
+          ]
+          : [];
+      });
   }
   return listPlayers({ ...params, page: 1, pageSize: 100 }).rows.map((row) => ({
     id: row.player.id,
@@ -387,8 +431,8 @@ export function filterShotRows(sourceRows: Shot[], params: ShotFilters = {}) {
   if (params.maxActualMinusExpected !== undefined) rows = rows.filter((shot) => shot.actualMinusExpected <= params.maxActualMinusExpected!);
   if (params.q) {
     rows = rows.filter((shot) => {
-      const player = players.find((item) => item.id === shot.playerId);
-      const team = teams.find((item) => item.id === shot.teamId);
+      const player = playerById.get(shot.playerId);
+      const team = teamById.get(shot.teamId);
       return textMatch(`${player?.name ?? shot.playerId} ${team?.city ?? ""} ${team?.name ?? shot.teamId} ${shot.playType} ${shot.shotZone}`, params.q);
     });
   }
@@ -416,7 +460,7 @@ export function filterPossessions(params: ShotFilters = {}) {
 }
 
 export function getMetricValuesForPlayer(playerId: string): MetricValue[] {
-  const aggregate = playerSeasonAggregates.find((row) => row.player.id === playerId);
+  const aggregate = playerSeasonAggregateByPlayerId.get(playerId);
   if (!aggregate) return [];
   return metricRegistry.flatMap((metric): MetricValue[] => {
       const value = calculatePlayerMetric(metric.key, aggregate);
@@ -444,7 +488,7 @@ export function searchAll(query: string, limit = 8) {
   const playerRows = players
     .filter((player) => `${player.name} ${player.position}`.toLowerCase().includes(q))
     .slice(0, limit)
-    .map((player) => ({ type: "player" as const, id: player.id, label: player.name, href: `/players/${player.slug}`, meta: teams.find((team) => team.id === player.teamId)?.abbreviation ?? "" }));
+    .map((player) => ({ type: "player" as const, id: player.id, label: player.name, href: `/players/${player.slug}`, meta: teamById.get(player.teamId)?.abbreviation ?? "" }));
   const teamRows = teams
     .filter((team) => `${team.city} ${team.name} ${team.abbreviation}`.toLowerCase().includes(q))
     .slice(0, limit)
@@ -459,7 +503,7 @@ export function searchAll(query: string, limit = 8) {
 export type SimilarityBasis = "Overall" | "Scoring style" | "Shot profile" | "Playmaking" | "Defense" | "Physical/role";
 
 export function getSimilarPlayers(playerId: string, basis: SimilarityBasis = "Overall") {
-  const target = playerSeasonAggregates.find((row) => row.player.id === playerId);
+  const target = playerSeasonAggregateByPlayerId.get(playerId);
   if (!target) return [];
   return similarPlayers(target, playerSeasonAggregates, 10).map((row) => ({
     player: row.aggregate.player,
@@ -511,17 +555,19 @@ export function featuredInsights() {
 }
 
 export function playerMetricSnapshot(playerId: string, keys: string[]) {
-  const aggregate = playerSeasonAggregates.find((row) => row.player.id === playerId);
+  const aggregate = playerSeasonAggregateByPlayerId.get(playerId);
   if (!aggregate) return [];
   return keys.map((key) => ({ metric: getMetric(key), value: calculatePlayerMetric(key, aggregate) }));
 }
 
 export function teamMetricSnapshot(teamId: string, keys: string[]) {
-  const aggregate = teamSeasonAggregates.find((row) => row.team.id === teamId);
+  const aggregate = teamSeasonAggregateByTeamId.get(teamId);
   if (!aggregate) return [];
   return keys.map((key) => ({ metric: getMetric(key), value: calculateTeamMetric(key, aggregate) }));
 }
 
 export function lineupPlayers(lineup: Lineup) {
-  return [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].map((id) => players.find((player) => player.id === id)!);
+  return [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id]
+    .map((id) => playerById.get(id))
+    .filter((player): player is Player => Boolean(player));
 }
