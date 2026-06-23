@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T07:32:58+00:00",
+  "generated_at": "2026-06-22T09:58:18+00:00",
   "source_workbook": "/Users/johnnypark/Documents/Codex/2026-06-16/aribradshaw-johnnystuff-https-github-com-aribradshaw/outputs/basketball-savant/data/raw/nba_data_2025_26.xlsx",
   "source_workbook_sha256": "196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169",
   "season": "2025-26",
@@ -110,14 +110,17 @@
     "skippedSheetNames": []
   },
   "ingestion_summary": {
-    "sheets_imported": 51,
-    "sheets_skipped": 16,
+    "sheets_found": 67,
+    "sheets_imported": 67,
+    "sheets_skipped": 0,
+    "sheets_failed": 0,
     "unique_players_found": 582,
-    "total_stat_rows_created": 414610,
-    "column_dictionary_entries": 953,
-    "issues_logged": 49
+    "total_stat_rows_created": 567552,
+    "column_dictionary_entries": 1262,
+    "issues_logged": 186
   },
   "sheets_imported": [
+    "General - Official Leaders",
     "General - Traditional",
     "General - Advanced",
     "General - Misc",
@@ -128,6 +131,8 @@
     "General - Opponent - Per Minute",
     "General - Defense",
     "General - Violations",
+    "General - Estimated Advanced",
+    "Clutch - Traditional",
     "Clutch - Advanced",
     "Clutch - Misc",
     "Clutch - Scoring",
@@ -136,7 +141,9 @@
     "Playtype - Isolation - Defense",
     "Playtype - Transition - Offense",
     "Playtype - Pick & Roll Ball Han",
+    "Sheet69",
     "Playtype - Pick & Roll Roll Man",
+    "Sheet70",
     "Playtype - Post Up - Offense",
     "Playtype - Post Up - Defense",
     "Playtype - Spot Up - Offense",
@@ -150,8 +157,10 @@
     "Playtype - Misc - Offense",
     "Tracking - Drives",
     "Tracking - Defensive Impact",
+    "Tracking - Catch & Shoot",
     "Tracking - Passing",
     "Tracking - Touches",
+    "Tracking - Pullup Shooting",
     "Tracking - Rebounding",
     "Tracking - Offensive Rebounding",
     "Tracking - Defensive Rebounding",
@@ -166,18 +175,6 @@
     "Defense Dashboard - <6ft",
     "Defense Dashboard - <10ft",
     "Defense Dashboard - >15ft",
-    "Hustle",
-    "Box Outs",
-    "Bios"
-  ],
-  "sheets_skipped": [
-    "General - Official Leaders",
-    "General - Estimated Advanced",
-    "Clutch - Traditional",
-    "Sheet69",
-    "Sheet70",
-    "Tracking - Catch & Shoot",
-    "Tracking - Pullup Shooting",
     "Shooting Dashboard - Overall",
     "Shooting Dashboard - Catch & Sh",
     "Shooting Dashboard - Pullups",
@@ -186,9 +183,27 @@
     "Shooting - By Zone",
     "Opponent Shooting - 5ft Range",
     "Opponent Shooting - 8ft Range",
-    "Opponent Shooting - By Zone"
+    "Opponent Shooting - By Zone",
+    "Hustle",
+    "Box Outs",
+    "Bios"
   ],
+  "sheets_skipped": [],
+  "sheets_failed": [],
   "issues": [
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "General - Official Leaders",
+        "reviewNote": "Reviewed after audit: NBA.com official leaders export with a time-formatted 3PM header.",
+        "auditIssues": [
+          "non_text_header_values",
+          "blank_rows"
+        ]
+      }
+    },
     {
       "severity": "info",
       "type": "reviewed_sheet_imported",
@@ -208,6 +223,218 @@
       "type": "reviewed_sheet_imported",
       "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
       "details": {
+        "sheetName": "General - Estimated Advanced",
+        "reviewNote": "Reviewed after audit: NBA.com estimated advanced export with player rows but no team column.",
+        "auditIssues": [
+          "missing_team_column",
+          "blank_header_columns",
+          "blank_rows"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Clutch - Traditional",
+        "reviewNote": "Reviewed after audit: NBA.com clutch traditional export with one time-formatted 3PM header.",
+        "auditIssues": [
+          "non_text_header_values",
+          "blank_header_columns",
+          "blank_rows"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Sheet69",
+        "reviewNote": "Reviewed after audit: generic sheet name, but layout is a valid NBA.com defensive play type export.",
+        "auditIssues": [
+          "generic_sheet_name",
+          "blank_rows"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Sheet70",
+        "reviewNote": "Reviewed after audit: generic sheet name, but layout is a valid NBA.com defensive play type export.",
+        "auditIssues": [
+          "generic_sheet_name",
+          "blank_rows"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Tracking - Catch & Shoot",
+        "reviewNote": "Reviewed after audit: NBA.com tracking export with one time-formatted 3PM header.",
+        "auditIssues": [
+          "non_text_header_values",
+          "blank_rows"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Tracking - Pullup Shooting",
+        "reviewNote": "Reviewed after audit: NBA.com tracking export with one time-formatted 3PM header.",
+        "auditIssues": [
+          "non_text_header_values",
+          "blank_rows"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Overall",
+        "reviewNote": "Reviewed after audit: NBA.com grouped shooting dashboard with a time-formatted 3FGM header.",
+        "auditIssues": [
+          "non_text_header_values",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Catch & Sh",
+        "reviewNote": "Reviewed after audit: NBA.com grouped shooting dashboard with a time-formatted 3FGM header.",
+        "auditIssues": [
+          "non_text_header_values",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Pullups",
+        "reviewNote": "Reviewed after audit: NBA.com grouped shooting dashboard with a time-formatted 3FGM header.",
+        "auditIssues": [
+          "non_text_header_values",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "reviewNote": "Reviewed after audit: NBA.com grouped shooting zone export; group labels are flattened into stat names.",
+        "auditIssues": [
+          "multi_row_grouped_header",
+          "duplicate_column_names",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "reviewNote": "Reviewed after audit: NBA.com grouped shooting zone export; group labels are flattened into stat names.",
+        "auditIssues": [
+          "multi_row_grouped_header",
+          "duplicate_column_names",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "reviewNote": "Reviewed after audit: NBA.com grouped shooting zone export; group labels are flattened into stat names.",
+        "auditIssues": [
+          "multi_row_grouped_header",
+          "duplicate_column_names",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "reviewNote": "Reviewed after audit: NBA.com grouped opponent shooting zone export; group labels are flattened into stat names.",
+        "auditIssues": [
+          "multi_row_grouped_header",
+          "duplicate_column_names",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "reviewNote": "Reviewed after audit: NBA.com grouped opponent shooting zone export; group labels are flattened into stat names.",
+        "auditIssues": [
+          "multi_row_grouped_header",
+          "duplicate_column_names",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "reviewNote": "Reviewed after audit: NBA.com grouped opponent shooting zone export; group labels are flattened into stat names.",
+        "auditIssues": [
+          "multi_row_grouped_header",
+          "duplicate_column_names",
+          "blank_rows",
+          "merged_header_cells"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "type": "reviewed_sheet_imported",
+      "message": "A sheet marked review by the audit was explicitly imported after deterministic review.",
+      "details": {
         "sheetName": "Bios",
         "reviewNote": "Reviewed after audit: NBA.com bio export with height cells sometimes formatted as Excel dates.",
         "auditIssues": [
@@ -217,358 +444,1637 @@
       }
     },
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
       "details": {
         "sheetName": "General - Official Leaders",
-        "decision": "review",
-        "auditIssues": [
-          "non_text_header_values",
-          "blank_rows"
-        ]
+        "columnIndex": 10,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_pm",
+        "groupLabel": ""
+      }
+    },
+    {
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
+      "details": {
+        "sheetName": "General - Traditional",
+        "columnIndex": 13,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_pm",
+        "groupLabel": ""
       }
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "type": "missing_team_column",
+      "message": "A Player header was detected but no Team header was found; team values will be preserved as blank.",
       "details": {
         "sheetName": "General - Estimated Advanced",
-        "decision": "review",
-        "auditIssues": [
-          "missing_team_column",
-          "blank_header_columns",
-          "blank_rows"
-        ]
+        "headerRow": 15
       }
     },
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
       "details": {
         "sheetName": "Clutch - Traditional",
-        "decision": "review",
-        "auditIssues": [
-          "non_text_header_values",
-          "blank_header_columns",
-          "blank_rows"
-        ]
+        "columnIndex": 13,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_pm",
+        "groupLabel": ""
       }
     },
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
-      "details": {
-        "sheetName": "Sheet69",
-        "decision": "review",
-        "auditIssues": [
-          "generic_sheet_name",
-          "blank_rows"
-        ]
-      }
-    },
-    {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
-      "details": {
-        "sheetName": "Sheet70",
-        "decision": "review",
-        "auditIssues": [
-          "generic_sheet_name",
-          "blank_rows"
-        ]
-      }
-    },
-    {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
       "details": {
         "sheetName": "Tracking - Catch & Shoot",
-        "decision": "review",
-        "auditIssues": [
-          "non_text_header_values",
-          "blank_rows"
-        ]
+        "columnIndex": 9,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_pm",
+        "groupLabel": ""
       }
     },
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
       "details": {
         "sheetName": "Tracking - Pullup Shooting",
-        "decision": "review",
-        "auditIssues": [
-          "non_text_header_values",
-          "blank_rows"
-        ]
+        "columnIndex": 11,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_pm",
+        "groupLabel": ""
       }
     },
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
       "details": {
         "sheetName": "Shooting Dashboard - Overall",
-        "decision": "review",
-        "auditIssues": [
-          "non_text_header_values",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "columnIndex": 16,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_fgm",
+        "groupLabel": "3 Point Field Goals"
       }
     },
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
       "details": {
         "sheetName": "Shooting Dashboard - Catch & Sh",
-        "decision": "review",
-        "auditIssues": [
-          "non_text_header_values",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "columnIndex": 16,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_fgm",
+        "groupLabel": "3 Point Field Goals"
       }
     },
     {
-      "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "severity": "info",
+      "type": "time_formatted_header_normalized",
+      "message": "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
       "details": {
         "sheetName": "Shooting Dashboard - Pullups",
-        "decision": "review",
-        "auditIssues": [
-          "non_text_header_values",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "columnIndex": 16,
+        "originalColumnName": "15:00:00",
+        "cleanedColumnName": "three_fgm",
+        "groupLabel": "3 Point Field Goals"
       }
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
       "details": {
         "sheetName": "Shooting - 5ft Range",
-        "decision": "review",
-        "auditIssues": [
-          "multi_row_grouped_header",
-          "duplicate_column_names",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "originalColumnName": "FGM",
+        "duplicateIndex": 2,
+        "excelColumn": "G"
       }
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 2,
+        "excelColumn": "H"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 2,
+        "excelColumn": "I"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 3,
+        "excelColumn": "J"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 3,
+        "excelColumn": "K"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 3,
+        "excelColumn": "L"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 4,
+        "excelColumn": "M"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 4,
+        "excelColumn": "N"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 4,
+        "excelColumn": "O"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 5,
+        "excelColumn": "P"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 5,
+        "excelColumn": "Q"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 5,
+        "excelColumn": "R"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 6,
+        "excelColumn": "S"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 6,
+        "excelColumn": "T"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 6,
+        "excelColumn": "U"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
       "details": {
         "sheetName": "Shooting - 8ft Range",
-        "decision": "review",
-        "auditIssues": [
-          "multi_row_grouped_header",
-          "duplicate_column_names",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "originalColumnName": "FGM",
+        "duplicateIndex": 2,
+        "excelColumn": "G"
       }
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 2,
+        "excelColumn": "H"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 2,
+        "excelColumn": "I"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 3,
+        "excelColumn": "J"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 3,
+        "excelColumn": "K"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 3,
+        "excelColumn": "L"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 4,
+        "excelColumn": "M"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 4,
+        "excelColumn": "N"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 4,
+        "excelColumn": "O"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 5,
+        "excelColumn": "P"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 5,
+        "excelColumn": "Q"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 5,
+        "excelColumn": "R"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
       "details": {
         "sheetName": "Shooting - By Zone",
-        "decision": "review",
-        "auditIssues": [
-          "multi_row_grouped_header",
-          "duplicate_column_names",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "originalColumnName": "FGM",
+        "duplicateIndex": 2,
+        "excelColumn": "G"
       }
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 2,
+        "excelColumn": "H"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 2,
+        "excelColumn": "I"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 3,
+        "excelColumn": "J"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 3,
+        "excelColumn": "K"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 3,
+        "excelColumn": "L"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 4,
+        "excelColumn": "M"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 4,
+        "excelColumn": "N"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 4,
+        "excelColumn": "O"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 5,
+        "excelColumn": "P"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 5,
+        "excelColumn": "Q"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 5,
+        "excelColumn": "R"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 6,
+        "excelColumn": "S"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 6,
+        "excelColumn": "T"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 6,
+        "excelColumn": "U"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 7,
+        "excelColumn": "V"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 7,
+        "excelColumn": "W"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 7,
+        "excelColumn": "X"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
       "details": {
         "sheetName": "Opponent Shooting - 5ft Range",
-        "decision": "review",
-        "auditIssues": [
-          "multi_row_grouped_header",
-          "duplicate_column_names",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "originalColumnName": "FGM",
+        "duplicateIndex": 2,
+        "excelColumn": "G"
       }
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 2,
+        "excelColumn": "H"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 2,
+        "excelColumn": "I"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 3,
+        "excelColumn": "J"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 3,
+        "excelColumn": "K"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 3,
+        "excelColumn": "L"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 4,
+        "excelColumn": "M"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 4,
+        "excelColumn": "N"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 4,
+        "excelColumn": "O"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 5,
+        "excelColumn": "P"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 5,
+        "excelColumn": "Q"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 5,
+        "excelColumn": "R"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 6,
+        "excelColumn": "S"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 6,
+        "excelColumn": "T"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 5ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 6,
+        "excelColumn": "U"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
       "details": {
         "sheetName": "Opponent Shooting - 8ft Range",
-        "decision": "review",
-        "auditIssues": [
-          "multi_row_grouped_header",
-          "duplicate_column_names",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "originalColumnName": "FGM",
+        "duplicateIndex": 2,
+        "excelColumn": "G"
       }
     },
     {
       "severity": "warning",
-      "type": "sheet_skipped_not_importable",
-      "message": "Sheet was skipped because the audit did not mark it as a clean import candidate.",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 2,
+        "excelColumn": "H"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 2,
+        "excelColumn": "I"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 3,
+        "excelColumn": "J"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 3,
+        "excelColumn": "K"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 3,
+        "excelColumn": "L"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 4,
+        "excelColumn": "M"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 4,
+        "excelColumn": "N"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 4,
+        "excelColumn": "O"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 5,
+        "excelColumn": "P"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 5,
+        "excelColumn": "Q"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 5,
+        "excelColumn": "R"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
       "details": {
         "sheetName": "Opponent Shooting - By Zone",
-        "decision": "review",
-        "auditIssues": [
-          "multi_row_grouped_header",
-          "duplicate_column_names",
-          "blank_rows",
-          "merged_header_cells"
-        ]
+        "originalColumnName": "FGM",
+        "duplicateIndex": 2,
+        "excelColumn": "G"
       }
     },
     {
       "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 2,
+        "excelColumn": "H"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 2,
+        "excelColumn": "I"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 3,
+        "excelColumn": "J"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 3,
+        "excelColumn": "K"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 3,
+        "excelColumn": "L"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 4,
+        "excelColumn": "M"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 4,
+        "excelColumn": "N"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 4,
+        "excelColumn": "O"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 5,
+        "excelColumn": "P"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 5,
+        "excelColumn": "Q"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 5,
+        "excelColumn": "R"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 6,
+        "excelColumn": "S"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 6,
+        "excelColumn": "T"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 6,
+        "excelColumn": "U"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGM",
+        "duplicateIndex": 7,
+        "excelColumn": "V"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FGA",
+        "duplicateIndex": 7,
+        "excelColumn": "W"
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "duplicate_original_column_name",
+      "message": "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "originalColumnName": "FG%",
+        "duplicateIndex": 7,
+        "excelColumn": "X"
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Advanced",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 582
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Misc",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 582
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Scoring",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 582
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Usage",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 582
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Opponent - Per Game",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 661
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Opponent - Per Posses",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 661
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Opponent - Per Minute",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 661
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Defense",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 582
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "General - Violations",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 582
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "General - Estimated Advanced",
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 582
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Clutch - Traditional",
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 492
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "Clutch - Advanced",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 492
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "Clutch - Misc",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 492
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "Clutch - Scoring",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 492
       }
     },
     {
-      "severity": "warning",
-      "type": "blank_header_column_skipped",
-      "message": "A blank header column was skipped during ingestion.",
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
       "details": {
         "sheetName": "Clutch - Usage",
-        "columnIndex": 1,
-        "excelColumn": "A"
+        "cleanedColumnName": "rank",
+        "originalColumnName": "",
+        "count": 492
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Catch & Shoot",
+        "cleanedColumnName": "three_pm",
+        "originalColumnName": "15:00:00",
+        "count": 35
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Catch & Shoot",
+        "cleanedColumnName": "three_pa",
+        "originalColumnName": "3PA",
+        "count": 35
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Catch & Shoot",
+        "cleanedColumnName": "three_p_pct",
+        "originalColumnName": "3P%",
+        "count": 37
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Catch & Shoot",
+        "cleanedColumnName": "fg_pct",
+        "originalColumnName": "FG%",
+        "count": 18
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Catch & Shoot",
+        "cleanedColumnName": "efg_pct",
+        "originalColumnName": "eFG%",
+        "count": 18
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Pullup Shooting",
+        "cleanedColumnName": "fg_pct",
+        "originalColumnName": "FG%",
+        "count": 46
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Pullup Shooting",
+        "cleanedColumnName": "three_p_pct",
+        "originalColumnName": "3P%",
+        "count": 102
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Pullup Shooting",
+        "cleanedColumnName": "efg_pct",
+        "originalColumnName": "eFG%",
+        "count": 46
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Pullup Shooting",
+        "cleanedColumnName": "three_pm",
+        "originalColumnName": "15:00:00",
+        "count": 35
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Tracking - Pullup Shooting",
+        "cleanedColumnName": "three_pa",
+        "originalColumnName": "3PA",
+        "count": 35
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Overall",
+        "cleanedColumnName": "stat_3_point_field_goals_three_p_pct",
+        "originalColumnName": "3P%",
+        "count": 35
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Overall",
+        "cleanedColumnName": "stat_2_point_field_goals_stat_2fg_pct",
+        "originalColumnName": "2FG%",
+        "count": 3
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Catch & Sh",
+        "cleanedColumnName": "stat_2_point_field_goals_stat_2fg_pct",
+        "originalColumnName": "2FG%",
+        "count": 131
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Catch & Sh",
+        "cleanedColumnName": "stat_3_point_field_goals_three_p_pct",
+        "originalColumnName": "3P%",
+        "count": 19
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Pullups",
+        "cleanedColumnName": "stat_2_point_field_goals_stat_2fg_pct",
+        "originalColumnName": "2FG%",
+        "count": 18
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting Dashboard - Pullups",
+        "cleanedColumnName": "stat_3_point_field_goals_three_p_pct",
+        "originalColumnName": "3P%",
+        "count": 56
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "cleanedColumnName": "back_court_shot_fgm",
+        "originalColumnName": "FGM",
+        "count": 9
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "cleanedColumnName": "back_court_shot_fga",
+        "originalColumnName": "FGA",
+        "count": 9
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - 8ft Range",
+        "cleanedColumnName": "back_court_shot_fg_pct",
+        "originalColumnName": "FG%",
+        "count": 9
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "cleanedColumnName": "left_corner_3_fgm",
+        "originalColumnName": "FGM",
+        "count": 2
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "cleanedColumnName": "left_corner_3_fga",
+        "originalColumnName": "FGA",
+        "count": 2
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "cleanedColumnName": "left_corner_3_fg_pct",
+        "originalColumnName": "FG%",
+        "count": 2
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "cleanedColumnName": "right_corner_3_fgm",
+        "originalColumnName": "FGM",
+        "count": 1
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "cleanedColumnName": "right_corner_3_fga",
+        "originalColumnName": "FGA",
+        "count": 1
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Shooting - By Zone",
+        "cleanedColumnName": "right_corner_3_fg_pct",
+        "originalColumnName": "FG%",
+        "count": 1
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "cleanedColumnName": "back_court_shot_fgm",
+        "originalColumnName": "FGM",
+        "count": 9
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "cleanedColumnName": "back_court_shot_fga",
+        "originalColumnName": "FGA",
+        "count": 9
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - 8ft Range",
+        "cleanedColumnName": "back_court_shot_fg_pct",
+        "originalColumnName": "FG%",
+        "count": 9
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "cleanedColumnName": "left_corner_3_fgm",
+        "originalColumnName": "FGM",
+        "count": 2
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "cleanedColumnName": "left_corner_3_fga",
+        "originalColumnName": "FGA",
+        "count": 2
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "cleanedColumnName": "left_corner_3_fg_pct",
+        "originalColumnName": "FG%",
+        "count": 2
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "cleanedColumnName": "right_corner_3_fgm",
+        "originalColumnName": "FGM",
+        "count": 1
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "cleanedColumnName": "right_corner_3_fga",
+        "originalColumnName": "FGA",
+        "count": 1
+      }
+    },
+    {
+      "severity": "info",
+      "type": "blank_stat_values",
+      "message": "Blank stat values were preserved as null numeric values.",
+      "details": {
+        "sheetName": "Opponent Shooting - By Zone",
+        "cleanedColumnName": "right_corner_3_fg_pct",
+        "originalColumnName": "FG%",
+        "count": 1
       }
     },
     {
@@ -676,17 +2182,6 @@
       "message": "Non-numeric stat values were preserved raw with null numeric values.",
       "details": {
         "sheetName": "Bios",
-        "cleanedColumnName": "height",
-        "originalColumnName": "Height",
-        "count": 582
-      }
-    },
-    {
-      "severity": "warning",
-      "type": "non_numeric_stat_values",
-      "message": "Non-numeric stat values were preserved raw with null numeric values.",
-      "details": {
-        "sheetName": "Bios",
         "cleanedColumnName": "college",
         "originalColumnName": "COLLEGE",
         "count": 582
@@ -738,6 +2233,30 @@
     },
     {
       "severity": "info",
+      "type": "normalized_numeric_values",
+      "message": "Raw values were preserved and deterministic numeric values were created for a typed stat field.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "height",
+        "originalColumnName": "Height",
+        "normalization": "height_excel_date_converted_to_inches",
+        "count": 545
+      }
+    },
+    {
+      "severity": "info",
+      "type": "normalized_numeric_values",
+      "message": "Raw values were preserved and deterministic numeric values were created for a typed stat field.",
+      "details": {
+        "sheetName": "Bios",
+        "cleanedColumnName": "height",
+        "originalColumnName": "Height",
+        "normalization": "height_text_converted_to_inches",
+        "count": 37
+      }
+    },
+    {
+      "severity": "info",
       "type": "player_name_reformatted",
       "message": "Player names in Last, First format were deterministically normalized to First Last.",
       "details": {
@@ -761,6 +2280,57 @@
       "details": {
         "sheetName": "General - Opponent - Per Minute",
         "count": 660
+      }
+    },
+    {
+      "severity": "warning",
+      "type": "missing_team_values",
+      "message": "Rows with missing team values were imported with blank team fields; no team was guessed.",
+      "details": {
+        "sheetName": "General - Estimated Advanced",
+        "count": 582,
+        "sampleRows": [
+          {
+            "rowNumber": 16,
+            "playerName": "A.J. Lawson"
+          },
+          {
+            "rowNumber": 17,
+            "playerName": "AJ Green"
+          },
+          {
+            "rowNumber": 18,
+            "playerName": "AJ Johnson"
+          },
+          {
+            "rowNumber": 19,
+            "playerName": "Aaron Gordon"
+          },
+          {
+            "rowNumber": 20,
+            "playerName": "Aaron Holiday"
+          },
+          {
+            "rowNumber": 21,
+            "playerName": "Aaron Nesmith"
+          },
+          {
+            "rowNumber": 22,
+            "playerName": "Aaron Wiggins"
+          },
+          {
+            "rowNumber": 23,
+            "playerName": "Ace Bailey"
+          },
+          {
+            "rowNumber": 24,
+            "playerName": "Adama Bal"
+          },
+          {
+            "rowNumber": 25,
+            "playerName": "Adem Bona"
+          }
+        ]
       }
     }
   ]

@@ -39,7 +39,23 @@ MISSING_MARKERS = {"", "-", "--", "—", "n/a", "na", "null"}
 PLAYER_HEADER_NAMES = {"player", "vs_player"}
 TEAM_HEADER_NAMES = {"team"}
 REVIEWED_IMPORT_SHEETS = {
+    "General - Official Leaders": "Reviewed after audit: NBA.com official leaders export with a time-formatted 3PM header.",
     "General - Traditional": "Reviewed after audit: NBA.com Per Game export with one time-formatted 3PM header.",
+    "General - Estimated Advanced": "Reviewed after audit: NBA.com estimated advanced export with player rows but no team column.",
+    "Clutch - Traditional": "Reviewed after audit: NBA.com clutch traditional export with one time-formatted 3PM header.",
+    "Sheet69": "Reviewed after audit: generic sheet name, but layout is a valid NBA.com defensive play type export.",
+    "Sheet70": "Reviewed after audit: generic sheet name, but layout is a valid NBA.com defensive play type export.",
+    "Tracking - Catch & Shoot": "Reviewed after audit: NBA.com tracking export with one time-formatted 3PM header.",
+    "Tracking - Pullup Shooting": "Reviewed after audit: NBA.com tracking export with one time-formatted 3PM header.",
+    "Shooting Dashboard - Overall": "Reviewed after audit: NBA.com grouped shooting dashboard with a time-formatted 3FGM header.",
+    "Shooting Dashboard - Catch & Sh": "Reviewed after audit: NBA.com grouped shooting dashboard with a time-formatted 3FGM header.",
+    "Shooting Dashboard - Pullups": "Reviewed after audit: NBA.com grouped shooting dashboard with a time-formatted 3FGM header.",
+    "Shooting - 5ft Range": "Reviewed after audit: NBA.com grouped shooting zone export; group labels are flattened into stat names.",
+    "Shooting - 8ft Range": "Reviewed after audit: NBA.com grouped shooting zone export; group labels are flattened into stat names.",
+    "Shooting - By Zone": "Reviewed after audit: NBA.com grouped shooting zone export; group labels are flattened into stat names.",
+    "Opponent Shooting - 5ft Range": "Reviewed after audit: NBA.com grouped opponent shooting zone export; group labels are flattened into stat names.",
+    "Opponent Shooting - 8ft Range": "Reviewed after audit: NBA.com grouped opponent shooting zone export; group labels are flattened into stat names.",
+    "Opponent Shooting - By Zone": "Reviewed after audit: NBA.com grouped opponent shooting zone export; group labels are flattened into stat names.",
     "Bios": "Reviewed after audit: NBA.com bio export with height cells sometimes formatted as Excel dates.",
 }
 REVIEWED_HEADER_REPLACEMENTS = {
@@ -48,6 +64,17 @@ REVIEWED_HEADER_REPLACEMENTS = {
         13: "3PM",
         30: "+/-",
     }
+}
+GROUPED_HEADER_SHEETS = {
+    "Shooting Dashboard - Overall",
+    "Shooting Dashboard - Catch & Sh",
+    "Shooting Dashboard - Pullups",
+    "Shooting - 5ft Range",
+    "Shooting - 8ft Range",
+    "Shooting - By Zone",
+    "Opponent Shooting - 5ft Range",
+    "Opponent Shooting - 8ft Range",
+    "Opponent Shooting - By Zone",
 }
 RUNTIME_SUMMARY_SHEETS = {
     "General - Traditional",
@@ -134,9 +161,34 @@ def snake_case(value: Any) -> str:
     return text
 
 
-def clean_numeric(value: Any) -> tuple[float | None, str | None]:
+def height_inches_from_value(value: Any) -> tuple[float | None, str | None]:
+    if isinstance(value, datetime):
+        feet = value.month
+        inches = value.day
+        if 4 <= feet <= 8 and 0 <= inches <= 11:
+            return float(feet * 12 + inches), "height_excel_date_converted_to_inches"
+    if isinstance(value, date):
+        feet = value.month
+        inches = value.day
+        if 4 <= feet <= 8 and 0 <= inches <= 11:
+            return float(feet * 12 + inches), "height_excel_date_converted_to_inches"
+    text = text_value(value).strip()
+    match = re.match(r"^([4-8])-(\d{1,2})$", text)
+    if match:
+        feet = int(match.group(1))
+        inches = int(match.group(2))
+        if 0 <= inches <= 11:
+            return float(feet * 12 + inches), "height_text_converted_to_inches"
+    return None, None
+
+
+def clean_numeric(value: Any, *, source_sheet: str = "", cleaned_column_name: str = "") -> tuple[float | None, str | None]:
     if value is None:
         return None, "blank_value"
+    if source_sheet == "Bios" and cleaned_column_name == "height":
+        height_inches, note = height_inches_from_value(value)
+        if height_inches is not None:
+            return height_inches, note
     if isinstance(value, bool):
         return None, "boolean_value_not_numeric"
     if isinstance(value, (datetime, date, time)):
@@ -179,11 +231,11 @@ def load_sheet_decisions(audit: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {sheet["sheetName"]: sheet for sheet in audit["sheets"]}
 
 
-def find_role_columns(headers: list[Any]) -> tuple[int | None, int | None]:
+def find_role_columns(headers: list[Any], cleaned_overrides: dict[int, str] | None = None) -> tuple[int | None, int | None]:
     player_col = None
     team_col = None
     for idx, header in enumerate(headers, start=1):
-        normalized = snake_case(header)
+        normalized = cleaned_overrides.get(idx, snake_case(header)) if cleaned_overrides else snake_case(header)
         if player_col is None and normalized in PLAYER_HEADER_NAMES:
             player_col = idx
         if team_col is None and normalized in TEAM_HEADER_NAMES:
@@ -191,11 +243,145 @@ def find_role_columns(headers: list[Any]) -> tuple[int | None, int | None]:
     return player_col, team_col
 
 
-def reviewed_headers(sheet_name: str, headers: list[Any]) -> list[Any]:
-    replacements = REVIEWED_HEADER_REPLACEMENTS.get(sheet_name, {})
-    if not replacements:
-        return headers
-    return [replacements.get(idx, header) for idx, header in enumerate(headers, start=1)]
+def is_time_formatted_three_header(value: Any) -> bool:
+    if isinstance(value, time):
+        return value.hour == 15 and value.minute == 0 and value.second == 0
+    if isinstance(value, datetime):
+        return value.hour == 15 and value.minute == 0 and value.second == 0
+    return text_value(value).strip().lower() in {"15:00:00", "15:00"}
+
+
+def row_values(ws: Any, row_number: int) -> list[Any]:
+    return [cell.value for cell in next(ws.iter_rows(min_row=row_number, max_row=row_number))]
+
+
+def infer_header_row(ws: Any, sheet_name: str, audit_header_row: int | None, issues: list[dict[str, Any]]) -> int | None:
+    candidates: list[tuple[int, int, bool, int]] = []
+    for row in ws.iter_rows(min_row=1, max_row=40):
+        values = [cell.value for cell in row]
+        player_col, team_col = find_role_columns(values)
+        if player_col is None:
+            continue
+        nonblank = sum(1 for value in values if text_value(value))
+        score = nonblank + (100 if team_col is not None else 20)
+        if audit_header_row and row[0].row == audit_header_row:
+            score += 15
+        candidates.append((score, row[0].row, team_col is not None, nonblank))
+
+    if not candidates:
+        if audit_header_row:
+            add_issue(
+                issues,
+                "error",
+                "unclear_header_row",
+                "No Player/Team-style header row could be detected; audit header was not used without a player column.",
+                sheetName=sheet_name,
+                auditHeaderRow=audit_header_row,
+            )
+        return None
+
+    candidates.sort(reverse=True)
+    best_score, best_row, has_team, _ = candidates[0]
+    tied = [candidate for candidate in candidates if candidate[0] == best_score]
+    if len(tied) > 1:
+        add_issue(
+            issues,
+            "warning",
+            "ambiguous_header_row",
+            "Multiple possible header rows had the same detection score; the first best row was used.",
+            sheetName=sheet_name,
+            chosenHeaderRow=best_row,
+            candidateRows=[candidate[1] for candidate in tied],
+        )
+    if not has_team:
+        add_issue(
+            issues,
+            "warning",
+            "missing_team_column",
+            "A Player header was detected but no Team header was found; team values will be preserved as blank.",
+            sheetName=sheet_name,
+            headerRow=best_row,
+        )
+    return best_row
+
+
+def grouped_labels_for_headers(ws: Any, header_row: int, width: int) -> list[str]:
+    if header_row <= 1:
+        return [""] * width
+    group_values = row_values(ws, header_row - 1)
+    labels: list[str] = []
+    current = ""
+    for idx in range(width):
+        value = group_values[idx] if idx < len(group_values) else None
+        text = text_value(value).replace("\n", " ").strip()
+        if text:
+            current = text
+        labels.append(current)
+    return labels
+
+
+def build_clean_header_overrides(
+    *,
+    sheet_name: str,
+    headers: list[Any],
+    group_labels: list[str],
+    issues: list[dict[str, Any]],
+) -> tuple[dict[int, str], dict[int, list[str]]]:
+    overrides: dict[int, str] = {}
+    notes: dict[int, list[str]] = defaultdict(list)
+    reviewed_replacements = REVIEWED_HEADER_REPLACEMENTS.get(sheet_name, {})
+
+    for idx, replacement in reviewed_replacements.items():
+        overrides[idx] = snake_case(replacement)
+        notes[idx].append(f"inferred_header:{replacement}")
+
+    for idx, original in enumerate(headers, start=1):
+        original_text = text_value(original).replace("\n", " ").strip()
+        previous_text = text_value(headers[idx - 2]).replace("\n", " ").strip() if idx > 1 else ""
+        next_text = text_value(headers[idx]).replace("\n", " ").strip() if idx < len(headers) else ""
+        group_label = group_labels[idx - 1] if idx - 1 < len(group_labels) else ""
+
+        if idx == 1 and not original_text and any(snake_case(header) in PLAYER_HEADER_NAMES for header in headers[1:4]):
+            overrides[idx] = "rank"
+            notes[idx].append("blank_leading_rank_header_inferred")
+
+        if original_text == "#":
+            overrides[idx] = "rank"
+            notes[idx].append("rank_header_normalized")
+
+        if is_time_formatted_three_header(original):
+            if "3 Point Field Goals" in group_label or previous_text.upper() == "3FG FREQ":
+                inferred = "three_fgm"
+                readable = "3FGM"
+            elif next_text.upper() == "3PA":
+                inferred = "three_pm"
+                readable = "3PM"
+            else:
+                inferred = "three_pm"
+                readable = "3PM"
+            overrides[idx] = inferred
+            notes[idx].append(f"time_formatted_header_inferred_as:{readable}")
+            add_issue(
+                issues,
+                "info",
+                "time_formatted_header_normalized",
+                "A time-formatted header was preserved raw and mapped to a usable cleaned stat name.",
+                sheetName=sheet_name,
+                columnIndex=idx,
+                originalColumnName=original_text,
+                cleanedColumnName=inferred,
+                groupLabel=group_label,
+            )
+
+        if sheet_name in GROUPED_HEADER_SHEETS and group_label and original_text:
+            role_name = snake_case(original_text)
+            if role_name not in PLAYER_HEADER_NAMES | TEAM_HEADER_NAMES and role_name != "age":
+                grouped_name = f"{snake_case(group_label)}_{role_name}"
+                if idx not in overrides:
+                    overrides[idx] = grouped_name
+                    notes[idx].append(f"grouped_header_prefix:{group_label}")
+
+    return overrides, notes
 
 
 def prepare_columns(
@@ -203,23 +389,27 @@ def prepare_columns(
     sheet_name: str,
     headers: list[Any],
     player_col: int,
-    team_col: int,
+    team_col: int | None,
+    cleaned_overrides: dict[int, str] | None = None,
+    header_notes: dict[int, list[str]] | None = None,
     issues: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     column_entries: list[dict[str, Any]] = []
     stat_columns: list[dict[str, Any]] = []
     seen_clean_names: Counter[str] = Counter()
+    seen_original_stat_names: Counter[str] = Counter()
     for idx, original in enumerate(headers, start=1):
         original_name = text_value(original)
         excel_column = get_column_letter(idx)
         role = "stat"
         imported = True
-        notes: list[str] = []
+        notes: list[str] = list((header_notes or {}).get(idx, []))
+        cleaned = (cleaned_overrides or {}).get(idx) or snake_case(original_name)
         if idx == player_col:
             role = "player"
         elif idx == team_col:
             role = "team"
-        elif not original_name:
+        elif not original_name and idx not in (cleaned_overrides or {}):
             role = "skipped_blank_header"
             imported = False
             notes.append("blank_header_not_imported")
@@ -233,8 +423,20 @@ def prepare_columns(
                 excelColumn=excel_column,
             )
 
-        cleaned = snake_case(original_name)
         if imported and role == "stat":
+            if original_name:
+                seen_original_stat_names[original_name] += 1
+                if seen_original_stat_names[original_name] > 1:
+                    add_issue(
+                        issues,
+                        "warning",
+                        "duplicate_original_column_name",
+                        "A duplicate original column name exists in this sheet; cleaned names remain distinct where possible.",
+                        sheetName=sheet_name,
+                        originalColumnName=original_name,
+                        duplicateIndex=seen_original_stat_names[original_name],
+                        excelColumn=excel_column,
+                    )
             seen_clean_names[cleaned] += 1
             if seen_clean_names[cleaned] > 1:
                 deduped = f"{cleaned}_{seen_clean_names[cleaned]}"
@@ -400,23 +602,24 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     importable_sheet_names = [
         sheet["sheetName"]
         for sheet in audit["sheets"]
-        if sheet["decision"] == "import" or sheet["sheetName"] in REVIEWED_IMPORT_SHEETS
+        if sheet["decision"] in {"import", "review"} or sheet["sheetName"] in REVIEWED_IMPORT_SHEETS
     ]
     skipped_sheet_names = [
         sheet["sheetName"]
         for sheet in audit["sheets"]
-        if sheet["decision"] != "import" and sheet["sheetName"] not in REVIEWED_IMPORT_SHEETS
+        if sheet["decision"] == "skip" and sheet["sheetName"] not in REVIEWED_IMPORT_SHEETS
     ]
     issues: list[dict[str, Any]] = []
-    for sheet_name, review_note in REVIEWED_IMPORT_SHEETS.items():
-        if sheet_name in sheet_decisions:
+    for sheet_name in importable_sheet_names:
+        review_note = REVIEWED_IMPORT_SHEETS.get(sheet_name)
+        if sheet_decisions[sheet_name]["decision"] == "review":
             add_issue(
                 issues,
                 "info",
                 "reviewed_sheet_imported",
                 "A sheet marked review by the audit was explicitly imported after deterministic review.",
                 sheetName=sheet_name,
-                reviewNote=review_note,
+                reviewNote=review_note or "Imported because the sheet has a detectable NBA.com player table header.",
                 auditIssues=[item["type"] for item in sheet_decisions[sheet_name]["issues"]],
             )
     for sheet_name in skipped_sheet_names:
@@ -448,189 +651,229 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     players: dict[str, dict[str, Any]] = {}
     player_profiles: dict[str, dict[str, Any]] = {}
     imported_sheets: list[str] = []
+    failed_sheet_names: list[str] = []
     sheet_summaries: list[dict[str, Any]] = []
     missing_value_counts: Counter[tuple[str, str, str]] = Counter()
     nonnumeric_counts: Counter[tuple[str, str, str]] = Counter()
+    normalized_value_counts: Counter[tuple[str, str, str, str]] = Counter()
     player_name_reformat_counts: Counter[str] = Counter()
     player_name_variant_counts: Counter[tuple[str, str]] = Counter()
+    missing_team_counts: Counter[str] = Counter()
+    missing_team_samples: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    duplicate_entity_counts: Counter[tuple[str, str, str]] = Counter()
+    duplicate_entity_samples: dict[tuple[str, str, str], list[int]] = defaultdict(list)
 
     try:
         for sheet_name in importable_sheet_names:
-            sheet_meta = sheet_decisions[sheet_name]
-            ws = wb[sheet_name]
-            header_row = sheet_meta["likelyHeaderRow"]
-            if not header_row:
-                add_issue(
-                    issues,
-                    "error",
-                    "importable_sheet_missing_header_row",
-                    "Importable sheet unexpectedly has no header row.",
-                    sheetName=sheet_name,
-                )
-                continue
-
-            headers = reviewed_headers(sheet_name, [cell.value for cell in next(ws.iter_rows(min_row=header_row, max_row=header_row))])
-            player_col, team_col = find_role_columns(headers)
-            if player_col is None or team_col is None:
-                add_issue(
-                    issues,
-                    "error",
-                    "importable_sheet_missing_role_column",
-                    "Importable sheet unexpectedly lacks player or team column.",
-                    sheetName=sheet_name,
-                    playerColumn=player_col,
-                    teamColumn=team_col,
-                )
-                continue
-
-            stat_category = sheet_meta["possibleStatCategory"]
-            column_entries, stat_columns = prepare_columns(
-                sheet_name=sheet_name,
-                headers=headers,
-                player_col=player_col,
-                team_col=team_col,
-                issues=issues,
-            )
-            for entry in column_entries:
-                entry["stat_category"] = stat_category
-            all_column_entries.extend(column_entries)
-
-            imported_data_rows = 0
-            sheet_stat_rows = 0
-            for row in ws.iter_rows(min_row=header_row + 1, max_row=ws.max_row):
-                values = [cell.value for cell in row]
-                if not any(text_value(value) for value in values):
-                    continue
-                source_row_number = row[0].row
-                player_raw = values[player_col - 1] if player_col - 1 < len(values) else None
-                team_raw = values[team_col - 1] if team_col - 1 < len(values) else None
-                raw_player_name = text_value(player_raw)
-                player_name, player_name_note = canonical_player_name(player_raw)
-                team = text_value(team_raw)
-                if not player_name:
+            try:
+                sheet_meta = sheet_decisions[sheet_name]
+                ws = wb[sheet_name]
+                header_row = infer_header_row(ws, sheet_name, sheet_meta["likelyHeaderRow"], issues)
+                if not header_row:
+                    failed_sheet_names.append(sheet_name)
                     add_issue(
                         issues,
                         "error",
-                        "row_skipped_missing_player",
-                        "A data row was skipped because player name is blank.",
+                        "failed_sheet_unclear_header",
+                        "Sheet could not be imported because no clear player table header was detected.",
                         sheetName=sheet_name,
-                        rowNumber=source_row_number,
                     )
                     continue
-                if player_name_note:
-                    player_name_reformat_counts[sheet_name] += 1
-                if not team:
+
+                headers = row_values(ws, header_row)
+                group_labels = grouped_labels_for_headers(ws, header_row, len(headers)) if sheet_name in GROUPED_HEADER_SHEETS else [""] * len(headers)
+                cleaned_overrides, header_notes = build_clean_header_overrides(
+                    sheet_name=sheet_name,
+                    headers=headers,
+                    group_labels=group_labels,
+                    issues=issues,
+                )
+                player_col, team_col = find_role_columns(headers, cleaned_overrides)
+                if player_col is None:
+                    failed_sheet_names.append(sheet_name)
                     add_issue(
                         issues,
-                        "warning",
-                        "row_has_missing_team",
-                        "A data row has no team value; team was left blank.",
+                        "error",
+                        "failed_sheet_missing_player_column",
+                        "Sheet could not be imported because no Player or VS PLAYER column was detected.",
                         sheetName=sheet_name,
-                        rowNumber=source_row_number,
-                        playerName=player_name,
+                        headerRow=header_row,
                     )
+                    continue
 
-                imported_data_rows += 1
-                player_slug = slugify(player_name)
-                if player_slug not in players:
-                    players[player_slug] = {
-                        "player_name": player_name,
-                        "player_slug": player_slug,
-                        "season": SEASON,
-                        "season_type": SEASON_TYPE,
-                        "teams": Counter(),
-                        "source_sheets": set(),
-                        "name_variants": set(),
-                        "stat_rows": 0,
-                    }
-                player = players[player_slug]
-                display_player_name = player["player_name"]
-                player["name_variants"].update({raw_player_name, player_name, display_player_name})
-                if player_name != display_player_name:
-                    player_name_variant_counts[(display_player_name, player_name)] += 1
-                player["teams"][team] += 1
-                player["source_sheets"].add(sheet_name)
-                profile = player_profiles.setdefault(
-                    player_slug,
-                    {
-                        "player_name": display_player_name,
-                        "player_slug": player_slug,
-                        "season": SEASON,
-                        "season_type": SEASON_TYPE,
-                        "teams": set(),
-                        "source_sheets": set(),
-                        "name_variants": set(),
-                        "stats": [],
-                    },
+                stat_category = sheet_meta["possibleStatCategory"]
+                column_entries, stat_columns = prepare_columns(
+                    sheet_name=sheet_name,
+                    headers=headers,
+                    player_col=player_col,
+                    team_col=team_col,
+                    cleaned_overrides=cleaned_overrides,
+                    header_notes=header_notes,
+                    issues=issues,
                 )
-                profile["teams"].add(team)
-                profile["source_sheets"].add(sheet_name)
-                profile["name_variants"].update({raw_player_name, player_name, display_player_name})
+                for entry in column_entries:
+                    entry["stat_category"] = stat_category
+                all_column_entries.extend(column_entries)
 
-                for column in stat_columns:
-                    column_index = column["column_index"]
-                    raw = values[column_index - 1] if column_index - 1 < len(values) else None
-                    numeric_value, note = clean_numeric(raw)
-                    notes = []
-                    if note:
-                        notes.append(note)
-                        key = (sheet_name, column["cleaned_column_name"], column["original_column_name"])
-                        if note == "blank_value":
-                            missing_value_counts[key] += 1
-                        else:
-                            nonnumeric_counts[key] += 1
-                    raw_json_value = json_safe(raw)
-                    stat_record = {
-                        "player_name": display_player_name,
-                        "raw_player_name": raw_player_name,
-                        "team": team,
-                        "season": SEASON,
-                        "season_type": SEASON_TYPE,
+                imported_data_rows = 0
+                sheet_stat_rows = 0
+                for row in ws.iter_rows(min_row=header_row + 1, max_row=ws.max_row):
+                    values = [cell.value for cell in row]
+                    if not any(text_value(value) for value in values):
+                        continue
+                    source_row_number = row[0].row
+                    player_raw = values[player_col - 1] if player_col - 1 < len(values) else None
+                    team_raw = values[team_col - 1] if team_col and team_col - 1 < len(values) else None
+                    raw_player_name = text_value(player_raw)
+                    player_name, player_name_note = canonical_player_name(player_raw)
+                    team = text_value(team_raw)
+                    if not player_name:
+                        add_issue(
+                            issues,
+                            "error",
+                            "row_skipped_missing_player",
+                            "A data row was skipped because player name is blank.",
+                            sheetName=sheet_name,
+                            rowNumber=source_row_number,
+                        )
+                        continue
+                    if player_name_note:
+                        player_name_reformat_counts[sheet_name] += 1
+                    if not team:
+                        missing_team_counts[sheet_name] += 1
+                        if len(missing_team_samples[sheet_name]) < 10:
+                            missing_team_samples[sheet_name].append({"rowNumber": source_row_number, "playerName": player_name})
+
+                    imported_data_rows += 1
+                    player_slug = slugify(player_name)
+                    entity_key = (sheet_name, player_slug, team)
+                    duplicate_entity_counts[entity_key] += 1
+                    if len(duplicate_entity_samples[entity_key]) < 5:
+                        duplicate_entity_samples[entity_key].append(source_row_number)
+                    if player_slug not in players:
+                        players[player_slug] = {
+                            "player_name": player_name,
+                            "player_slug": player_slug,
+                            "season": SEASON,
+                            "season_type": SEASON_TYPE,
+                            "teams": Counter(),
+                            "source_sheets": set(),
+                            "name_variants": set(),
+                            "stat_rows": 0,
+                        }
+                    player = players[player_slug]
+                    display_player_name = player["player_name"]
+                    player["name_variants"].update({raw_player_name, player_name, display_player_name})
+                    if player_name != display_player_name:
+                        player_name_variant_counts[(display_player_name, player_name)] += 1
+                    player["teams"][team] += 1
+                    player["source_sheets"].add(sheet_name)
+                    profile = player_profiles.setdefault(
+                        player_slug,
+                        {
+                            "player_name": display_player_name,
+                            "player_slug": player_slug,
+                            "season": SEASON,
+                            "season_type": SEASON_TYPE,
+                            "teams": set(),
+                            "source_sheets": set(),
+                            "name_variants": set(),
+                            "stats": [],
+                        },
+                    )
+                    profile["teams"].add(team)
+                    profile["source_sheets"].add(sheet_name)
+                    profile["name_variants"].update({raw_player_name, player_name, display_player_name})
+
+                    for column in stat_columns:
+                        column_index = column["column_index"]
+                        raw = values[column_index - 1] if column_index - 1 < len(values) else None
+                        numeric_value, note = clean_numeric(
+                            raw,
+                            source_sheet=sheet_name,
+                            cleaned_column_name=column["cleaned_column_name"],
+                        )
+                        notes = []
+                        if note:
+                            notes.append(note)
+                            if numeric_value is None:
+                                key = (sheet_name, column["cleaned_column_name"], column["original_column_name"])
+                                if note == "blank_value":
+                                    missing_value_counts[key] += 1
+                                else:
+                                    nonnumeric_counts[key] += 1
+                            else:
+                                normalized_value_counts[
+                                    (
+                                        sheet_name,
+                                        column["cleaned_column_name"],
+                                        column["original_column_name"],
+                                        note,
+                                    )
+                                ] += 1
+                        raw_json_value = json_safe(raw)
+                        stat_record = {
+                            "player_name": display_player_name,
+                            "raw_player_name": raw_player_name,
+                            "team": team,
+                            "season": SEASON,
+                            "season_type": SEASON_TYPE,
+                            "source_sheet": sheet_name,
+                            "stat_category": stat_category,
+                            "original_column_name": column["original_column_name"],
+                            "cleaned_column_name": column["cleaned_column_name"],
+                            "raw_value": raw_json_value,
+                            "numeric_value": numeric_value,
+                            "import_notes": "; ".join(notes) if notes else None,
+                        }
+                        if PROFILE_STAT_LIMIT is None or len(profile["stats"]) < PROFILE_STAT_LIMIT:
+                            profile["stats"].append(stat_record)
+                        all_stat_rows.append(
+                            (
+                                raw_player_name,
+                                display_player_name,
+                                player_slug,
+                                team,
+                                SEASON,
+                                SEASON_TYPE,
+                                sheet_name,
+                                stat_category,
+                                column["original_column_name"],
+                                column["cleaned_column_name"],
+                                text_value(raw),
+                                json.dumps(raw_json_value, ensure_ascii=False),
+                                numeric_value,
+                                stat_record["import_notes"],
+                                source_row_number,
+                                column["excel_column"],
+                            )
+                        )
+                        player["stat_rows"] += 1
+                        sheet_stat_rows += 1
+
+                imported_sheets.append(sheet_name)
+                sheet_summaries.append(
+                    {
                         "source_sheet": sheet_name,
                         "stat_category": stat_category,
-                        "original_column_name": column["original_column_name"],
-                        "cleaned_column_name": column["cleaned_column_name"],
-                        "raw_value": raw_json_value,
-                        "numeric_value": numeric_value,
-                        "import_notes": "; ".join(notes) if notes else None,
+                        "header_row": header_row,
+                        "source_row_count": sheet_meta["rowCount"],
+                        "source_column_count": sheet_meta["columnCount"],
+                        "imported_data_rows": imported_data_rows,
+                        "stat_rows_created": sheet_stat_rows,
                     }
-                    if PROFILE_STAT_LIMIT is None or len(profile["stats"]) < PROFILE_STAT_LIMIT:
-                        profile["stats"].append(stat_record)
-                    all_stat_rows.append(
-                        (
-                            raw_player_name,
-                            display_player_name,
-                            player_slug,
-                            team,
-                            SEASON,
-                            SEASON_TYPE,
-                            sheet_name,
-                            stat_category,
-                            column["original_column_name"],
-                            column["cleaned_column_name"],
-                            text_value(raw),
-                            json.dumps(raw_json_value, ensure_ascii=False),
-                            numeric_value,
-                            stat_record["import_notes"],
-                            source_row_number,
-                            column["excel_column"],
-                        )
-                    )
-                    player["stat_rows"] += 1
-                    sheet_stat_rows += 1
-
-            imported_sheets.append(sheet_name)
-            sheet_summaries.append(
-                {
-                    "source_sheet": sheet_name,
-                    "stat_category": stat_category,
-                    "header_row": header_row,
-                    "source_row_count": sheet_meta["rowCount"],
-                    "source_column_count": sheet_meta["columnCount"],
-                    "imported_data_rows": imported_data_rows,
-                    "stat_rows_created": sheet_stat_rows,
-                }
-            )
+                )
+            except Exception as exc:
+                failed_sheet_names.append(sheet_name)
+                add_issue(
+                    issues,
+                    "error",
+                    "failed_sheet_import",
+                    "Sheet import failed and was skipped after logging the exception.",
+                    sheetName=sheet_name,
+                    exceptionType=type(exc).__name__,
+                    error=str(exc),
+                )
     finally:
         wb.close()
 
@@ -656,6 +899,18 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
             originalColumnName=original_name,
             count=count,
         )
+    for (sheet_name, cleaned_name, original_name, note), count in normalized_value_counts.items():
+        add_issue(
+            issues,
+            "info",
+            "normalized_numeric_values",
+            "Raw values were preserved and deterministic numeric values were created for a typed stat field.",
+            sheetName=sheet_name,
+            cleanedColumnName=cleaned_name,
+            originalColumnName=original_name,
+            normalization=note,
+            count=count,
+        )
     for sheet_name, count in player_name_reformat_counts.items():
         add_issue(
             issues,
@@ -674,6 +929,30 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
             playerName=display_name,
             variantName=variant_name,
             count=count,
+        )
+    for sheet_name, count in missing_team_counts.items():
+        add_issue(
+            issues,
+            "warning",
+            "missing_team_values",
+            "Rows with missing team values were imported with blank team fields; no team was guessed.",
+            sheetName=sheet_name,
+            count=count,
+            sampleRows=missing_team_samples[sheet_name],
+        )
+    for (sheet_name, player_slug, team), count in duplicate_entity_counts.items():
+        if count <= 1:
+            continue
+        add_issue(
+            issues,
+            "warning",
+            "duplicate_player_team_rows",
+            "The same player/team key appears more than once in a source sheet; all rows were preserved.",
+            sheetName=sheet_name,
+            playerSlug=player_slug,
+            team=team,
+            count=count,
+            sampleRowNumbers=duplicate_entity_samples[(sheet_name, player_slug, team)],
         )
 
     conn.executemany(
@@ -828,8 +1107,10 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
         "season_type": SEASON_TYPE,
         "audit_summary": audit["summary"],
         "ingestion_summary": {
+            "sheets_found": len(audit["sheets"]),
             "sheets_imported": len(imported_sheets),
             "sheets_skipped": len(skipped_sheet_names),
+            "sheets_failed": len(failed_sheet_names),
             "unique_players_found": len(players),
             "total_stat_rows_created": len(all_stat_rows),
             "column_dictionary_entries": len(all_column_entries),
@@ -837,6 +1118,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
         },
         "sheets_imported": imported_sheets,
         "sheets_skipped": skipped_sheet_names,
+        "sheets_failed": failed_sheet_names,
         "issues": issues,
     }
     write_json(args.issues_log, issue_log)
@@ -851,8 +1133,10 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
         example_slug = players_json[0]["player_slug"]
 
     return {
+        "sheets_found": len(audit["sheets"]),
         "sheets_imported": imported_sheets,
         "sheets_skipped": skipped_sheet_names,
+        "sheets_failed": failed_sheet_names,
         "unique_players_found": len(players),
         "total_stat_rows_created": len(all_stat_rows),
         "top_20_issues": issues[:20],
