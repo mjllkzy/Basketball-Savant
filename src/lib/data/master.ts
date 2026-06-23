@@ -249,6 +249,7 @@ const aggregateRows: PlayerSeasonAggregate[] = masterSummaries.map((summary) => 
 export const masterPlayers = aggregateRows.map((row) => row.player);
 export const masterPlayerSeasonAggregates = aggregateRows;
 export const masterPlayerAliasBySlug = new Map(Array.from(playersByMasterSlug.entries()).map(([slug, player]) => [slug, player.id]));
+export const masterPlayerSlugById = new Map(Array.from(playersByMasterSlug.entries()).map(([slug, player]) => [player.id, slug]));
 export const masterDatasetVersion = `${officialDatasetVersion}+excel-master-${masterSummaries.length}-players`;
 export const masterMetadata = {
   ...officialMetadata,

@@ -11,6 +11,7 @@ import { SimilarPlayersTable } from "@/components/domain/SimilarPlayersTable";
 import { StatTable } from "@/components/ui/StatTable";
 import { PercentileBar } from "@/components/ui/PercentileBar";
 import { getPlayerProfile, lineups, players } from "@/lib/data/queries";
+import { loadMasterPlayerProfile, masterProfileCategorySummary, masterProfileKeyStats } from "@/lib/data/masterProfiles.server";
 import { formatShortDate } from "@/lib/date";
 import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
@@ -47,11 +48,56 @@ export default function PlayerPage({ params }: { params: { playerId: string } })
   }));
   const playerLineups = lineups.filter((lineup) => [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].includes(profile.player.id));
   const hasShotEvents = profile.shots.length > 0;
+  const masterProfile = loadMasterPlayerProfile({ slug: profile.masterSlug, playerName: profile.player.name });
+  const keyStats = masterProfile ? masterProfileKeyStats(masterProfile) : [];
+  const categoryRows = masterProfile ? masterProfileCategorySummary(masterProfile).slice(0, 8) : [];
 
   return (
     <div className="grid gap-4">
       <PlayerHeader player={profile.player} team={profile.team} />
       <PlayerSnapshot aggregate={profile.aggregate} />
+      <section className="rounded border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-4 flex flex-col gap-2 border-b border-slate-200 pb-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 className="text-lg font-black text-ink">Master Data Profile</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              {masterProfile
+                ? `${masterProfile.player_name} · ${masterProfile.season} ${masterProfile.season_type} · ${masterProfile.teams.join(", ") || profile.team.abbreviation}`
+                : "Full master profile JSON is unavailable for this player; summary data remains loaded."}
+            </p>
+          </div>
+          {masterProfile ? (
+            <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+              <span className="rounded bg-slate-100 px-3 py-2 font-bold">{masterProfile.source_sheets.length} source sheets</span>
+              <span className="rounded bg-slate-100 px-3 py-2 font-bold">{masterProfile.stat_rows.toLocaleString()} stat rows</span>
+              <span className="rounded bg-slate-100 px-3 py-2 font-bold">Team {masterProfile.primary_team ?? profile.team.abbreviation}</span>
+              <span className="rounded bg-slate-100 px-3 py-2 font-bold">JSON profile loaded</span>
+            </div>
+          ) : null}
+        </div>
+        {masterProfile ? (
+          <div className="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
+            <StatTable
+              dense
+              columns={[
+                { key: "label", label: "Key Stat" },
+                { key: "value", label: "Value", align: "right" },
+                { key: "source", label: "Source Sheet" }
+              ]}
+              rows={keyStats.map((stat) => ({ label: stat.label, value: stat.value, source: stat.sourceSheet }))}
+            />
+            <StatTable
+              dense
+              columns={[
+                { key: "category", label: "Category" },
+                { key: "statRows", label: "Rows", align: "right" },
+                { key: "sheetCount", label: "Sheets", align: "right" }
+              ]}
+              rows={categoryRows.map((row) => ({ category: row.category, statRows: row.statRows, sheetCount: row.sheetCount }))}
+            />
+          </div>
+        ) : null}
+      </section>
       <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
         <PercentileRadar data={radarData} />
         <RollingLineChart data={profile.aggregate.recentGameScores.map((row) => ({ date: formatShortDate(row.date), pts: row.pts, ts: toPercentagePoints(row.ts) ?? 0, usage: toPercentagePoints(row.usage) ?? 0, net: row.net }))} lines={["pts", "net"]} />

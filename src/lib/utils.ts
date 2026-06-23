@@ -21,18 +21,3 @@ export function formatClock(secondsRemaining: number): string {
   const seconds = secondsRemaining % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
-
-export function stableHash(input: string): number {
-  let hash = 0;
-  for (let index = 0; index < input.length; index += 1) {
-    hash = (hash << 5) - hash + input.charCodeAt(index);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
-export function seededNumber(seed: string, min: number, max: number, decimals = 0): number {
-  const value = min + (stableHash(seed) % 10000) / 10000 * (max - min);
-  const factor = 10 ** decimals;
-  return Math.round(value * factor) / factor;
-}

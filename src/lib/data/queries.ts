@@ -25,7 +25,7 @@ import {
   officialTeamSeasonAggregates,
   officialTeams
 } from "@/lib/data/official";
-import { masterDatasetVersion, masterMetadata, masterPlayerAliasBySlug, masterPlayers, masterPlayerSeasonAggregates } from "@/lib/data/master";
+import { masterDatasetVersion, masterMetadata, masterPlayerAliasBySlug, masterPlayers, masterPlayerSeasonAggregates, masterPlayerSlugById } from "@/lib/data/master";
 import { calculatePlayerMetric, calculateTeamMetric, getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { percentileRank } from "@/lib/metrics/formulas";
 import { similarPlayers } from "@/lib/comparison";
@@ -246,7 +246,16 @@ export function getPlayerProfile(idOrSlug: string) {
     .sort((a, b) => b.game.date.localeCompare(a.game.date));
   const playerShots = shots.filter((shot) => shot.playerId === player.id);
   const metricValues = getMetricValuesForPlayer(player.id);
-  return { player, team: aggregate.team, aggregate, gameLog, shots: playerShots, metricValues, similar: getSimilarPlayers(player.id, "Overall").slice(0, 5) };
+  return {
+    player,
+    team: aggregate.team,
+    aggregate,
+    masterSlug: masterPlayerSlugById.get(player.id) ?? player.slug,
+    gameLog,
+    shots: playerShots,
+    metricValues,
+    similar: getSimilarPlayers(player.id, "Overall").slice(0, 5)
+  };
 }
 
 export function getTeamProfile(idOrSlug: string) {
