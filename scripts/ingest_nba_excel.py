@@ -4,23 +4,21 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import os
 import re
 import sqlite3
 import sys
 import unicodedata
+import uuid
 from collections import Counter, defaultdict
 from datetime import date, datetime, time, timezone
 from pathlib import Path
 from typing import Any
 
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
-
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from audit_nba_excel import build_audit, sha256, text_value  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +29,7 @@ DEFAULT_ISSUES_LOG = ROOT / "data" / "processed" / "data_issues_log.json"
 DEFAULT_PLAYERS_JSON = ROOT / "public" / "data" / "players.json"
 DEFAULT_PROFILE_DIR = ROOT / "public" / "data" / "player_profiles"
 DEFAULT_RUNTIME_SUMMARIES = ROOT / "src" / "lib" / "data" / "generated" / "master-player-summaries.json"
+DEFAULT_OFFICIAL_SNAPSHOT = ROOT / "src" / "lib" / "data" / "generated" / "official-snapshot.json"
 
 SEASON = "2025-26"
 SEASON_TYPE = "Regular Season"
@@ -84,6 +83,34 @@ RUNTIME_SUMMARY_SHEETS = {
     "General - Misc",
     "General - Usage",
 }
+
+
+def text_value(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, datetime):
+        return value.isoformat(sep=" ")
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, time):
+        return value.isoformat()
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return str(value).strip()
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file_handle:
+        for chunk in iter(lambda: file_handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def excel_column_letter(index: int) -> str:
+    from openpyxl.utils import get_column_letter
+
+    return get_column_letter(index)
 
 
 def now_iso() -> str:
@@ -400,7 +427,7 @@ def prepare_columns(
     seen_original_stat_names: Counter[str] = Counter()
     for idx, original in enumerate(headers, start=1):
         original_name = text_value(original)
-        excel_column = get_column_letter(idx)
+        excel_column = excel_column_letter(idx)
         role = "stat"
         imported = True
         notes: list[str] = list((header_notes or {}).get(idx, []))
@@ -591,10 +618,668 @@ def build_runtime_summary(profile: dict[str, Any], primary_team: str | None) -> 
     }
 
 
+def database_url_from_env() -> str | None:
+    value = os.environ.get("DATABASE_URL", "").strip()
+    return value or None
+
+
+def normalized_lookup_key(value: Any) -> str:
+    text = unicodedata.normalize("NFKD", text_value(value)).encode("ascii", "ignore").decode("ascii")
+    text = re.sub(r"[^a-zA-Z0-9]+", " ", text.lower())
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def int_or_none(value: Any) -> int | None:
+    if value is None:
+        return None
+    try:
+        if isinstance(value, str):
+            value = value.strip()
+            if value.lower() in MISSING_MARKERS:
+                return None
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def float_or_none(value: Any) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+        if value.lower() in MISSING_MARKERS:
+            return None
+        value = value.replace(",", "")
+        if value.endswith("%"):
+            value = value[:-1]
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if math.isfinite(parsed) else None
+
+
+def percent_or_none(value: Any) -> float | None:
+    parsed = float_or_none(value)
+    if parsed is None:
+        return None
+    return parsed / 100 if abs(parsed) > 1 else parsed
+
+
+def table_rows(snapshot: dict[str, Any], table_name: str) -> list[dict[str, Any]]:
+    table = snapshot.get("tables", {}).get(table_name) or {}
+    headers = table.get("headers") or []
+    rows = table.get("rows") or []
+    return [dict(zip(headers, row)) for row in rows]
+
+
+def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
+    if not snapshot_path.exists():
+        return {
+            "teams_by_id": {},
+            "teams_by_abbr": {},
+            "players_by_name": {},
+            "players_by_name_team": {},
+        }
+
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    player_index_rows = table_rows(snapshot, "playerIndex")
+    player_bio_rows = table_rows(snapshot, "playerBioStatsRegular")
+    team_stat_rows = table_rows(snapshot, "teamStatsRegular")
+    bio_by_id = {str(row.get("PLAYER_ID")): row for row in player_bio_rows if row.get("PLAYER_ID") is not None}
+
+    teams_by_id: dict[str, dict[str, Any]] = {}
+    for row in player_index_rows:
+        team_id = str(row.get("TEAM_ID") or "").strip()
+        abbr = text_value(row.get("TEAM_ABBREVIATION")).strip()
+        if not team_id or team_id == "0" or not abbr:
+            continue
+        teams_by_id.setdefault(
+            team_id,
+            {
+                "id": team_id,
+                "slug": slugify(text_value(row.get("TEAM_SLUG")) or abbr),
+                "abbreviation": abbr,
+                "city": text_value(row.get("TEAM_CITY")) or abbr,
+                "name": text_value(row.get("TEAM_NAME")) or abbr,
+                "conference": None,
+                "division": None,
+                "primary_color": None,
+                "secondary_color": None,
+                "source": "official_snapshot",
+            },
+        )
+
+    for row in team_stat_rows:
+        team_id = str(row.get("TEAM_ID") or "").strip()
+        full_name = text_value(row.get("TEAM_NAME")).strip()
+        if not team_id or team_id in teams_by_id or not full_name:
+            continue
+        teams_by_id[team_id] = {
+            "id": team_id,
+            "slug": slugify(full_name),
+            "abbreviation": slugify(full_name).upper()[:3],
+            "city": full_name,
+            "name": full_name,
+            "conference": None,
+            "division": None,
+            "primary_color": None,
+            "secondary_color": None,
+            "source": "official_snapshot",
+        }
+
+    teams_by_abbr = {team["abbreviation"]: team for team in teams_by_id.values() if team.get("abbreviation")}
+    players_by_name: dict[str, dict[str, Any]] = {}
+    players_by_name_team: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in player_index_rows:
+        person_id = str(row.get("PERSON_ID") or "").strip()
+        first = text_value(row.get("PLAYER_FIRST_NAME")).strip()
+        last = text_value(row.get("PLAYER_LAST_NAME")).strip()
+        player_name = f"{first} {last}".strip()
+        if not player_name:
+            continue
+        team_abbr = text_value(row.get("TEAM_ABBREVIATION")).strip()
+        bio = bio_by_id.get(person_id, {})
+        reference_row = {
+            "nba_player_id": person_id or None,
+            "app_player_id": person_id or None,
+            "player_name": player_name,
+            "normalized_player_name": normalized_lookup_key(player_name),
+            "team_abbreviation": team_abbr or None,
+            "team_id": str(row.get("TEAM_ID") or "").strip() or None,
+            "position": text_value(row.get("POSITION")).strip() or None,
+            "height": text_value(row.get("HEIGHT") or bio.get("PLAYER_HEIGHT")).strip() or None,
+            "height_inches": float_or_none(bio.get("PLAYER_HEIGHT_INCHES")),
+            "weight": int_or_none(row.get("WEIGHT") or bio.get("PLAYER_WEIGHT")),
+            "age": int_or_none(bio.get("AGE")),
+            "college": text_value(row.get("COLLEGE") or bio.get("COLLEGE")).strip() or None,
+            "country": text_value(row.get("COUNTRY") or bio.get("COUNTRY")).strip() or None,
+            "jersey_number": text_value(row.get("JERSEY_NUMBER")).strip() or None,
+            "headshot_url": f"https://cdn.nba.com/headshots/nba/latest/1040x760/{person_id}.png" if person_id else None,
+        }
+        lookup_name = normalized_lookup_key(player_name)
+        players_by_name.setdefault(lookup_name, reference_row)
+        if team_abbr:
+            players_by_name_team[(lookup_name, team_abbr)] = reference_row
+
+    return {
+        "teams_by_id": teams_by_id,
+        "teams_by_abbr": teams_by_abbr,
+        "players_by_name": players_by_name,
+        "players_by_name_team": players_by_name_team,
+    }
+
+
+def fallback_team_row(abbreviation: str) -> dict[str, Any]:
+    safe_abbreviation = abbreviation.strip() or "UNK"
+    if safe_abbreviation.upper() == "TOT":
+        city = "Multiple"
+        name = "Teams"
+    else:
+        city = safe_abbreviation
+        name = safe_abbreviation
+    return {
+        "id": safe_abbreviation,
+        "slug": slugify(safe_abbreviation),
+        "abbreviation": safe_abbreviation,
+        "city": city,
+        "name": name,
+        "conference": None,
+        "division": None,
+        "primary_color": None,
+        "secondary_color": None,
+        "source": "excel_fallback",
+    }
+
+
+def find_player_reference(player: dict[str, Any], official: dict[str, Any]) -> dict[str, Any] | None:
+    name_key = normalized_lookup_key(player["player_name"])
+    primary_team = player.get("primary_team")
+    if primary_team:
+        by_team = official["players_by_name_team"].get((name_key, primary_team))
+        if by_team:
+            return by_team
+    return official["players_by_name"].get(name_key)
+
+
+def source_sheet_value(summary: dict[str, Any], source_sheet: str, cleaned_column_name: str) -> dict[str, Any] | None:
+    return summary.get("sheets", {}).get(source_sheet, {}).get(cleaned_column_name)
+
+
+def summary_numeric(summary: dict[str, Any], source_sheet: str, cleaned_column_name: str) -> float | None:
+    cell = source_sheet_value(summary, source_sheet, cleaned_column_name)
+    if not cell:
+        return None
+    return float_or_none(cell.get("numeric"))
+
+
+def summary_percent(summary: dict[str, Any], source_sheet: str, cleaned_column_name: str) -> float | None:
+    cell = source_sheet_value(summary, source_sheet, cleaned_column_name)
+    if not cell:
+        return None
+    return percent_or_none(cell.get("numeric"))
+
+
+def stat_row_fingerprint(row: tuple[Any, ...]) -> str:
+    payload = {
+        "player_slug": row[2],
+        "team": row[3],
+        "season": row[4],
+        "season_type": row[5],
+        "source_sheet": row[6],
+        "stat_category": row[7],
+        "original_column_name": row[8],
+        "cleaned_column_name": row[9],
+        "raw_value_json": row[11],
+        "source_row_number": row[14],
+        "source_column_letter": row[15],
+    }
+    encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def batched(rows: list[Any], size: int) -> Any:
+    for start in range(0, len(rows), size):
+        yield rows[start : start + size]
+
+
+def write_postgres_outputs(
+    *,
+    args: argparse.Namespace,
+    generated_at: str,
+    workbook_path: Path,
+    audit: dict[str, Any],
+    imported_sheets: list[str],
+    skipped_sheet_names: list[str],
+    failed_sheet_names: list[str],
+    all_column_entries: list[dict[str, Any]],
+    all_stat_rows: list[tuple[Any, ...]],
+    players_json: list[dict[str, Any]],
+    profile_outputs: dict[str, dict[str, Any]],
+    runtime_summaries: list[dict[str, Any]],
+    issue_log: dict[str, Any],
+) -> dict[str, Any]:
+    database_url = database_url_from_env()
+    if not database_url:
+        raise RuntimeError("Postgres write requested with --write-postgres, but DATABASE_URL is not set.")
+
+    try:
+        import psycopg
+        from psycopg.types.json import Jsonb
+    except ImportError as exc:
+        raise RuntimeError(
+            "Postgres write requested, but psycopg is not installed. Install Python dependencies from requirements.txt."
+        ) from exc
+
+    run_id = str(uuid.uuid4())
+    official = load_official_reference(args.official_snapshot)
+    runtime_by_slug = {summary["player_slug"]: summary for summary in runtime_summaries}
+
+    teams_by_abbr: dict[str, dict[str, Any]] = dict(official["teams_by_abbr"])
+    for player in players_json:
+        for team_abbr in player.get("teams", []):
+            if team_abbr and team_abbr not in teams_by_abbr:
+                teams_by_abbr[team_abbr] = fallback_team_row(team_abbr)
+    team_rows_by_id = {team["id"]: team for team in teams_by_abbr.values()}
+    team_id_by_abbr = {team["abbreviation"]: team["id"] for team in team_rows_by_id.values()}
+
+    player_rows = []
+    profile_rows = []
+    season_summary_rows = []
+    for player in players_json:
+        reference = find_player_reference(player, official) or {}
+        primary_team = player.get("primary_team")
+        primary_team_id = team_id_by_abbr.get(primary_team) if primary_team else None
+        player_rows.append(
+            {
+                "player_slug": player["player_slug"],
+                "nba_player_id": reference.get("nba_player_id"),
+                "app_player_id": reference.get("app_player_id"),
+                "player_name": player["player_name"],
+                "normalized_player_name": normalized_lookup_key(player["player_name"]),
+                "primary_team_id": primary_team_id,
+                "primary_team_abbreviation": primary_team,
+                "position": reference.get("position"),
+                "height": reference.get("height"),
+                "height_inches": reference.get("height_inches"),
+                "weight": reference.get("weight"),
+                "age": reference.get("age"),
+                "college": reference.get("college"),
+                "country": reference.get("country"),
+                "jersey_number": reference.get("jersey_number"),
+                "headshot_url": reference.get("headshot_url"),
+            }
+        )
+        profile = profile_outputs[player["player_slug"]]
+        profile_json = {key: value for key, value in profile.items() if key != "stats"}
+        profile_json["profile_path"] = player["profile_path"]
+        profile_rows.append(
+            {
+                "player_slug": player["player_slug"],
+                "season": SEASON,
+                "season_type": SEASON_TYPE,
+                "primary_team": primary_team,
+                "teams": player.get("teams", []),
+                "name_variants": player.get("name_variants", []),
+                "source_sheets": player.get("source_sheets", []),
+                "stat_rows": player.get("stat_rows", 0),
+                "profile_json": profile_json,
+            }
+        )
+
+        summary = runtime_by_slug.get(player["player_slug"], {})
+        games = int_or_none(summary_numeric(summary, "General - Traditional", "gp"))
+        season_summary_rows.append(
+            {
+                "player_slug": player["player_slug"],
+                "team_id": primary_team_id,
+                "season": SEASON,
+                "season_type": SEASON_TYPE,
+                "position": reference.get("position"),
+                "games": games,
+                "minutes": summary_numeric(summary, "General - Traditional", "min"),
+                "pts": summary_numeric(summary, "General - Traditional", "pts"),
+                "reb": summary_numeric(summary, "General - Traditional", "reb"),
+                "ast": summary_numeric(summary, "General - Traditional", "ast"),
+                "stl": summary_numeric(summary, "General - Traditional", "stl"),
+                "blk": summary_numeric(summary, "General - Traditional", "blk"),
+                "tov": summary_numeric(summary, "General - Traditional", "tov"),
+                "fg_pct": summary_percent(summary, "General - Traditional", "fg_pct"),
+                "three_pct": summary_percent(summary, "General - Traditional", "three_p_pct"),
+                "ft_pct": summary_percent(summary, "General - Traditional", "ft_pct"),
+                "ts_pct": summary_percent(summary, "General - Advanced", "ts_pct"),
+                "efg_pct": summary_percent(summary, "General - Advanced", "efg_pct"),
+                "usage_rate": summary_percent(summary, "General - Advanced", "usg_pct"),
+                "ast_pct": summary_percent(summary, "General - Advanced", "ast_pct"),
+                "reb_pct": summary_percent(summary, "General - Advanced", "reb_pct"),
+                "turnover_rate": summary_percent(summary, "General - Advanced", "to_ratio"),
+                "off_rating": summary_numeric(summary, "General - Advanced", "off_rtg"),
+                "def_rating": summary_numeric(summary, "General - Advanced", "def_rtg"),
+                "net_rating": summary_numeric(summary, "General - Advanced", "net_rtg"),
+                "pie": summary_percent(summary, "General - Advanced", "pie"),
+                "summary_json": summary,
+            }
+        )
+
+    stat_categories = sorted({(entry["source_sheet"], entry["stat_category"]) for entry in all_column_entries})
+    stat_value_rows = []
+    for row in all_stat_rows:
+        team_id = team_id_by_abbr.get(row[3]) if row[3] else None
+        stat_value_rows.append(
+            (
+                run_id,
+                row[0],
+                row[1],
+                row[2],
+                row[3],
+                team_id,
+                row[4],
+                row[5],
+                row[6],
+                row[7],
+                row[8],
+                row[9],
+                row[10],
+                Jsonb(json.loads(row[11])),
+                row[12],
+                row[13],
+                row[14],
+                row[15],
+                stat_row_fingerprint(row),
+            )
+        )
+
+    run_metadata = {
+        "generated_at": generated_at,
+        "json_outputs_preserved": True,
+        "sheets_imported": imported_sheets,
+        "sheets_skipped": skipped_sheet_names,
+        "sheets_failed": failed_sheet_names,
+        "source": "scripts/ingest_nba_excel.py",
+    }
+    batch_size = max(1, args.postgres_batch_size)
+
+    try:
+        with psycopg.connect(database_url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO ingestion_runs (
+                      id, source_workbook_path, source_workbook_sha256, season, season_type,
+                      status, sheets_found, sheets_imported, sheets_skipped, sheets_failed,
+                      unique_players, stat_rows_created, issues_logged, metadata
+                    )
+                    VALUES (%s, %s, %s, %s, %s, 'running', %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        run_id,
+                        str(workbook_path),
+                        sha256(workbook_path),
+                        SEASON,
+                        SEASON_TYPE,
+                        len(audit["sheets"]),
+                        len(imported_sheets),
+                        len(skipped_sheet_names),
+                        len(failed_sheet_names),
+                        len(players_json),
+                        len(all_stat_rows),
+                        len(issue_log["issues"]),
+                        Jsonb(run_metadata),
+                    ),
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO teams (
+                      id, slug, abbreviation, city, name, conference, division,
+                      primary_color, secondary_color, source, updated_at
+                    )
+                    VALUES (
+                      %(id)s, %(slug)s, %(abbreviation)s, %(city)s, %(name)s, %(conference)s, %(division)s,
+                      %(primary_color)s, %(secondary_color)s, %(source)s, now()
+                    )
+                    ON CONFLICT (id) DO UPDATE SET
+                      slug = EXCLUDED.slug,
+                      abbreviation = EXCLUDED.abbreviation,
+                      city = EXCLUDED.city,
+                      name = EXCLUDED.name,
+                      conference = EXCLUDED.conference,
+                      division = EXCLUDED.division,
+                      primary_color = EXCLUDED.primary_color,
+                      secondary_color = EXCLUDED.secondary_color,
+                      source = EXCLUDED.source,
+                      updated_at = now()
+                    """,
+                    list(team_rows_by_id.values()),
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO players (
+                      player_slug, nba_player_id, app_player_id, player_name, normalized_player_name,
+                      primary_team_id, primary_team_abbreviation, position, height, height_inches, weight,
+                      age, college, country, jersey_number, headshot_url, active, updated_at
+                    )
+                    VALUES (
+                      %(player_slug)s, %(nba_player_id)s, %(app_player_id)s, %(player_name)s, %(normalized_player_name)s,
+                      %(primary_team_id)s, %(primary_team_abbreviation)s, %(position)s, %(height)s, %(height_inches)s,
+                      %(weight)s, %(age)s, %(college)s, %(country)s, %(jersey_number)s, %(headshot_url)s, true, now()
+                    )
+                    ON CONFLICT (player_slug) DO UPDATE SET
+                      nba_player_id = EXCLUDED.nba_player_id,
+                      app_player_id = EXCLUDED.app_player_id,
+                      player_name = EXCLUDED.player_name,
+                      normalized_player_name = EXCLUDED.normalized_player_name,
+                      primary_team_id = EXCLUDED.primary_team_id,
+                      primary_team_abbreviation = EXCLUDED.primary_team_abbreviation,
+                      position = EXCLUDED.position,
+                      height = EXCLUDED.height,
+                      height_inches = EXCLUDED.height_inches,
+                      weight = EXCLUDED.weight,
+                      age = EXCLUDED.age,
+                      college = EXCLUDED.college,
+                      country = EXCLUDED.country,
+                      jersey_number = EXCLUDED.jersey_number,
+                      headshot_url = EXCLUDED.headshot_url,
+                      active = true,
+                      updated_at = now()
+                    """,
+                    player_rows,
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO stat_categories (source_sheet, stat_category)
+                    VALUES (%s, %s)
+                    ON CONFLICT (source_sheet, stat_category) DO NOTHING
+                    """,
+                    stat_categories,
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO column_dictionary (
+                      ingestion_run_id, source_sheet, stat_category, column_index, excel_column,
+                      original_column_name, cleaned_column_name, role, imported, notes
+                    )
+                    VALUES (
+                      %(ingestion_run_id)s, %(source_sheet)s, %(stat_category)s, %(column_index)s, %(excel_column)s,
+                      %(original_column_name)s, %(cleaned_column_name)s, %(role)s, %(imported)s, %(notes)s
+                    )
+                    ON CONFLICT (ingestion_run_id, source_sheet, column_index, cleaned_column_name) DO NOTHING
+                    """,
+                    [
+                        {
+                            "ingestion_run_id": run_id,
+                            **entry,
+                            "notes": "; ".join(entry["notes"]) if entry["notes"] else None,
+                        }
+                        for entry in all_column_entries
+                    ],
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO player_profiles (
+                      ingestion_run_id, player_slug, season, season_type, primary_team, teams,
+                      name_variants, source_sheets, stat_rows, profile_json
+                    )
+                    VALUES (
+                      %(ingestion_run_id)s, %(player_slug)s, %(season)s, %(season_type)s, %(primary_team)s, %(teams)s,
+                      %(name_variants)s, %(source_sheets)s, %(stat_rows)s, %(profile_json)s
+                    )
+                    ON CONFLICT (player_slug, season, season_type, ingestion_run_id) DO UPDATE SET
+                      primary_team = EXCLUDED.primary_team,
+                      teams = EXCLUDED.teams,
+                      name_variants = EXCLUDED.name_variants,
+                      source_sheets = EXCLUDED.source_sheets,
+                      stat_rows = EXCLUDED.stat_rows,
+                      profile_json = EXCLUDED.profile_json
+                    """,
+                    [
+                        {
+                            "ingestion_run_id": run_id,
+                            **row,
+                            "teams": Jsonb(row["teams"]),
+                            "name_variants": Jsonb(row["name_variants"]),
+                            "source_sheets": Jsonb(row["source_sheets"]),
+                            "profile_json": Jsonb(row["profile_json"]),
+                        }
+                        for row in profile_rows
+                    ],
+                    returning=False,
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO player_season_summaries (
+                      ingestion_run_id, player_slug, team_id, season, season_type, position, games,
+                      minutes, pts, reb, ast, stl, blk, tov, fg_pct, three_pct, ft_pct, ts_pct,
+                      efg_pct, usage_rate, ast_pct, reb_pct, turnover_rate, off_rating, def_rating,
+                      net_rating, pie, summary_json
+                    )
+                    VALUES (
+                      %(ingestion_run_id)s, %(player_slug)s, %(team_id)s, %(season)s, %(season_type)s, %(position)s, %(games)s,
+                      %(minutes)s, %(pts)s, %(reb)s, %(ast)s, %(stl)s, %(blk)s, %(tov)s, %(fg_pct)s, %(three_pct)s,
+                      %(ft_pct)s, %(ts_pct)s, %(efg_pct)s, %(usage_rate)s, %(ast_pct)s, %(reb_pct)s,
+                      %(turnover_rate)s, %(off_rating)s, %(def_rating)s, %(net_rating)s, %(pie)s, %(summary_json)s
+                    )
+                    ON CONFLICT (player_slug, season, season_type, ingestion_run_id) DO UPDATE SET
+                      team_id = EXCLUDED.team_id,
+                      position = EXCLUDED.position,
+                      games = EXCLUDED.games,
+                      minutes = EXCLUDED.minutes,
+                      pts = EXCLUDED.pts,
+                      reb = EXCLUDED.reb,
+                      ast = EXCLUDED.ast,
+                      stl = EXCLUDED.stl,
+                      blk = EXCLUDED.blk,
+                      tov = EXCLUDED.tov,
+                      fg_pct = EXCLUDED.fg_pct,
+                      three_pct = EXCLUDED.three_pct,
+                      ft_pct = EXCLUDED.ft_pct,
+                      ts_pct = EXCLUDED.ts_pct,
+                      efg_pct = EXCLUDED.efg_pct,
+                      usage_rate = EXCLUDED.usage_rate,
+                      ast_pct = EXCLUDED.ast_pct,
+                      reb_pct = EXCLUDED.reb_pct,
+                      turnover_rate = EXCLUDED.turnover_rate,
+                      off_rating = EXCLUDED.off_rating,
+                      def_rating = EXCLUDED.def_rating,
+                      net_rating = EXCLUDED.net_rating,
+                      pie = EXCLUDED.pie,
+                      summary_json = EXCLUDED.summary_json
+                    """,
+                    [{**row, "ingestion_run_id": run_id, "summary_json": Jsonb(row["summary_json"])} for row in season_summary_rows],
+                    returning=False,
+                )
+                for batch in batched(stat_value_rows, batch_size):
+                    cur.executemany(
+                        """
+                        INSERT INTO player_stat_values (
+                          ingestion_run_id, raw_player_name, player_name, player_slug, team, team_id,
+                          season, season_type, source_sheet, stat_category, original_column_name,
+                          cleaned_column_name, raw_value, raw_value_json, numeric_value, import_notes,
+                          source_row_number, source_column_letter, row_fingerprint
+                        )
+                        VALUES (
+                          %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        )
+                        ON CONFLICT (ingestion_run_id, row_fingerprint) DO NOTHING
+                        """,
+                        batch,
+                    )
+                cur.executemany(
+                    """
+                    INSERT INTO data_issues (ingestion_run_id, severity, type, message, details)
+                    VALUES (%(ingestion_run_id)s, %(severity)s, %(type)s, %(message)s, %(details)s)
+                    """,
+                    [
+                        {**issue, "ingestion_run_id": run_id, "details": Jsonb(issue.get("details", {}))}
+                        for issue in issue_log["issues"]
+                    ],
+                    returning=False,
+                )
+                cur.execute(
+                    """
+                    UPDATE ingestion_runs
+                    SET status = 'succeeded', finished_at = now()
+                    WHERE id = %s
+                    """,
+                    (run_id,),
+                )
+    except Exception as exc:
+        try:
+            with psycopg.connect(database_url) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO ingestion_runs (
+                          id, source_workbook_path, source_workbook_sha256, season, season_type,
+                          status, started_at, finished_at, metadata
+                        )
+                        VALUES (%s, %s, %s, %s, %s, 'failed', now(), now(), %s)
+                        ON CONFLICT (id) DO UPDATE SET
+                          status = 'failed',
+                          finished_at = now(),
+                          metadata = EXCLUDED.metadata
+                        """,
+                        (
+                            run_id,
+                            str(workbook_path),
+                            sha256(workbook_path),
+                            SEASON,
+                            SEASON_TYPE,
+                            Jsonb({"error": str(exc), **run_metadata}),
+                        ),
+                    )
+        except Exception:
+            pass
+        raise RuntimeError(f"Postgres ingestion failed and was rolled back: {exc}") from exc
+
+    return {
+        "requested": True,
+        "written": True,
+        "ingestion_run_id": run_id,
+        "tables_written": [
+            "ingestion_runs",
+            "teams",
+            "players",
+            "player_profiles",
+            "player_season_summaries",
+            "player_stat_values",
+            "stat_categories",
+            "column_dictionary",
+            "data_issues",
+        ],
+        "teams_written": len(team_rows_by_id),
+        "players_written": len(player_rows),
+        "stat_rows_written": len(stat_value_rows),
+        "issues_written": len(issue_log["issues"]),
+    }
+
+
 def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     workbook_path = args.workbook.resolve()
     if not workbook_path.exists():
         raise FileNotFoundError(f"Workbook not found: {workbook_path}")
+
+    from audit_nba_excel import build_audit
+    from openpyxl import load_workbook
 
     generated_at = now_iso()
     audit = build_audit(workbook_path)
@@ -650,6 +1335,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     all_stat_rows: list[tuple[Any, ...]] = []
     players: dict[str, dict[str, Any]] = {}
     player_profiles: dict[str, dict[str, Any]] = {}
+    profile_outputs: dict[str, dict[str, Any]] = {}
     imported_sheets: list[str] = []
     failed_sheet_names: list[str] = []
     sheet_summaries: list[dict[str, Any]] = []
@@ -1039,6 +1725,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
             "stat_rows": player["stat_rows"],
             "stats": profile["stats"],
         }
+        profile_outputs[player_slug] = profile_out
         write_json(args.profile_dir / f"{player_slug}.json", profile_out, compact=True)
         runtime_summaries.append(build_runtime_summary(profile_out, primary_team))
         player_rows.append(
@@ -1123,6 +1810,24 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     }
     write_json(args.issues_log, issue_log)
 
+    postgres_summary = {"requested": False, "written": False}
+    if args.write_postgres:
+        postgres_summary = write_postgres_outputs(
+            args=args,
+            generated_at=generated_at,
+            workbook_path=workbook_path,
+            audit=audit,
+            imported_sheets=imported_sheets,
+            skipped_sheet_names=skipped_sheet_names,
+            failed_sheet_names=failed_sheet_names,
+            all_column_entries=all_column_entries,
+            all_stat_rows=all_stat_rows,
+            players_json=players_json,
+            profile_outputs=profile_outputs,
+            runtime_summaries=runtime_summaries,
+            issue_log=issue_log,
+        )
+
     example_slug = None
     for preferred in ["Nikola Jokić", "Luka Dončić", "Shai Gilgeous-Alexander", "Giannis Antetokounmpo"]:
         preferred_slug = slugify(preferred)
@@ -1149,6 +1854,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
             "profile_dir": str(args.profile_dir),
             "runtime_summaries": str(args.runtime_summaries),
         },
+        "postgres": postgres_summary,
     }
 
 
@@ -1161,11 +1867,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--players-json", type=Path, default=DEFAULT_PLAYERS_JSON)
     parser.add_argument("--profile-dir", type=Path, default=DEFAULT_PROFILE_DIR)
     parser.add_argument("--runtime-summaries", type=Path, default=DEFAULT_RUNTIME_SUMMARIES)
+    parser.add_argument("--official-snapshot", type=Path, default=DEFAULT_OFFICIAL_SNAPSHOT)
+    parser.add_argument("--write-postgres", action="store_true", help="Write processed output to Postgres after JSON/SQLite generation.")
+    parser.add_argument("--postgres-batch-size", type=int, default=5000)
     return parser.parse_args()
 
 
 def main() -> None:
-    summary = import_workbook(parse_args())
+    args = parse_args()
+    if args.write_postgres and not database_url_from_env():
+        print(
+            "Postgres write requested with --write-postgres, but DATABASE_URL is not set. "
+            "Run without --write-postgres for JSON/SQLite generation only, or set DATABASE_URL.",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    summary = import_workbook(args)
     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
 
