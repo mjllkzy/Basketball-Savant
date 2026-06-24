@@ -953,9 +953,9 @@ def write_postgres_outputs(
                 "ast_pct": summary_percent(summary, "General - Advanced", "ast_pct"),
                 "reb_pct": summary_percent(summary, "General - Advanced", "reb_pct"),
                 "turnover_rate": summary_percent(summary, "General - Advanced", "to_ratio"),
-                "off_rating": summary_numeric(summary, "General - Advanced", "off_rtg"),
-                "def_rating": summary_numeric(summary, "General - Advanced", "def_rtg"),
-                "net_rating": summary_numeric(summary, "General - Advanced", "net_rtg"),
+                "off_rating": summary_numeric(summary, "General - Advanced", "offrtg"),
+                "def_rating": summary_numeric(summary, "General - Advanced", "defrtg"),
+                "net_rating": summary_numeric(summary, "General - Advanced", "netrtg"),
                 "pie": summary_percent(summary, "General - Advanced", "pie"),
                 "summary_json": summary,
             }
@@ -1187,22 +1187,25 @@ def write_postgres_outputs(
                     [{**row, "ingestion_run_id": run_id, "summary_json": Jsonb(row["summary_json"])} for row in season_summary_rows],
                     returning=False,
                 )
+                # Make the run metadata and small lookup tables durable before the
+                # large fact load. Current views only expose succeeded runs, so
+                # these rows remain invisible until finalization.
+                conn.commit()
                 for batch in batched(stat_value_rows, batch_size):
-                    cur.executemany(
+                    with cur.copy(
                         """
-                        INSERT INTO player_stat_values (
+                        COPY player_stat_values (
                           ingestion_run_id, raw_player_name, player_name, player_slug, team, team_id,
                           season, season_type, source_sheet, stat_category, original_column_name,
                           cleaned_column_name, raw_value, raw_value_json, numeric_value, import_notes,
                           source_row_number, source_column_letter, row_fingerprint
                         )
-                        VALUES (
-                          %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                        )
-                        ON CONFLICT (ingestion_run_id, row_fingerprint) DO NOTHING
-                        """,
-                        batch,
-                    )
+                        FROM STDIN
+                        """
+                    ) as copy:
+                        for stat_row in batch:
+                            copy.write_row(stat_row)
+                    conn.commit()
                 cur.executemany(
                     """
                     INSERT INTO data_issues (ingestion_run_id, severity, type, message, details)
@@ -1226,6 +1229,7 @@ def write_postgres_outputs(
         try:
             with psycopg.connect(database_url) as conn:
                 with conn.cursor() as cur:
+                    cur.execute("DELETE FROM ingestion_runs WHERE id = %s", (run_id,))
                     cur.execute(
                         """
                         INSERT INTO ingestion_runs (

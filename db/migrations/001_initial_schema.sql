@@ -1,7 +1,5 @@
 -- Phase 3.1 database foundation for Basketball Savant.
--- This file is intentionally not executed by the app yet.
-
-BEGIN;
+-- Transactions are managed by scripts/migrate-postgres.mjs.
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -250,5 +248,3 @@ CREATE INDEX IF NOT EXISTS idx_data_issues_run
 
 CREATE INDEX IF NOT EXISTS idx_data_issues_type
   ON data_issues (type);
-
-COMMIT;

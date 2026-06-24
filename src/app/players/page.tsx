@@ -2,8 +2,8 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
-import { listPlayers, players, teams } from "@/lib/data/queries";
-import { calculatePlayerMetric } from "@/lib/metrics/registry";
+import { players, teams } from "@/lib/data/queries";
+import { listPlayerDirectory } from "@/lib/db/playerDirectory.server";
 import { formatMetric } from "@/lib/metrics/format";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
@@ -72,7 +72,7 @@ function playersHref(searchParams: RouteSearchParams, showAll: boolean) {
   return query ? `/players?${query}` : "/players";
 }
 
-export default function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
+export default async function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const loadedPositions = new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"));
   const positionOptions = primaryPositionOrder.filter((position) => loadedPositions.has(position));
   const q = singleParam(searchParams, "q");
@@ -88,7 +88,7 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
   const minGames = boundedNumber(numberParam(searchParams, "minGames"), defaultMinGames, 0, maxMinGames);
   const showAll = booleanParam(searchParams, "showAll") === true;
   const order = singleParam(searchParams, "order") === "asc" ? "asc" : "desc";
-  const result = listPlayers({
+  const result = await listPlayerDirectory({
     q,
     teamId,
     position,
@@ -100,34 +100,34 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
     all: showAll
   });
   const rows = result.rows.map((row) => ({
-    player: row.player.name,
-    href: `/players/${row.player.slug}`,
-    team: row.team.abbreviation,
-    pos: row.player.position,
-    height: row.player.height,
-    weight: row.player.weight || "N/A",
-    age: row.player.age,
+    player: row.playerName,
+    href: `/players/${row.playerSlug}`,
+    team: row.teamAbbreviation,
+    pos: row.position,
+    height: row.height,
+    weight: row.weight || "N/A",
+    age: row.age ?? "N/A",
     games: row.games,
-    min: (row.minutes / Math.max(row.games, 1)).toFixed(1),
-    pts: formatMetric("pts", calculatePlayerMetric("pts", row)),
-    reb: formatMetric("reb", calculatePlayerMetric("reb", row)),
-    ast: formatMetric("ast", calculatePlayerMetric("ast", row)),
-    stl: formatMetric("stl", calculatePlayerMetric("stl", row)),
-    blk: formatMetric("blk", calculatePlayerMetric("blk", row)),
-    tov: formatMetric("tov", calculatePlayerMetric("tov", row)),
-    fg: formatMetric("fg_pct", calculatePlayerMetric("fg_pct", row)),
-    three: formatMetric("three_pct", calculatePlayerMetric("three_pct", row)),
-    ft: formatMetric("ft_pct", calculatePlayerMetric("ft_pct", row)),
-    ts: formatMetric("ts_pct", calculatePlayerMetric("ts_pct", row)),
-    efg: formatMetric("efg_pct", calculatePlayerMetric("efg_pct", row)),
-    usg: formatMetric("usage_rate", calculatePlayerMetric("usage_rate", row)),
-    astPct: formatMetric("ast_pct", calculatePlayerMetric("ast_pct", row)),
-    rebPct: formatMetric("reb_pct", calculatePlayerMetric("reb_pct", row)),
-    tovPct: formatMetric("turnover_rate", calculatePlayerMetric("turnover_rate", row)),
-    ortg: formatMetric("off_rating", calculatePlayerMetric("off_rating", row)),
-    drtg: formatMetric("def_rating", calculatePlayerMetric("def_rating", row)),
-    net: formatMetric("net_rating", calculatePlayerMetric("net_rating", row)),
-    pie: formatMetric("pie", calculatePlayerMetric("pie", row))
+    min: row.minutesPerGame?.toFixed(1) ?? "N/A",
+    pts: formatMetric("pts", row.pts),
+    reb: formatMetric("reb", row.reb),
+    ast: formatMetric("ast", row.ast),
+    stl: formatMetric("stl", row.stl),
+    blk: formatMetric("blk", row.blk),
+    tov: formatMetric("tov", row.tov),
+    fg: formatMetric("fg_pct", row.fgPct),
+    three: formatMetric("three_pct", row.threePct),
+    ft: formatMetric("ft_pct", row.ftPct),
+    ts: formatMetric("ts_pct", row.tsPct),
+    efg: formatMetric("efg_pct", row.efgPct),
+    usg: formatMetric("usage_rate", row.usageRate),
+    astPct: formatMetric("ast_pct", row.astPct),
+    rebPct: formatMetric("reb_pct", row.rebPct),
+    tovPct: formatMetric("turnover_rate", row.turnoverRate),
+    ortg: formatMetric("off_rating", row.offRating),
+    drtg: formatMetric("def_rating", row.defRating),
+    net: formatMetric("net_rating", row.netRating),
+    pie: formatMetric("pie", row.pie)
   }));
   const columns = statView === "advanced" ? advancedColumns : standardColumns;
   const tableMinWidth = statView === "advanced" ? advancedTableMinWidth : standardTableMinWidth;
@@ -145,7 +145,7 @@ export default function PlayersPage({ searchParams }: { searchParams: RouteSearc
         teamOptions={teams.map((team) => ({ label: team.abbreviation, value: team.id }))}
         positionOptions={positionOptions}
       />
-      <div className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
+      <div data-data-source={result.meta.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
         Showing <strong className="text-ink">{result.meta.total}</strong> players with at least <strong className="text-ink">{minMinutes.toLocaleString()}</strong> total minutes and <strong className="text-ink">{minGames}</strong> games played.
       </div>
       <StatTable

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import publicPlayerIndexJson from "../../../public/data/players.json";
+import { queryDatabase } from "@/lib/db/client.server";
 
 export type MasterPlayerIndexEntry = {
   player_name: string;
@@ -120,6 +121,107 @@ export function loadMasterPlayerProfile(input: string | { slug?: string; playerN
   } catch {
     profileCache.set(entry.player_slug, null);
     return null;
+  }
+}
+
+type MasterProfileMetadataDbRow = {
+  player_name: string;
+  player_slug: string;
+  season: string;
+  season_type: string;
+  primary_team: string | null;
+  teams: string[];
+  name_variants: string[];
+  source_sheets: string[];
+  stat_rows: number;
+};
+
+type MasterProfileStatDbRow = {
+  player_name: string;
+  raw_player_name: string | null;
+  team: string | null;
+  season: string;
+  season_type: string;
+  source_sheet: string;
+  stat_category: string;
+  original_column_name: string;
+  cleaned_column_name: string;
+  raw_value_json: unknown;
+  numeric_value: number | string | null;
+  import_notes: string | null;
+};
+
+export async function loadMasterPlayerProfileDbFirst(
+  input: string | { slug?: string; playerName?: string },
+): Promise<MasterPlayerProfile | null> {
+  const entry = getMasterPlayerIndexEntry(input);
+  if (!entry) return null;
+
+  try {
+    const [metadataResult, statsResult] = await Promise.all([
+      queryDatabase<MasterProfileMetadataDbRow>(
+        `
+        SELECT
+          p.player_name,
+          profile.player_slug,
+          profile.season,
+          profile.season_type,
+          profile.primary_team,
+          profile.teams,
+          profile.name_variants,
+          profile.source_sheets,
+          profile.stat_rows
+        FROM current_player_profiles profile
+        JOIN players p USING (player_slug)
+        WHERE profile.player_slug = $1
+        LIMIT 1
+        `,
+        [entry.player_slug],
+      ),
+      queryDatabase<MasterProfileStatDbRow>(
+        `
+        SELECT
+          player_name,
+          raw_player_name,
+          team,
+          season,
+          season_type,
+          source_sheet,
+          stat_category,
+          original_column_name,
+          cleaned_column_name,
+          raw_value_json,
+          numeric_value,
+          import_notes
+        FROM current_player_stat_values
+        WHERE player_slug = $1
+        ORDER BY source_sheet, source_row_number, source_column_letter
+        `,
+        [entry.player_slug],
+      ),
+    ]);
+    const metadata = metadataResult?.rows[0];
+    if (!metadata || !statsResult) return loadMasterPlayerProfile(input);
+
+    return {
+      ...metadata,
+      stats: statsResult.rows.map((stat) => ({
+        player_name: stat.player_name,
+        raw_player_name: stat.raw_player_name ?? undefined,
+        team: stat.team,
+        season: stat.season,
+        season_type: stat.season_type,
+        source_sheet: stat.source_sheet,
+        stat_category: stat.stat_category,
+        original_column_name: stat.original_column_name,
+        cleaned_column_name: stat.cleaned_column_name,
+        raw_value: stat.raw_value_json,
+        numeric_value: stat.numeric_value === null ? null : Number(stat.numeric_value),
+        import_notes: stat.import_notes,
+      })),
+    };
+  } catch {
+    return loadMasterPlayerProfile(input);
   }
 }
 

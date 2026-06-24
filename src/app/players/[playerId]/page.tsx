@@ -11,7 +11,7 @@ import { SimilarPlayersTable } from "@/components/domain/SimilarPlayersTable";
 import { StatTable } from "@/components/ui/StatTable";
 import { PercentileBar } from "@/components/ui/PercentileBar";
 import { getPlayerProfile, lineups, players } from "@/lib/data/queries";
-import { loadMasterPlayerProfile, masterProfileCategorySummary, masterProfileKeyStats } from "@/lib/data/masterProfiles.server";
+import { loadMasterPlayerProfileDbFirst, masterProfileCategorySummary, masterProfileKeyStats } from "@/lib/data/masterProfiles.server";
 import { formatShortDate } from "@/lib/date";
 import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
@@ -26,7 +26,7 @@ function FeedRequiredPanel({ title, detail }: { title: string; detail: string })
   );
 }
 
-export default function PlayerPage({ params }: { params: { playerId: string } }) {
+export default async function PlayerPage({ params }: { params: { playerId: string } }) {
   const profile = getPlayerProfile(params.playerId);
   if (!profile) notFound();
   const radarKeys = ["pts", "reb", "ast", "stl", "blk", "ts_pct", "usage_rate", "three_pct"];
@@ -48,7 +48,7 @@ export default function PlayerPage({ params }: { params: { playerId: string } })
   }));
   const playerLineups = lineups.filter((lineup) => [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].includes(profile.player.id));
   const hasShotEvents = profile.shots.length > 0;
-  const masterProfile = loadMasterPlayerProfile({ slug: profile.masterSlug, playerName: profile.player.name });
+  const masterProfile = await loadMasterPlayerProfileDbFirst({ slug: profile.masterSlug, playerName: profile.player.name });
   const keyStats = masterProfile ? masterProfileKeyStats(masterProfile) : [];
   const categoryRows = masterProfile ? masterProfileCategorySummary(masterProfile).slice(0, 8) : [];
 
