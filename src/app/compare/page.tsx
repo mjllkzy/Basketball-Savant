@@ -3,33 +3,27 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight, GitCompare, Minus, Radar } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PercentileBar } from "@/components/ui/PercentileBar";
-import { getPlayerProfile, players, teams } from "@/lib/data/queries";
 import { comparisonRows, heightToInches, type ComparisonWinner } from "@/lib/comparison";
+import {
+  listComparisonPlayerOptions,
+  loadComparisonPlayers,
+  type ComparisonPlayer,
+  type PlayerOption,
+} from "@/lib/db/playerAnalytics.server";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
 
-function selectedSlug(searchParams: RouteSearchParams, key: string, fallback: string) {
-  return singleParam(searchParams, key) ?? fallback;
-}
-
-function defaultSlugById(playerId: string, fallbackIndex: number) {
-  return players.find((player) => player.id === playerId)?.slug ?? players[fallbackIndex]?.slug ?? players[0].slug;
-}
-
-function PlayerSelect({ name, label, value }: { name: string; label: string; value: string }) {
+function PlayerSelect({ name, label, value, options }: { name: string; label: string; value: string; options: PlayerOption[] }) {
   return (
     <label className="grid gap-1">
       <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</span>
       <select name={name} defaultValue={value} className="rounded border border-slate-300 px-3 py-2 text-sm">
-        {players.map((player) => {
-          const team = teams.find((item) => item.id === player.teamId);
-          return (
-            <option key={player.id} value={player.slug}>
-              {player.name} · {team?.abbreviation ?? "NBA"} · {player.position}
-            </option>
-          );
-        })}
+        {options.map((player) => (
+          <option key={player.slug} value={player.slug}>
+            {player.name} · {player.teamAbbreviation} · {player.position}
+          </option>
+        ))}
       </select>
     </label>
   );
@@ -45,7 +39,7 @@ function WinnerIcon({ winner }: { winner: ComparisonWinner }) {
   return <span aria-label="Tie" className="inline-flex h-9 w-12 items-center justify-center rounded bg-slate-100 text-slate-500"><Minus className="h-6 w-6" /></span>;
 }
 
-function PlayerCard({ profile }: { profile: NonNullable<ReturnType<typeof getPlayerProfile>> }) {
+function PlayerCard({ profile }: { profile: ComparisonPlayer }) {
   const heightInches = heightToInches(profile.player.height);
   const logoUrl = nbaTeamLogoUrl(profile.team.id);
   const accentColor = teamAccentColor(profile.team);
@@ -75,29 +69,22 @@ function PlayerCard({ profile }: { profile: NonNullable<ReturnType<typeof getPla
         <Link href={`/players/${profile.player.slug}`} className="rounded border border-slate-200 px-3 py-2 text-xs font-black text-ink hover:bg-slate-50">Profile</Link>
       </div>
       <div className="mt-4 grid gap-2">
-        <PercentileBar label="True Shooting" value={profile.metricValues.find((value) => value.metricKey === "ts_pct")?.percentile ?? 0} />
-        <PercentileBar label="Usage" value={profile.metricValues.find((value) => value.metricKey === "usage_rate")?.percentile ?? 0} />
-        <PercentileBar label="PIE" value={profile.metricValues.find((value) => value.metricKey === "pie")?.percentile ?? 0} />
+        <PercentileBar label="True Shooting" value={profile.percentiles.tsPct} />
+        <PercentileBar label="Usage" value={profile.percentiles.usageRate} />
+        <PercentileBar label="PIE" value={profile.percentiles.pie} />
       </div>
     </div>
   );
 }
 
-export default function ComparePage({ searchParams }: { searchParams: RouteSearchParams }) {
+export default async function ComparePage({ searchParams }: { searchParams: RouteSearchParams }) {
   const mode = singleParam(searchParams, "mode");
-  const defaultLeftSlug = defaultSlugById("1629029", 0);
-  const defaultRightSlug = defaultSlugById("203999", 1);
-  const leftSlug = selectedSlug(searchParams, "left", defaultLeftSlug);
-  const rightSlug = selectedSlug(searchParams, "right", defaultRightSlug);
-  const leftProfile = getPlayerProfile(leftSlug) ?? getPlayerProfile(players[0].slug)!;
-  const rightProfile = getPlayerProfile(rightSlug) ?? getPlayerProfile(players[1]?.slug ?? players[0].slug)!;
-  const rows = comparisonRows(leftProfile.aggregate, rightProfile.aggregate);
 
   if (mode !== "compare") {
     return (
       <div className="grid min-h-[calc(100vh-220px)] gap-4 lg:grid-cols-2">
         <Link
-          href={`/compare?mode=compare&left=${leftProfile.player.slug}&right=${rightProfile.player.slug}`}
+          href="/compare?mode=compare"
           className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_42%)]" />
@@ -117,7 +104,7 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
         </Link>
 
         <Link
-          href={`/similarity?player=${leftProfile.player.slug}`}
+          href="/similarity"
           className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-ink/20 bg-ink p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(244,162,97,0.32),transparent_44%)]" />
@@ -139,6 +126,30 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
     );
   }
 
+  const options = await listComparisonPlayerOptions();
+  const fallbackLeft = options.find((player) => player.slug === "luka-doncic")?.slug ?? options[0]?.slug ?? "";
+  const fallbackRight = options.find((player) => player.slug === "nikola-jokic")?.slug ?? options[1]?.slug ?? fallbackLeft;
+  const leftSlug = singleParam(searchParams, "left") ?? fallbackLeft;
+  const rightSlug = singleParam(searchParams, "right") ?? fallbackRight;
+  let [leftProfile, rightProfile] = await loadComparisonPlayers([leftSlug, rightSlug]);
+
+  if (!leftProfile || !rightProfile) {
+    [leftProfile, rightProfile] = await loadComparisonPlayers([fallbackLeft, fallbackRight]);
+  }
+
+  if (!leftProfile || !rightProfile) {
+    return (
+      <div className="grid gap-4">
+        <PageHeader eyebrow="Compare" title="Player Comparison" description="Side-by-side player edges from masterfile box, advanced, physical, and role data." />
+        <div className="rounded border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+          Player comparison data is temporarily unavailable. The last generated dataset remains available through the player directory.
+        </div>
+      </div>
+    );
+  }
+
+  const rows = comparisonRows(leftProfile.aggregate, rightProfile.aggregate);
+
   return (
     <div className="grid gap-5">
       <PageHeader eyebrow="Compare" title="Player Comparison" description="Side-by-side player edges from masterfile box, advanced, physical, and role data." />
@@ -147,8 +158,8 @@ export default function ComparePage({ searchParams }: { searchParams: RouteSearc
         <h2 className="text-xl font-black text-ink">Side-by-Side</h2>
         <form className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_120px]">
           <input type="hidden" name="mode" value="compare" />
-          <PlayerSelect name="left" label="Left Player" value={leftProfile.player.slug} />
-          <PlayerSelect name="right" label="Right Player" value={rightProfile.player.slug} />
+          <PlayerSelect name="left" label="Left Player" value={leftProfile.player.slug} options={options} />
+          <PlayerSelect name="right" label="Right Player" value={rightProfile.player.slug} options={options} />
           <button className="self-end rounded bg-ink px-3 py-2 text-sm font-black text-white">Compare</button>
         </form>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
