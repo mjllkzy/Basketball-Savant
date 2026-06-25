@@ -1,5 +1,7 @@
-import type { Team, TeamSeasonAggregate } from "@/lib/types";
+import type { Lineup, Shot, Team, TeamSeasonAggregate } from "@/lib/types";
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
+import { listGameAnalytics, type GameListItem } from "./gameAnalytics.server";
+import { listPlayerDirectory, type PlayerDirectoryRow } from "./playerDirectory.server";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -53,6 +55,16 @@ type TeamSummaryDbRow = {
 
 export type TeamSummaryResult = {
   rows: TeamSeasonAggregate[];
+  source: "postgres" | "json";
+};
+
+export type TeamProfileResult = {
+  team: Team;
+  aggregate: TeamSeasonAggregate;
+  rosterRows: PlayerDirectoryRow[];
+  games: GameListItem[];
+  shots: Shot[];
+  lineups: Lineup[];
   source: "postgres" | "json";
 };
 
@@ -187,4 +199,33 @@ export async function listTeamSeasonSummaries(): Promise<TeamSummaryResult> {
   } catch {
     return jsonFallback();
   }
+}
+
+export async function loadTeamProfile(idOrSlug: string): Promise<TeamProfileResult | null> {
+  const teamResult = await listTeamSeasonSummaries();
+  const normalized = idOrSlug.trim().toLowerCase();
+  const aggregate = teamResult.rows.find((row) =>
+    row.team.id === idOrSlug
+    || row.team.slug.toLowerCase() === normalized
+    || row.team.abbreviation.toLowerCase() === normalized
+  );
+  if (!aggregate) return null;
+
+  const [roster, games] = await Promise.all([
+    listPlayerDirectory({ teamId: aggregate.team.id, all: true, minGames: 0, minMinutes: 0 }),
+    listGameAnalytics({ teamId: aggregate.team.id, pageSize: 100 }),
+  ]);
+  return {
+    team: aggregate.team,
+    aggregate,
+    rosterRows: roster.rows,
+    games: games.rows,
+    shots: [],
+    lineups: [],
+    source: teamResult.source === "postgres"
+      && roster.meta.source === "postgres"
+      && games.meta.source === "postgres"
+      ? "postgres"
+      : "json",
+  };
 }

@@ -1,7 +1,7 @@
 import { notFound, ok } from "@/lib/api/response";
-import { getTeamProfile } from "@/lib/data/queries";
+import { loadTeamProfile } from "@/lib/db/teamAnalytics.server";
 
-export function GET(_: Request, { params }: { params: { teamId: string } }) {
-  const profile = getTeamProfile(params.teamId);
+export async function GET(_: Request, { params }: { params: { teamId: string } }) {
+  const profile = await loadTeamProfile(params.teamId);
   return profile ? ok(profile) : notFound("Team not found");
 }

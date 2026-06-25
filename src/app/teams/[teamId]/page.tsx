@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { LineupNetwork } from "@/components/charts/LineupNetwork";
 import { TeamShotMap } from "@/components/charts/TeamShotMap";
 import { TeamStyleProfile } from "@/components/charts/TeamStyleProfile";
 import { TeamHeader } from "@/components/domain/TeamHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
 import { getLiveTeamShotChart } from "@/lib/data/liveShotCharts";
-import { gameMatchupLabel, getTeamProfile, players, teamSeasonAggregates } from "@/lib/data/queries";
+import { gameMatchupLabel } from "@/lib/db/gameAnalytics.server";
+import { listTeamSeasonSummaries, loadTeamProfile } from "@/lib/db/teamAnalytics.server";
 import { formatShortDate } from "@/lib/date";
-import { calculatePlayerMetric, calculateTeamMetric } from "@/lib/metrics/registry";
+import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
-export function generateMetadata({ params }: { params: { teamId: string } }): Metadata {
-  const profile = getTeamProfile(params.teamId);
+export async function generateMetadata({ params }: { params: { teamId: string } }): Promise<Metadata> {
+  const profile = await loadTeamProfile(params.teamId);
   if (!profile) return { title: "Team Not Found", robots: { index: false, follow: false } };
 
   const teamName = `${profile.team.city} ${profile.team.name}`.trim();
@@ -32,26 +32,28 @@ export function generateMetadata({ params }: { params: { teamId: string } }): Me
 }
 
 export default async function TeamPage({ params }: { params: { teamId: string } }) {
-  const profile = getTeamProfile(params.teamId);
+  const [profile, teamSummaries] = await Promise.all([
+    loadTeamProfile(params.teamId),
+    listTeamSeasonSummaries(),
+  ]);
   if (!profile) notFound();
   const liveShots = await getLiveTeamShotChart(profile.team.id);
-  const chartShots = liveShots.length ? liveShots : profile.shots;
   const rosterRows = profile.rosterRows.map((row) => ({
-    player: row.player.name,
-    href: `/players/${row.player.slug}`,
-    pos: row.player.position,
+    player: row.playerName,
+    href: `/players/${row.playerSlug}`,
+    pos: row.position,
     games: row.games,
-    min: (row.minutes / Math.max(row.games, 1)).toFixed(1),
-    pts: formatMetric("pts", calculatePlayerMetric("pts", row)),
-    reb: formatMetric("reb", calculatePlayerMetric("reb", row)),
-    ast: formatMetric("ast", calculatePlayerMetric("ast", row)),
-    stl: formatMetric("stl", calculatePlayerMetric("stl", row)),
-    blk: formatMetric("blk", calculatePlayerMetric("blk", row)),
-    tov: formatMetric("tov", calculatePlayerMetric("tov", row)),
-    fg: formatMetric("fg_pct", calculatePlayerMetric("fg_pct", row)),
-    three: formatMetric("three_pct", calculatePlayerMetric("three_pct", row)),
-    ft: formatMetric("ft_pct", calculatePlayerMetric("ft_pct", row)),
-    ts: formatMetric("ts_pct", calculatePlayerMetric("ts_pct", row))
+    min: row.minutesPerGame === null ? "N/A" : row.minutesPerGame.toFixed(1),
+    pts: formatMetric("pts", row.pts),
+    reb: formatMetric("reb", row.reb),
+    ast: formatMetric("ast", row.ast),
+    stl: formatMetric("stl", row.stl),
+    blk: formatMetric("blk", row.blk),
+    tov: formatMetric("tov", row.tov),
+    fg: formatMetric("fg_pct", row.fgPct),
+    three: formatMetric("three_pct", row.threePct),
+    ft: formatMetric("ft_pct", row.ftPct),
+    ts: formatMetric("ts_pct", row.tsPct)
   }));
   return (
     <div className="grid gap-4">
@@ -62,11 +64,10 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
         ))}
       </section>
       <section>
-        <TeamShotMap shots={chartShots} />
+        <TeamShotMap shots={liveShots} />
       </section>
-      <section className={`grid gap-4 ${profile.lineups.length ? "xl:grid-cols-2" : ""}`}>
-        <TeamStyleProfile team={profile.aggregate} teams={teamSeasonAggregates} />
-        {profile.lineups.length ? <LineupNetwork lineups={profile.lineups} players={players} /> : null}
+      <section className="grid gap-4">
+        <TeamStyleProfile team={profile.aggregate} teams={teamSummaries.rows} />
       </section>
       <div>
         <h2 className="mb-2 text-lg font-black text-ink">Roster</h2>
@@ -95,7 +96,7 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
       <div>
         <h2 className="mb-2 text-lg font-black text-ink">Game Logs</h2>
         {profile.games.length ? (
-          <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "result", label: "Result" }]} rows={profile.games.map((game) => ({ date: formatShortDate(game.date), matchup: gameMatchupLabel(game), href: `/games/${game.id}`, score: `${game.awayScore}-${game.homeScore}`, result: game.homeTeamId === profile.team.id ? (game.homeScore > game.awayScore ? "W" : "L") : (game.awayScore > game.homeScore ? "W" : "L") }))} />
+          <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "result", label: "Result" }]} rows={profile.games.map((item) => ({ date: formatShortDate(item.game.date), matchup: gameMatchupLabel(item), href: `/games/${item.game.id}`, score: `${item.game.awayScore}-${item.game.homeScore}`, result: item.game.homeTeamId === profile.team.id ? (item.game.homeScore > item.game.awayScore ? "W" : "L") : (item.game.awayScore > item.game.homeScore ? "W" : "L") }))} />
         ) : (
           <div className="rounded border border-dashed border-slate-300 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
             Official team game logs are not loaded in this snapshot.
