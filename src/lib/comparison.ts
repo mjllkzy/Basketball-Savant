@@ -134,6 +134,21 @@ function pct(value: number) {
   return Math.round(Math.max(0, Math.min(1, value)) * 100);
 }
 
+type SimilarityContext = {
+  pool: PlayerSeasonAggregate[];
+  boxSpreads: Map<(typeof boxRateKeys)[number], number>;
+  metricSpreads: Map<string, number>;
+};
+
+function buildSimilarityContext(target: PlayerSeasonAggregate, rows: PlayerSeasonAggregate[]): SimilarityContext {
+  const pool = similarityPool(target, rows);
+  return {
+    pool,
+    boxSpreads: new Map(boxRateKeys.map((key) => [key, boxRateSpread(pool, key)])),
+    metricSpreads: new Map(ratioSimilarityKeys.map((key) => [key, metricSpread(pool, key)])),
+  };
+}
+
 export function playerSimilaritySummary(row: PlayerSeasonAggregate) {
   return {
     height: row.player.height || "N/A",
@@ -168,13 +183,14 @@ export function comparisonRows(left: PlayerSeasonAggregate, right: PlayerSeasonA
   });
 }
 
-export function similarityScore(target: PlayerSeasonAggregate, candidate: PlayerSeasonAggregate, rows: PlayerSeasonAggregate[]) {
-  const pool = similarityPool(target, rows);
+function similarityScoreWithContext(target: PlayerSeasonAggregate, candidate: PlayerSeasonAggregate, context: SimilarityContext) {
+  const boxSpread = (key: (typeof boxRateKeys)[number]) => context.boxSpreads.get(key) ?? 1;
+  const ratioSpread = (key: string) => context.metricSpreads.get(key) ?? 1;
   const perMinuteScore = average(
-    boxRateKeys.map((key) => gaussianCloseness(boxRateValue(target, key), boxRateValue(candidate, key), boxRateSpread(pool, key), 0.8))
+    boxRateKeys.map((key) => gaussianCloseness(boxRateValue(target, key), boxRateValue(candidate, key), boxSpread(key), 0.8))
   );
   const ratioScore = average(
-    ratioSimilarityKeys.map((key) => gaussianCloseness(calculatePlayerMetric(key, target), calculatePlayerMetric(key, candidate), metricSpread(pool, key), 0.82))
+    ratioSimilarityKeys.map((key) => gaussianCloseness(calculatePlayerMetric(key, target), calculatePlayerMetric(key, candidate), ratioSpread(key), 0.82))
   );
   const physicalScore = physicalCloseness(target, candidate);
   const roleScore = positionSimilarity(target.player.position, candidate.player.position);
@@ -186,7 +202,7 @@ export function similarityScore(target: PlayerSeasonAggregate, candidate: Player
   const statTraits = ratioSimilarityKeys
     .map((key) => ({
       label: getMetric(key).shortLabel,
-      score: gaussianCloseness(calculatePlayerMetric(key, target), calculatePlayerMetric(key, candidate), metricSpread(pool, key), 0.82)
+      score: gaussianCloseness(calculatePlayerMetric(key, target), calculatePlayerMetric(key, candidate), ratioSpread(key), 0.82)
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 2)
@@ -194,7 +210,7 @@ export function similarityScore(target: PlayerSeasonAggregate, candidate: Player
   const rateTraits = boxRateKeys
     .map((key) => ({
       label: key === "threePa" ? "3PA/36" : `${key.toUpperCase()}/36`,
-      score: gaussianCloseness(boxRateValue(target, key), boxRateValue(candidate, key), boxRateSpread(pool, key), 0.8)
+      score: gaussianCloseness(boxRateValue(target, key), boxRateValue(candidate, key), boxSpread(key), 0.8)
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 2)
@@ -222,11 +238,15 @@ export function similarityScore(target: PlayerSeasonAggregate, candidate: Player
   };
 }
 
+export function similarityScore(target: PlayerSeasonAggregate, candidate: PlayerSeasonAggregate, rows: PlayerSeasonAggregate[]) {
+  return similarityScoreWithContext(target, candidate, buildSimilarityContext(target, rows));
+}
+
 export function similarPlayers(target: PlayerSeasonAggregate, rows: PlayerSeasonAggregate[], limit = 8) {
-  const pool = similarityPool(target, rows);
-  return pool
+  const context = buildSimilarityContext(target, rows);
+  return context.pool
     .filter((row) => row.player.id !== target.player.id)
-    .map((row) => ({ ...similarityScore(target, row, pool), aggregate: row }))
+    .map((row) => ({ ...similarityScoreWithContext(target, row, context), aggregate: row }))
     .sort((a, b) => b.score - a.score || a.aggregate.player.name.localeCompare(b.aggregate.player.name))
     .slice(0, limit);
 }
