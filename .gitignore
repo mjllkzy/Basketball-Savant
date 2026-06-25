@@ -6,6 +6,8 @@ test-results/
 .env
 .env.local
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
 data/imports/*.csv
 data/imports/*.json
 !data/imports/.gitkeep

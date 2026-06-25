@@ -28,19 +28,19 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_PUBLIC_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 9.15.9
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 22
           cache: pnpm
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
           cache: pip
@@ -65,16 +65,4 @@ jobs:
           python scripts/refresh_production_data.py --write-postgres $FORCE_FLAG
 
       - name: Verify production health
-        run: |
-          python - <<'PY'
-          import json
-          import urllib.request
-
-          url = "https://basketball-savant-production.up.railway.app/api/health/database"
-          with urllib.request.urlopen(url, timeout=30) as response:
-              payload = json.load(response)
-          database = payload["data"]["database"]
-          if response.status != 200 or not database["schemaReady"] or not database["dataReady"]:
-              raise SystemExit(f"Production database health check failed: {payload}")
-          print(json.dumps(payload, indent=2))
-          PY
+        run: python scripts/smoke_production.py
