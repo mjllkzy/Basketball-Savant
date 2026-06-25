@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SimilarPlayersTable } from "@/components/domain/SimilarPlayersTable";
 import { getPlayerByIdOrSlug, getPlayerProfile, players } from "@/lib/data/queries";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { playerSimilaritySummary } from "@/lib/comparison";
+
+export function generateMetadata({ searchParams }: { searchParams: RouteSearchParams }): Metadata {
+  const hasSelection = Boolean(singleParam(searchParams, "player"));
+  return {
+    title: "NBA Player Similarity Finder",
+    description: "Find statistically and physically similar NBA players using 2025-26 production, role, and profile data.",
+    alternates: { canonical: "/similarity" },
+    robots: hasSelection ? { index: false, follow: true } : undefined,
+  };
+}
 
 function decimal(value: number) {
   return value.toFixed(1);

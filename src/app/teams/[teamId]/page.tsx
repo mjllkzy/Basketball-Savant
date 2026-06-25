@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LineupNetwork } from "@/components/charts/LineupNetwork";
 import { TeamShotMap } from "@/components/charts/TeamShotMap";
@@ -10,6 +11,25 @@ import { gameMatchupLabel, getTeamProfile, players, teamSeasonAggregates } from 
 import { formatShortDate } from "@/lib/date";
 import { calculatePlayerMetric, calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
+
+export function generateMetadata({ params }: { params: { teamId: string } }): Metadata {
+  const profile = getTeamProfile(params.teamId);
+  if (!profile) return { title: "Team Not Found", robots: { index: false, follow: false } };
+
+  const teamName = `${profile.team.city} ${profile.team.name}`.trim();
+  const title = `${teamName} Stats`;
+  const description = `${teamName} 2025-26 team ratings, shooting profile, roster statistics, and game logs.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/teams/${profile.team.slug}` },
+    openGraph: {
+      title,
+      description,
+      url: `/teams/${profile.team.slug}`,
+    },
+  };
+}
 
 export default async function TeamPage({ params }: { params: { teamId: string } }) {
   const profile = getTeamProfile(params.teamId);

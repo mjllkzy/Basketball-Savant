@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
@@ -13,6 +14,12 @@ const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct"
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
 const standardTableMinWidth = "1500px";
 const advancedTableMinWidth = "1580px";
+
+export const metadata: Metadata = {
+  title: "NBA Players",
+  description: "Explore sortable 2025-26 NBA player statistics, advanced metrics, physical profiles, and impact data.",
+  alternates: { canonical: "/players" },
+};
 
 function identityColumn(key: string, label: string, width: string, sortOrder?: string[]): StatTableColumn {
   return { key, label, width, align: "center", sortOrder };

@@ -9,6 +9,14 @@ export function notFound(message = "Record not found") {
   return NextResponse.json({ data: null, error: { code: "NOT_FOUND", message } }, { status: 404 });
 }
 
+export function unauthorized(message = "Authentication required") {
+  return NextResponse.json({ data: null, error: { code: "UNAUTHORIZED", message } }, { status: 401 });
+}
+
+export function payloadTooLarge(message = "Request body is too large") {
+  return NextResponse.json({ data: null, error: { code: "PAYLOAD_TOO_LARGE", message } }, { status: 413 });
+}
+
 export function badRequest(error: unknown) {
   if (error instanceof ZodError) {
     return NextResponse.json(

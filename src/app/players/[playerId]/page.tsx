@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PercentileRadar } from "@/components/charts/PercentileRadar";
 import { RollingLineChart } from "@/components/charts/RollingLineChart";
@@ -16,6 +17,26 @@ import { formatShortDate } from "@/lib/date";
 import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import { formatMetric, toPercentagePoints } from "@/lib/metrics/format";
+
+export function generateMetadata({ params }: { params: { playerId: string } }): Metadata {
+  const profile = getPlayerProfile(params.playerId);
+  if (!profile) return { title: "Player Not Found", robots: { index: false, follow: false } };
+
+  const canonicalSlug = profile.masterSlug ?? profile.player.slug;
+  const title = `${profile.player.name} Stats`;
+  const description = `${profile.player.name} 2025-26 NBA stats, advanced metrics, percentiles, game logs, and player similarity analysis.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/players/${canonicalSlug}` },
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      url: `/players/${canonicalSlug}`,
+    },
+  };
+}
 
 function FeedRequiredPanel({ title, detail }: { title: string; detail: string }) {
   return (

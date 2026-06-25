@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
 import { teamSeasonAggregates } from "@/lib/data/queries";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { nbaTeamLogoUrl } from "@/lib/teamBranding";
+
+export const metadata: Metadata = {
+  title: "NBA Teams",
+  description: "Compare 2025-26 NBA team records, ratings, pace, shooting, ball movement, and rebounding.",
+  alternates: { canonical: "/teams" },
+};
 
 export default function TeamsPage() {
   const rows = teamSeasonAggregates.map((row) => ({

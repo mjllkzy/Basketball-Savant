@@ -1,10 +1,35 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { getSiteUrl, siteDescription, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Basketball Savant",
-  description: "Premium basketball player, team, comparison, and similarity analytics powered by official data."
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: siteName,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  applicationName: siteName,
+  keywords: ["NBA stats", "basketball analytics", "NBA player comparison", "NBA team stats", "player similarity"],
+  openGraph: {
+    type: "website",
+    siteName,
+    title: siteName,
+    description: siteDescription,
+    url: "/",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

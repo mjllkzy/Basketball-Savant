@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, GitCompare, Minus, Radar } from "lucide-react";
@@ -13,6 +14,16 @@ import {
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
+
+export function generateMetadata({ searchParams }: { searchParams: RouteSearchParams }): Metadata {
+  const isResult = singleParam(searchParams, "mode") === "compare";
+  return {
+    title: "NBA Player Comparison",
+    description: "Compare two NBA players across scoring, efficiency, playmaking, defense, role, and advanced metrics.",
+    alternates: { canonical: "/compare" },
+    robots: isResult ? { index: false, follow: true } : undefined,
+  };
+}
 
 function PlayerSelect({ name, label, value, options }: { name: string; label: string; value: string; options: PlayerOption[] }) {
   return (

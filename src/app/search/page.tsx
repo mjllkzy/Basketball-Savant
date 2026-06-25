@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ShotChart } from "@/components/charts/ShotChart";
 import { ShotHeatmap } from "@/components/charts/ShotHeatmap";
 import { ShotSearchResults } from "@/components/domain/ShotSearchResults";
@@ -11,6 +12,11 @@ import { filterShots, gameMatchupLabel, games, playerName, players, shots, teamN
 import { formatShortDate } from "@/lib/date";
 import { formatMetric } from "@/lib/metrics/format";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
+
+export const metadata: Metadata = {
+  title: "Search",
+  robots: { index: false, follow: true },
+};
 
 export default function SearchPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const filters = {

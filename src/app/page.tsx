@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BarChart3, ExternalLink, GitCompare, Newspaper, Users } from "lucide-react";
 import { categoryTone, formatNewsDate, getRecentNews } from "@/lib/news";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const tools = [
   { href: "/players", label: "Player Intelligence", icon: Users, body: "Search every loaded player by role, team, volume, efficiency, creation, and impact." },
