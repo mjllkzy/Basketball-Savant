@@ -1,0 +1,80 @@
+name: Production Data Refresh
+
+on:
+  schedule:
+    # Noon America/Phoenix for daily validation.
+    - cron: "0 19 * * *"
+    # After typical West Coast game windows for game-day validation.
+    - cron: "30 8 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Write a new ingestion even when the workbook checksum is unchanged
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_PUBLIC_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          python -m pip install -r requirements.txt
+
+      - name: Verify database secret
+        run: test -n "$DATABASE_URL"
+
+      - name: Apply database migrations
+        run: pnpm db:migrate
+
+      - name: Validate and refresh master data
+        run: |
+          FORCE_FLAG=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          python scripts/refresh_production_data.py --write-postgres $FORCE_FLAG
+
+      - name: Verify production health
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.request
+
+          url = "https://basketball-savant-production.up.railway.app/api/health/database"
+          with urllib.request.urlopen(url, timeout=30) as response:
+              payload = json.load(response)
+          database = payload["data"]["database"]
+          if response.status != 200 or not database["schemaReady"] or not database["dataReady"]:
+              raise SystemExit(f"Production database health check failed: {payload}")
+          print(json.dumps(payload, indent=2))
+          PY
