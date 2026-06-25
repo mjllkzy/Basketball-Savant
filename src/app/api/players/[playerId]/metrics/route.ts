@@ -1,7 +1,7 @@
 import { notFound, ok } from "@/lib/api/response";
-import { getPlayerByIdOrSlug, getMetricValuesForPlayer } from "@/lib/data/queries";
+import { loadPlayerProfileAnalytics } from "@/lib/db/playerAnalytics.server";
 
-export function GET(_: Request, { params }: { params: { playerId: string } }) {
-  const player = getPlayerByIdOrSlug(params.playerId);
-  return player ? ok(getMetricValuesForPlayer(player.id)) : notFound("Player not found");
+export async function GET(_: Request, { params }: { params: { playerId: string } }) {
+  const profile = await loadPlayerProfileAnalytics(params.playerId);
+  return profile ? ok(profile.metricValues) : notFound("Player not found");
 }

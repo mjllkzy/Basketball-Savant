@@ -1,9 +1,7 @@
 import { notFound, ok } from "@/lib/api/response";
-import { getPlayerByIdOrSlug, getSimilarPlayers, type SimilarityBasis } from "@/lib/data/queries";
+import { loadPlayerProfileAnalytics } from "@/lib/db/playerAnalytics.server";
 
-export function GET(request: Request, { params }: { params: { playerId: string } }) {
-  const player = getPlayerByIdOrSlug(params.playerId);
-  if (!player) return notFound("Player not found");
-  const basis = (new URL(request.url).searchParams.get("basis") ?? "Overall") as SimilarityBasis;
-  return ok(getSimilarPlayers(player.id, basis));
+export async function GET(_: Request, { params }: { params: { playerId: string } }) {
+  const profile = await loadPlayerProfileAnalytics(params.playerId);
+  return profile ? ok(profile.similar) : notFound("Player not found");
 }

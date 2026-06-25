@@ -64,7 +64,7 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
         ))}
       </section>
       <section>
-        <TeamShotMap shots={liveShots} />
+        <TeamShotMap shots={liveShots} maxShots={400} />
       </section>
       <section className="grid gap-4">
         <TeamStyleProfile team={profile.aggregate} teams={teamSummaries.rows} />

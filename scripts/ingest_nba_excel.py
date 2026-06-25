@@ -1024,6 +1024,10 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
             "college": text_value(row.get("COLLEGE") or bio.get("COLLEGE")).strip() or None,
             "country": text_value(row.get("COUNTRY") or bio.get("COUNTRY")).strip() or None,
             "jersey_number": text_value(row.get("JERSEY_NUMBER")).strip() or None,
+            "draft_year": int_or_none(row.get("DRAFT_YEAR")),
+            "draft_round": int_or_none(row.get("DRAFT_ROUND")),
+            "draft_pick": int_or_none(row.get("DRAFT_NUMBER")),
+            "roster_status": text_value(row.get("ROSTER_STATUS")).strip() or None,
             "headshot_url": f"https://cdn.nba.com/headshots/nba/latest/1040x760/{person_id}.png" if person_id else None,
         }
         lookup_name = normalized_lookup_key(player_name)
@@ -1261,6 +1265,10 @@ def write_postgres_outputs(
                 "college": reference.get("college"),
                 "country": reference.get("country"),
                 "jersey_number": reference.get("jersey_number"),
+                "draft_year": reference.get("draft_year"),
+                "draft_round": reference.get("draft_round"),
+                "draft_pick": reference.get("draft_pick"),
+                "roster_status": reference.get("roster_status"),
                 "headshot_url": reference.get("headshot_url"),
             }
         )
@@ -1420,12 +1428,14 @@ def write_postgres_outputs(
                     INSERT INTO players (
                       player_slug, nba_player_id, app_player_id, player_name, normalized_player_name,
                       primary_team_id, primary_team_abbreviation, position, height, height_inches, weight,
-                      age, college, country, jersey_number, headshot_url, active, updated_at
+                      age, college, country, jersey_number, draft_year, draft_round, draft_pick,
+                      roster_status, headshot_url, active, updated_at
                     )
                     VALUES (
                       %(player_slug)s, %(nba_player_id)s, %(app_player_id)s, %(player_name)s, %(normalized_player_name)s,
                       %(primary_team_id)s, %(primary_team_abbreviation)s, %(position)s, %(height)s, %(height_inches)s,
-                      %(weight)s, %(age)s, %(college)s, %(country)s, %(jersey_number)s, %(headshot_url)s, true, now()
+                      %(weight)s, %(age)s, %(college)s, %(country)s, %(jersey_number)s, %(draft_year)s,
+                      %(draft_round)s, %(draft_pick)s, %(roster_status)s, %(headshot_url)s, true, now()
                     )
                     ON CONFLICT (player_slug) DO UPDATE SET
                       nba_player_id = EXCLUDED.nba_player_id,
@@ -1442,6 +1452,10 @@ def write_postgres_outputs(
                       college = EXCLUDED.college,
                       country = EXCLUDED.country,
                       jersey_number = EXCLUDED.jersey_number,
+                      draft_year = EXCLUDED.draft_year,
+                      draft_round = EXCLUDED.draft_round,
+                      draft_pick = EXCLUDED.draft_pick,
+                      roster_status = EXCLUDED.roster_status,
                       headshot_url = EXCLUDED.headshot_url,
                       active = true,
                       updated_at = now()

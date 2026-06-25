@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDatabasePool } from "./client.server";
-import { listComparisonPlayerOptions, loadComparisonPlayers } from "./playerAnalytics.server";
+import { listComparisonPlayerOptions, loadComparisonPlayers, loadPlayerProfileAnalytics } from "./playerAnalytics.server";
 
 describe("database-backed player analytics", () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;
@@ -23,5 +23,16 @@ describe("database-backed player analytics", () => {
     expect(options.length).toBeGreaterThan(500);
     expect(profiles.map((profile) => profile.player.name)).toEqual(["Luka Dončić", "Nikola Jokić"]);
     expect(profiles.every((profile) => profile.aggregate.games > 0)).toBe(true);
+  }, 15_000);
+
+  it("preserves canonical and legacy player profile URLs without Postgres", async () => {
+    const [canonical, legacy] = await Promise.all([
+      loadPlayerProfileAnalytics("luka-doncic"),
+      loadPlayerProfileAnalytics("luka-don-i-1629029"),
+    ]);
+
+    expect(canonical?.player.name).toBe("Luka Dončić");
+    expect(legacy?.player.name).toBe("Luka Dončić");
+    expect(canonical?.gameLog.length).toBeGreaterThan(60);
   }, 15_000);
 });

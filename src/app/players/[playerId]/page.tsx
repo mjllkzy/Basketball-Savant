@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { PercentileRadar } from "@/components/charts/PercentileRadar";
 import { RollingLineChart } from "@/components/charts/RollingLineChart";
 import { ShotChart } from "@/components/charts/ShotChart";
-import { LineupNetwork } from "@/components/charts/LineupNetwork";
 import { PlayerHeader } from "@/components/domain/PlayerHeader";
 import { PlayerSnapshot } from "@/components/domain/PlayerSnapshot";
 import { PlayTypeBreakdown } from "@/components/domain/PlayTypeBreakdown";
@@ -11,15 +10,15 @@ import { ShotProfileTable } from "@/components/domain/ShotProfileTable";
 import { SimilarPlayersTable } from "@/components/domain/SimilarPlayersTable";
 import { StatTable } from "@/components/ui/StatTable";
 import { PercentileBar } from "@/components/ui/PercentileBar";
-import { getPlayerProfile, lineups, players } from "@/lib/data/queries";
+import { loadPlayerProfileAnalytics } from "@/lib/db/playerAnalytics.server";
 import { loadMasterPlayerProfileDbFirst, masterProfileCategorySummary, masterProfileKeyStats } from "@/lib/data/masterProfiles.server";
 import { formatShortDate } from "@/lib/date";
 import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import { formatMetric, toPercentagePoints } from "@/lib/metrics/format";
 
-export function generateMetadata({ params }: { params: { playerId: string } }): Metadata {
-  const profile = getPlayerProfile(params.playerId);
+export async function generateMetadata({ params }: { params: { playerId: string } }): Promise<Metadata> {
+  const profile = await loadPlayerProfileAnalytics(params.playerId);
   if (!profile) return { title: "Player Not Found", robots: { index: false, follow: false } };
 
   const canonicalSlug = profile.masterSlug ?? profile.player.slug;
@@ -48,7 +47,7 @@ function FeedRequiredPanel({ title, detail }: { title: string; detail: string })
 }
 
 export default async function PlayerPage({ params }: { params: { playerId: string } }) {
-  const profile = getPlayerProfile(params.playerId);
+  const profile = await loadPlayerProfileAnalytics(params.playerId);
   if (!profile) notFound();
   const radarKeys = ["pts", "reb", "ast", "stl", "blk", "ts_pct", "usage_rate", "three_pct"];
   const radarData = radarKeys.map((key) => ({
@@ -67,7 +66,6 @@ export default async function PlayerPage({ params }: { params: { playerId: strin
     ts: formatMetric("ts_pct", trueShootingPercentage(line.pts, line.fga, line.fta)),
     pm: line.plusMinus
   }));
-  const playerLineups = lineups.filter((lineup) => [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id].includes(profile.player.id));
   const hasShotEvents = profile.shots.length > 0;
   const masterProfile = await loadMasterPlayerProfileDbFirst({ slug: profile.masterSlug, playerName: profile.player.name });
   const keyStats = masterProfile ? masterProfileKeyStats(masterProfile) : [];
@@ -92,7 +90,7 @@ export default async function PlayerPage({ params }: { params: { playerId: strin
               <span className="rounded bg-slate-100 px-3 py-2 font-bold">{masterProfile.source_sheets.length} source sheets</span>
               <span className="rounded bg-slate-100 px-3 py-2 font-bold">{masterProfile.stat_rows.toLocaleString()} stat rows</span>
               <span className="rounded bg-slate-100 px-3 py-2 font-bold">Team {masterProfile.primary_team ?? profile.team.abbreviation}</span>
-              <span className="rounded bg-slate-100 px-3 py-2 font-bold">JSON profile loaded</span>
+              <span className="rounded bg-slate-100 px-3 py-2 font-bold">Master profile loaded</span>
             </div>
           ) : null}
         </div>
@@ -125,7 +123,7 @@ export default async function PlayerPage({ params }: { params: { playerId: strin
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         {hasShotEvents ? (
-          <ShotChart shots={profile.shots} colorBy="xpts" />
+          <ShotChart shots={profile.shots} colorBy="xpts" maxShots={180} />
         ) : (
           <FeedRequiredPanel title="Shot Chart Feed Required" detail="This player has official season and game-log stats loaded, but row-level shot events are not present in the current snapshot." />
         )}
@@ -155,11 +153,7 @@ export default async function PlayerPage({ params }: { params: { playerId: strin
         <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "game", label: "Opp" }, { key: "pts", label: "PTS", align: "right" }, { key: "reb", label: "REB", align: "right" }, { key: "ast", label: "AST", align: "right" }, { key: "stl", label: "STL", align: "right" }, { key: "blk", label: "BLK", align: "right" }, { key: "tov", label: "TOV", align: "right" }, { key: "ts", label: "TS", align: "right" }, { key: "pm", label: "+/-", align: "right" }]} rows={gameRows} />
         <SimilarPlayersTable rows={profile.similar} />
       </section>
-      {playerLineups.length > 0 ? (
-        <LineupNetwork lineups={playerLineups} players={players} />
-      ) : (
-        <FeedRequiredPanel title="Lineup Network Feed Required" detail="Five-player lineup ratings need lineup stint rows with possessions, offensive rating, defensive rating, and net rating." />
-      )}
+      <FeedRequiredPanel title="Lineup Network Feed Required" detail="Five-player lineup ratings need lineup stint rows with possessions, offensive rating, defensive rating, and net rating." />
     </div>
   );
 }
