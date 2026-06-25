@@ -706,12 +706,152 @@ def table_rows(snapshot: dict[str, Any], table_name: str) -> list[dict[str, Any]
     return [dict(zip(headers, row)) for row in rows]
 
 
+def opponent_abbreviation(matchup: Any) -> str | None:
+    parts = re.split(r"\s(?:vs\.|@)\s", text_value(matchup).strip())
+    return parts[1].strip() if len(parts) == 2 and parts[1].strip() else None
+
+
+def estimated_possessions(row: dict[str, Any]) -> float | None:
+    fga = float_or_none(row.get("FGA"))
+    fta = float_or_none(row.get("FTA"))
+    oreb = float_or_none(row.get("OREB"))
+    tov = float_or_none(row.get("TOV"))
+    if None in {fga, fta, oreb, tov}:
+        return None
+    return 0.96 * (fga + 0.44 * fta - oreb + tov)
+
+
+def game_rows_from_team_logs(
+    team_rows: list[dict[str, Any]],
+    season_type: str,
+    teams_by_abbr: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in team_rows:
+        game_id = text_value(row.get("GAME_ID")).strip()
+        if game_id:
+            grouped[game_id].append(row)
+
+    games = []
+    for game_id, rows in grouped.items():
+        home_row = next((row for row in rows if " vs. " in text_value(row.get("MATCHUP"))), None)
+        away_row = next((row for row in rows if " @ " in text_value(row.get("MATCHUP"))), None)
+        neutral_site = False
+        if not home_row and len(rows) == 2:
+            away_row, home_row = rows
+            neutral_site = True
+        if not home_row or not away_row:
+            continue
+        home_team = teams_by_abbr.get(text_value(home_row.get("TEAM_ABBREVIATION")).strip())
+        away_team = teams_by_abbr.get(text_value(away_row.get("TEAM_ABBREVIATION")).strip())
+        game_date = text_value(home_row.get("GAME_DATE")).strip()[:10]
+        if not home_team or not away_team or not game_date:
+            continue
+        games.append(
+            {
+                "game_id": game_id,
+                "season": SEASON,
+                "season_type": season_type,
+                "game_date": game_date,
+                "home_team_id": home_team["id"],
+                "away_team_id": away_team["id"],
+                "home_score": int_or_none(home_row.get("PTS")) or 0,
+                "away_score": int_or_none(away_row.get("PTS")) or 0,
+                "status": "Final",
+                "neutral_site": neutral_site,
+                "arena": "Neutral site" if neutral_site else None,
+            }
+        )
+    return games
+
+
+def team_game_stats_from_logs(
+    team_rows: list[dict[str, Any]],
+    teams_by_abbr: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    output = []
+    for row in team_rows:
+        team = teams_by_abbr.get(text_value(row.get("TEAM_ABBREVIATION")).strip())
+        opponent = teams_by_abbr.get(opponent_abbreviation(row.get("MATCHUP")) or "")
+        game_id = text_value(row.get("GAME_ID")).strip()
+        if not team or not opponent or not game_id:
+            continue
+        output.append(
+            {
+                "game_id": game_id,
+                "team_id": team["id"],
+                "opponent_team_id": opponent["id"],
+                "minutes": float_or_none(row.get("MIN")),
+                "pts": float_or_none(row.get("PTS")),
+                "fgm": float_or_none(row.get("FGM")),
+                "fga": float_or_none(row.get("FGA")),
+                "three_pm": float_or_none(row.get("FG3M")),
+                "three_pa": float_or_none(row.get("FG3A")),
+                "ftm": float_or_none(row.get("FTM")),
+                "fta": float_or_none(row.get("FTA")),
+                "oreb": float_or_none(row.get("OREB")),
+                "dreb": float_or_none(row.get("DREB")),
+                "reb": float_or_none(row.get("REB")),
+                "ast": float_or_none(row.get("AST")),
+                "stl": float_or_none(row.get("STL")),
+                "blk": float_or_none(row.get("BLK")),
+                "tov": float_or_none(row.get("TOV")),
+                "pf": float_or_none(row.get("PF")),
+                "possessions": estimated_possessions(row),
+            }
+        )
+    return output
+
+
+def player_game_stats_from_logs(
+    player_rows: list[dict[str, Any]],
+    teams_by_abbr: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    output = []
+    for row in player_rows:
+        team = teams_by_abbr.get(text_value(row.get("TEAM_ABBREVIATION")).strip())
+        opponent = teams_by_abbr.get(opponent_abbreviation(row.get("MATCHUP")) or "")
+        game_id = text_value(row.get("GAME_ID")).strip()
+        player_id = text_value(row.get("PLAYER_ID")).strip()
+        if not team or not opponent or not game_id or not player_id:
+            continue
+        output.append(
+            {
+                "game_id": game_id,
+                "nba_player_id": player_id,
+                "team_id": team["id"],
+                "opponent_team_id": opponent["id"],
+                "minutes": float_or_none(row.get("MIN")),
+                "pts": float_or_none(row.get("PTS")),
+                "reb": float_or_none(row.get("REB")),
+                "oreb": float_or_none(row.get("OREB")),
+                "dreb": float_or_none(row.get("DREB")),
+                "ast": float_or_none(row.get("AST")),
+                "stl": float_or_none(row.get("STL")),
+                "blk": float_or_none(row.get("BLK")),
+                "tov": float_or_none(row.get("TOV")),
+                "pf": float_or_none(row.get("PF")),
+                "fgm": float_or_none(row.get("FGM")),
+                "fga": float_or_none(row.get("FGA")),
+                "three_pm": float_or_none(row.get("FG3M")),
+                "three_pa": float_or_none(row.get("FG3A")),
+                "ftm": float_or_none(row.get("FTM")),
+                "fta": float_or_none(row.get("FTA")),
+                "plus_minus": float_or_none(row.get("PLUS_MINUS")),
+            }
+        )
+    return output
+
+
 def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
     if not snapshot_path.exists():
         return {
             "teams_by_id": {},
             "teams_by_abbr": {},
             "team_summaries": [],
+            "games": [],
+            "team_game_stats": [],
+            "player_game_stats": [],
             "players_by_name": {},
             "players_by_name_team": {},
         }
@@ -721,6 +861,10 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
     player_bio_rows = table_rows(snapshot, "playerBioStatsRegular")
     team_stat_rows = table_rows(snapshot, "teamStatsRegular")
     team_advanced_rows = table_rows(snapshot, "teamAdvancedRegular")
+    team_game_log_rows_regular = table_rows(snapshot, "teamGameLogsRegular")
+    team_game_log_rows_playoffs = table_rows(snapshot, "teamGameLogsPlayoffs")
+    player_game_log_rows_regular = table_rows(snapshot, "playerGameLogsRegular")
+    player_game_log_rows_playoffs = table_rows(snapshot, "playerGameLogsPlayoffs")
     basketball_reference_rows = table_rows(snapshot, "basketballReferencePlayerAdvancedCrosscheck")
     bio_by_id = {str(row.get("PLAYER_ID")): row for row in player_bio_rows if row.get("PLAYER_ID") is not None}
     primary_position_by_id = {}
@@ -782,6 +926,18 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
             team["conference"], team["division"], team["primary_color"], team["secondary_color"] = metadata
 
     teams_by_abbr = {team["abbreviation"]: team for team in teams_by_id.values() if team.get("abbreviation")}
+    games = [
+        *game_rows_from_team_logs(team_game_log_rows_regular, "Regular Season", teams_by_abbr),
+        *game_rows_from_team_logs(team_game_log_rows_playoffs, "Playoffs", teams_by_abbr),
+    ]
+    team_game_stats = team_game_stats_from_logs(
+        [*team_game_log_rows_regular, *team_game_log_rows_playoffs],
+        teams_by_abbr,
+    )
+    player_game_stats = player_game_stats_from_logs(
+        [*player_game_log_rows_regular, *player_game_log_rows_playoffs],
+        teams_by_abbr,
+    )
     advanced_by_id = {
         str(row.get("TEAM_ID")): row
         for row in team_advanced_rows
@@ -879,6 +1035,9 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
         "teams_by_id": teams_by_id,
         "teams_by_abbr": teams_by_abbr,
         "team_summaries": team_summaries,
+        "games": games,
+        "team_game_stats": team_game_stats,
+        "player_game_stats": player_game_stats,
         "players_by_name": players_by_name,
         "players_by_name_team": players_by_name_team,
     }
@@ -1067,6 +1226,8 @@ def write_postgres_outputs(
     official = load_official_reference(args.official_snapshot)
     runtime_by_slug = {summary["player_slug"]: summary for summary in runtime_summaries}
     team_summary_rows = official["team_summaries"]
+    game_rows = official["games"]
+    team_game_stat_rows = official["team_game_stats"]
 
     teams_by_abbr: dict[str, dict[str, Any]] = dict(official["teams_by_abbr"])
     for player in players_json:
@@ -1155,6 +1316,16 @@ def write_postgres_outputs(
         )
 
     stat_categories = sorted({(entry["source_sheet"], entry["stat_category"]) for entry in all_column_entries})
+    player_slug_by_nba_id = {
+        row["nba_player_id"]: row["player_slug"]
+        for row in player_rows
+        if row.get("nba_player_id")
+    }
+    player_game_stat_rows = [
+        {**row, "player_slug": player_slug_by_nba_id[row["nba_player_id"]]}
+        for row in official["player_game_stats"]
+        if row["nba_player_id"] in player_slug_by_nba_id
+    ]
     stat_value_rows = []
     for row in all_stat_rows:
         team_id = team_id_by_abbr.get(row[3]) if row[3] else None
@@ -1284,6 +1455,103 @@ def write_postgres_outputs(
                     ON CONFLICT (source_sheet, stat_category) DO NOTHING
                     """,
                     stat_categories,
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO games (
+                      ingestion_run_id, game_id, season, season_type, game_date,
+                      home_team_id, away_team_id, home_score, away_score, status, neutral_site, arena
+                    )
+                    VALUES (
+                      %(ingestion_run_id)s, %(game_id)s, %(season)s, %(season_type)s, %(game_date)s,
+                      %(home_team_id)s, %(away_team_id)s, %(home_score)s, %(away_score)s,
+                      %(status)s, %(neutral_site)s, %(arena)s
+                    )
+                    ON CONFLICT (ingestion_run_id, game_id) DO UPDATE SET
+                      game_date = EXCLUDED.game_date,
+                      home_team_id = EXCLUDED.home_team_id,
+                      away_team_id = EXCLUDED.away_team_id,
+                      home_score = EXCLUDED.home_score,
+                      away_score = EXCLUDED.away_score,
+                      status = EXCLUDED.status,
+                      neutral_site = EXCLUDED.neutral_site,
+                      arena = EXCLUDED.arena
+                    """,
+                    [{**row, "ingestion_run_id": run_id} for row in game_rows],
+                    returning=False,
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO team_game_stats (
+                      ingestion_run_id, game_id, team_id, opponent_team_id, minutes, pts,
+                      fgm, fga, three_pm, three_pa, ftm, fta, oreb, dreb, reb, ast,
+                      stl, blk, tov, pf, possessions
+                    )
+                    VALUES (
+                      %(ingestion_run_id)s, %(game_id)s, %(team_id)s, %(opponent_team_id)s,
+                      %(minutes)s, %(pts)s, %(fgm)s, %(fga)s, %(three_pm)s, %(three_pa)s,
+                      %(ftm)s, %(fta)s, %(oreb)s, %(dreb)s, %(reb)s, %(ast)s, %(stl)s,
+                      %(blk)s, %(tov)s, %(pf)s, %(possessions)s
+                    )
+                    ON CONFLICT (ingestion_run_id, game_id, team_id) DO UPDATE SET
+                      opponent_team_id = EXCLUDED.opponent_team_id,
+                      minutes = EXCLUDED.minutes,
+                      pts = EXCLUDED.pts,
+                      fgm = EXCLUDED.fgm,
+                      fga = EXCLUDED.fga,
+                      three_pm = EXCLUDED.three_pm,
+                      three_pa = EXCLUDED.three_pa,
+                      ftm = EXCLUDED.ftm,
+                      fta = EXCLUDED.fta,
+                      oreb = EXCLUDED.oreb,
+                      dreb = EXCLUDED.dreb,
+                      reb = EXCLUDED.reb,
+                      ast = EXCLUDED.ast,
+                      stl = EXCLUDED.stl,
+                      blk = EXCLUDED.blk,
+                      tov = EXCLUDED.tov,
+                      pf = EXCLUDED.pf,
+                      possessions = EXCLUDED.possessions
+                    """,
+                    [{**row, "ingestion_run_id": run_id} for row in team_game_stat_rows],
+                    returning=False,
+                )
+                cur.executemany(
+                    """
+                    INSERT INTO player_game_stats (
+                      ingestion_run_id, game_id, player_slug, nba_player_id, team_id,
+                      opponent_team_id, minutes, pts, reb, oreb, dreb, ast, stl, blk,
+                      tov, pf, fgm, fga, three_pm, three_pa, ftm, fta, plus_minus
+                    )
+                    VALUES (
+                      %(ingestion_run_id)s, %(game_id)s, %(player_slug)s, %(nba_player_id)s,
+                      %(team_id)s, %(opponent_team_id)s, %(minutes)s, %(pts)s, %(reb)s,
+                      %(oreb)s, %(dreb)s, %(ast)s, %(stl)s, %(blk)s, %(tov)s, %(pf)s,
+                      %(fgm)s, %(fga)s, %(three_pm)s, %(three_pa)s, %(ftm)s, %(fta)s,
+                      %(plus_minus)s
+                    )
+                    ON CONFLICT (ingestion_run_id, game_id, player_slug, team_id) DO UPDATE SET
+                      opponent_team_id = EXCLUDED.opponent_team_id,
+                      minutes = EXCLUDED.minutes,
+                      pts = EXCLUDED.pts,
+                      reb = EXCLUDED.reb,
+                      oreb = EXCLUDED.oreb,
+                      dreb = EXCLUDED.dreb,
+                      ast = EXCLUDED.ast,
+                      stl = EXCLUDED.stl,
+                      blk = EXCLUDED.blk,
+                      tov = EXCLUDED.tov,
+                      pf = EXCLUDED.pf,
+                      fgm = EXCLUDED.fgm,
+                      fga = EXCLUDED.fga,
+                      three_pm = EXCLUDED.three_pm,
+                      three_pa = EXCLUDED.three_pa,
+                      ftm = EXCLUDED.ftm,
+                      fta = EXCLUDED.fta,
+                      plus_minus = EXCLUDED.plus_minus
+                    """,
+                    [{**row, "ingestion_run_id": run_id} for row in player_game_stat_rows],
+                    returning=False,
                 )
                 cur.executemany(
                     """
@@ -1521,6 +1789,9 @@ def write_postgres_outputs(
             "player_profiles",
             "player_season_summaries",
             "team_season_summaries",
+            "games",
+            "team_game_stats",
+            "player_game_stats",
             "player_stat_values",
             "stat_categories",
             "column_dictionary",
@@ -1528,6 +1799,9 @@ def write_postgres_outputs(
         ],
         "teams_written": len(team_rows_by_id),
         "team_summaries_written": len(team_summary_rows),
+        "games_written": len(game_rows),
+        "team_game_stats_written": len(team_game_stat_rows),
+        "player_game_stats_written": len(player_game_stat_rows),
         "players_written": len(player_rows),
         "stat_rows_written": len(stat_value_rows),
         "issues_written": len(issue_log["issues"]),

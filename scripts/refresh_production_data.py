@@ -19,6 +19,9 @@ MINIMUM_SHEETS = 60
 MINIMUM_PLAYERS = 500
 MINIMUM_STAT_ROWS = 500_000
 EXPECTED_TEAMS = 30
+MINIMUM_GAMES = 1_300
+MINIMUM_TEAM_GAME_STATS = 2_600
+MINIMUM_PLAYER_GAME_STATS = 28_000
 
 
 def sha256(path: Path) -> str:
@@ -73,7 +76,10 @@ def probe_database(connection_string: str) -> dict[str, Any]:
                 SELECT
                   to_regclass('public.current_ingestion_run') IS NOT NULL,
                   to_regclass('public.current_player_season_summaries') IS NOT NULL,
-                  to_regclass('public.current_team_season_summaries') IS NOT NULL
+                  to_regclass('public.current_team_season_summaries') IS NOT NULL,
+                  to_regclass('public.current_games') IS NOT NULL,
+                  to_regclass('public.current_team_game_stats') IS NOT NULL,
+                  to_regclass('public.current_player_game_stats') IS NOT NULL
                 """
             )
             schema_flags = cursor.fetchone()
@@ -89,10 +95,13 @@ def probe_database(connection_string: str) -> dict[str, Any]:
                   run.unique_players,
                   run.stat_rows_created,
                   (SELECT count(*) FROM current_player_season_summaries),
-                  (SELECT count(*) FROM current_team_season_summaries)
+                  (SELECT count(*) FROM current_team_season_summaries),
+                  (SELECT count(*) FROM current_games),
+                  (SELECT count(*) FROM current_team_game_stats),
+                  (SELECT count(*) FROM current_player_game_stats)
                 FROM current_ingestion_run run
                 UNION ALL
-                SELECT NULL, NULL, NULL, 0, 0, 0, 0
+                SELECT NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0
                 WHERE NOT EXISTS (SELECT 1 FROM current_ingestion_run)
                 LIMIT 1
                 """
@@ -108,6 +117,9 @@ def probe_database(connection_string: str) -> dict[str, Any]:
         "stat_rows_reported": int(row[4] or 0),
         "player_summaries": int(row[5] or 0),
         "team_summaries": int(row[6] or 0),
+        "games": int(row[7] or 0),
+        "team_game_stats": int(row[8] or 0),
+        "player_game_stats": int(row[9] or 0),
     }
 
 
@@ -117,6 +129,9 @@ def database_is_complete(state: dict[str, Any]) -> bool:
         and state["stat_rows_reported"] >= MINIMUM_STAT_ROWS
         and state["player_summaries"] >= MINIMUM_PLAYERS
         and state["team_summaries"] == EXPECTED_TEAMS
+        and state["games"] >= MINIMUM_GAMES
+        and state["team_game_stats"] >= MINIMUM_TEAM_GAME_STATS
+        and state["player_game_stats"] >= MINIMUM_PLAYER_GAME_STATS
     )
 
 

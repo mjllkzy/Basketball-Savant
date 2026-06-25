@@ -6,14 +6,27 @@ import { LineupTable } from "@/components/domain/LineupTable";
 import { PossessionTable } from "@/components/domain/PossessionTable";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
-import { gameFlow, getGameReport, teamName } from "@/lib/data/queries";
+import { getGameAnalytics } from "@/lib/db/gameAnalytics.server";
 
-export default function GamePage({ params }: { params: { gameId: string } }) {
-  const report = getGameReport(params.gameId);
+export default async function GamePage({ params }: { params: { gameId: string } }) {
+  const report = await getGameAnalytics(params.gameId);
   if (!report) notFound();
   const awayCardLabel = report.game.neutralSite ? report.awayTeam.abbreviation : "Away";
   const homeCardLabel = report.game.neutralSite ? report.homeTeam.abbreviation : "Home";
   const topPossessions = [...report.feed].sort((a, b) => Math.abs(b.actualMinusExpected) - Math.abs(a.actualMinusExpected)).slice(0, 10);
+  let homeScore = 0;
+  let awayScore = 0;
+  const flow = report.feed.slice(0, 80).map((possession, index) => {
+    if (possession.offenseTeamId === report.game.homeTeamId) homeScore += possession.points;
+    else awayScore += possession.points;
+    return {
+      index,
+      label: `${possession.quarter} ${possession.clock}`,
+      home: homeScore,
+      away: awayScore,
+      margin: homeScore - awayScore,
+    };
+  });
   const boxRows = report.boxScore.map((line) => ({
     player: line.player.name,
     href: `/players/${line.player.slug}`,
@@ -31,13 +44,13 @@ export default function GamePage({ params }: { params: { gameId: string } }) {
     <div className="grid gap-4">
       <GameHeader game={report.game} homeTeam={report.homeTeam} awayTeam={report.awayTeam} />
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard label={awayCardLabel} value={report.game.awayScore} sublabel={teamName(report.game.awayTeamId)} />
-        <MetricCard label={homeCardLabel} value={report.game.homeScore} sublabel={teamName(report.game.homeTeamId)} accent="court" />
+        <MetricCard label={awayCardLabel} value={report.game.awayScore} sublabel={`${report.awayTeam.city} ${report.awayTeam.name}`} />
+        <MetricCard label={homeCardLabel} value={report.game.homeScore} sublabel={`${report.homeTeam.city} ${report.homeTeam.name}`} accent="court" />
         <MetricCard label="Possessions" value={report.feed.length} sublabel="event feed rows" />
         <MetricCard label="Top A-xE" value={topPossessions[0]?.actualMinusExpected.toFixed(2) ?? "N/A"} sublabel={topPossessions[0]?.primaryPlayer.name} accent="ink" />
       </section>
       <section className="grid gap-4 xl:grid-cols-2">
-        <GameFlowChart data={gameFlow(report.game.id)} />
+        <GameFlowChart data={flow} />
         <ShotChart shots={report.shots} />
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">

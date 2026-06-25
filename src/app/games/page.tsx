@@ -1,18 +1,18 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
-import { gameContextLabel, gameMatchupLabel, getGameLeadingScorer, listGames } from "@/lib/data/queries";
+import { gameContextLabel, gameMatchupLabel, listGameAnalytics } from "@/lib/db/gameAnalytics.server";
 import { formatShortDate } from "@/lib/date";
 
-export default function GamesPage() {
-  const result = listGames({ pageSize: 100 });
-  const rows = result.rows.map((game) => {
-    const leadingScorer = getGameLeadingScorer(game.id);
+export default async function GamesPage() {
+  const result = await listGameAnalytics({ pageSize: 100 });
+  const rows = result.rows.map((item) => {
+    const leadingScorer = item.leadingScorer;
     return {
-      date: formatShortDate(game.date),
-      matchup: gameMatchupLabel(game),
-      href: `/games/${game.id}`,
-      score: `${game.awayScore}-${game.homeScore}`,
-      context: gameContextLabel(game),
+      date: formatShortDate(item.game.date),
+      matchup: gameMatchupLabel(item),
+      href: `/games/${item.game.id}`,
+      score: `${item.game.awayScore}-${item.game.homeScore}`,
+      context: gameContextLabel(item),
       leadingScorer: leadingScorer ? `${leadingScorer.player.name} · ${leadingScorer.team.abbreviation} · ${leadingScorer.points} PTS` : null,
       leadingScorerHref: leadingScorer ? `/players/${leadingScorer.player.slug}` : undefined
     };

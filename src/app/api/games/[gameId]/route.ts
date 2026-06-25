@@ -1,7 +1,7 @@
 import { notFound, ok } from "@/lib/api/response";
-import { getGameReport } from "@/lib/data/queries";
+import { getGameAnalytics } from "@/lib/db/gameAnalytics.server";
 
-export function GET(_: Request, { params }: { params: { gameId: string } }) {
-  const report = getGameReport(params.gameId);
+export async function GET(_: Request, { params }: { params: { gameId: string } }) {
+  const report = await getGameAnalytics(params.gameId);
   return report ? ok(report) : notFound("Game not found");
 }

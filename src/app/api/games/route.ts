@@ -1,9 +1,9 @@
 import { ok } from "@/lib/api/response";
-import { listGames } from "@/lib/data/queries";
+import { listGameAnalytics } from "@/lib/db/gameAnalytics.server";
 
-export function GET(request: Request) {
+export async function GET(request: Request) {
   const params = Object.fromEntries(new URL(request.url).searchParams.entries());
-  const result = listGames({
+  const result = await listGameAnalytics({
     teamId: params.teamId,
     status: params.status,
     season: params.season,
