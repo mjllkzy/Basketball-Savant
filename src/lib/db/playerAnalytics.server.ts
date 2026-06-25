@@ -11,6 +11,7 @@ if (typeof window !== "undefined") {
 }
 
 export type PlayerOption = {
+  id?: string;
   slug: string;
   name: string;
   teamAbbreviation: string;
@@ -141,6 +142,7 @@ type PlayerProfileGameDbRow = {
 };
 
 type PlayerOptionDbRow = {
+  nba_player_id: string | null;
   player_slug: string;
   player_name: string;
   primary_team_abbreviation: string | null;
@@ -410,6 +412,7 @@ export async function listComparisonPlayerOptions(): Promise<PlayerOption[]> {
     const result = await queryDatabase<PlayerOptionDbRow>(
       `
       SELECT
+        p.nba_player_id,
         p.player_slug,
         p.player_name,
         p.primary_team_abbreviation,
@@ -421,6 +424,7 @@ export async function listComparisonPlayerOptions(): Promise<PlayerOption[]> {
     );
     if (!result) return jsonPlayerOptions();
     return result.rows.map((row) => ({
+      id: row.nba_player_id ?? row.player_slug,
       slug: row.player_slug,
       name: row.player_name,
       teamAbbreviation: row.primary_team_abbreviation ?? "NBA",

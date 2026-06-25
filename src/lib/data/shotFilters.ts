@@ -22,7 +22,7 @@ export type ShotCollectionFilters = {
   order?: "asc" | "desc";
 };
 
-export function filterShotCollection(sourceRows: Shot[], params: ShotCollectionFilters = {}) {
+export function filterShotRows(sourceRows: Shot[], params: ShotCollectionFilters = {}) {
   let rows = [...sourceRows];
   if (params.season) rows = rows.filter((shot) => shot.season === params.season);
   if (params.quarter) rows = rows.filter((shot) => shot.quarter === params.quarter);
@@ -53,7 +53,11 @@ export function filterShotCollection(sourceRows: Shot[], params: ShotCollectionF
     }
     return left.id.localeCompare(right.id);
   });
+  return rows;
+}
 
+export function filterShotCollection(sourceRows: Shot[], params: ShotCollectionFilters = {}) {
+  const rows = filterShotRows(sourceRows, params);
   const total = rows.length;
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 50));

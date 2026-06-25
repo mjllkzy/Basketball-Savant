@@ -2,15 +2,16 @@ import { ExportCsvButton } from "@/components/ui/ExportCsvButton";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ShareUrlButton } from "@/components/ui/ShareUrlButton";
 import { StatTable } from "@/components/ui/StatTable";
-import { getCustomLeaderboard } from "@/lib/data/queries";
+import { getCustomLeaderboardAnalytics } from "@/lib/db/customAnalytics.server";
 import { getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
-export default function CustomLeaderboardPage({ searchParams }: { searchParams: RouteSearchParams }) {
+export default async function CustomLeaderboardPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const entityType = (singleParam(searchParams, "entityType") ?? "players") as "players" | "teams" | "lineups";
   const metricKeys = (singleParam(searchParams, "metrics") ?? "pts,reb,ast,stl,blk,ts_pct,efg_pct,usage_rate").split(",").filter(Boolean);
-  const rows = getCustomLeaderboard(entityType, metricKeys).map((row, index) => ({
+  const leaderboard = await getCustomLeaderboardAnalytics(entityType, metricKeys);
+  const rows = leaderboard.rows.slice(0, 100).map((row, index) => ({
     rank: index + 1,
     entity: row.label,
     team: row.team?.abbreviation ?? "",
@@ -35,15 +36,23 @@ export default function CustomLeaderboardPage({ searchParams }: { searchParams: 
       <div className="rounded border border-slate-200 bg-white p-3 text-xs leading-6 text-slate-600 shadow-sm">
         Suggested columns: {metricRegistry.slice(0, 28).map((metric) => metric.key).join(", ")}
       </div>
-      <StatTable
-        columns={[
-          { key: "rank", label: "Rk", align: "right" },
-          { key: "entity", label: entityType },
-          { key: "team", label: "Team" },
-          ...metricKeys.map((key) => ({ key, label: getMetric(key).shortLabel, align: "right" as const }))
-        ]}
-        rows={rows}
-      />
+      {leaderboard.message ? (
+        <div className="rounded border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600 shadow-sm">
+          {leaderboard.message}
+        </div>
+      ) : (
+        <div data-data-source={leaderboard.source}>
+          <StatTable
+            columns={[
+              { key: "rank", label: "Rk", align: "right" },
+              { key: "entity", label: entityType },
+              { key: "team", label: "Team" },
+              ...metricKeys.map((key) => ({ key, label: getMetric(key).shortLabel, align: "right" as const }))
+            ]}
+            rows={rows}
+          />
+        </div>
+      )}
     </div>
   );
 }

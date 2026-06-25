@@ -1,14 +1,21 @@
 import { StatTable } from "@/components/ui/StatTable";
 import type { Possession } from "@/lib/types";
-import { playerName, teamName } from "@/lib/data/queries";
 
-export function PossessionTable({ possessions }: { possessions: Possession[] }) {
+export function PossessionTable({
+  possessions,
+  playerNames = {},
+  teamNames = {},
+}: {
+  possessions: Possession[];
+  playerNames?: Record<string, string>;
+  teamNames?: Record<string, string>;
+}) {
   const rows = possessions.slice(0, 80).map((possession) => ({
     quarter: `Q${possession.quarter}`,
     clock: possession.clock,
-    offense: teamName(possession.offenseTeamId),
-    defense: teamName(possession.defenseTeamId),
-    player: playerName(possession.primaryPlayerId),
+    offense: teamNames[possession.offenseTeamId] ?? possession.offenseTeamId,
+    defense: teamNames[possession.defenseTeamId] ?? possession.defenseTeamId,
+    player: playerNames[possession.primaryPlayerId] ?? possession.primaryPlayerId,
     playType: possession.playType,
     result: possession.resultType,
     points: possession.points,

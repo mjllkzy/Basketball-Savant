@@ -40,6 +40,11 @@ export default async function GamePage({ params }: { params: { gameId: string } 
     tov: line.tov,
     pm: line.plusMinus
   }));
+  const playerNames = Object.fromEntries(report.boxScore.map((line) => [line.player.id, line.player.name]));
+  const teamNames = {
+    [report.homeTeam.id]: `${report.homeTeam.city} ${report.homeTeam.name}`,
+    [report.awayTeam.id]: `${report.awayTeam.city} ${report.awayTeam.name}`,
+  };
   return (
     <div className="grid gap-4">
       <GameHeader game={report.game} homeTeam={report.homeTeam} awayTeam={report.awayTeam} />
@@ -56,11 +61,11 @@ export default async function GamePage({ params }: { params: { gameId: string } 
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         <div>
           <h2 className="mb-2 text-lg font-black text-ink">Possession Timeline</h2>
-          <PossessionTable possessions={report.feed} />
+          <PossessionTable possessions={report.feed} playerNames={playerNames} teamNames={teamNames} />
         </div>
         <div>
           <h2 className="mb-2 text-lg font-black text-ink">Top 10 Most Valuable Possessions</h2>
-          <PossessionTable possessions={topPossessions} />
+          <PossessionTable possessions={topPossessions} playerNames={playerNames} teamNames={teamNames} />
         </div>
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
@@ -70,7 +75,7 @@ export default async function GamePage({ params }: { params: { gameId: string } 
         </div>
         <div>
           <h2 className="mb-2 text-lg font-black text-ink">Lineup Stints</h2>
-          <LineupTable lineups={report.lineups} />
+          <LineupTable lineups={report.lineups} playerNames={playerNames} />
         </div>
       </section>
     </div>

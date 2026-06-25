@@ -8,8 +8,10 @@ import { FilterPanel } from "@/components/ui/FilterPanel";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ShareUrlButton } from "@/components/ui/ShareUrlButton";
-import { filterShots, gameMatchupLabel, games, playerName, players, shots, teamName, teams } from "@/lib/data/queries";
+import { teamShotCacheAttempts } from "@/lib/data/teamShotCache";
 import { formatShortDate } from "@/lib/date";
+import { gameMatchupLabel } from "@/lib/db/gameAnalytics.server";
+import { loadShotSearchOptions, searchShotAnalytics } from "@/lib/db/shotSearch.server";
 import { formatMetric } from "@/lib/metrics/format";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function SearchPage({ searchParams }: { searchParams: RouteSearchParams }) {
+export default async function SearchPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const filters = {
     q: singleParam(searchParams, "q"),
     playerId: singleParam(searchParams, "playerId"),
@@ -34,25 +36,35 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
     minExpectedPoints: numberParam(searchParams, "minExpectedPoints"),
     minActualMinusExpected: numberParam(searchParams, "minActualMinusExpected"),
     maxActualMinusExpected: numberParam(searchParams, "maxActualMinusExpected"),
-    pageSize: 120
+    pageSize: 60
   };
-  const result = filterShots(filters);
-  const hasShotFeed = shots.length > 0;
-  const makes = result.rows.filter((shot) => shot.made).length;
-  const expected = result.rows.reduce((sum, shot) => sum + shot.expectedPoints, 0);
-  const actualMinusExpected = result.rows.reduce((sum, shot) => sum + shot.actualMinusExpected, 0);
+  const [result, options] = await Promise.all([
+    searchShotAnalytics(filters),
+    loadShotSearchOptions(),
+  ]);
+  const playersById = new Map(options.players.flatMap((player) => [
+    [player.slug, player.name] as const,
+    ...(player.id ? [[player.id, player.name] as const] : []),
+  ]));
+  const teamsById = new Map(options.teams.map((team) => [team.id, team] as const));
+  const hasShotFeed = teamShotCacheAttempts > 0;
   const tableRows = result.rows.map((shot) => {
-    const game = games.find((item) => item.id === shot.gameId)!;
-    const opponentId = game.homeTeamId === shot.teamId ? game.awayTeamId : game.homeTeamId;
+    const item = result.gameLookup.get(shot.gameId);
+    const game = item?.game;
+    const opponentId = game
+      ? (game.homeTeamId === shot.teamId ? game.awayTeamId : game.homeTeamId)
+      : "";
+    const team = teamsById.get(shot.teamId);
+    const opponent = teamsById.get(opponentId);
     return {
       id: shot.id,
-      date: formatShortDate(game.date),
-      game: gameMatchupLabel(game),
+      date: game ? formatShortDate(game.date) : "N/A",
+      game: item ? gameMatchupLabel(item) : shot.gameId,
       quarter: `Q${shot.quarter}`,
       clock: shot.clock,
-      player: playerName(shot.playerId),
-      team: teamName(shot.teamId),
-      opponent: teamName(opponentId),
+      player: playersById.get(shot.playerId) ?? shot.playerId,
+      team: team ? `${team.city} ${team.name}` : shot.teamId,
+      opponent: opponent ? `${opponent.city} ${opponent.name}` : opponentId || "N/A",
       playType: shot.playType,
       shotZone: shot.shotZone,
       shotType: shot.shotType,
@@ -73,7 +85,7 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
     };
   });
   const chips = Object.entries(filters)
-    .filter(([, value]) => value !== undefined && value !== "" && value !== 120)
+    .filter(([, value]) => value !== undefined && value !== "" && value !== 60)
     .map(([key, value]) => `${key}: ${value}`);
 
   return (
@@ -90,11 +102,11 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
             <input name="q" defaultValue={filters.q} placeholder="Keyword" className="rounded border border-slate-300 px-3 py-2" />
             <select name="playerId" defaultValue={filters.playerId ?? ""} className="rounded border border-slate-300 px-3 py-2">
               <option value="">All players</option>
-              {players.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}
+              {options.players.map((player) => <option key={player.slug} value={player.slug}>{player.name} · {player.teamAbbreviation}</option>)}
             </select>
             <select name="teamId" defaultValue={filters.teamId ?? ""} className="rounded border border-slate-300 px-3 py-2">
               <option value="">All teams</option>
-              {teams.map((team) => <option key={team.id} value={team.id}>{team.abbreviation}</option>)}
+              {options.teams.map((team) => <option key={team.id} value={team.id}>{team.abbreviation}</option>)}
             </select>
             <select name="quarter" defaultValue={filters.quarter ?? ""} className="rounded border border-slate-300 px-3 py-2">
               <option value="">Any quarter</option>
@@ -123,13 +135,18 @@ export default function SearchPage({ searchParams }: { searchParams: RouteSearch
         </FilterPanel>
         <div className="grid gap-4">
           <FilterChipBar chips={chips} />
-          {hasShotFeed ? (
+          {result.scopeRequired ? (
+            <div className="rounded border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600 shadow-sm">
+              <h2 className="mb-2 text-lg font-black text-ink">Choose a Player or Team</h2>
+              <p>Select a player or team before running shot search. Scoping the query keeps the page fast and prevents loading the entire league shot dataset into one request.</p>
+            </div>
+          ) : hasShotFeed ? (
             <>
               <div className="grid gap-3 sm:grid-cols-4">
                 <MetricCard label="Attempts" value={result.meta.total} />
-                <MetricCard label="Make Rate" value={formatMetric("fg_pct", makes / Math.max(result.rows.length, 1))} />
-                <MetricCard label="xPTS / Shot" value={(expected / Math.max(result.rows.length, 1)).toFixed(2)} accent="court" />
-                <MetricCard label="A - xPTS" value={actualMinusExpected.toFixed(1)} accent="ink" />
+                <MetricCard label="Make Rate" value={formatMetric("fg_pct", result.summary.makes / Math.max(result.summary.attempts, 1))} />
+                <MetricCard label="xPTS / Shot" value={(result.summary.expectedPoints / Math.max(result.summary.attempts, 1)).toFixed(2)} accent="court" />
+                <MetricCard label="A - xPTS" value={result.summary.actualMinusExpected.toFixed(1)} accent="ink" />
               </div>
               <section className="grid gap-4 xl:grid-cols-2">
                 <ShotChart shots={result.rows} />

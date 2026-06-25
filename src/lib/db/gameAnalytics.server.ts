@@ -471,6 +471,42 @@ export async function listGameAnalytics(params: GameListParams = {}): Promise<Ga
   }
 }
 
+export async function loadGameAnalyticsByIds(gameIds: string[]): Promise<Map<string, GameListItem>> {
+  const ids = Array.from(new Set(gameIds.filter(Boolean))).slice(0, 200);
+  if (!ids.length) return new Map();
+
+  try {
+    const result = await queryDatabase<GameDbRow>(
+      `${gameSelect} WHERE g.game_id = ANY($1::text[])`,
+      [ids],
+    );
+    if (result) return new Map(result.rows.map((row) => {
+      const item = mapGameRow(row);
+      return [item.game.id, item] as const;
+    }));
+  } catch {
+    // Official generated game logs remain the fallback.
+  }
+
+  const query = await import("@/lib/data/queries");
+  return new Map(ids.flatMap((gameId) => {
+    const game = query.getGame(gameId);
+    if (!game) return [];
+    const homeTeam = query.getTeamByIdOrSlug(game.homeTeamId);
+    const awayTeam = query.getTeamByIdOrSlug(game.awayTeamId);
+    if (!homeTeam || !awayTeam) return [];
+    const leader = query.getGameLeadingScorer(game.id);
+    return [[game.id, {
+      game,
+      homeTeam,
+      awayTeam,
+      leadingScorer: leader
+        ? { player: leader.player, team: leader.team, points: leader.points }
+        : null,
+    }] as const];
+  }));
+}
+
 export async function getGameAnalytics(gameId: string) {
   try {
     const [gameResult, playerResult, teamResult] = await Promise.all([

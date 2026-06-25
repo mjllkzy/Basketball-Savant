@@ -1,9 +1,10 @@
 import { ok } from "@/lib/api/response";
-import { getCustomLeaderboard } from "@/lib/data/queries";
+import { getCustomLeaderboardAnalytics } from "@/lib/db/customAnalytics.server";
 
-export function GET(request: Request) {
+export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const entityType = (params.get("entityType") ?? "players") as "players" | "teams" | "lineups";
   const metricKeys = (params.get("metrics") ?? "pts,reb,ast,stl,blk,ts_pct,efg_pct,usage_rate").split(",").filter(Boolean);
-  return ok(getCustomLeaderboard(entityType, metricKeys));
+  const result = await getCustomLeaderboardAnalytics(entityType, metricKeys);
+  return ok(result.rows, { source: result.source, message: result.message });
 }

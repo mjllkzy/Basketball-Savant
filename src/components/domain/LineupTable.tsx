@@ -1,10 +1,18 @@
 import { StatTable } from "@/components/ui/StatTable";
-import { lineupPlayers } from "@/lib/data/queries";
 import type { Lineup } from "@/lib/types";
 
-export function LineupTable({ lineups }: { lineups: Lineup[] }) {
+export function LineupTable({
+  lineups,
+  playerNames = {},
+}: {
+  lineups: Lineup[];
+  playerNames?: Record<string, string>;
+}) {
   const rows = lineups.slice(0, 20).map((lineup) => ({
-    lineup: lineupPlayers(lineup).map((player) => player.name.split(" ").slice(-1)[0]).join(" / "),
+    lineup: [lineup.player1Id, lineup.player2Id, lineup.player3Id, lineup.player4Id, lineup.player5Id]
+      .map((playerId) => playerNames[playerId] ?? playerId)
+      .map((name) => name.split(" ").slice(-1)[0])
+      .join(" / "),
     poss: lineup.possessions,
     ortg: lineup.offensiveRating.toFixed(1),
     drtg: lineup.defensiveRating.toFixed(1),

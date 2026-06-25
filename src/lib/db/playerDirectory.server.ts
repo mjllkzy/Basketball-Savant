@@ -1,4 +1,3 @@
-import type { PlayerFilters } from "@/lib/data/queries";
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
 import { queryDatabase } from "./client.server";
 
@@ -53,6 +52,20 @@ export type PlayerDirectoryFilters = {
   teams: Array<{ label: string; value: string }>;
   positions: string[];
   source: "postgres" | "json";
+};
+
+export type PlayerDirectoryParams = {
+  page?: number;
+  pageSize?: number;
+  all?: boolean;
+  sort?: string;
+  order?: "asc" | "desc";
+  q?: string;
+  teamId?: string;
+  position?: string;
+  season?: string;
+  minGames?: number;
+  minMinutes?: number;
 };
 
 type PlayerDirectoryDbRow = {
@@ -222,7 +235,7 @@ function compareFallbackValues(left: number | string | null, right: number | str
   return order === "asc" ? result : -result;
 }
 
-async function jsonFallback(params: PlayerFilters): Promise<PlayerDirectoryResult> {
+async function jsonFallback(params: PlayerDirectoryParams): Promise<PlayerDirectoryResult> {
   const { players } = await loadRuntimeFallbacks();
   const page = params.all ? 1 : Math.max(1, params.page ?? 1);
   const requestedPageSize = params.all ? 1000 : params.pageSize ?? 20;
@@ -254,7 +267,7 @@ async function jsonFallback(params: PlayerFilters): Promise<PlayerDirectoryResul
   };
 }
 
-export async function listPlayerDirectory(params: PlayerFilters = {}): Promise<PlayerDirectoryResult> {
+export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): Promise<PlayerDirectoryResult> {
   const page = params.all ? 1 : Math.max(1, params.page ?? 1);
   const requestedPageSize = params.all ? 1000 : params.pageSize ?? 20;
   const pageSize = Math.min(1000, Math.max(1, requestedPageSize));
