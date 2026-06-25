@@ -1,4 +1,4 @@
-import snapshot from "@/lib/data/generated/official-snapshot.json";
+import { readGeneratedJsonSync } from "@/lib/data/generatedJson.server";
 import type {
   Game,
   Lineup,
@@ -23,9 +23,22 @@ type SnapshotTable = {
   rows: unknown[][];
 };
 
-type OfficialSnapshot = typeof snapshot;
+type OfficialSnapshot = {
+  metadata: {
+    generatedAt: string;
+    season: string;
+    primarySeasonType: string;
+    dataProvider: string;
+    coverage: Record<string, number>;
+    [key: string]: unknown;
+  };
+  tables: Record<string, unknown> & {
+    rosters: Record<string, SnapshotTable>;
+    shotCharts?: Record<string, unknown>;
+  };
+};
 
-const officialSnapshot = snapshot as OfficialSnapshot;
+const officialSnapshot = readGeneratedJsonSync<OfficialSnapshot>("official-snapshot.json");
 
 function isSnapshotTable(candidate: unknown): candidate is SnapshotTable {
   return (

@@ -2,6 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    outputFileTracingIncludes: {
+      "/*": [
+        "./src/lib/data/generated/official-snapshot.json",
+        "./src/lib/data/generated/master-player-summaries.json",
+        "./src/lib/data/generated/team-shot-charts/**/*"
+      ]
+    }
+  },
   images: {
     remotePatterns: [
       {

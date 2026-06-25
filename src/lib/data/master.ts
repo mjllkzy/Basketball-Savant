@@ -1,4 +1,3 @@
-import masterSummariesJson from "@/lib/data/generated/master-player-summaries.json";
 import {
   officialDatasetVersion,
   officialMetadata,
@@ -6,6 +5,7 @@ import {
   officialPlayerSeasonAggregates,
   officialTeams
 } from "@/lib/data/official";
+import { readGeneratedJsonSync } from "@/lib/data/generatedJson.server";
 import { blankPlayerHeadshotUrl } from "@/lib/playerImages";
 import type { Player, PlayerSeasonAggregate, Team } from "@/lib/types";
 
@@ -28,7 +28,7 @@ type MasterRuntimeSummary = {
   sheets: Record<string, MasterSheet | undefined>;
 };
 
-const masterSummaries = masterSummariesJson as MasterRuntimeSummary[];
+const masterSummaries = readGeneratedJsonSync<MasterRuntimeSummary[]>("master-player-summaries.json");
 
 function normalizedName(value: string) {
   return value
@@ -257,5 +257,5 @@ export const masterMetadata = {
   coverage: {
     ...officialMetadata.coverage,
     regularSeasonPlayerStats: masterPlayerSeasonAggregates.length,
-  },
+  } as Record<string, number>,
 };

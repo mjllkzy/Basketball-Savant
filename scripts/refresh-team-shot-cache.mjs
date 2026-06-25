@@ -1,8 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
+import { gzip } from "node:zlib";
 import snapshot from "../src/lib/data/generated/official-snapshot.json" with { type: "json" };
 
-const outputPath = path.join(process.cwd(), "src/lib/data/generated/team-shot-charts.json");
+const gzipAsync = promisify(gzip);
+const outputDirectory = path.join(process.cwd(), "src/lib/data/generated/team-shot-charts");
 const season = snapshot.metadata.season;
 const seasonType = "Regular Season";
 
@@ -148,13 +151,22 @@ async function fetchTeam(teamId) {
   });
 }
 
+await fs.rm(outputDirectory, { recursive: true, force: true });
+await fs.mkdir(outputDirectory, { recursive: true });
+
 const teams = {};
 for (const teamId of teamIds()) {
-  teams[teamId] = await fetchTeam(teamId);
-  console.log(`${teamId}: ${teams[teamId].length} shots`);
+  const shots = await fetchTeam(teamId);
+  const file = `${teamId}.json.gz`;
+  await fs.writeFile(
+    path.join(outputDirectory, file),
+    await gzipAsync(JSON.stringify(shots), { level: 9 }),
+  );
+  teams[teamId] = { file, shots: shots.length };
+  console.log(`${teamId}: ${shots.length} shots`);
 }
 
-await fs.writeFile(outputPath, JSON.stringify({
+await fs.writeFile(path.join(outputDirectory, "manifest.json"), JSON.stringify({
   metadata: {
     season,
     seasonType,
@@ -162,4 +174,4 @@ await fs.writeFile(outputPath, JSON.stringify({
     generatedAt: new Date().toISOString()
   },
   teams
-}));
+}, null, 2));
