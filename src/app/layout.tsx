@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Telemetry } from "@/components/analytics/Telemetry";
 import { AppShell } from "@/components/layout/AppShell";
 import { getSiteUrl, siteDescription, siteName } from "@/lib/site";
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <AppShell>{children}</AppShell>
+        <Telemetry />
       </body>
     </html>
   );
