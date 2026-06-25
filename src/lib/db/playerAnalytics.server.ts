@@ -1,4 +1,6 @@
 import type { Player, PlayerSeasonAggregate, Team } from "@/lib/types";
+import { playerSimilaritySummary, similarPlayers } from "@/lib/comparison";
+import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -21,6 +23,24 @@ export type ComparisonPlayer = {
     usageRate: number;
     pie: number;
   };
+};
+
+export type SimilarPlayerMatch = {
+  player: Player;
+  team: Team;
+  score: number;
+  matchingTraits: string[];
+  ratioScore: number;
+  perMinuteScore: number;
+  physicalScore: number;
+  roleScore: number;
+  summary: ReturnType<typeof playerSimilaritySummary>;
+};
+
+export type PlayerSimilarityResult = {
+  target: ComparisonPlayer;
+  matches: SimilarPlayerMatch[];
+  source: "postgres" | "json";
 };
 
 type ComparisonDbRow = {
@@ -76,19 +96,6 @@ type PlayerOptionDbRow = {
   position: string | null;
 };
 
-type MasterCell = {
-  raw: unknown;
-  numeric: number | null;
-};
-
-type MasterFallbackSummary = {
-  player_name: string;
-  player_slug: string;
-  season: string;
-  primary_team: string | null;
-  sheets: Record<string, Record<string, MasterCell | undefined> | undefined>;
-};
-
 const blankHeadshot = "/brand/player-placeholder.png";
 const teamIdByAbbreviation: Record<string, string> = {
   ATL: "1610612737",
@@ -131,31 +138,6 @@ function numeric(value: number | string | null): number | null {
 
 function total(value: number | string | null, games: number) {
   return (numeric(value) ?? 0) * Math.max(games, 1);
-}
-
-function masterNumber(cell: MasterCell | undefined) {
-  return typeof cell?.numeric === "number" && Number.isFinite(cell.numeric) ? cell.numeric : null;
-}
-
-function masterPercentage(cell: MasterCell | undefined) {
-  const value = masterNumber(cell);
-  if (value === null) return null;
-  return Math.abs(value) > 1 ? value / 100 : value;
-}
-
-function masterText(cell: MasterCell | undefined) {
-  if (cell?.raw === null || cell?.raw === undefined) return null;
-  const value = String(cell.raw).trim();
-  return value && value !== "N/A" ? value : null;
-}
-
-function masterHeight(cell: MasterCell | undefined) {
-  const value = masterText(cell);
-  if (!value) return "N/A";
-  const direct = value.match(/^(\d+)-(\d+)$/);
-  if (direct) return `${Number(direct[1])}-${Number(direct[2])}`;
-  const excelDate = value.match(/^\d{4}-(\d{2})-(\d{2})/);
-  return excelDate ? `${Number(excelDate[1])}-${Number(excelDate[2])}` : "N/A";
 }
 
 function percentile(value: number | null, values: number[]) {
@@ -285,93 +267,76 @@ function mapComparisonRow(row: ComparisonDbRow): ComparisonPlayer {
   };
 }
 
-async function loadMasterFallbackSummaries() {
-  const summariesModule = await import("@/lib/data/generated/master-player-summaries.json");
-  return summariesModule.default as MasterFallbackSummary[];
-}
-
 async function jsonPlayerOptions(): Promise<PlayerOption[]> {
-  const summaries = await loadMasterFallbackSummaries();
-  return summaries.map((summary) => ({
-    slug: summary.player_slug,
-    name: summary.player_name,
-    teamAbbreviation: summary.primary_team ?? "NBA",
-    position: "N/A",
+  const { players } = await loadRuntimeFallbacks();
+  return players.map((player) => ({
+    slug: player.player_slug,
+    name: player.player_name,
+    teamAbbreviation: player.team_abbreviation ?? "NBA",
+    position: player.position ?? "N/A",
   }));
 }
 
-async function jsonComparisonPlayers(slugs: string[]): Promise<ComparisonPlayer[]> {
-  const summaries = await loadMasterFallbackSummaries();
-  const selected = new Set(slugs);
-  const tsValues = summaries.flatMap((summary) => {
-    const value = masterPercentage(summary.sheets["General - Advanced"]?.ts_pct);
-    return value === null ? [] : [value];
-  });
-  const usageValues = summaries.flatMap((summary) => {
-    const value = masterPercentage(summary.sheets["General - Advanced"]?.usg_pct);
-    return value === null ? [] : [value];
-  });
-  const pieValues = summaries.flatMap((summary) => {
-    const value = masterPercentage(summary.sheets["General - Advanced"]?.pie);
-    return value === null ? [] : [value];
-  });
-  const rows = summaries.flatMap((summary): ComparisonDbRow[] => {
-    if (!selected.has(summary.player_slug)) return [];
-    const traditional = summary.sheets["General - Traditional"] ?? {};
-    const advanced = summary.sheets["General - Advanced"] ?? {};
-    const bios = summary.sheets.Bios ?? {};
-    const teamAbbreviation = summary.primary_team ?? "NBA";
-    const teamId = teamIdByAbbreviation[teamAbbreviation] ?? teamAbbreviation;
-    const tsPct = masterPercentage(advanced.ts_pct);
-    const usageRate = masterPercentage(advanced.usg_pct);
-    const pie = masterPercentage(advanced.pie);
+async function jsonComparisonPlayers(slugs?: string[]): Promise<ComparisonPlayer[]> {
+  const { players, teams } = await loadRuntimeFallbacks();
+  const selected = slugs ? new Set(slugs) : null;
+  const tsValues = players.flatMap((player) => player.ts_pct === null ? [] : [player.ts_pct]);
+  const usageValues = players.flatMap((player) => player.usage_rate === null ? [] : [player.usage_rate]);
+  const pieValues = players.flatMap((player) => player.pie === null ? [] : [player.pie]);
+  const teamsById = new Map(teams.map((team) => [team.team_id, team]));
+  const rows = players.flatMap((player): ComparisonDbRow[] => {
+    if (selected && !selected.has(player.player_slug)) return [];
+    const teamAbbreviation = player.team_abbreviation ?? "NBA";
+    const teamId = player.team_id ?? teamIdByAbbreviation[teamAbbreviation] ?? teamAbbreviation;
+    const team = teamsById.get(teamId);
     return [{
-      player_slug: summary.player_slug,
+      player_slug: player.player_slug,
       nba_player_id: null,
-      app_player_id: summary.player_slug,
-      player_name: summary.player_name,
+      app_player_id: player.player_slug,
+      player_name: player.player_name,
       primary_team_id: teamId,
       primary_team_abbreviation: teamAbbreviation,
-      position: "N/A",
-      height: masterHeight(bios.height),
-      weight: masterNumber(bios.weight),
-      age: masterNumber(bios.age ?? traditional.age),
-      college: masterText(bios.college),
-      country: masterText(bios.country),
+      position: player.position,
+      height: player.height,
+      weight: player.weight,
+      age: player.age,
+      college: null,
+      country: null,
       jersey_number: null,
       headshot_url: null,
-      team_slug: teamAbbreviation.toLowerCase(),
-      team_name: teamAbbreviation,
-      team_city: "",
-      conference: null,
-      division: null,
-      primary_color: null,
-      secondary_color: null,
-      season: summary.season,
-      games: masterNumber(traditional.gp ?? advanced.gp),
-      minutes: masterNumber(traditional.min ?? advanced.min),
-      pts: masterNumber(traditional.pts),
-      reb: masterNumber(traditional.reb),
-      ast: masterNumber(traditional.ast),
-      stl: masterNumber(traditional.stl),
-      blk: masterNumber(traditional.blk),
-      tov: masterNumber(traditional.tov),
-      ts_pct: tsPct,
-      efg_pct: masterPercentage(advanced.efg_pct),
-      usage_rate: usageRate,
-      ast_pct: masterPercentage(advanced.ast_pct),
-      reb_pct: masterPercentage(advanced.reb_pct),
-      turnover_rate: masterPercentage(advanced.to_ratio),
-      off_rating: masterNumber(advanced.offrtg),
-      def_rating: masterNumber(advanced.defrtg),
-      net_rating: masterNumber(advanced.netrtg),
-      pie,
-      ts_percentile: percentile(tsPct, tsValues),
-      usage_percentile: percentile(usageRate, usageValues),
-      pie_percentile: percentile(pie, pieValues),
+      team_slug: team?.slug ?? teamAbbreviation.toLowerCase(),
+      team_name: team?.name ?? teamAbbreviation,
+      team_city: team?.city ?? "",
+      conference: team?.conference ?? null,
+      division: team?.division ?? null,
+      primary_color: team?.primary_color ?? null,
+      secondary_color: team?.secondary_color ?? null,
+      season: "2025-26",
+      games: player.games,
+      minutes: player.minutes,
+      pts: player.pts,
+      reb: player.reb,
+      ast: player.ast,
+      stl: player.stl,
+      blk: player.blk,
+      tov: player.tov,
+      ts_pct: player.ts_pct,
+      efg_pct: player.efg_pct,
+      usage_rate: player.usage_rate,
+      ast_pct: player.ast_pct,
+      reb_pct: player.reb_pct,
+      turnover_rate: player.turnover_rate,
+      off_rating: player.off_rating,
+      def_rating: player.def_rating,
+      net_rating: player.net_rating,
+      pie: player.pie,
+      ts_percentile: percentile(player.ts_pct, tsValues),
+      usage_percentile: percentile(player.usage_rate, usageValues),
+      pie_percentile: percentile(player.pie, pieValues),
     }];
   });
   const bySlug = new Map(rows.map((row) => [row.player_slug, mapComparisonRow(row)]));
+  if (!slugs) return rows.map(mapComparisonRow);
   return slugs.flatMap((slug) => {
     const player = bySlug.get(slug);
     return player ? [player] : [];
@@ -457,5 +422,91 @@ export async function loadComparisonPlayers(slugs: string[]): Promise<Comparison
     });
   } catch {
     return jsonComparisonPlayers(requested);
+  }
+}
+
+async function jsonSimilarityResult(playerSlug: string): Promise<PlayerSimilarityResult | null> {
+  const players = await jsonComparisonPlayers();
+  const target = players.find((player) => player.player.slug === playerSlug);
+  if (!target) return null;
+
+  const matches = similarPlayers(target.aggregate, players.map((player) => player.aggregate), 10).map((row) => ({
+    player: row.aggregate.player,
+    team: row.aggregate.team,
+    score: row.score,
+    matchingTraits: row.traits,
+    ratioScore: row.ratioScore,
+    perMinuteScore: row.perMinuteScore,
+    physicalScore: row.physicalScore,
+    roleScore: row.roleScore,
+    summary: row.candidateSummary,
+  }));
+  return {
+    target,
+    source: "json",
+    matches,
+  };
+}
+
+export async function loadPlayerSimilarity(playerSlug: string): Promise<PlayerSimilarityResult | null> {
+  if (!playerSlug) return null;
+
+  try {
+    const result = await queryDatabase<ComparisonDbRow>(`
+      WITH ranked AS (
+        SELECT
+          s.*,
+          percent_rank() OVER (ORDER BY s.ts_pct) * 100 AS ts_percentile,
+          percent_rank() OVER (ORDER BY s.usage_rate) * 100 AS usage_percentile,
+          percent_rank() OVER (ORDER BY s.pie) * 100 AS pie_percentile
+        FROM current_player_season_summaries s
+      )
+      SELECT
+        p.player_slug,
+        p.nba_player_id,
+        p.app_player_id,
+        p.player_name,
+        p.primary_team_id,
+        p.primary_team_abbreviation,
+        p.position,
+        p.height,
+        p.weight,
+        p.age,
+        p.college,
+        p.country,
+        p.jersey_number,
+        p.headshot_url,
+        t.slug AS team_slug,
+        t.name AS team_name,
+        t.city AS team_city,
+        t.conference,
+        t.division,
+        t.primary_color,
+        t.secondary_color,
+        ranked.*
+      FROM ranked
+      JOIN players p USING (player_slug)
+      LEFT JOIN teams t ON t.id = p.primary_team_id
+    `);
+    if (!result?.rows.length) return jsonSimilarityResult(playerSlug);
+
+    const players = result.rows.map(mapComparisonRow);
+    const target = players.find((player) => player.player.slug === playerSlug);
+    if (!target) return jsonSimilarityResult(playerSlug);
+    const matches = similarPlayers(target.aggregate, players.map((player) => player.aggregate), 10).map((row) => ({
+      player: row.aggregate.player,
+      team: row.aggregate.team,
+      score: row.score,
+      matchingTraits: row.traits,
+      ratioScore: row.ratioScore,
+      perMinuteScore: row.perMinuteScore,
+      physicalScore: row.physicalScore,
+      roleScore: row.roleScore,
+      summary: row.candidateSummary,
+    }));
+
+    return { target, matches, source: "postgres" };
+  } catch {
+    return jsonSimilarityResult(playerSlug);
   }
 }

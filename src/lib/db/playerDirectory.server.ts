@@ -1,6 +1,5 @@
 import type { PlayerFilters } from "@/lib/data/queries";
-import { listPlayers } from "@/lib/data/queries";
-import { calculatePlayerMetric } from "@/lib/metrics/registry";
+import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -48,6 +47,12 @@ export type PlayerDirectoryResult = {
     totalPages: number;
     source: "postgres" | "json";
   };
+};
+
+export type PlayerDirectoryFilters = {
+  teams: Array<{ label: string; value: string }>;
+  positions: string[];
+  source: "postgres" | "json";
 };
 
 type PlayerDirectoryDbRow = {
@@ -148,41 +153,104 @@ function mapDbRow(row: PlayerDirectoryDbRow): PlayerDirectoryRow {
   };
 }
 
-function jsonFallback(params: PlayerFilters): PlayerDirectoryResult {
-  const result = listPlayers(params);
+function mapFallbackRow(row: RuntimePlayerFallback): PlayerDirectoryRow {
   return {
-    rows: result.rows.map((row) => ({
-      playerSlug: row.player.slug,
-      playerName: row.player.name,
-      teamId: row.team.id,
-      teamAbbreviation: row.team.abbreviation,
-      position: row.player.position,
-      height: row.player.height,
-      weight: row.player.weight || null,
-      age: row.player.age || null,
-      games: row.games,
-      minutesPerGame: row.minutes / Math.max(row.games, 1),
-      pts: calculatePlayerMetric("pts", row),
-      reb: calculatePlayerMetric("reb", row),
-      ast: calculatePlayerMetric("ast", row),
-      stl: calculatePlayerMetric("stl", row),
-      blk: calculatePlayerMetric("blk", row),
-      tov: calculatePlayerMetric("tov", row),
-      fgPct: calculatePlayerMetric("fg_pct", row),
-      threePct: calculatePlayerMetric("three_pct", row),
-      ftPct: calculatePlayerMetric("ft_pct", row),
-      tsPct: calculatePlayerMetric("ts_pct", row),
-      efgPct: calculatePlayerMetric("efg_pct", row),
-      usageRate: calculatePlayerMetric("usage_rate", row),
-      astPct: calculatePlayerMetric("ast_pct", row),
-      rebPct: calculatePlayerMetric("reb_pct", row),
-      turnoverRate: calculatePlayerMetric("turnover_rate", row),
-      offRating: calculatePlayerMetric("off_rating", row),
-      defRating: calculatePlayerMetric("def_rating", row),
-      netRating: calculatePlayerMetric("net_rating", row),
-      pie: calculatePlayerMetric("pie", row),
-    })),
-    meta: { ...result.meta, source: "json" },
+    playerSlug: row.player_slug,
+    playerName: row.player_name,
+    teamId: row.team_id ?? row.team_abbreviation ?? "",
+    teamAbbreviation: row.team_abbreviation ?? "NBA",
+    position: row.position ?? "N/A",
+    height: row.height ?? "N/A",
+    weight: row.weight,
+    age: row.age,
+    games: row.games ?? 0,
+    minutesPerGame: row.minutes,
+    pts: row.pts,
+    reb: row.reb,
+    ast: row.ast,
+    stl: row.stl,
+    blk: row.blk,
+    tov: row.tov,
+    fgPct: row.fg_pct,
+    threePct: row.three_pct,
+    ftPct: row.ft_pct,
+    tsPct: row.ts_pct,
+    efgPct: row.efg_pct,
+    usageRate: row.usage_rate,
+    astPct: row.ast_pct,
+    rebPct: row.reb_pct,
+    turnoverRate: row.turnover_rate,
+    offRating: row.off_rating,
+    defRating: row.def_rating,
+    netRating: row.net_rating,
+    pie: row.pie,
+  };
+}
+
+const fallbackSortValues: Record<string, (row: RuntimePlayerFallback) => number | string | null> = {
+  name: (row) => row.player_name,
+  team: (row) => row.team_abbreviation ?? "",
+  position: (row) => ["PG", "SG", "SF", "PF", "C"].indexOf(row.position ?? ""),
+  pts: (row) => row.pts,
+  reb: (row) => row.reb,
+  ast: (row) => row.ast,
+  stl: (row) => row.stl,
+  blk: (row) => row.blk,
+  tov: (row) => row.tov,
+  fg_pct: (row) => row.fg_pct,
+  three_pct: (row) => row.three_pct,
+  ft_pct: (row) => row.ft_pct,
+  ts_pct: (row) => row.ts_pct,
+  efg_pct: (row) => row.efg_pct,
+  usage_rate: (row) => row.usage_rate,
+  ast_pct: (row) => row.ast_pct,
+  reb_pct: (row) => row.reb_pct,
+  turnover_rate: (row) => row.turnover_rate,
+  off_rating: (row) => row.off_rating,
+  def_rating: (row) => row.def_rating,
+  net_rating: (row) => row.net_rating,
+  pie: (row) => row.pie,
+};
+
+function compareFallbackValues(left: number | string | null, right: number | string | null, order: "asc" | "desc") {
+  if (left === null && right === null) return 0;
+  if (left === null) return 1;
+  if (right === null) return -1;
+  const result = typeof left === "string" || typeof right === "string"
+    ? String(left).localeCompare(String(right))
+    : left - right;
+  return order === "asc" ? result : -result;
+}
+
+async function jsonFallback(params: PlayerFilters): Promise<PlayerDirectoryResult> {
+  const { players } = await loadRuntimeFallbacks();
+  const page = params.all ? 1 : Math.max(1, params.page ?? 1);
+  const requestedPageSize = params.all ? 1000 : params.pageSize ?? 20;
+  const pageSize = Math.min(1000, Math.max(1, requestedPageSize));
+  const query = params.q?.trim().toLowerCase();
+  const positions = params.position === "G" ? ["PG", "SG"] : params.position === "F" ? ["SF", "PF"] : params.position ? [params.position] : [];
+  const sortKey = fallbackSortValues[params.sort ?? "name"] ? params.sort ?? "name" : "name";
+  const order = params.order ?? (sortKey === "name" ? "asc" : "desc");
+  const sortValue = fallbackSortValues[sortKey];
+  const filtered = players
+    .filter((row) => !query || `${row.player_name} ${row.team_abbreviation ?? ""} ${row.position ?? ""}`.toLowerCase().includes(query))
+    .filter((row) => !params.teamId || row.team_id === params.teamId || row.team_abbreviation === params.teamId)
+    .filter((row) => !positions.length || positions.includes(row.position ?? ""))
+    .filter((row) => params.minGames === undefined || (row.games ?? 0) >= params.minGames)
+    .filter((row) => params.minMinutes === undefined || (row.minutes ?? 0) * (row.games ?? 0) >= params.minMinutes)
+    .sort((left, right) => compareFallbackValues(sortValue(left), sortValue(right), order) || left.player_name.localeCompare(right.player_name));
+  const total = filtered.length;
+  const offset = (page - 1) * pageSize;
+
+  return {
+    rows: filtered.slice(offset, offset + pageSize).map(mapFallbackRow),
+    meta: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+      source: "json",
+    },
   };
 }
 
@@ -284,4 +352,39 @@ export async function listPlayerDirectory(params: PlayerFilters = {}): Promise<P
   } catch {
     return jsonFallback(params);
   }
+}
+
+export async function loadPlayerDirectoryFilters(): Promise<PlayerDirectoryFilters> {
+  try {
+    const [teamResult, positionResult] = await Promise.all([
+      queryDatabase<{ id: string; abbreviation: string }>(`
+        SELECT DISTINCT t.id, t.abbreviation
+        FROM teams t
+        JOIN current_player_season_summaries s ON s.team_id = t.id
+        ORDER BY t.abbreviation
+      `),
+      queryDatabase<{ position: string }>(`
+        SELECT DISTINCT p.position
+        FROM players p
+        JOIN current_player_season_summaries s USING (player_slug)
+        WHERE p.position IN ('PG', 'SG', 'SF', 'PF', 'C')
+      `),
+    ]);
+    if (teamResult?.rows.length && positionResult?.rows.length) {
+      return {
+        teams: teamResult.rows.map((team) => ({ label: team.abbreviation, value: team.id })),
+        positions: positionResult.rows.map((row) => row.position),
+        source: "postgres",
+      };
+    }
+  } catch {
+    // Generated data remains the fallback when Postgres is absent or incomplete.
+  }
+
+  const { players, teams } = await loadRuntimeFallbacks();
+  return {
+    teams: teams.map((team) => ({ label: team.abbreviation, value: team.team_id })),
+    positions: Array.from(new Set(players.map((player) => player.position).filter((position): position is string => Boolean(position && position !== "N/A")))),
+    source: "json",
+  };
 }

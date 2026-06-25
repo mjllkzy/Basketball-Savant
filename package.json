@@ -12,7 +12,7 @@
     "refresh:official": "node scripts/refresh-official-data.mjs",
     "refresh:official:shots": "node scripts/refresh-official-data.mjs --regular-season-shots",
     "refresh:team-shots": "node scripts/refresh-team-shot-cache.mjs",
-    "build": "NEXT_PRIVATE_BUILD_WORKER=0 next build",
+    "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest run",

@@ -1,28 +1,28 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
-import { getPlayerLeaderboard } from "@/lib/data/queries";
+import { listPlayerLeaderboard } from "@/lib/db/leaderboards.server";
 import { defaultLeaderboardMetric, isLeaderboardMetricFeedRequired, leaderboardTabs } from "@/lib/leaderboards";
 import { getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
-export default function LeaderboardsPage({ searchParams }: { searchParams: RouteSearchParams }) {
+export default async function LeaderboardsPage({ searchParams }: { searchParams: RouteSearchParams }) {
   const category = singleParam(searchParams, "category") ?? "Scoring";
   const metricKey = singleParam(searchParams, "metric") ?? defaultLeaderboardMetric(category);
   const metric = getMetric(metricKey);
   const feedRequired = isLeaderboardMetricFeedRequired(metricKey);
-  const leaderboard = feedRequired ? [] : getPlayerLeaderboard(metricKey, { limit: 50 });
-  const hasValues = leaderboard.some((row) => row.value !== null);
-  const rows = leaderboard.map((row) => ({
+  const leaderboard = feedRequired ? { rows: [], source: "json" as const } : await listPlayerLeaderboard(metricKey, 50);
+  const hasValues = leaderboard.rows.some((row) => row.value !== null);
+  const rows = leaderboard.rows.map((row) => ({
     rank: row.rank,
-    player: row.player.name,
-    href: `/players/${row.player.slug}`,
-    team: row.team.abbreviation,
-    pos: row.player.position,
+    player: row.playerName,
+    href: `/players/${row.playerSlug}`,
+    team: row.teamAbbreviation,
+    pos: row.position,
     value: formatMetric(metricKey, row.value),
     percentile: row.percentile,
-    sample: row.aggregate.games
+    sample: row.games
   }));
 
   return (
@@ -56,7 +56,9 @@ export default function LeaderboardsPage({ searchParams }: { searchParams: Route
           </Link>
         </div>
       ) : (
-        <StatTable columns={[{ key: "rank", label: "Rk", align: "right" }, { key: "player", label: "Player", hrefKey: "href" }, { key: "team", label: "Team" }, { key: "pos", label: "Pos" }, { key: "value", label: metric.shortLabel, align: "right" }, { key: "percentile", label: "Pctile", align: "right" }, { key: "sample", label: "G", align: "right" }]} rows={rows} />
+        <div data-data-source={leaderboard.source}>
+          <StatTable columns={[{ key: "rank", label: "Rk", align: "right" }, { key: "player", label: "Player", hrefKey: "href" }, { key: "team", label: "Team" }, { key: "pos", label: "Pos" }, { key: "value", label: metric.shortLabel, align: "right" }, { key: "percentile", label: "Pctile", align: "right" }, { key: "sample", label: "G", align: "right" }]} rows={rows} />
+        </div>
       )}
       <div className="rounded border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
         The metric registry currently includes {metricRegistry.length} definitions. Box-score and NBA Stats Advanced metrics are active; event, model, lineup, and tracking metrics stay gated until those feeds are loaded.

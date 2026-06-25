@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
-import { teamSeasonAggregates } from "@/lib/data/queries";
+import { listTeamSeasonSummaries } from "@/lib/db/teamAnalytics.server";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { nbaTeamLogoUrl } from "@/lib/teamBranding";
@@ -12,8 +12,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/teams" },
 };
 
-export default function TeamsPage() {
-  const rows = teamSeasonAggregates.map((row) => ({
+export default async function TeamsPage() {
+  const result = await listTeamSeasonSummaries();
+  const rows = result.rows.map((row) => ({
     team: `${row.team.city} ${row.team.name}`,
     teamLogo: nbaTeamLogoUrl(row.team.id),
     teamLogoAlt: `${row.team.city} ${row.team.name} logo`,
@@ -35,24 +36,26 @@ export default function TeamsPage() {
   return (
     <div className="grid gap-4">
       <PageHeader eyebrow="Team Index" title="Teams" description="Official team records, ratings, pace, shooting, ball movement, and rebounding context." />
-      <StatTable
-        columns={[
-          { key: "team", label: "Team", hrefKey: "href", imageKey: "teamLogo", imageAltKey: "teamLogoAlt", imageFallbackKey: "teamLogoFallback" },
-          { key: "conf", label: "Conf" },
-          { key: "record", label: "Record" },
-          { key: "ortg", label: "ORtg", align: "right" },
-          { key: "drtg", label: "DRtg", align: "right" },
-          { key: "net", label: "Net", align: "right" },
-          { key: "pace", label: "Pace", align: "right" },
-          { key: "ts", label: "TS%", align: "right" },
-          { key: "efg", label: "eFG%", align: "right" },
-          { key: "three", label: "3P%", align: "right" },
-          { key: "ast", label: "AST%", align: "right" },
-          { key: "reb", label: "REB%", align: "right" },
-          { key: "tov", label: "TOV%", align: "right" }
-        ]}
-        rows={rows}
-      />
+      <div data-data-source={result.source}>
+        <StatTable
+          columns={[
+            { key: "team", label: "Team", hrefKey: "href", imageKey: "teamLogo", imageAltKey: "teamLogoAlt", imageFallbackKey: "teamLogoFallback" },
+            { key: "conf", label: "Conf" },
+            { key: "record", label: "Record" },
+            { key: "ortg", label: "ORtg", align: "right" },
+            { key: "drtg", label: "DRtg", align: "right" },
+            { key: "net", label: "Net", align: "right" },
+            { key: "pace", label: "Pace", align: "right" },
+            { key: "ts", label: "TS%", align: "right" },
+            { key: "efg", label: "eFG%", align: "right" },
+            { key: "three", label: "3P%", align: "right" },
+            { key: "ast", label: "AST%", align: "right" },
+            { key: "reb", label: "REB%", align: "right" },
+            { key: "tov", label: "TOV%", align: "right" }
+          ]}
+          rows={rows}
+        />
+      </div>
     </div>
   );
 }

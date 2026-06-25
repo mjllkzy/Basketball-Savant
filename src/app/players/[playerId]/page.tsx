@@ -153,7 +153,7 @@ export default async function PlayerPage({ params }: { params: { playerId: strin
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "game", label: "Opp" }, { key: "pts", label: "PTS", align: "right" }, { key: "reb", label: "REB", align: "right" }, { key: "ast", label: "AST", align: "right" }, { key: "stl", label: "STL", align: "right" }, { key: "blk", label: "BLK", align: "right" }, { key: "tov", label: "TOV", align: "right" }, { key: "ts", label: "TS", align: "right" }, { key: "pm", label: "+/-", align: "right" }]} rows={gameRows} />
-        <SimilarPlayersTable playerId={profile.player.id} />
+        <SimilarPlayersTable rows={profile.similar} />
       </section>
       {playerLineups.length > 0 ? (
         <LineupNetwork lineups={playerLineups} players={players} />

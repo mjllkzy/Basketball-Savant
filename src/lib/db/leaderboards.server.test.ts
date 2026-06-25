@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDatabasePool } from "./client.server";
-import { listPlayerDirectory } from "./playerDirectory.server";
+import { listPlayerLeaderboard } from "./leaderboards.server";
 
-describe("database-backed player directory", () => {
+describe("database-backed leaderboards", () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;
 
   beforeEach(async () => {
@@ -16,18 +16,12 @@ describe("database-backed player directory", () => {
     else process.env.DATABASE_URL = originalDatabaseUrl;
   });
 
-  it("falls back to generated JSON when DATABASE_URL is absent", async () => {
-    const result = await listPlayerDirectory({
-      minGames: 30,
-      minMinutes: 500,
-      sort: "pts",
-      order: "desc",
-      pageSize: 10,
-    });
+  it("preserves generated leaderboards when Postgres is unavailable", async () => {
+    const result = await listPlayerLeaderboard("pts", 10);
 
-    expect(result.meta.source).toBe("json");
+    expect(result.source).toBe("json");
     expect(result.rows).toHaveLength(10);
-    expect(result.rows[0].playerName).toBeTruthy();
-    expect(result.rows[0].pts).not.toBeNull();
-  }, 15_000);
+    expect(result.rows[0].value).not.toBeNull();
+    expect(result.rows.every((row) => row.playerSlug.length > 0)).toBe(true);
+  }, 30_000);
 });

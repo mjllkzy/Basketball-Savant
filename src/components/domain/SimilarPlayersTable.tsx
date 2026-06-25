@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { getSimilarPlayers } from "@/lib/data/queries";
+import type { SimilarPlayerMatch } from "@/lib/db/playerAnalytics.server";
 
 function decimal(value: number) {
   return value.toFixed(1);
 }
 
-export function SimilarPlayersTable({ playerId }: { playerId: string }) {
-  const rows = getSimilarPlayers(playerId);
+export function SimilarPlayersTable({ rows }: { rows: SimilarPlayerMatch[] }) {
   return (
     <div className="rounded border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 p-3 text-sm font-black text-ink">Most Similar Players</div>

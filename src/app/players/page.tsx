@@ -3,8 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
-import { players, teams } from "@/lib/data/queries";
-import { listPlayerDirectory } from "@/lib/db/playerDirectory.server";
+import { listPlayerDirectory, loadPlayerDirectoryFilters } from "@/lib/db/playerDirectory.server";
 import { formatMetric } from "@/lib/metrics/format";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
@@ -80,12 +79,9 @@ function playersHref(searchParams: RouteSearchParams, showAll: boolean) {
 }
 
 export default async function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const loadedPositions = new Set(players.map((player) => player.position).filter((position) => position && position !== "N/A"));
-  const positionOptions = primaryPositionOrder.filter((position) => loadedPositions.has(position));
   const q = singleParam(searchParams, "q");
   const teamId = singleParam(searchParams, "teamId");
   const position = singleParam(searchParams, "position");
-  const selectedPosition = positionOptions.includes(position ?? "") ? position : undefined;
   const statView = singleParam(searchParams, "view") === "advanced" ? "advanced" : "standard";
   const sortMetrics = statView === "advanced" ? advancedSortMetrics : standardSortMetrics;
   const defaultSort = statView === "advanced" ? "pie" : "pts";
@@ -95,17 +91,23 @@ export default async function PlayersPage({ searchParams }: { searchParams: Rout
   const minGames = boundedNumber(numberParam(searchParams, "minGames"), defaultMinGames, 0, maxMinGames);
   const showAll = booleanParam(searchParams, "showAll") === true;
   const order = singleParam(searchParams, "order") === "asc" ? "asc" : "desc";
-  const result = await listPlayerDirectory({
-    q,
-    teamId,
-    position,
-    sort,
-    order,
-    minGames,
-    minMinutes,
-    pageSize: 100,
-    all: showAll
-  });
+  const [filterOptions, result] = await Promise.all([
+    loadPlayerDirectoryFilters(),
+    listPlayerDirectory({
+      q,
+      teamId,
+      position,
+      sort,
+      order,
+      minGames,
+      minMinutes,
+      pageSize: 100,
+      all: showAll
+    }),
+  ]);
+  const loadedPositions = new Set(filterOptions.positions);
+  const positionOptions = primaryPositionOrder.filter((loadedPosition) => loadedPositions.has(loadedPosition));
+  const selectedPosition = positionOptions.includes(position ?? "") ? position : undefined;
   const rows = result.rows.map((row) => ({
     player: row.playerName,
     href: `/players/${row.playerSlug}`,
@@ -149,7 +151,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Rout
         statView={statView}
         minMinutes={minMinutes}
         minGames={minGames}
-        teamOptions={teams.map((team) => ({ label: team.abbreviation, value: team.id }))}
+        teamOptions={filterOptions.teams}
         positionOptions={positionOptions}
       />
       <div data-data-source={result.meta.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">

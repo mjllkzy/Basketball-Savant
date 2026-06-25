@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SimilarPlayersTable } from "@/components/domain/SimilarPlayersTable";
-import { getPlayerByIdOrSlug, getPlayerProfile, players } from "@/lib/data/queries";
+import { listComparisonPlayerOptions, loadPlayerSimilarity } from "@/lib/db/playerAnalytics.server";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { playerSimilaritySummary } from "@/lib/comparison";
 
@@ -19,17 +19,32 @@ function decimal(value: number) {
   return value.toFixed(1);
 }
 
-export default function SimilarityPage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const selected = singleParam(searchParams, "player") ?? players[0].slug;
-  const player = getPlayerByIdOrSlug(selected) ?? players[0];
-  const profile = getPlayerProfile(player.slug)!;
+export default async function SimilarityPage({ searchParams }: { searchParams: RouteSearchParams }) {
+  const options = await listComparisonPlayerOptions();
+  const selected = singleParam(searchParams, "player") ?? options[0]?.slug ?? "";
+  const result = await loadPlayerSimilarity(selected);
+  const fallback = !result && options[0] ? await loadPlayerSimilarity(options[0].slug) : null;
+  const similarity = result ?? fallback;
+
+  if (!similarity) {
+    return (
+      <div className="grid gap-4">
+        <PageHeader eyebrow="Similarity" title="Player Similarity Finder" description="Find the closest player profiles using masterfile production, scoring ratios, playmaking ratios, physical build, and position context." />
+        <div className="rounded border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+          Player similarity data is temporarily unavailable.
+        </div>
+      </div>
+    );
+  }
+
+  const profile = similarity.target;
   const summary = playerSimilaritySummary(profile.aggregate);
   return (
     <div className="grid gap-4">
       <PageHeader eyebrow="Similarity" title="Player Similarity Finder" description="Find the closest player profiles using masterfile production, scoring ratios, playmaking ratios, physical build, and position context." />
       <form className="grid gap-3 rounded border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[1fr_120px]">
-        <select name="player" defaultValue={player.slug} className="rounded border border-slate-300 px-3 py-2 text-sm">
-          {players.map((option) => <option key={option.id} value={option.slug}>{option.name}</option>)}
+        <select name="player" defaultValue={profile.player.slug} className="rounded border border-slate-300 px-3 py-2 text-sm">
+          {options.map((option) => <option key={option.slug} value={option.slug}>{option.name} · {option.teamAbbreviation} · {option.position}</option>)}
         </select>
         <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Find</button>
       </form>
@@ -64,7 +79,9 @@ export default function SimilarityPage({ searchParams }: { searchParams: RouteSe
           </div>
         </div>
       </section>
-      <SimilarPlayersTable playerId={player.id} />
+      <div data-data-source={similarity.source}>
+        <SimilarPlayersTable rows={similarity.matches} />
+      </div>
     </div>
   );
 }

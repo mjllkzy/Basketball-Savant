@@ -29,6 +29,7 @@ DEFAULT_ISSUES_LOG = ROOT / "data" / "processed" / "data_issues_log.json"
 DEFAULT_PLAYERS_JSON = ROOT / "public" / "data" / "players.json"
 DEFAULT_PROFILE_DIR = ROOT / "public" / "data" / "player_profiles"
 DEFAULT_RUNTIME_SUMMARIES = ROOT / "src" / "lib" / "data" / "generated" / "master-player-summaries.json"
+DEFAULT_RUNTIME_FALLBACKS = ROOT / "src" / "lib" / "data" / "generated" / "runtime-fallbacks.json"
 DEFAULT_OFFICIAL_SNAPSHOT = ROOT / "src" / "lib" / "data" / "generated" / "official-snapshot.json"
 
 SEASON = "2025-26"
@@ -82,6 +83,38 @@ RUNTIME_SUMMARY_SHEETS = {
     "General - Defense",
     "General - Misc",
     "General - Usage",
+}
+TEAM_METADATA = {
+    "ATL": ("East", "Southeast", "#e03a3e", "#c1d32f"),
+    "BOS": ("East", "Atlantic", "#007a33", "#ba9653"),
+    "BKN": ("East", "Atlantic", "#000000", "#ffffff"),
+    "CHA": ("East", "Southeast", "#1d1160", "#00788c"),
+    "CHI": ("East", "Central", "#ce1141", "#000000"),
+    "CLE": ("East", "Central", "#860038", "#041e42"),
+    "DAL": ("West", "Southwest", "#00538c", "#002b5e"),
+    "DEN": ("West", "Northwest", "#0e2240", "#fec524"),
+    "DET": ("East", "Central", "#c8102e", "#1d42ba"),
+    "GSW": ("West", "Pacific", "#1d428a", "#ffc72c"),
+    "HOU": ("West", "Southwest", "#ce1141", "#000000"),
+    "IND": ("East", "Central", "#002d62", "#fdbb30"),
+    "LAC": ("West", "Pacific", "#c8102e", "#1d428a"),
+    "LAL": ("West", "Pacific", "#552583", "#fdb927"),
+    "MEM": ("West", "Southwest", "#5d76a9", "#12173f"),
+    "MIA": ("East", "Southeast", "#98002e", "#f9a01b"),
+    "MIL": ("East", "Central", "#00471b", "#eee1c6"),
+    "MIN": ("West", "Northwest", "#0c2340", "#78be20"),
+    "NOP": ("West", "Southwest", "#0c2340", "#c8102e"),
+    "NYK": ("East", "Atlantic", "#006bb6", "#f58426"),
+    "OKC": ("West", "Northwest", "#007ac1", "#ef3b24"),
+    "ORL": ("East", "Southeast", "#0077c0", "#c4ced4"),
+    "PHI": ("East", "Atlantic", "#006bb6", "#ed174c"),
+    "PHX": ("West", "Pacific", "#1d1160", "#e56020"),
+    "POR": ("West", "Northwest", "#e03a3e", "#000000"),
+    "SAC": ("West", "Pacific", "#5a2d81", "#63727a"),
+    "SAS": ("West", "Southwest", "#c4ced4", "#000000"),
+    "TOR": ("East", "Atlantic", "#ce1141", "#000000"),
+    "UTA": ("West", "Northwest", "#002b5c", "#f9a01b"),
+    "WAS": ("East", "Southeast", "#002b5c", "#e31837"),
 }
 
 
@@ -678,6 +711,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
         return {
             "teams_by_id": {},
             "teams_by_abbr": {},
+            "team_summaries": [],
             "players_by_name": {},
             "players_by_name_team": {},
         }
@@ -686,7 +720,19 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
     player_index_rows = table_rows(snapshot, "playerIndex")
     player_bio_rows = table_rows(snapshot, "playerBioStatsRegular")
     team_stat_rows = table_rows(snapshot, "teamStatsRegular")
+    team_advanced_rows = table_rows(snapshot, "teamAdvancedRegular")
+    basketball_reference_rows = table_rows(snapshot, "basketballReferencePlayerAdvancedCrosscheck")
     bio_by_id = {str(row.get("PLAYER_ID")): row for row in player_bio_rows if row.get("PLAYER_ID") is not None}
+    primary_position_by_id = {}
+    for row in basketball_reference_rows:
+        player_id = str(row.get("PLAYER_ID") or "").strip()
+        raw_position = text_value(row.get("BREF_POSITION")).strip()
+        primary_position = next(
+            (token for token in re.split(r"[-/,\s]+", raw_position) if token in {"PG", "SG", "SF", "PF", "C"}),
+            None,
+        )
+        if player_id and primary_position:
+            primary_position_by_id[player_id] = primary_position
 
     teams_by_id: dict[str, dict[str, Any]] = {}
     for row in player_index_rows:
@@ -694,14 +740,16 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
         abbr = text_value(row.get("TEAM_ABBREVIATION")).strip()
         if not team_id or team_id == "0" or not abbr:
             continue
+        team_city = text_value(row.get("TEAM_CITY")) or abbr
+        team_name = text_value(row.get("TEAM_NAME")) or abbr
         teams_by_id.setdefault(
             team_id,
             {
                 "id": team_id,
-                "slug": slugify(text_value(row.get("TEAM_SLUG")) or abbr),
+                "slug": slugify(f"{team_city} {team_name}"),
                 "abbreviation": abbr,
-                "city": text_value(row.get("TEAM_CITY")) or abbr,
-                "name": text_value(row.get("TEAM_NAME")) or abbr,
+                "city": team_city,
+                "name": team_name,
                 "conference": None,
                 "division": None,
                 "primary_color": None,
@@ -728,7 +776,72 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
             "source": "official_snapshot",
         }
 
+    for team in teams_by_id.values():
+        metadata = TEAM_METADATA.get(team["abbreviation"])
+        if metadata:
+            team["conference"], team["division"], team["primary_color"], team["secondary_color"] = metadata
+
     teams_by_abbr = {team["abbreviation"]: team for team in teams_by_id.values() if team.get("abbreviation")}
+    advanced_by_id = {
+        str(row.get("TEAM_ID")): row
+        for row in team_advanced_rows
+        if row.get("TEAM_ID") is not None
+    }
+    team_summaries = []
+    for row in team_stat_rows:
+        team_id = str(row.get("TEAM_ID") or "").strip()
+        team = teams_by_id.get(team_id)
+        if not team:
+            continue
+        advanced = advanced_by_id.get(team_id, {})
+        fga = float_or_none(row.get("FGA"))
+        three_pa = float_or_none(row.get("FG3A"))
+        pts = float_or_none(row.get("PTS"))
+        plus_minus = float_or_none(row.get("PLUS_MINUS"))
+        team_summaries.append(
+            {
+                "team_id": team_id,
+                "season": SEASON,
+                "season_type": SEASON_TYPE,
+                "games": int_or_none(row.get("GP")),
+                "wins": int_or_none(row.get("W")),
+                "losses": int_or_none(row.get("L")),
+                "pts": pts,
+                "pts_allowed": pts - plus_minus if pts is not None and plus_minus is not None else None,
+                "fgm": float_or_none(row.get("FGM")),
+                "fga": fga,
+                "three_pm": float_or_none(row.get("FG3M")),
+                "three_pa": three_pa,
+                "ftm": float_or_none(row.get("FTM")),
+                "fta": float_or_none(row.get("FTA")),
+                "oreb": float_or_none(row.get("OREB")),
+                "dreb": float_or_none(row.get("DREB")),
+                "reb": float_or_none(row.get("REB")),
+                "ast": float_or_none(row.get("AST")),
+                "stl": float_or_none(row.get("STL")),
+                "blk": float_or_none(row.get("BLK")),
+                "tov": float_or_none(row.get("TOV")),
+                "possessions": float_or_none(advanced.get("POSS")),
+                "off_rating": float_or_none(advanced.get("OFF_RATING")),
+                "def_rating": float_or_none(advanced.get("DEF_RATING")),
+                "net_rating": float_or_none(advanced.get("NET_RATING")),
+                "assist_pct": percent_or_none(advanced.get("AST_PCT")),
+                "offensive_rebound_pct": percent_or_none(advanced.get("OREB_PCT")),
+                "defensive_rebound_pct": percent_or_none(advanced.get("DREB_PCT")),
+                "rebound_pct": percent_or_none(advanced.get("REB_PCT")),
+                "turnover_pct": percent_or_none(advanced.get("TM_TOV_PCT")),
+                "efg_pct": percent_or_none(advanced.get("EFG_PCT")),
+                "ts_pct": percent_or_none(advanced.get("TS_PCT")),
+                "pie": percent_or_none(advanced.get("PIE")),
+                "pace": float_or_none(advanced.get("PACE")),
+                "three_frequency": three_pa / fga if fga and three_pa is not None else None,
+                "summary_json": {
+                    "source": "official_snapshot",
+                    "team_abbreviation": team["abbreviation"],
+                    "team_name": f"{team['city']} {team['name']}".strip(),
+                },
+            }
+        )
     players_by_name: dict[str, dict[str, Any]] = {}
     players_by_name_team: dict[tuple[str, str], dict[str, Any]] = {}
     for row in player_index_rows:
@@ -747,7 +860,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
             "normalized_player_name": normalized_lookup_key(player_name),
             "team_abbreviation": team_abbr or None,
             "team_id": str(row.get("TEAM_ID") or "").strip() or None,
-            "position": text_value(row.get("POSITION")).strip() or None,
+            "position": primary_position_by_id.get(person_id) or text_value(row.get("POSITION")).strip() or None,
             "height": text_value(row.get("HEIGHT") or bio.get("PLAYER_HEIGHT")).strip() or None,
             "height_inches": float_or_none(bio.get("PLAYER_HEIGHT_INCHES")),
             "weight": int_or_none(row.get("WEIGHT") or bio.get("PLAYER_WEIGHT")),
@@ -765,6 +878,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
     return {
         "teams_by_id": teams_by_id,
         "teams_by_abbr": teams_by_abbr,
+        "team_summaries": team_summaries,
         "players_by_name": players_by_name,
         "players_by_name_team": players_by_name_team,
     }
@@ -800,6 +914,84 @@ def find_player_reference(player: dict[str, Any], official: dict[str, Any]) -> d
         if by_team:
             return by_team
     return official["players_by_name"].get(name_key)
+
+
+def build_runtime_fallbacks(
+    *,
+    generated_at: str,
+    workbook_path: Path,
+    players_json: list[dict[str, Any]],
+    runtime_summaries: list[dict[str, Any]],
+    official: dict[str, Any],
+) -> dict[str, Any]:
+    runtime_by_slug = {summary["player_slug"]: summary for summary in runtime_summaries}
+    player_rows = []
+    for player in players_json:
+        reference = find_player_reference(player, official) or {}
+        summary = runtime_by_slug.get(player["player_slug"], {})
+        player_rows.append(
+            {
+                "player_slug": player["player_slug"],
+                "player_name": player["player_name"],
+                "team_id": reference.get("team_id"),
+                "team_abbreviation": player.get("primary_team"),
+                "position": reference.get("position"),
+                "height": reference.get("height"),
+                "weight": reference.get("weight"),
+                "age": reference.get("age"),
+                "games": int_or_none(summary_numeric(summary, "General - Traditional", "gp")),
+                "minutes": summary_numeric(summary, "General - Traditional", "min"),
+                "pts": summary_numeric(summary, "General - Traditional", "pts"),
+                "reb": summary_numeric(summary, "General - Traditional", "reb"),
+                "ast": summary_numeric(summary, "General - Traditional", "ast"),
+                "stl": summary_numeric(summary, "General - Traditional", "stl"),
+                "blk": summary_numeric(summary, "General - Traditional", "blk"),
+                "tov": summary_numeric(summary, "General - Traditional", "tov"),
+                "fg_pct": summary_percent(summary, "General - Traditional", "fg_pct"),
+                "three_pct": summary_percent(summary, "General - Traditional", "three_p_pct"),
+                "ft_pct": summary_percent(summary, "General - Traditional", "ft_pct"),
+                "ts_pct": summary_percent(summary, "General - Advanced", "ts_pct"),
+                "efg_pct": summary_percent(summary, "General - Advanced", "efg_pct"),
+                "usage_rate": summary_percent(summary, "General - Advanced", "usg_pct"),
+                "ast_pct": summary_percent(summary, "General - Advanced", "ast_pct"),
+                "reb_pct": summary_percent(summary, "General - Advanced", "reb_pct"),
+                "turnover_rate": summary_percent(summary, "General - Advanced", "to_ratio"),
+                "off_rating": summary_numeric(summary, "General - Advanced", "offrtg"),
+                "def_rating": summary_numeric(summary, "General - Advanced", "defrtg"),
+                "net_rating": summary_numeric(summary, "General - Advanced", "netrtg"),
+                "pie": summary_percent(summary, "General - Advanced", "pie"),
+            }
+        )
+
+    team_rows = []
+    for summary in official["team_summaries"]:
+        team = official["teams_by_id"].get(summary["team_id"], {})
+        team_rows.append(
+            {
+                **summary,
+                "slug": team.get("slug"),
+                "abbreviation": team.get("abbreviation"),
+                "city": team.get("city"),
+                "name": team.get("name"),
+                "conference": team.get("conference"),
+                "division": team.get("division"),
+                "primary_color": team.get("primary_color"),
+                "secondary_color": team.get("secondary_color"),
+            }
+        )
+
+    return {
+        "metadata": {
+            "generated_at": generated_at,
+            "source_workbook_sha256": sha256(workbook_path),
+            "season": SEASON,
+            "season_type": SEASON_TYPE,
+            "players": len(player_rows),
+            "teams": len(team_rows),
+        },
+        "players": player_rows,
+        "teams": team_rows,
+    }
 
 
 def source_sheet_value(summary: dict[str, Any], source_sheet: str, cleaned_column_name: str) -> dict[str, Any] | None:
@@ -874,6 +1066,7 @@ def write_postgres_outputs(
     run_id = str(uuid.uuid4())
     official = load_official_reference(args.official_snapshot)
     runtime_by_slug = {summary["player_slug"]: summary for summary in runtime_summaries}
+    team_summary_rows = official["team_summaries"]
 
     teams_by_abbr: dict[str, dict[str, Any]] = dict(official["teams_by_abbr"])
     for player in players_json:
@@ -1094,6 +1287,68 @@ def write_postgres_outputs(
                 )
                 cur.executemany(
                     """
+                    INSERT INTO team_season_summaries (
+                      ingestion_run_id, team_id, season, season_type, games, wins, losses,
+                      pts, pts_allowed, fgm, fga, three_pm, three_pa, ftm, fta, oreb, dreb,
+                      reb, ast, stl, blk, tov, possessions, off_rating, def_rating, net_rating,
+                      assist_pct, offensive_rebound_pct, defensive_rebound_pct, rebound_pct,
+                      turnover_pct, efg_pct, ts_pct, pie, pace, three_frequency, summary_json
+                    )
+                    VALUES (
+                      %(ingestion_run_id)s, %(team_id)s, %(season)s, %(season_type)s, %(games)s, %(wins)s, %(losses)s,
+                      %(pts)s, %(pts_allowed)s, %(fgm)s, %(fga)s, %(three_pm)s, %(three_pa)s, %(ftm)s, %(fta)s,
+                      %(oreb)s, %(dreb)s, %(reb)s, %(ast)s, %(stl)s, %(blk)s, %(tov)s, %(possessions)s,
+                      %(off_rating)s, %(def_rating)s, %(net_rating)s, %(assist_pct)s, %(offensive_rebound_pct)s,
+                      %(defensive_rebound_pct)s, %(rebound_pct)s, %(turnover_pct)s, %(efg_pct)s, %(ts_pct)s,
+                      %(pie)s, %(pace)s, %(three_frequency)s, %(summary_json)s
+                    )
+                    ON CONFLICT (team_id, season, season_type, ingestion_run_id) DO UPDATE SET
+                      games = EXCLUDED.games,
+                      wins = EXCLUDED.wins,
+                      losses = EXCLUDED.losses,
+                      pts = EXCLUDED.pts,
+                      pts_allowed = EXCLUDED.pts_allowed,
+                      fgm = EXCLUDED.fgm,
+                      fga = EXCLUDED.fga,
+                      three_pm = EXCLUDED.three_pm,
+                      three_pa = EXCLUDED.three_pa,
+                      ftm = EXCLUDED.ftm,
+                      fta = EXCLUDED.fta,
+                      oreb = EXCLUDED.oreb,
+                      dreb = EXCLUDED.dreb,
+                      reb = EXCLUDED.reb,
+                      ast = EXCLUDED.ast,
+                      stl = EXCLUDED.stl,
+                      blk = EXCLUDED.blk,
+                      tov = EXCLUDED.tov,
+                      possessions = EXCLUDED.possessions,
+                      off_rating = EXCLUDED.off_rating,
+                      def_rating = EXCLUDED.def_rating,
+                      net_rating = EXCLUDED.net_rating,
+                      assist_pct = EXCLUDED.assist_pct,
+                      offensive_rebound_pct = EXCLUDED.offensive_rebound_pct,
+                      defensive_rebound_pct = EXCLUDED.defensive_rebound_pct,
+                      rebound_pct = EXCLUDED.rebound_pct,
+                      turnover_pct = EXCLUDED.turnover_pct,
+                      efg_pct = EXCLUDED.efg_pct,
+                      ts_pct = EXCLUDED.ts_pct,
+                      pie = EXCLUDED.pie,
+                      pace = EXCLUDED.pace,
+                      three_frequency = EXCLUDED.three_frequency,
+                      summary_json = EXCLUDED.summary_json
+                    """,
+                    [
+                        {
+                            "ingestion_run_id": run_id,
+                            **row,
+                            "summary_json": Jsonb(row["summary_json"]),
+                        }
+                        for row in team_summary_rows
+                    ],
+                    returning=False,
+                )
+                cur.executemany(
+                    """
                     INSERT INTO column_dictionary (
                       ingestion_run_id, source_sheet, stat_category, column_index, excel_column,
                       original_column_name, cleaned_column_name, role, imported, notes
@@ -1265,12 +1520,14 @@ def write_postgres_outputs(
             "players",
             "player_profiles",
             "player_season_summaries",
+            "team_season_summaries",
             "player_stat_values",
             "stat_categories",
             "column_dictionary",
             "data_issues",
         ],
         "teams_written": len(team_rows_by_id),
+        "team_summaries_written": len(team_summary_rows),
         "players_written": len(player_rows),
         "stat_rows_written": len(stat_value_rows),
         "issues_written": len(issue_log["issues"]),
@@ -1789,6 +2046,15 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
     write_json(args.column_dictionary, column_dictionary)
     write_json(args.players_json, players_json)
     write_json(args.runtime_summaries, runtime_summaries, compact=True)
+    official_reference = load_official_reference(args.official_snapshot)
+    runtime_fallbacks = build_runtime_fallbacks(
+        generated_at=generated_at,
+        workbook_path=workbook_path,
+        players_json=players_json,
+        runtime_summaries=runtime_summaries,
+        official=official_reference,
+    )
+    write_json(args.runtime_fallbacks, runtime_fallbacks, compact=True)
 
     issue_log = {
         "generated_at": generated_at,
@@ -1857,6 +2123,7 @@ def import_workbook(args: argparse.Namespace) -> dict[str, Any]:
             "players_json": str(args.players_json),
             "profile_dir": str(args.profile_dir),
             "runtime_summaries": str(args.runtime_summaries),
+            "runtime_fallbacks": str(args.runtime_fallbacks),
         },
         "postgres": postgres_summary,
     }
@@ -1871,6 +2138,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--players-json", type=Path, default=DEFAULT_PLAYERS_JSON)
     parser.add_argument("--profile-dir", type=Path, default=DEFAULT_PROFILE_DIR)
     parser.add_argument("--runtime-summaries", type=Path, default=DEFAULT_RUNTIME_SUMMARIES)
+    parser.add_argument("--runtime-fallbacks", type=Path, default=DEFAULT_RUNTIME_FALLBACKS)
     parser.add_argument("--official-snapshot", type=Path, default=DEFAULT_OFFICIAL_SNAPSHOT)
     parser.add_argument("--write-postgres", action="store_true", help="Write processed output to Postgres after JSON/SQLite generation.")
     parser.add_argument("--postgres-batch-size", type=int, default=5000)
