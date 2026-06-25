@@ -514,7 +514,7 @@ async function jsonSimilarityResult(playerSlug: string): Promise<PlayerSimilarit
   };
 }
 
-async function loadAllComparisonPlayers(): Promise<{ rows: ComparisonPlayer[]; source: "postgres" | "json" }> {
+export async function loadAllComparisonPlayers(): Promise<{ rows: ComparisonPlayer[]; source: "postgres" | "json" }> {
   try {
     const result = await queryDatabase<ComparisonDbRow>(`
       WITH ranked AS (

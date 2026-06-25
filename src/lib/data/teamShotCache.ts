@@ -49,6 +49,9 @@ function compactShotsForTeam(teamId: string): CompactShot[] {
 }
 
 export const teamShotCacheMetadata = manifest?.metadata ?? readLegacyCache()?.metadata ?? {};
+export const teamShotCacheAttempts = manifest
+  ? Object.values(manifest.teams ?? {}).reduce((total, entry) => total + entry.shots, 0)
+  : Object.values(readLegacyCache()?.teams ?? {}).reduce((total, shots) => total + shots.length, 0);
 
 export function getCachedTeamShotChart(teamId: string): Shot[] {
   const cached = expandedShotCache.get(teamId);

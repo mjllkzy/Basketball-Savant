@@ -30,6 +30,10 @@ export type DatabaseHealth =
         statRows: number;
       } | null;
       currentPlayerSummaries: number;
+      currentTeamSummaries: number;
+      currentGames: number;
+      currentTeamGameStats: number;
+      currentPlayerGameStats: number;
     }
   | {
       status: "unavailable";
@@ -51,6 +55,10 @@ type DataProbeRow = {
   unique_players: number | string | null;
   stat_rows_created: number | string | null;
   current_player_summaries: number | string;
+  current_team_summaries: number | string;
+  current_games: number | string;
+  current_team_game_stats: number | string;
+  current_player_game_stats: number | string;
 };
 
 function safeMessage(error: unknown) {
@@ -83,6 +91,10 @@ export async function getDatabaseHealth(): Promise<DatabaseHealth> {
       SELECT
         to_regclass('public.ingestion_runs') IS NOT NULL
         AND to_regclass('public.current_player_season_summaries') IS NOT NULL
+        AND to_regclass('public.current_team_season_summaries') IS NOT NULL
+        AND to_regclass('public.current_games') IS NOT NULL
+        AND to_regclass('public.current_team_game_stats') IS NOT NULL
+        AND to_regclass('public.current_player_game_stats') IS NOT NULL
         AS schema_ready
     `);
     if (!schemaProbe?.rows[0]?.schema_ready) {
@@ -103,10 +115,14 @@ export async function getDatabaseHealth(): Promise<DatabaseHealth> {
         run.finished_at,
         run.unique_players,
         run.stat_rows_created,
-        (SELECT count(*) FROM current_player_season_summaries) AS current_player_summaries
+        (SELECT count(*) FROM current_player_season_summaries) AS current_player_summaries,
+        (SELECT count(*) FROM current_team_season_summaries) AS current_team_summaries,
+        (SELECT count(*) FROM current_games) AS current_games,
+        (SELECT count(*) FROM current_team_game_stats) AS current_team_game_stats,
+        (SELECT count(*) FROM current_player_game_stats) AS current_player_game_stats
       FROM current_ingestion_run run
       UNION ALL
-      SELECT NULL, NULL, NULL, NULL, 0, 0, 0
+      SELECT NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0
       WHERE NOT EXISTS (SELECT 1 FROM current_ingestion_run)
       LIMIT 1
     `);
@@ -134,6 +150,10 @@ export async function getDatabaseHealth(): Promise<DatabaseHealth> {
         : "Postgres is connected and migrated, but no successful ingestion is available.",
       latestIngestion,
       currentPlayerSummaries,
+      currentTeamSummaries: count(row?.current_team_summaries ?? 0),
+      currentGames: count(row?.current_games ?? 0),
+      currentTeamGameStats: count(row?.current_team_game_stats ?? 0),
+      currentPlayerGameStats: count(row?.current_player_game_stats ?? 0),
     };
   } catch (error) {
     return {
