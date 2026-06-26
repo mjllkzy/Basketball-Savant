@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified release: `d541f9e7549a29344131411da3e1201e2614df45`
+- Latest verified release: `4001168a61ff830c2f19b9270b382bab1bd12bc3`
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,9 +34,9 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit d541f9e --wait-seconds 120
-python scripts/check_launch_readiness.py --expected-commit d541f9e
-python scripts/load_check_production.py --expected-commit d541f9e --rounds 3 --concurrency 4 --max-p95-seconds 3
+python scripts/smoke_production.py --expected-commit 4001168 --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit 4001168
+python scripts/load_check_production.py --expected-commit 4001168 --rounds 3 --concurrency 4 --max-p95-seconds 3
 ```
 
 Production smoke results on the deployed Railway site:
@@ -56,14 +56,27 @@ Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.
 
 The conservative load check repeats the core database-backed APIs and canonical pages with light concurrency. It is designed as a launch confidence gate, not a stress test.
 
-GitHub Actions status for `d541f9e`:
+GitHub Actions status for `4001168`:
 
 - CI: success
 - Production Smoke: success
 - Production Load Check: success
-- Production Data Refresh: success
+- Production Postgres Backup: success
 
-Railway status for `d541f9e`:
+Last verified production data refresh:
+
+- Commit: `d541f9e7549a29344131411da3e1201e2614df45`
+- Workflow: Production Data Refresh
+- Status: success
+
+Last verified production backup artifact:
+
+- Workflow run: `28263354997`
+- Artifact: `basketball-savant-postgres-backup-20260626T202622Z`
+- Size: 74,514,243 bytes
+- Expires: 2026-07-10
+
+Railway status for `4001168`:
 
 - Deployment: success
 
@@ -114,7 +127,7 @@ python scripts/check_external_launch_gates.py
 
 python scripts/check_launch_readiness.py \
   --base-url https://www.example.com \
-  --expected-commit d541f9e \
+  --expected-commit 4001168 \
   --require-custom-domain
 ```
 

@@ -41,6 +41,8 @@ The workflow:
 - checks for the required production tables, including `shot_attempts`;
 - uploads the dump, manifest, and metadata as a GitHub artifact with `retention-days: 14`.
 
+Last manual verification: workflow run `28263354997` succeeded on 2026-06-26 and uploaded `basketball-savant-postgres-backup-20260626T202622Z` at 74,514,243 bytes.
+
 This gives the project a rolling external export path without changing Railway settings or the live application. It is still a short-term artifact backup, not a replacement for a confirmed Railway backup/PITR policy.
 
 For restore testing, download an artifact and restore it into a disposable database first:

@@ -53,7 +53,7 @@ Before public launch and after high-risk performance changes, run a conservative
 
 ```bash
 python scripts/load_check_production.py \
-  --expected-commit d541f9e \
+  --expected-commit 4001168 \
   --rounds 3 \
   --concurrency 4 \
   --max-p95-seconds 3
