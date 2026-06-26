@@ -74,6 +74,7 @@ data/raw/nba_data_2025_26.xlsx
 -> scripts/ingest_nba_excel.py
 -> generated JSON + SQLite fallback outputs
 -> scripts/refresh_production_data.py --write-postgres
+-> scripts/refresh_postgres_shots.py --write-postgres
 -> Postgres-backed website reads
 ```
 

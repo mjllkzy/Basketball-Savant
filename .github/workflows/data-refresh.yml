@@ -64,5 +64,8 @@ jobs:
           fi
           python scripts/refresh_production_data.py --write-postgres $FORCE_FLAG
 
+      - name: Load official shot cache into Postgres
+        run: python scripts/refresh_postgres_shots.py --write-postgres
+
       - name: Verify production health
         run: python scripts/smoke_production.py

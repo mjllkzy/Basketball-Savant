@@ -5,6 +5,7 @@ import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { percentileRank, trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
 import { queryDatabase } from "./client.server";
+import { listShotAttempts } from "./shotAttempts.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/playerAnalytics.server.ts can only be imported on the server.");
@@ -744,9 +745,12 @@ export async function loadPlayerProfileAnalytics(input: string) {
     }));
     const teamIds = new Set(gameLog.map((line) => line.teamId));
     if (!teamIds.size) teamIds.add(target.team.id);
-    const shots = Array.from(teamIds)
-      .flatMap((teamId) => getCachedTeamShotChart(teamId))
-      .filter((shot) => shot.playerId === target.player.id);
+    const postgresShots = await listShotAttempts({ playerId: target.player.id });
+    const shots = postgresShots.source === "postgres" && postgresShots.rows.length
+      ? postgresShots.rows
+      : Array.from(teamIds)
+        .flatMap((teamId) => getCachedTeamShotChart(teamId))
+        .filter((shot) => shot.playerId === target.player.id);
     return {
       source: "postgres" as const,
       player: target.player,

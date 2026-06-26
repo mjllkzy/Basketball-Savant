@@ -12,12 +12,14 @@ function findPythonCommand(): string | null {
 describe("production refresh CLI safety", () => {
   it("keeps database writes explicit and checksum-aware", () => {
     const script = readFileSync("scripts/refresh_production_data.py", "utf8");
+    const workflow = readFileSync(".github/workflows/data-refresh.yml", "utf8");
 
     expect(script).toContain("--write-postgres");
     expect(script).toContain("--force");
     expect(script).toContain("source_workbook_sha256");
     expect(script).toContain("skipped_unchanged");
     expect(script).toContain("current_team_season_summaries");
+    expect(workflow).toContain("scripts/refresh_postgres_shots.py --write-postgres");
   });
 
   const pythonCommand = findPythonCommand();

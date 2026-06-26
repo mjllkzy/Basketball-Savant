@@ -69,6 +69,7 @@ describe("database foundation", () => {
       "player_profiles",
       "player_season_summaries",
       "player_stat_values",
+      "shot_attempts",
       "stat_categories",
       "column_dictionary",
       "data_issues"

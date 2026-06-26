@@ -1,6 +1,7 @@
 import type { Game, Player, PlayerGameStat, Team, TeamGameStat } from "@/lib/types";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { queryDatabase } from "./client.server";
+import { listShotAttempts } from "./shotAttempts.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/gameAnalytics.server.ts can only be imported on the server.");
@@ -547,10 +548,13 @@ export async function getGameAnalytics(gameId: string) {
     const gameRow = gameResult?.rows[0];
     if (!gameRow || !playerResult || !teamResult) throw new Error("Game data unavailable");
     const item = mapGameRow(gameRow);
-    const shots = [
-      ...getCachedTeamShotChart(item.game.homeTeamId),
-      ...getCachedTeamShotChart(item.game.awayTeamId),
-    ].filter((shot) => shot.gameId === item.game.id);
+    const postgresShots = await listShotAttempts({ gameId: item.game.id });
+    const shots = postgresShots.source === "postgres" && postgresShots.rows.length
+      ? postgresShots.rows
+      : [
+        ...getCachedTeamShotChart(item.game.homeTeamId),
+        ...getCachedTeamShotChart(item.game.awayTeamId),
+      ].filter((shot) => shot.gameId === item.game.id);
     return {
       source: "postgres" as const,
       game: item.game,

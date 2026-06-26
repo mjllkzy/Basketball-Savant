@@ -4,6 +4,7 @@ import type { Shot } from "@/lib/types";
 import { loadGameAnalyticsByIds, type GameListItem } from "./gameAnalytics.server";
 import { listComparisonPlayerOptions, loadPlayerProfileAnalytics } from "./playerAnalytics.server";
 import { listTeamSeasonSummaries } from "./teamAnalytics.server";
+import { listShotAttempts } from "./shotAttempts.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/shotSearch.server.ts can only be imported on the server.");
@@ -55,6 +56,13 @@ async function scopedShots(filters: ShotSearchFilters): Promise<{ rows: Shot[]; 
     };
   }
   if (filters.teamId) {
+    const postgresShots = await listShotAttempts({ teamId: filters.teamId });
+    if (postgresShots.source === "postgres" && postgresShots.rows.length) {
+      return {
+        rows: postgresShots.rows,
+        source: "postgres",
+      };
+    }
     return {
       rows: getCachedTeamShotChart(filters.teamId),
       source: "json",

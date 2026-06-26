@@ -26,6 +26,8 @@ Use `--force` after an ingestion/schema mapping change that requires rebuilding 
 
 The workflow requires the repository secret `DATABASE_PUBLIC_URL`. It applies migrations, validates the masterfile, skips unchanged complete data, and checks the Railway database health endpoint.
 
+The workflow also loads the compact NBA Stats team shot-cache files into the `shot_attempts` Postgres table after the current masterfile ingestion is known. The site still keeps the generated JSON shot cache as a fallback, but production shot search, team shot maps, player shot charts, and game shot charts can read from Postgres after this step succeeds.
+
 ## Backup/PITR launch gate
 
 The application is protected by Railway Postgres storage plus configured usage alerts, but final public launch should explicitly confirm the restore policy that is acceptable for the site:

@@ -14,6 +14,7 @@ export async function GET() {
   const players = connected ? database.currentPlayerSummaries : fallback.metadata.players;
   const teams = connected ? database.currentTeamSummaries : fallback.metadata.teams;
   const games = connected ? database.currentGames : 0;
+  const databaseShots = connected ? database.currentShotAttempts : 0;
   return ok({
     status: database.status === "unavailable" ? "degraded" : "ok",
     name: "Basketball Savant",
@@ -29,13 +30,13 @@ export async function GET() {
       sourceWorkbookSha256: fallback.metadata.source_workbook_sha256,
       teamGameStats: connected ? database.currentTeamGameStats : 0,
       playerGameStats: connected ? database.currentPlayerGameStats : 0,
-      shotSource: teamShotCacheMetadata.source ?? "generated team shot cache",
+      shotSource: databaseShots > 0 ? "Postgres shot_attempts" : teamShotCacheMetadata.source ?? "generated team shot cache",
     },
     teams,
     players,
     games,
     possessions: 0,
-    shots: teamShotCacheAttempts,
+    shots: databaseShots > 0 ? databaseShots : teamShotCacheAttempts,
     lineups: 0,
     database,
   });

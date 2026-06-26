@@ -34,6 +34,7 @@ export type DatabaseHealth =
       currentGames: number;
       currentTeamGameStats: number;
       currentPlayerGameStats: number;
+      currentShotAttempts: number;
     }
   | {
       status: "unavailable";
@@ -59,6 +60,7 @@ type DataProbeRow = {
   current_games: number | string;
   current_team_game_stats: number | string;
   current_player_game_stats: number | string;
+  current_shot_attempts: number | string;
 };
 
 function safeMessage(error: unknown) {
@@ -95,6 +97,7 @@ export async function getDatabaseHealth(): Promise<DatabaseHealth> {
         AND to_regclass('public.current_games') IS NOT NULL
         AND to_regclass('public.current_team_game_stats') IS NOT NULL
         AND to_regclass('public.current_player_game_stats') IS NOT NULL
+        AND to_regclass('public.current_shot_attempts') IS NOT NULL
         AS schema_ready
     `);
     if (!schemaProbe?.rows[0]?.schema_ready) {
@@ -119,10 +122,11 @@ export async function getDatabaseHealth(): Promise<DatabaseHealth> {
         (SELECT count(*) FROM current_team_season_summaries) AS current_team_summaries,
         (SELECT count(*) FROM current_games) AS current_games,
         (SELECT count(*) FROM current_team_game_stats) AS current_team_game_stats,
-        (SELECT count(*) FROM current_player_game_stats) AS current_player_game_stats
+        (SELECT count(*) FROM current_player_game_stats) AS current_player_game_stats,
+        (SELECT count(*) FROM current_shot_attempts) AS current_shot_attempts
       FROM current_ingestion_run run
       UNION ALL
-      SELECT NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0
+      SELECT NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0
       WHERE NOT EXISTS (SELECT 1 FROM current_ingestion_run)
       LIMIT 1
     `);
@@ -154,6 +158,7 @@ export async function getDatabaseHealth(): Promise<DatabaseHealth> {
       currentGames: count(row?.current_games ?? 0),
       currentTeamGameStats: count(row?.current_team_game_stats ?? 0),
       currentPlayerGameStats: count(row?.current_player_game_stats ?? 0),
+      currentShotAttempts: count(row?.current_shot_attempts ?? 0),
     };
   } catch (error) {
     return {

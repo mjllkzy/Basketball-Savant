@@ -3,6 +3,8 @@ import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
 import { listGameAnalytics, type GameListItem } from "./gameAnalytics.server";
 import { listPlayerDirectory, type PlayerDirectoryRow } from "./playerDirectory.server";
 import { queryDatabase } from "./client.server";
+import { listShotAttempts } from "./shotAttempts.server";
+import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/teamAnalytics.server.ts can only be imported on the server.");
@@ -215,12 +217,15 @@ export async function loadTeamProfile(idOrSlug: string): Promise<TeamProfileResu
     listPlayerDirectory({ teamId: aggregate.team.id, all: true, minGames: 0, minMinutes: 0 }),
     listGameAnalytics({ teamId: aggregate.team.id, pageSize: 100 }),
   ]);
+  const shotResult = await listShotAttempts({ teamId: aggregate.team.id });
   return {
     team: aggregate.team,
     aggregate,
     rosterRows: roster.rows,
     games: games.rows,
-    shots: [],
+    shots: shotResult.source === "postgres" && shotResult.rows.length
+      ? shotResult.rows
+      : getCachedTeamShotChart(aggregate.team.id),
     lineups: [],
     source: teamResult.source === "postgres"
       && roster.meta.source === "postgres"
