@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified release: `d8bba9d7751df766dce152a8e316022b234504ca`
+- Latest verified release: `2ab8305420217f4d80849cea88709292b27ac41d`
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,8 +34,9 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit d8bba9d --wait-seconds 120
-python scripts/check_launch_readiness.py --expected-commit d8bba9d
+python scripts/smoke_production.py --expected-commit 2ab8305 --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit 2ab8305
+python scripts/load_check_production.py --expected-commit 2ab8305 --rounds 3 --concurrency 4 --max-p95-seconds 3
 ```
 
 Production smoke results on the deployed Railway site:
@@ -53,12 +54,14 @@ Production smoke results on the deployed Railway site:
 
 Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, and the core indexable pages. It runs inside the GitHub Production Smoke workflow after deploy verification. Use `--require-custom-domain` after a public domain is configured to make the Railway service domain fail this check.
 
-GitHub Actions status for `d8bba9d`:
+The conservative load check repeats the core database-backed APIs and canonical pages with light concurrency. It is designed as a launch confidence gate, not a stress test.
+
+GitHub Actions status for `2ab8305`:
 
 - CI: success
 - Production Smoke: success
 
-Railway status for `d8bba9d`:
+Railway status for `2ab8305`:
 
 - Deployment: success
 
@@ -102,7 +105,7 @@ python scripts/check_external_launch_gates.py
 
 python scripts/check_launch_readiness.py \
   --base-url https://www.example.com \
-  --expected-commit d8bba9d \
+  --expected-commit 2ab8305 \
   --require-custom-domain
 ```
 

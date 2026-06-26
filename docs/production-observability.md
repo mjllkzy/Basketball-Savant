@@ -47,6 +47,20 @@ If GitHub Production Smoke is the chosen uptime monitor, set:
 BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only
 ```
 
+## Load Check
+
+Before public launch and after high-risk performance changes, run a conservative load check:
+
+```bash
+python scripts/load_check_production.py \
+  --expected-commit 2ab8305 \
+  --rounds 3 \
+  --concurrency 4 \
+  --max-p95-seconds 3
+```
+
+This is intentionally a lightweight responsiveness check across core database-backed APIs and canonical pages. It is not a high-volume stress test.
+
 ## Final Validation
 
 After Sentry and PostHog are configured, run the external launch gate check from a shell that contains the production variable values:
