@@ -43,20 +43,25 @@ jobs:
         run: |
           set -euo pipefail
 
+          PG_DUMP="/usr/lib/postgresql/18/bin/pg_dump"
+          PG_RESTORE="/usr/lib/postgresql/18/bin/pg_restore"
+          test -x "$PG_DUMP"
+          test -x "$PG_RESTORE"
+
           mkdir -p "$BACKUP_DIR"
           STAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
           BACKUP_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.dump"
           MANIFEST_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.manifest.txt"
           METADATA_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.metadata.json"
 
-          pg_dump \
+          "$PG_DUMP" \
             --format=custom \
             --no-owner \
             --no-acl \
             --file "$BACKUP_FILE" \
             "$DATABASE_URL"
 
-          pg_restore --list "$BACKUP_FILE" > "$MANIFEST_FILE"
+          "$PG_RESTORE" --list "$BACKUP_FILE" > "$MANIFEST_FILE"
 
           for table in \
             ingestion_runs \
@@ -75,7 +80,7 @@ jobs:
 
           SHA256="$(sha256sum "$BACKUP_FILE" | awk '{print $1}')"
           SIZE_BYTES="$(wc -c < "$BACKUP_FILE" | tr -d ' ')"
-          PG_DUMP_VERSION="$(pg_dump --version | sed 's/"/\\"/g')"
+          PG_DUMP_VERSION="$("$PG_DUMP" --version | sed 's/"/\\"/g')"
 
           cat > "$METADATA_FILE" <<EOF
           {

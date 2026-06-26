@@ -8,6 +8,8 @@ describe("production Postgres backup workflow", () => {
     expect(workflow).toContain("DATABASE_URL: ${{ secrets.DATABASE_PUBLIC_URL }}");
     expect(workflow).toContain("apt.postgresql.org/pub/repos/apt");
     expect(workflow).toContain("postgresql-client-18");
+    expect(workflow).toContain("/usr/lib/postgresql/18/bin/pg_dump");
+    expect(workflow).toContain("/usr/lib/postgresql/18/bin/pg_restore");
     expect(workflow).toContain("pg_dump");
     expect(workflow).toContain("--format=custom");
     expect(workflow).toContain("pg_restore --list");
