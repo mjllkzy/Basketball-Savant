@@ -35,6 +35,7 @@ The workflow also loads the compact NBA Stats team shot-cache files into the `sh
 The workflow:
 
 - uses the existing `DATABASE_PUBLIC_URL` repository secret;
+- installs PostgreSQL 18 client tools to match the current Railway Postgres major version;
 - runs `pg_dump --format=custom --no-owner --no-acl`;
 - verifies the dump with `pg_restore --list`;
 - checks for the required production tables, including `shot_attempts`;
