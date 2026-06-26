@@ -59,8 +59,9 @@ function playerPicker(tab: VisualTab, selectedSlug: string, playerRows: Comparis
   );
 }
 
-export default async function VisualsPage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const tab = normalizeVisualTab(singleParam(searchParams, "tab"));
+export default async function VisualsPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
+  const tab = normalizeVisualTab(singleParam(resolvedSearchParams, "tab"));
   const [playerData, teamData, recentGames, database] = await Promise.all([
     loadAllComparisonPlayers(),
     listTeamSeasonSummaries(),
@@ -68,7 +69,7 @@ export default async function VisualsPage({ searchParams }: { searchParams: Rout
     getDatabaseHealth(),
   ]);
   const fallbackPlayer = defaultPlayerSlug(playerData.rows);
-  const requestedPlayer = singleParam(searchParams, "player") ?? fallbackPlayer;
+  const requestedPlayer = singleParam(resolvedSearchParams, "player") ?? fallbackPlayer;
   const selectedProfile = await loadPlayerProfileAnalytics(requestedPlayer)
     ?? (fallbackPlayer ? await loadPlayerProfileAnalytics(fallbackPlayer) : undefined);
   const currentPlayers = database.status === "connected" ? database.currentPlayerSummaries : playerData.rows.length;

@@ -7,9 +7,10 @@ import { getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
-export default async function LeaderboardsPage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const category = singleParam(searchParams, "category") ?? "Scoring";
-  const metricKey = singleParam(searchParams, "metric") ?? defaultLeaderboardMetric(category);
+export default async function LeaderboardsPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
+  const category = singleParam(resolvedSearchParams, "category") ?? "Scoring";
+  const metricKey = singleParam(resolvedSearchParams, "metric") ?? defaultLeaderboardMetric(category);
   const metric = getMetric(metricKey);
   const feedRequired = isLeaderboardMetricFeedRequired(metricKey);
   const leaderboard = feedRequired ? { rows: [], source: "json" as const } : await listPlayerLeaderboard(metricKey, 50);

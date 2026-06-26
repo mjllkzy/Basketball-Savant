@@ -78,19 +78,20 @@ function playersHref(searchParams: RouteSearchParams, showAll: boolean) {
   return query ? `/players?${query}` : "/players";
 }
 
-export default async function PlayersPage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const q = singleParam(searchParams, "q");
-  const teamId = singleParam(searchParams, "teamId");
-  const position = singleParam(searchParams, "position");
-  const statView = singleParam(searchParams, "view") === "advanced" ? "advanced" : "standard";
+export default async function PlayersPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
+  const q = singleParam(resolvedSearchParams, "q");
+  const teamId = singleParam(resolvedSearchParams, "teamId");
+  const position = singleParam(resolvedSearchParams, "position");
+  const statView = singleParam(resolvedSearchParams, "view") === "advanced" ? "advanced" : "standard";
   const sortMetrics = statView === "advanced" ? advancedSortMetrics : standardSortMetrics;
   const defaultSort = statView === "advanced" ? "pie" : "pts";
-  const requestedSort = singleParam(searchParams, "sort") ?? defaultSort;
+  const requestedSort = singleParam(resolvedSearchParams, "sort") ?? defaultSort;
   const sort = sortMetrics.includes(requestedSort) ? requestedSort : defaultSort;
-  const minMinutes = boundedNumber(numberParam(searchParams, "minMinutes"), defaultMinMinutes, 0, maxMinMinutes);
-  const minGames = boundedNumber(numberParam(searchParams, "minGames"), defaultMinGames, 0, maxMinGames);
-  const showAll = booleanParam(searchParams, "showAll") === true;
-  const order = singleParam(searchParams, "order") === "asc" ? "asc" : "desc";
+  const minMinutes = boundedNumber(numberParam(resolvedSearchParams, "minMinutes"), defaultMinMinutes, 0, maxMinMinutes);
+  const minGames = boundedNumber(numberParam(resolvedSearchParams, "minGames"), defaultMinGames, 0, maxMinGames);
+  const showAll = booleanParam(resolvedSearchParams, "showAll") === true;
+  const order = singleParam(resolvedSearchParams, "order") === "asc" ? "asc" : "desc";
   const [filterOptions, result] = await Promise.all([
     loadPlayerDirectoryFilters(),
     listPlayerDirectory({
@@ -168,11 +169,11 @@ export default async function PlayersPage({ searchParams }: { searchParams: Rout
           Displaying <strong className="text-ink">{rows.length}</strong> of <strong className="text-ink">{result.meta.total}</strong> matching players.
         </span>
         {showAll ? (
-          <Link href={playersHref(searchParams, false)} className="inline-flex min-h-10 items-center justify-center rounded border border-slate-300 px-4 text-sm font-black text-ink hover:bg-slate-50">
+          <Link href={playersHref(resolvedSearchParams, false)} className="inline-flex min-h-10 items-center justify-center rounded border border-slate-300 px-4 text-sm font-black text-ink hover:bg-slate-50">
             Show first 100
           </Link>
         ) : (
-          <Link href={playersHref(searchParams, true)} className="inline-flex min-h-10 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-slate-800">
+          <Link href={playersHref(resolvedSearchParams, true)} className="inline-flex min-h-10 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-slate-800">
             Show all rows
           </Link>
         )}

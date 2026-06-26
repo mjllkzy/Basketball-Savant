@@ -17,4 +17,5 @@ public/data/player_profiles/* 2.json
 public/data/player_profiles/* [0-9].json
 public/data/player_profiles/* copy*.json
 public/data/player_profiles/.DS_Store
+src/lib/data/generated/team-shot-charts.json
 .DS_Store

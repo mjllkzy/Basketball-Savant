@@ -7,9 +7,10 @@ import { getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
-export default async function CustomLeaderboardPage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const entityType = (singleParam(searchParams, "entityType") ?? "players") as "players" | "teams" | "lineups";
-  const metricKeys = (singleParam(searchParams, "metrics") ?? "pts,reb,ast,stl,blk,ts_pct,efg_pct,usage_rate").split(",").filter(Boolean);
+export default async function CustomLeaderboardPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
+  const entityType = (singleParam(resolvedSearchParams, "entityType") ?? "players") as "players" | "teams" | "lineups";
+  const metricKeys = (singleParam(resolvedSearchParams, "metrics") ?? "pts,reb,ast,stl,blk,ts_pct,efg_pct,usage_rate").split(",").filter(Boolean);
   const leaderboard = await getCustomLeaderboardAnalytics(entityType, metricKeys);
   const rows = leaderboard.rows.slice(0, 100).map((row, index) => ({
     rank: index + 1,

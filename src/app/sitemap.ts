@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import playerIndexJson from "../../public/data/players.json";
 import type { MasterPlayerIndexEntry } from "@/lib/data/masterProfiles.server";
+import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
 import { absoluteUrl } from "@/lib/site";
 
 export const revalidate = 86_400;
@@ -19,42 +20,11 @@ const staticRoutes = [
   "/docs/api",
 ];
 
-const teamSlugs = [
-  "atlanta-hawks",
-  "boston-celtics",
-  "brooklyn-nets",
-  "charlotte-hornets",
-  "chicago-bulls",
-  "cleveland-cavaliers",
-  "dallas-mavericks",
-  "denver-nuggets",
-  "detroit-pistons",
-  "golden-state-warriors",
-  "houston-rockets",
-  "indiana-pacers",
-  "la-clippers",
-  "los-angeles-lakers",
-  "memphis-grizzlies",
-  "miami-heat",
-  "milwaukee-bucks",
-  "minnesota-timberwolves",
-  "new-orleans-pelicans",
-  "new-york-knicks",
-  "oklahoma-city-thunder",
-  "orlando-magic",
-  "philadelphia-76ers",
-  "phoenix-suns",
-  "portland-trail-blazers",
-  "sacramento-kings",
-  "san-antonio-spurs",
-  "toronto-raptors",
-  "utah-jazz",
-  "washington-wizards",
-];
-
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const masterPlayers = playerIndexJson as MasterPlayerIndexEntry[];
-  const lastModified = new Date(process.env.MASTER_DATA_UPDATED_AT ?? "2026-06-17T10:30:46.492Z");
+  const fallback = await loadRuntimeFallbacks();
+  const lastModified = new Date(process.env.MASTER_DATA_UPDATED_AT ?? fallback.metadata.generated_at);
+  const teamSlugs = fallback.teams.map((team) => team.slug);
 
   return [
     ...staticRoutes.map((route) => ({

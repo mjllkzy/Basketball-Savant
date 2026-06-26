@@ -5,8 +5,9 @@ import { listComparisonPlayerOptions, loadPlayerSimilarity } from "@/lib/db/play
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { playerSimilaritySummary } from "@/lib/comparison";
 
-export function generateMetadata({ searchParams }: { searchParams: RouteSearchParams }): Metadata {
-  const hasSelection = Boolean(singleParam(searchParams, "player"));
+export async function generateMetadata({ searchParams }: { searchParams: Promise<RouteSearchParams> }): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const hasSelection = Boolean(singleParam(resolvedSearchParams, "player"));
   return {
     title: "NBA Player Similarity Finder",
     description: "Find statistically and physically similar NBA players using 2025-26 production, role, and profile data.",
@@ -19,9 +20,10 @@ function decimal(value: number) {
   return value.toFixed(1);
 }
 
-export default async function SimilarityPage({ searchParams }: { searchParams: RouteSearchParams }) {
+export default async function SimilarityPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
   const options = await listComparisonPlayerOptions();
-  const selected = singleParam(searchParams, "player") ?? options[0]?.slug ?? "";
+  const selected = singleParam(resolvedSearchParams, "player") ?? options[0]?.slug ?? "";
   const result = await loadPlayerSimilarity(selected);
   const fallback = !result && options[0] ? await loadPlayerSimilarity(options[0].slug) : null;
   const similarity = result ?? fallback;

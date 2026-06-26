@@ -4,9 +4,10 @@ import { getLiveTeamShotChart } from "@/lib/data/liveShotCharts";
 import { filterShotCollection } from "@/lib/data/shotFilters";
 import { loadTeamProfile } from "@/lib/db/teamAnalytics.server";
 
-export async function GET(request: Request, { params }: { params: { teamId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
-    const profile = await loadTeamProfile(params.teamId);
+    const { teamId } = await params;
+    const profile = await loadTeamProfile(teamId);
     if (!profile) return notFound("Team not found");
     const query = parseSearchParams(shotQuerySchema, request);
     const liveShots = await getLiveTeamShotChart(profile.team.id);

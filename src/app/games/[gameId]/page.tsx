@@ -8,8 +8,9 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
 import { getGameAnalytics } from "@/lib/db/gameAnalytics.server";
 
-export default async function GamePage({ params }: { params: { gameId: string } }) {
-  const report = await getGameAnalytics(params.gameId);
+export default async function GamePage({ params }: { params: Promise<{ gameId: string }> }) {
+  const { gameId } = await params;
+  const report = await getGameAnalytics(gameId);
   if (!report) notFound();
   const awayCardLabel = report.game.neutralSite ? report.awayTeam.abbreviation : "Away";
   const homeCardLabel = report.game.neutralSite ? report.homeTeam.abbreviation : "Home";

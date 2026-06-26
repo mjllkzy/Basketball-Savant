@@ -15,8 +15,9 @@ import { formatMetric } from "@/lib/metrics/format";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
 
-export function generateMetadata({ searchParams }: { searchParams: RouteSearchParams }): Metadata {
-  const isResult = singleParam(searchParams, "mode") === "compare";
+export async function generateMetadata({ searchParams }: { searchParams: Promise<RouteSearchParams> }): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const isResult = singleParam(resolvedSearchParams, "mode") === "compare";
   return {
     title: "NBA Player Comparison",
     description: "Compare two NBA players across scoring, efficiency, playmaking, defense, role, and advanced metrics.",
@@ -88,8 +89,9 @@ function PlayerCard({ profile }: { profile: ComparisonPlayer }) {
   );
 }
 
-export default async function ComparePage({ searchParams }: { searchParams: RouteSearchParams }) {
-  const mode = singleParam(searchParams, "mode");
+export default async function ComparePage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
+  const mode = singleParam(resolvedSearchParams, "mode");
 
   if (mode !== "compare") {
     return (
@@ -140,8 +142,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Rout
   const options = await listComparisonPlayerOptions();
   const fallbackLeft = options.find((player) => player.slug === "luka-doncic")?.slug ?? options[0]?.slug ?? "";
   const fallbackRight = options.find((player) => player.slug === "nikola-jokic")?.slug ?? options[1]?.slug ?? fallbackLeft;
-  const leftSlug = singleParam(searchParams, "left") ?? fallbackLeft;
-  const rightSlug = singleParam(searchParams, "right") ?? fallbackRight;
+  const leftSlug = singleParam(resolvedSearchParams, "left") ?? fallbackLeft;
+  const rightSlug = singleParam(resolvedSearchParams, "right") ?? fallbackRight;
   let [leftProfile, rightProfile] = await loadComparisonPlayers([leftSlug, rightSlug]);
 
   if (!leftProfile || !rightProfile) {

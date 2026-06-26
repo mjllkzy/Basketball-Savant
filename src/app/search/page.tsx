@@ -20,22 +20,23 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default async function SearchPage({ searchParams }: { searchParams: RouteSearchParams }) {
+export default async function SearchPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
   const filters = {
-    q: singleParam(searchParams, "q"),
-    playerId: singleParam(searchParams, "playerId"),
-    teamId: singleParam(searchParams, "teamId"),
-    quarter: numberParam(searchParams, "quarter"),
-    clutch: booleanParam(searchParams, "clutch"),
-    shotZone: singleParam(searchParams, "shotZone"),
-    playType: singleParam(searchParams, "playType"),
-    result: singleParam(searchParams, "result") as "made" | "missed" | undefined,
-    assisted: booleanParam(searchParams, "assisted"),
-    pullUp: booleanParam(searchParams, "pullUp"),
-    catchAndShoot: booleanParam(searchParams, "catchAndShoot"),
-    minExpectedPoints: numberParam(searchParams, "minExpectedPoints"),
-    minActualMinusExpected: numberParam(searchParams, "minActualMinusExpected"),
-    maxActualMinusExpected: numberParam(searchParams, "maxActualMinusExpected"),
+    q: singleParam(resolvedSearchParams, "q"),
+    playerId: singleParam(resolvedSearchParams, "playerId"),
+    teamId: singleParam(resolvedSearchParams, "teamId"),
+    quarter: numberParam(resolvedSearchParams, "quarter"),
+    clutch: booleanParam(resolvedSearchParams, "clutch"),
+    shotZone: singleParam(resolvedSearchParams, "shotZone"),
+    playType: singleParam(resolvedSearchParams, "playType"),
+    result: singleParam(resolvedSearchParams, "result") as "made" | "missed" | undefined,
+    assisted: booleanParam(resolvedSearchParams, "assisted"),
+    pullUp: booleanParam(resolvedSearchParams, "pullUp"),
+    catchAndShoot: booleanParam(resolvedSearchParams, "catchAndShoot"),
+    minExpectedPoints: numberParam(resolvedSearchParams, "minExpectedPoints"),
+    minActualMinusExpected: numberParam(resolvedSearchParams, "minActualMinusExpected"),
+    maxActualMinusExpected: numberParam(resolvedSearchParams, "maxActualMinusExpected"),
     pageSize: 60
   };
   const [result, options] = await Promise.all([

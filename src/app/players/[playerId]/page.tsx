@@ -17,8 +17,9 @@ import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import { formatMetric, toPercentagePoints } from "@/lib/metrics/format";
 
-export async function generateMetadata({ params }: { params: { playerId: string } }): Promise<Metadata> {
-  const profile = await loadPlayerProfileAnalytics(params.playerId);
+export async function generateMetadata({ params }: { params: Promise<{ playerId: string }> }): Promise<Metadata> {
+  const { playerId } = await params;
+  const profile = await loadPlayerProfileAnalytics(playerId);
   if (!profile) return { title: "Player Not Found", robots: { index: false, follow: false } };
 
   const canonicalSlug = profile.masterSlug ?? profile.player.slug;
@@ -46,8 +47,9 @@ function FeedRequiredPanel({ title, detail }: { title: string; detail: string })
   );
 }
 
-export default async function PlayerPage({ params }: { params: { playerId: string } }) {
-  const profile = await loadPlayerProfileAnalytics(params.playerId);
+export default async function PlayerPage({ params }: { params: Promise<{ playerId: string }> }) {
+  const { playerId } = await params;
+  const profile = await loadPlayerProfileAnalytics(playerId);
   if (!profile) notFound();
   const radarKeys = ["pts", "reb", "ast", "stl", "blk", "ts_pct", "usage_rate", "three_pct"];
   const radarData = radarKeys.map((key) => ({

@@ -1,5 +1,7 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 function findPythonCommand(): string | null {
@@ -37,8 +39,13 @@ describe("production smoke monitoring", () => {
   const runIfPython = pythonCommand ? it : it.skip;
 
   runIfPython("is valid Python", () => {
+    const pycacheDirectory = mkdtempSync(join(tmpdir(), "basketball-savant-pycache-"));
     const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/smoke_production.py"], {
       cwd: process.cwd(),
+      env: {
+        ...process.env,
+        PYTHONPYCACHEPREFIX: pycacheDirectory,
+      },
       encoding: "utf8",
     });
 

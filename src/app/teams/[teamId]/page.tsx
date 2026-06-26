@@ -12,8 +12,9 @@ import { formatShortDate } from "@/lib/date";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 
-export async function generateMetadata({ params }: { params: { teamId: string } }): Promise<Metadata> {
-  const profile = await loadTeamProfile(params.teamId);
+export async function generateMetadata({ params }: { params: Promise<{ teamId: string }> }): Promise<Metadata> {
+  const { teamId } = await params;
+  const profile = await loadTeamProfile(teamId);
   if (!profile) return { title: "Team Not Found", robots: { index: false, follow: false } };
 
   const teamName = `${profile.team.city} ${profile.team.name}`.trim();
@@ -31,9 +32,10 @@ export async function generateMetadata({ params }: { params: { teamId: string } 
   };
 }
 
-export default async function TeamPage({ params }: { params: { teamId: string } }) {
+export default async function TeamPage({ params }: { params: Promise<{ teamId: string }> }) {
+  const { teamId } = await params;
   const [profile, teamSummaries] = await Promise.all([
-    loadTeamProfile(params.teamId),
+    loadTeamProfile(teamId),
     listTeamSeasonSummaries(),
   ]);
   if (!profile) notFound();
