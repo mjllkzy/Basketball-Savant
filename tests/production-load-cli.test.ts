@@ -12,6 +12,19 @@ function findPythonCommand(): string | null {
 }
 
 describe("production load check CLI", () => {
+  it("runs after production smoke, on schedule, and on demand", () => {
+    const workflow = readFileSync(".github/workflows/production-load-check.yml", "utf8");
+
+    expect(workflow).toContain("workflow_run:");
+    expect(workflow).toContain("Production Smoke");
+    expect(workflow).toContain('cron: "37 12 * * *"');
+    expect(workflow).toContain("scripts/load_check_production.py");
+    expect(workflow).toContain("--wait-seconds 600");
+    expect(workflow).toContain("--rounds 3");
+    expect(workflow).toContain("--concurrency 4");
+    expect(workflow).toContain("--max-p95-seconds 3");
+  });
+
   it("checks core Postgres APIs and canonical pages", () => {
     const script = readFileSync("scripts/load_check_production.py", "utf8");
 

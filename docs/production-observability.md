@@ -61,6 +61,8 @@ python scripts/load_check_production.py \
 
 This is intentionally a lightweight responsiveness check across core database-backed APIs and canonical pages. It is not a high-volume stress test.
 
+The GitHub Production Load Check workflow also runs this conservative check after successful Production Smoke runs, daily at 12:37 UTC, and on demand from GitHub Actions.
+
 ## Final Validation
 
 After Sentry and PostHog are configured, run the external launch gate check from a shell that contains the production variable values:

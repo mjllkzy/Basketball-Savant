@@ -1,0 +1,47 @@
+name: Production Load Check
+
+on:
+  workflow_run:
+    workflows:
+      - Production Smoke
+    types:
+      - completed
+  schedule:
+    - cron: "37 12 * * *"
+  workflow_dispatch:
+    inputs:
+      expected_commit:
+        description: Optional production commit SHA to wait for before checking
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-load-check
+  cancel-in-progress: true
+
+jobs:
+  load:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_COMMIT: ${{ github.event.workflow_run.head_sha || inputs.expected_commit || '' }}
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify production responsiveness
+        run: |
+          python scripts/load_check_production.py \
+            --expected-commit "$EXPECTED_COMMIT" \
+            --wait-seconds 600 \
+            --rounds 3 \
+            --concurrency 4 \
+            --max-p95-seconds 3

@@ -89,6 +89,8 @@ The app still preserves JSON fallback behavior for local and degraded states. Pr
 
 The workflow applies migrations, validates the workbook, refreshes Postgres when needed, and runs the production smoke script.
 
+`.github/workflows/production-load-check.yml` runs the conservative production load check after successful Production Smoke runs, daily, and on demand.
+
 ## Final External Gate Validation
 
 After the public domain, Sentry, PostHog, uptime-monitor decision, and backup policy are configured, run:
