@@ -91,6 +91,8 @@ The workflow applies migrations, validates the workbook, refreshes Postgres when
 
 `.github/workflows/production-load-check.yml` runs the conservative production load check after successful Production Smoke runs, daily, and on demand.
 
+`.github/workflows/final-launch-gates.yml` is a manual workflow for the final public-domain launch check. Run it after DNS is active and GitHub secrets are configured for `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY`. It validates the external launch gates, custom-domain SEO readiness, and conservative responsiveness against the selected public URL.
+
 ## Final External Gate Validation
 
 After the public domain, Sentry, PostHog, uptime-monitor decision, and backup policy are configured, run:

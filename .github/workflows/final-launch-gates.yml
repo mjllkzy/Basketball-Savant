@@ -1,0 +1,85 @@
+name: Final Launch Gates
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: Public custom domain URL, for example https://www.basketballsavant.com
+        required: true
+      expected_commit:
+        description: Optional production commit SHA to require before checking
+        required: false
+        default: ""
+      uptime_monitor_decision:
+        description: Uptime monitoring decision
+        required: true
+        default: github-smoke-only
+        type: choice
+        options:
+          - github-smoke-only
+          - external-monitor
+      uptime_monitor_url:
+        description: Required only when uptime_monitor_decision is external-monitor
+        required: false
+        default: ""
+      backup_policy_confirmed:
+        description: Confirm Railway backup/PITR or an external backup policy has been reviewed
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: final-launch-gates
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SITE_URL: ${{ inputs.site_url }}
+      EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+      NEXT_PUBLIC_SITE_URL: ${{ inputs.site_url }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      SENTRY_ENVIRONMENT: production
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+      NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com' }}
+      BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION: ${{ inputs.uptime_monitor_decision }}
+      BASKETBALL_SAVANT_UPTIME_MONITOR_URL: ${{ inputs.uptime_monitor_url }}
+      BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED: ${{ inputs.backup_policy_confirmed }}
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify external account gates
+        run: python scripts/check_external_launch_gates.py --site-url "$SITE_URL"
+
+      - name: Verify custom-domain launch readiness
+        run: |
+          if [ -n "$EXPECTED_COMMIT" ]; then
+            python scripts/check_launch_readiness.py \
+              --base-url "$SITE_URL" \
+              --expected-commit "$EXPECTED_COMMIT" \
+              --require-custom-domain
+          else
+            python scripts/check_launch_readiness.py \
+              --base-url "$SITE_URL" \
+              --require-custom-domain
+          fi
+
+      - name: Verify custom-domain responsiveness
+        run: |
+          python scripts/load_check_production.py \
+            --base-url "$SITE_URL" \
+            --expected-commit "$EXPECTED_COMMIT" \
+            --wait-seconds 300 \
+            --rounds 3 \
+            --concurrency 4 \
+            --max-p95-seconds 3

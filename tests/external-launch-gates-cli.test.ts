@@ -15,6 +15,19 @@ const pythonCommand = findPythonCommand();
 const runIfPython = pythonCommand ? it : it.skip;
 
 describe("external launch gate CLI", () => {
+  it("has a manual final launch workflow for custom-domain validation", () => {
+    const workflow = readFileSync(".github/workflows/final-launch-gates.yml", "utf8");
+
+    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).toContain("site_url:");
+    expect(workflow).toContain("secrets.SENTRY_DSN");
+    expect(workflow).toContain("secrets.NEXT_PUBLIC_POSTHOG_KEY");
+    expect(workflow).toContain("scripts/check_external_launch_gates.py");
+    expect(workflow).toContain("--require-custom-domain");
+    expect(workflow).toContain("scripts/load_check_production.py");
+    expect(workflow).toContain("--base-url \"$SITE_URL\"");
+  });
+
   it("documents the final account, DNS, analytics, and backup gates", () => {
     const script = readFileSync("scripts/check_external_launch_gates.py", "utf8");
 

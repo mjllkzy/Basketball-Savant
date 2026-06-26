@@ -70,3 +70,5 @@ After Sentry and PostHog are configured, run the external launch gate check from
 ```bash
 python scripts/check_external_launch_gates.py
 ```
+
+The same validation is available as the manual GitHub Final Launch Gates workflow. It expects `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY` as GitHub secrets, accepts the public custom domain as a workflow input, and then runs the external gate, launch-readiness, and conservative load checks against that domain.
