@@ -94,6 +94,8 @@ The workflow applies migrations, validates the workbook, refreshes Postgres when
 
 `.github/workflows/production-load-check.yml` runs the conservative production load check after successful Production Smoke runs, daily, and on demand.
 
+`.github/workflows/postgres-backup.yml` creates a daily verified `pg_dump` artifact after the overnight data-refresh window and can be run manually before risky data or deployment work. The artifact is intentionally short-retention and does not replace the final Railway backup/PITR policy decision.
+
 `.github/workflows/final-launch-gates.yml` is a manual workflow for the final public-domain launch check. Run it after DNS is active and GitHub secrets are configured for `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY`. It validates the external launch gates, custom-domain SEO readiness, and conservative responsiveness against the selected public URL.
 
 ## Final External Gate Validation
@@ -162,7 +164,7 @@ These are not code blockers, but they require account or product decisions outsi
 4. Add Sentry project credentials if server error monitoring should be live.
 5. Add PostHog credentials if growth analytics should be live.
 6. Decide whether to add an external uptime monitor in addition to GitHub scheduled production smoke checks.
-7. Confirm Railway backup/PITR policy beyond the current managed volume and alerts if stricter restore guarantees are required.
+7. Confirm whether Railway backup/PITR plus the rolling GitHub `pg_dump` artifacts meet the restore policy, or add a stricter restore-tested backup process.
 
 ## Safe Next Product Work
 

@@ -28,6 +28,27 @@ The workflow requires the repository secret `DATABASE_PUBLIC_URL`. It applies mi
 
 The workflow also loads the compact NBA Stats team shot-cache files into the `shot_attempts` Postgres table after the current masterfile ingestion is known. The site still keeps the generated JSON shot cache as a fallback, but production shot search, team shot maps, player shot charts, and game shot charts can read from Postgres after this step succeeds.
 
+## Rolling Postgres exports
+
+`.github/workflows/postgres-backup.yml` creates a daily short-retention production database export after the overnight refresh window and can also be run on demand from GitHub Actions.
+
+The workflow:
+
+- uses the existing `DATABASE_PUBLIC_URL` repository secret;
+- runs `pg_dump --format=custom --no-owner --no-acl`;
+- verifies the dump with `pg_restore --list`;
+- checks for the required production tables, including `shot_attempts`;
+- uploads the dump, manifest, and metadata as a GitHub artifact with `retention-days: 14`.
+
+This gives the project a rolling external export path without changing Railway settings or the live application. It is still a short-term artifact backup, not a replacement for a confirmed Railway backup/PITR policy.
+
+For restore testing, download an artifact and restore it into a disposable database first:
+
+```bash
+pg_restore --list basketball-savant-postgres-YYYYMMDDTHHMMSSZ.dump
+pg_restore --clean --if-exists --no-owner --no-acl --dbname "$DISPOSABLE_DATABASE_URL" basketball-savant-postgres-YYYYMMDDTHHMMSSZ.dump
+```
+
 ## Backup/PITR launch gate
 
 The application is protected by Railway Postgres storage plus configured usage alerts, but final public launch should explicitly confirm the restore policy that is acceptable for the site:

@@ -1,0 +1,97 @@
+name: Production Postgres Backup
+
+on:
+  schedule:
+    # Daily after the overnight production data refresh window.
+    - cron: "45 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: production-postgres-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_PUBLIC_URL }}
+      BACKUP_DIR: postgres-backup
+    steps:
+      - name: Verify database secret
+        run: test -n "$DATABASE_URL"
+
+      - name: Install Postgres client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Export and verify database dump
+        id: backup
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$BACKUP_DIR"
+          STAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
+          BACKUP_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.dump"
+          MANIFEST_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.manifest.txt"
+          METADATA_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.metadata.json"
+
+          pg_dump \
+            --format=custom \
+            --no-owner \
+            --no-acl \
+            --file "$BACKUP_FILE" \
+            "$DATABASE_URL"
+
+          pg_restore --list "$BACKUP_FILE" > "$MANIFEST_FILE"
+
+          for table in \
+            ingestion_runs \
+            teams \
+            players \
+            player_profiles \
+            player_season_summaries \
+            player_stat_values \
+            team_season_summaries \
+            games \
+            player_game_stats \
+            shot_attempts
+          do
+            grep -Eq "TABLE( DATA)? public ${table}\\b" "$MANIFEST_FILE"
+          done
+
+          SHA256="$(sha256sum "$BACKUP_FILE" | awk '{print $1}')"
+          SIZE_BYTES="$(wc -c < "$BACKUP_FILE" | tr -d ' ')"
+          PG_DUMP_VERSION="$(pg_dump --version | sed 's/"/\\"/g')"
+
+          cat > "$METADATA_FILE" <<EOF
+          {
+            "created_at_utc": "$STAMP",
+            "repository": "$GITHUB_REPOSITORY",
+            "workflow": "$GITHUB_WORKFLOW",
+            "run_id": "$GITHUB_RUN_ID",
+            "run_attempt": "$GITHUB_RUN_ATTEMPT",
+            "commit": "$GITHUB_SHA",
+            "pg_dump_version": "$PG_DUMP_VERSION",
+            "dump_sha256": "$SHA256",
+            "dump_size_bytes": $SIZE_BYTES,
+            "format": "pg_dump custom",
+            "verification": "pg_restore --list plus required-table manifest checks"
+          }
+          EOF
+
+          echo "artifact_name=basketball-savant-postgres-backup-$STAMP" >> "$GITHUB_OUTPUT"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ steps.backup.outputs.artifact_name }}
+          path: postgres-backup/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
