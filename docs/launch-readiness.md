@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified release: `10ea5859388c4496115209b235105e7cc7bb4b11`
+- Latest verified release: `6880305992c94af1d566a375e1cf89ac6e49e597`
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,7 +34,8 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit 10ea585 --wait-seconds 60
+python scripts/smoke_production.py --expected-commit 6880305 --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit 6880305
 ```
 
 Production smoke results on the deployed Railway site:
@@ -50,12 +51,14 @@ Production smoke results on the deployed Railway site:
 - `/visuals`: 200
 - Slowest checked production response: 0.465 seconds
 
-GitHub Actions status for `10ea585`:
+Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, and the core indexable pages. Use `--require-custom-domain` after a public domain is configured to make the Railway service domain fail this check.
+
+GitHub Actions status for `6880305`:
 
 - CI: success
 - Production Smoke: success
 
-Railway status for `10ea585`:
+Railway status for `6880305`:
 
 - Deployment: success
 
