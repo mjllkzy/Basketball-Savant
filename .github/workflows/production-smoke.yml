@@ -34,3 +34,6 @@ jobs:
 
       - name: Verify production routes
         run: python scripts/smoke_production.py --expected-commit "$EXPECTED_COMMIT" --wait-seconds 600
+
+      - name: Verify launch readiness
+        run: python scripts/check_launch_readiness.py --expected-commit "$EXPECTED_COMMIT"

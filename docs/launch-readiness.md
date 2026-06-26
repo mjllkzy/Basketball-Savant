@@ -51,7 +51,7 @@ Production smoke results on the deployed Railway site:
 - `/visuals`: 200
 - Slowest checked production response: 0.465 seconds
 
-Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, and the core indexable pages. Use `--require-custom-domain` after a public domain is configured to make the Railway service domain fail this check.
+Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, and the core indexable pages. It runs inside the GitHub Production Smoke workflow after deploy verification. Use `--require-custom-domain` after a public domain is configured to make the Railway service domain fail this check.
 
 GitHub Actions status for `6880305`:
 

@@ -33,6 +33,7 @@ describe("production smoke monitoring", () => {
     expect(workflow).toContain('cron: "17 * * * *"');
     expect(workflow).toContain("workflow_run.conclusion == 'success'");
     expect(workflow).toContain("--wait-seconds 600");
+    expect(workflow).toContain("scripts/check_launch_readiness.py");
   });
 
   const pythonCommand = findPythonCommand();
