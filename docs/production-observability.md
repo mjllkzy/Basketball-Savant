@@ -33,3 +33,24 @@ GET /api/health/database
 ```
 
 A successful response must be HTTP 200 and report `schemaReady: true` and `dataReady: true`.
+
+The GitHub Production Smoke workflow runs hourly and after successful CI deployments. It checks the database-backed APIs, canonical pages, SEO files, and manifest. If a separate uptime service is added, set:
+
+```txt
+BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=external-monitor
+BASKETBALL_SAVANT_UPTIME_MONITOR_URL=https://...
+```
+
+If GitHub Production Smoke is the chosen uptime monitor, set:
+
+```txt
+BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only
+```
+
+## Final Validation
+
+After Sentry and PostHog are configured, run the external launch gate check from a shell that contains the production variable values:
+
+```bash
+python scripts/check_external_launch_gates.py
+```

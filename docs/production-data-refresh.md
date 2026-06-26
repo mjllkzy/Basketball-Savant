@@ -25,3 +25,16 @@ Use `--force` after an ingestion/schema mapping change that requires rebuilding 
 - On demand through GitHub Actions, with an optional force input.
 
 The workflow requires the repository secret `DATABASE_PUBLIC_URL`. It applies migrations, validates the masterfile, skips unchanged complete data, and checks the Railway database health endpoint.
+
+## Backup/PITR launch gate
+
+The application is protected by Railway Postgres storage plus configured usage alerts, but final public launch should explicitly confirm the restore policy that is acceptable for the site:
+
+- Railway-managed backup/PITR policy is accepted for the launch risk profile, or
+- an external backup/export process is added and restore-tested.
+
+After that decision is made, set the local validation flag when running the launch gate check:
+
+```bash
+BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED=true python scripts/check_external_launch_gates.py
+```

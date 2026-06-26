@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified release: `6880305992c94af1d566a375e1cf89ac6e49e597`
+- Latest verified release: `d8bba9d7751df766dce152a8e316022b234504ca`
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,8 +34,8 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit 6880305 --wait-seconds 120
-python scripts/check_launch_readiness.py --expected-commit 6880305
+python scripts/smoke_production.py --expected-commit d8bba9d --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit d8bba9d
 ```
 
 Production smoke results on the deployed Railway site:
@@ -49,16 +49,16 @@ Production smoke results on the deployed Railway site:
 - `/players/luka-doncic`: 200
 - `/teams/los-angeles-lakers`: 200
 - `/visuals`: 200
-- Slowest checked production response: 0.465 seconds
+- Slowest checked production response: 0.77 seconds
 
 Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, and the core indexable pages. It runs inside the GitHub Production Smoke workflow after deploy verification. Use `--require-custom-domain` after a public domain is configured to make the Railway service domain fail this check.
 
-GitHub Actions status for `6880305`:
+GitHub Actions status for `d8bba9d`:
 
 - CI: success
 - Production Smoke: success
 
-Railway status for `6880305`:
+Railway status for `d8bba9d`:
 
 - Deployment: success
 
@@ -85,6 +85,28 @@ The app still preserves JSON fallback behavior for local and degraded states. Pr
 - On demand through GitHub Actions.
 
 The workflow applies migrations, validates the workbook, refreshes Postgres when needed, and runs the production smoke script.
+
+## Final External Gate Validation
+
+After the public domain, Sentry, PostHog, uptime-monitor decision, and backup policy are configured, run:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://www.example.com \
+SENTRY_DSN=https://public@sentry.example.com/42 \
+SENTRY_ENVIRONMENT=production \
+NEXT_PUBLIC_POSTHOG_KEY=phc_... \
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
+BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only \
+BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED=true \
+python scripts/check_external_launch_gates.py
+
+python scripts/check_launch_readiness.py \
+  --base-url https://www.example.com \
+  --expected-commit d8bba9d \
+  --require-custom-domain
+```
+
+Use `BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=external-monitor` and set `BASKETBALL_SAVANT_UPTIME_MONITOR_URL=https://...` if a third-party uptime monitor is added instead of relying only on the scheduled GitHub Production Smoke workflow.
 
 ## Security Baseline
 
