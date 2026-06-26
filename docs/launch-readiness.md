@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified release: `2ab8305420217f4d80849cea88709292b27ac41d`
+- Latest verified release: `d541f9e7549a29344131411da3e1201e2614df45`
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,9 +34,9 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit 2ab8305 --wait-seconds 120
-python scripts/check_launch_readiness.py --expected-commit 2ab8305
-python scripts/load_check_production.py --expected-commit 2ab8305 --rounds 3 --concurrency 4 --max-p95-seconds 3
+python scripts/smoke_production.py --expected-commit d541f9e --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit d541f9e
+python scripts/load_check_production.py --expected-commit d541f9e --rounds 3 --concurrency 4 --max-p95-seconds 3
 ```
 
 Production smoke results on the deployed Railway site:
@@ -50,18 +50,20 @@ Production smoke results on the deployed Railway site:
 - `/players/luka-doncic`: 200
 - `/teams/los-angeles-lakers`: 200
 - `/visuals`: 200
-- Slowest checked production response: 0.77 seconds
+- Slowest checked production response: 0.94 seconds
 
 Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, and the core indexable pages. It runs inside the GitHub Production Smoke workflow after deploy verification. Use `--require-custom-domain` after a public domain is configured to make the Railway service domain fail this check.
 
 The conservative load check repeats the core database-backed APIs and canonical pages with light concurrency. It is designed as a launch confidence gate, not a stress test.
 
-GitHub Actions status for `2ab8305`:
+GitHub Actions status for `d541f9e`:
 
 - CI: success
 - Production Smoke: success
+- Production Load Check: success
+- Production Data Refresh: success
 
-Railway status for `2ab8305`:
+Railway status for `d541f9e`:
 
 - Deployment: success
 
@@ -78,7 +80,7 @@ data/raw/nba_data_2025_26.xlsx
 -> Postgres-backed website reads
 ```
 
-The app still preserves JSON fallback behavior for local and degraded states. Production APIs and core analytics pages use Postgres-backed reads where available.
+The app still preserves JSON fallback behavior for local and degraded states. Production APIs, core analytics pages, game logs, and shot-chart surfaces use Postgres-backed reads where available. The current production shot source is `Postgres shot_attempts` with 219,160 loaded attempts.
 
 ## Automation
 
@@ -110,7 +112,7 @@ python scripts/check_external_launch_gates.py
 
 python scripts/check_launch_readiness.py \
   --base-url https://www.example.com \
-  --expected-commit 2ab8305 \
+  --expected-commit d541f9e \
   --require-custom-domain
 ```
 
