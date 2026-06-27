@@ -99,7 +99,7 @@ python scripts/load_check_production.py \
 Then run the manual GitHub `Final Launch Gates` workflow with:
 
 - `site_url`: the public custom domain.
-- `expected_commit`: the full commit SHA from the live Railway deployment.
+- `expected_commit`: optional. Leave it blank to let the workflow resolve the live release from `/api/health`, or provide the full commit SHA from the live Railway deployment.
 - `uptime_monitor_decision`: `github-smoke-only`, unless an external monitor was added.
 - `backup_policy_confirmed`: `true`.
 

@@ -61,24 +61,49 @@ jobs:
       - name: Verify external account gates
         run: python scripts/check_external_launch_gates.py --site-url "$SITE_URL"
 
+      - name: Resolve live deployment commit
+        run: |
+          set -euo pipefail
+          if [ -n "$EXPECTED_COMMIT" ]; then
+            echo "RESOLVED_EXPECTED_COMMIT=$EXPECTED_COMMIT" >> "$GITHUB_ENV"
+            echo "Using operator-provided expected commit: $EXPECTED_COMMIT"
+          else
+            RESOLVED_EXPECTED_COMMIT="$(python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.request
+
+          site_url = os.environ["SITE_URL"].rstrip("/")
+          request = urllib.request.Request(
+              f"{site_url}/api/health",
+              headers={"User-Agent": "Basketball-Savant-Final-Launch-Gates/1.0"},
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              payload = json.loads(response.read())
+          release = str(payload.get("data", {}).get("release") or "").strip()
+          if not release:
+              print("Could not resolve live release from /api/health", file=sys.stderr)
+              raise SystemExit(1)
+          print(release)
+          PY
+          )"
+            echo "RESOLVED_EXPECTED_COMMIT=$RESOLVED_EXPECTED_COMMIT" >> "$GITHUB_ENV"
+            echo "Resolved live expected commit: $RESOLVED_EXPECTED_COMMIT"
+          fi
+
       - name: Verify custom-domain launch readiness
         run: |
-          if [ -n "$EXPECTED_COMMIT" ]; then
-            python scripts/check_launch_readiness.py \
-              --base-url "$SITE_URL" \
-              --expected-commit "$EXPECTED_COMMIT" \
-              --require-custom-domain
-          else
-            python scripts/check_launch_readiness.py \
-              --base-url "$SITE_URL" \
-              --require-custom-domain
-          fi
+          python scripts/check_launch_readiness.py \
+            --base-url "$SITE_URL" \
+            --expected-commit "$RESOLVED_EXPECTED_COMMIT" \
+            --require-custom-domain
 
       - name: Verify custom-domain responsiveness
         run: |
           python scripts/load_check_production.py \
             --base-url "$SITE_URL" \
-            --expected-commit "$EXPECTED_COMMIT" \
+            --expected-commit "$RESOLVED_EXPECTED_COMMIT" \
             --wait-seconds 300 \
             --rounds 3 \
             --concurrency 4 \

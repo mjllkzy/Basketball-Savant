@@ -115,7 +115,7 @@ The workflow applies migrations, validates the workbook, refreshes Postgres when
 
 `.github/workflows/postgres-backup.yml` creates a daily verified `pg_dump` artifact after the overnight data-refresh window and can be run manually before risky data or deployment work. The artifact is intentionally short-retention and does not replace the final Railway backup/PITR policy decision.
 
-`.github/workflows/final-launch-gates.yml` is a manual workflow for the final public-domain launch check. Run it after DNS is active and GitHub secrets are configured for `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY`. It validates the external launch gates, custom-domain SEO readiness, and conservative responsiveness against the selected public URL.
+`.github/workflows/final-launch-gates.yml` is a manual workflow for the final public-domain launch check. Run it after DNS is active and GitHub secrets are configured for `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY`. It validates the external launch gates, custom-domain SEO readiness, and conservative responsiveness against the selected public URL. If the optional expected commit input is blank, the workflow resolves the live release from `/api/health` and uses it for the readiness and load checks.
 
 ## Final External Gate Validation
 
