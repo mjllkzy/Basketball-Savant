@@ -1,4 +1,4 @@
-import { badRequest, notFound, ok, serverError } from "@/lib/api/response";
+import { SHORT_DATA_CACHE_CONTROL, badRequest, cachedOk, notFound, serverError } from "@/lib/api/response";
 import { parseSearchParams, shotQuerySchema } from "@/lib/api/validation";
 import { getLiveTeamShotChart } from "@/lib/data/liveShotCharts";
 import { filterShotCollection } from "@/lib/data/shotFilters";
@@ -12,7 +12,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     const query = parseSearchParams(shotQuerySchema, request);
     const liveShots = await getLiveTeamShotChart(profile.team.id);
     const result = filterShotCollection(liveShots, query);
-    return ok(result.rows, result.meta);
+    return cachedOk(result.rows, result.meta, SHORT_DATA_CACHE_CONTROL);
   } catch (error) {
     return error instanceof Error && error.name === "ZodError" ? badRequest(error) : serverError(error);
   }

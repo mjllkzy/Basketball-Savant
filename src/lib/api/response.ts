@@ -1,8 +1,23 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
-export function ok<T>(data: T, meta?: Record<string, unknown>) {
-  return NextResponse.json({ data, meta });
+export const PUBLIC_DATA_CACHE_CONTROL = "public, s-maxage=300, stale-while-revalidate=3600";
+export const SHORT_DATA_CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=300";
+export const STATIC_DATA_CACHE_CONTROL = "public, s-maxage=3600, stale-while-revalidate=86400";
+export const NO_STORE_CACHE_CONTROL = "no-store";
+
+type ResponseOptions = {
+  cacheControl?: string;
+};
+
+export function ok<T>(data: T, meta?: Record<string, unknown>, options: ResponseOptions = {}) {
+  const response = NextResponse.json({ data, meta });
+  if (options.cacheControl) response.headers.set("Cache-Control", options.cacheControl);
+  return response;
+}
+
+export function cachedOk<T>(data: T, meta?: Record<string, unknown>, cacheControl = PUBLIC_DATA_CACHE_CONTROL) {
+  return ok(data, meta, { cacheControl });
 }
 
 export function notFound(message = "Record not found") {

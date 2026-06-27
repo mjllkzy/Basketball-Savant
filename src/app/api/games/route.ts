@@ -1,4 +1,4 @@
-import { ok } from "@/lib/api/response";
+import { cachedOk } from "@/lib/api/response";
 import { listGameAnalytics } from "@/lib/db/gameAnalytics.server";
 
 export async function GET(request: Request) {
@@ -11,5 +11,5 @@ export async function GET(request: Request) {
     page: params.page ? Number(params.page) : 1,
     pageSize: params.pageSize ? Number(params.pageSize) : 20
   });
-  return ok(result.rows, result.meta);
+  return cachedOk(result.rows, result.meta);
 }

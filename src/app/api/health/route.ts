@@ -1,4 +1,4 @@
-import { ok } from "@/lib/api/response";
+import { NO_STORE_CACHE_CONTROL, ok } from "@/lib/api/response";
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
 import { teamShotCacheAttempts, teamShotCacheMetadata } from "@/lib/data/teamShotCache";
 import { getDatabaseHealth } from "@/lib/db/health.server";
@@ -39,5 +39,5 @@ export async function GET() {
     shots: databaseShots > 0 ? databaseShots : teamShotCacheAttempts,
     lineups: 0,
     database,
-  });
+  }, undefined, { cacheControl: NO_STORE_CACHE_CONTROL });
 }

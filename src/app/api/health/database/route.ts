@@ -13,6 +13,9 @@ export async function GET() {
         database,
       },
     },
-    { status: ready ? 200 : 503 },
+    {
+      status: ready ? 200 : 503,
+      headers: { "Cache-Control": "no-store" },
+    },
   );
 }

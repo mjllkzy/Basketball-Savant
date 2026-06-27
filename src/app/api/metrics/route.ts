@@ -1,6 +1,6 @@
-import { ok } from "@/lib/api/response";
+import { STATIC_DATA_CACHE_CONTROL, cachedOk } from "@/lib/api/response";
 import { metricRegistry } from "@/lib/metrics/registry";
 
 export function GET() {
-  return ok(metricRegistry);
+  return cachedOk(metricRegistry, undefined, STATIC_DATA_CACHE_CONTROL);
 }
