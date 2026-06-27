@@ -55,7 +55,7 @@ Before public launch and after high-risk performance changes, run a conservative
 
 ```bash
 python scripts/load_check_production.py \
-  --expected-commit 4001168 \
+  --expected-commit <live-deployment-commit> \
   --rounds 3 \
   --concurrency 4 \
   --max-p95-seconds 3
@@ -73,4 +73,4 @@ After Sentry and PostHog are configured, run the external launch gate check from
 python scripts/check_external_launch_gates.py
 ```
 
-The same validation is available as the manual GitHub Final Launch Gates workflow. It expects `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY` as GitHub secrets, accepts the public custom domain as a workflow input, and then runs the external gate, launch-readiness, and conservative load checks against that domain.
+The same validation is available as the manual GitHub Final Launch Gates workflow. It expects `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY` as GitHub secrets, accepts the public custom domain as a workflow input, and then runs the external gate, launch-readiness, and conservative load checks against that domain. See [Final Launch Handoff](final-launch-handoff.md) for the exact setup sequence.
