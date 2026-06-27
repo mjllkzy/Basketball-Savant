@@ -82,7 +82,7 @@ Last verified production backup artifact:
 - Size: 74,514,243 bytes
 - Expires: 2026-07-10
 
-Railway status for `b3994d0`:
+Last verified application-code Railway deployment:
 
 - Deployment: `a60b1242-efff-4d29-8c2c-ecfcd6d704ee`, success
 

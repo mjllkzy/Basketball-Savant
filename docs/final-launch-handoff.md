@@ -5,12 +5,12 @@ This is the remaining account-level setup needed after the repo-side launch work
 ## Current Verified State
 
 - Production URL: `https://basketball-savant-production.up.railway.app`
-- Latest verified commit: `b3994d0216049c9b84abba90e1b75e114e961f9a`
-- Railway deployment: `a60b1242-efff-4d29-8c2c-ecfcd6d704ee`
+- Last verified application-code baseline: `b3994d0216049c9b84abba90e1b75e114e961f9a`
+- Before the final domain launch, read the live deployment commit from Railway or `/api/health` and use that value as `<live-deployment-commit>`.
 - Data source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Runtime data version: `excel-master-2025-26-196c59613934`
 - Loaded production data: 582 players, 30 teams, 1,315 games, 219,160 shot attempts
-- GitHub CI, Production Smoke, Production Load Check, Production Data Refresh, and Production Postgres Backup are passing on the latest verified commit.
+- GitHub CI, Production Smoke, Production Load Check, Production Data Refresh, and Production Postgres Backup are passing on the verified application-code baseline and current handoff deployments.
 
 ## Required Before Public Launch
 
