@@ -41,11 +41,13 @@ BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=external-monitor
 BASKETBALL_SAVANT_UPTIME_MONITOR_URL=https://...
 ```
 
-If GitHub Production Smoke is the chosen uptime monitor, set:
+The current production decision is to use GitHub Production Smoke as the uptime monitor. Railway has:
 
 ```txt
 BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only
 ```
+
+If a separate uptime service is added later, change the decision to `external-monitor` and set `BASKETBALL_SAVANT_UPTIME_MONITOR_URL`.
 
 ## Load Check
 

@@ -1,6 +1,6 @@
 # Launch Readiness
 
-Last verified: 2026-06-26
+Last verified: 2026-06-27
 
 Basketball Savant is deployed on Railway at:
 
@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified release: `4001168a61ff830c2f19b9270b382bab1bd12bc3`
+- Latest verified release: `8baf8f2f26a32646cba912777958f70985f4f78c`
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,9 +34,9 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit 4001168 --wait-seconds 120
-python scripts/check_launch_readiness.py --expected-commit 4001168
-python scripts/load_check_production.py --expected-commit 4001168 --rounds 3 --concurrency 4 --max-p95-seconds 3
+python scripts/smoke_production.py --expected-commit 8baf8f2 --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit 8baf8f2
+python scripts/load_check_production.py --expected-commit 8baf8f2 --rounds 3 --concurrency 4 --max-p95-seconds 3
 ```
 
 Production smoke results on the deployed Railway site:
@@ -50,18 +50,24 @@ Production smoke results on the deployed Railway site:
 - `/players/luka-doncic`: 200
 - `/teams/los-angeles-lakers`: 200
 - `/visuals`: 200
-- Slowest checked production response: 0.94 seconds
+- Slowest checked production response: 0.721 seconds
 
 Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, and the core indexable pages. It runs inside the GitHub Production Smoke workflow after deploy verification. Use `--require-custom-domain` after a public domain is configured to make the Railway service domain fail this check.
 
 The conservative load check repeats the core database-backed APIs and canonical pages with light concurrency. It is designed as a launch confidence gate, not a stress test.
 
-GitHub Actions status for `4001168`:
+GitHub Actions status for `8baf8f2`:
 
 - CI: success
 - Production Smoke: success
 - Production Load Check: success
-- Production Postgres Backup: success
+- Latest Production Postgres Backup: success
+
+Live API cache-header verification for `8baf8f2`:
+
+- `/api/players?...`: `Cache-Control: public, s-maxage=300, stale-while-revalidate=3600`
+- `/api/search/shots?...`: `Cache-Control: public, s-maxage=60, stale-while-revalidate=300`
+- `/api/health`: `Cache-Control: no-store`
 
 Last verified production data refresh:
 
@@ -76,9 +82,9 @@ Last verified production backup artifact:
 - Size: 74,514,243 bytes
 - Expires: 2026-07-10
 
-Railway status for `4001168`:
+Railway status for `8baf8f2`:
 
-- Deployment: success
+- Deployment: `584fd5a4-7db8-4347-b394-6571b9a0529f`, success
 
 ## Data Pipeline
 
@@ -152,7 +158,9 @@ Application service:
 - `SENTRY_DSN`: missing.
 - `SENTRY_ENVIRONMENT`: missing.
 - `NEXT_PUBLIC_POSTHOG_KEY`: missing.
-- `NEXT_PUBLIC_POSTHOG_HOST`: missing.
+- `NEXT_PUBLIC_POSTHOG_HOST`: defaults to `https://us.i.posthog.com`.
+- `BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION`: `github-smoke-only`.
+- `BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED`: `true`.
 
 Domains:
 
@@ -176,8 +184,8 @@ These are not code blockers, but they require account or product decisions outsi
 3. Update `NEXT_PUBLIC_SITE_URL` to the custom domain after DNS is active.
 4. Add Sentry project credentials if server error monitoring should be live.
 5. Add PostHog credentials if growth analytics should be live.
-6. Decide whether to add an external uptime monitor in addition to GitHub scheduled production smoke checks.
-7. Confirm whether Railway backup/PITR plus the rolling GitHub `pg_dump` artifacts meet the restore policy, or add a stricter restore-tested backup process.
+6. Optional: add an external uptime monitor in addition to GitHub scheduled production smoke checks.
+7. Optional: replace or supplement the current verified rolling `pg_dump` artifacts with Railway PITR or a stricter restore-tested backup process.
 
 ## Safe Next Product Work
 
