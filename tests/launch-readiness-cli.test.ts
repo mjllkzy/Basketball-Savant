@@ -21,6 +21,8 @@ describe("launch readiness CLI", () => {
     expect(script).toContain("/manifest.webmanifest");
     expect(script).toContain("/players/luka-doncic");
     expect(script).toContain("/teams/los-angeles-lakers");
+    expect(script).toContain('type="application/ld+json"');
+    expect(script).toContain('"@type":"SearchAction"');
     expect(script).toContain("--require-custom-domain");
   });
 

@@ -129,6 +129,11 @@ def validate_seo(base_url: str) -> list[CheckResult]:
         results.append(result)
         require_contains(html, expected, path)
         require_contains(html, "Basketball Savant", path)
+        if path == "/":
+            require_contains(html, 'type="application/ld+json"', path)
+            require_contains(html, '"@type":"WebSite"', path)
+            require_contains(html, '"@type":"SearchAction"', path)
+            require_contains(html, '"@type":"SportsOrganization"', path)
 
     return results
 
