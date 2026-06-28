@@ -191,7 +191,7 @@ def classify_rss_category(title: str, categories: list[str], summary: str) -> st
         return "Roster"
     if "draft" in category_blob:
         return "Draft"
-    return "Rumor"
+    return "League"
 
 
 def classify_reporting_status(article: dict[str, Any], *, category: str) -> str:
