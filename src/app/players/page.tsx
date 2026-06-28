@@ -13,8 +13,10 @@ import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
-const standardTableMinWidth = "1564px";
-const advancedTableMinWidth = "1644px";
+const entityColumnWidth = "290px";
+const secondaryColumnWidth = "86px";
+const standardTableMinWidth = "1752px";
+const advancedTableMinWidth = "1838px";
 const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
 
 export const metadata: Metadata = {
@@ -27,20 +29,20 @@ function identityColumn(key: string, label: string, width: string, group: string
   return { key, label, width, group, align: "center", sortOrder };
 }
 
-function metricColumn(key: string, label: string, group: string, width = "82px"): StatTableColumn {
+function metricColumn(key: string, label: string, group: string, width = secondaryColumnWidth): StatTableColumn {
   return { key, label, width, group, align: "center" };
 }
 
 const baseColumns: StatTableColumn[] = [
-  { key: "player", label: "Player", group: "Profile", hrefKey: "href", width: "260px", truncate: true },
-  identityColumn("team", "Team", "72px", "Profile"),
-  identityColumn("pos", "Pos", "66px", "Profile", primaryPositionOrder),
-  identityColumn("height", "Height", "82px", "Profile"),
-  identityColumn("weight", "Weight", "86px", "Profile"),
-  identityColumn("age", "Age", "64px", "Profile"),
-  identityColumn("games", "G", "58px", "Availability"),
-  identityColumn("gamesStarted", "GS", "64px", "Availability"),
-  metricColumn("min", "MIN", "Availability", "74px")
+  { key: "player", label: "Player", group: "Profile", hrefKey: "href", width: entityColumnWidth, truncate: true },
+  identityColumn("team", "Team", secondaryColumnWidth, "Profile"),
+  identityColumn("pos", "Pos", secondaryColumnWidth, "Profile", primaryPositionOrder),
+  identityColumn("height", "Height", secondaryColumnWidth, "Profile"),
+  identityColumn("weight", "Weight", secondaryColumnWidth, "Profile"),
+  identityColumn("age", "Age", secondaryColumnWidth, "Profile"),
+  identityColumn("games", "G", secondaryColumnWidth, "Availability"),
+  identityColumn("gamesStarted", "GS", secondaryColumnWidth, "Availability"),
+  metricColumn("min", "MIN", "Availability")
 ];
 
 const standardColumns: StatTableColumn[] = [
@@ -51,23 +53,23 @@ const standardColumns: StatTableColumn[] = [
   metricColumn("stl", "STL", "Defense"),
   metricColumn("blk", "BLK", "Defense"),
   metricColumn("tov", "TOV", "Ball Security"),
-  metricColumn("fg", "FG%", "Efficiency", "82px"),
-  metricColumn("three", "3P%", "Efficiency", "82px"),
-  metricColumn("ft", "FT%", "Efficiency", "82px")
+  metricColumn("fg", "FG%", "Efficiency"),
+  metricColumn("three", "3P%", "Efficiency"),
+  metricColumn("ft", "FT%", "Efficiency")
 ];
 
 const advancedColumns: StatTableColumn[] = [
   ...baseColumns,
-  metricColumn("ts", "TS%", "Efficiency", "82px"),
-  metricColumn("efg", "eFG%", "Efficiency", "82px"),
-  metricColumn("usg", "USG%", "Creation", "82px"),
-  metricColumn("astPct", "AST%", "Creation", "82px"),
-  metricColumn("rebPct", "REB%", "Rebounding", "82px"),
-  metricColumn("tovPct", "TOV%", "Ball Security", "82px"),
-  metricColumn("ortg", "ORtg", "Impact", "82px"),
-  metricColumn("drtg", "DRtg", "Impact", "82px"),
-  metricColumn("net", "Net", "Impact", "82px"),
-  metricColumn("pie", "PIE", "Impact", "82px")
+  metricColumn("ts", "TS%", "Efficiency"),
+  metricColumn("efg", "eFG%", "Efficiency"),
+  metricColumn("usg", "USG%", "Creation"),
+  metricColumn("astPct", "AST%", "Creation"),
+  metricColumn("rebPct", "REB%", "Rebounding"),
+  metricColumn("tovPct", "TOV%", "Ball Security"),
+  metricColumn("ortg", "ORtg", "Impact"),
+  metricColumn("drtg", "DRtg", "Impact"),
+  metricColumn("net", "Net", "Impact"),
+  metricColumn("pie", "PIE", "Impact")
 ];
 
 function playersHref(searchParams: RouteSearchParams, showAll: boolean) {

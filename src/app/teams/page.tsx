@@ -6,7 +6,9 @@ import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { nbaTeamLogoUrl } from "@/lib/teamBranding";
 
-const teamTableMinWidth = "1308px";
+const entityColumnWidth = "290px";
+const secondaryColumnWidth = "86px";
+const teamTableMinWidth = "1322px";
 
 export const metadata: Metadata = {
   title: "NBA Teams",
@@ -27,21 +29,21 @@ const teamColumns: StatTableColumn[] = [
     imageKey: "teamLogo",
     imageAltKey: "teamLogoAlt",
     imageFallbackKey: "teamLogoFallback",
-    width: "290px",
+    width: entityColumnWidth,
     truncate: true
   },
-  centerColumn("conf", "Conf", "Profile", "70px"),
-  centerColumn("record", "Record", "Profile", "90px"),
-  centerColumn("ortg", "ORtg", "Ratings", "86px"),
-  centerColumn("drtg", "DRtg", "Ratings", "86px"),
-  centerColumn("net", "Net", "Ratings", "86px"),
-  centerColumn("pace", "Pace", "Tempo", "80px"),
-  centerColumn("ts", "TS%", "Efficiency", "84px"),
-  centerColumn("efg", "eFG%", "Efficiency", "84px"),
-  centerColumn("three", "3P%", "Efficiency", "84px"),
-  centerColumn("ast", "AST%", "Ball Movement", "100px"),
-  centerColumn("reb", "REB%", "Possession", "84px"),
-  centerColumn("tov", "TOV%", "Possession", "84px")
+  centerColumn("conf", "Conf", "Profile", secondaryColumnWidth),
+  centerColumn("record", "Record", "Profile", secondaryColumnWidth),
+  centerColumn("ortg", "ORtg", "Ratings", secondaryColumnWidth),
+  centerColumn("drtg", "DRtg", "Ratings", secondaryColumnWidth),
+  centerColumn("net", "Net", "Ratings", secondaryColumnWidth),
+  centerColumn("pace", "Pace", "Tempo", secondaryColumnWidth),
+  centerColumn("ts", "TS%", "Efficiency", secondaryColumnWidth),
+  centerColumn("efg", "eFG%", "Efficiency", secondaryColumnWidth),
+  centerColumn("three", "3P%", "Efficiency", secondaryColumnWidth),
+  centerColumn("ast", "AST%", "Ball Movement", secondaryColumnWidth),
+  centerColumn("reb", "REB%", "Possession", secondaryColumnWidth),
+  centerColumn("tov", "TOV%", "Possession", secondaryColumnWidth)
 ];
 
 export default async function TeamsPage() {
