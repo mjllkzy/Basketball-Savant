@@ -1,4 +1,4 @@
-const fallbackSiteUrl = "https://basketball-savant-production.up.railway.app";
+const fallbackSiteUrl = "https://shotclockbb.com";
 
 export const siteName = "ShotClock";
 export const siteTitle = "ShotClock Advanced Basketball Analytics";

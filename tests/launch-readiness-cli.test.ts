@@ -15,11 +15,15 @@ describe("launch readiness CLI", () => {
   it("checks health, security headers, SEO, manifest, and canonical launch pages", () => {
     const script = readFileSync("scripts/check_launch_readiness.py", "utf8");
 
+    expect(script).toContain("https://shotclockbb.com");
     expect(script).toContain("/api/health");
     expect(script).toContain("validate_security_headers");
     expect(script).toContain("x-content-type-options");
     expect(script).toContain("strict-transport-security");
     expect(script).toContain("permissions-policy");
+    expect(script).toContain("content-security-policy");
+    expect(script).toContain("frame-ancestors 'none'");
+    expect(script).toContain("object-src 'none'");
     expect(script).toContain("/robots.txt");
     expect(script).toContain("/sitemap.xml");
     expect(script).toContain("/manifest.webmanifest");
@@ -34,7 +38,7 @@ describe("launch readiness CLI", () => {
   const runIfPython = pythonCommand ? it : it.skip;
 
   runIfPython("is valid Python", () => {
-    const pycacheDirectory = mkdtempSync(join(tmpdir(), "basketball-savant-pycache-"));
+    const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
     const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/check_launch_readiness.py"], {
       cwd: process.cwd(),
       env: {

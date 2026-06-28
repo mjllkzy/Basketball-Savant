@@ -136,7 +136,7 @@ def database_is_complete(state: dict[str, Any]) -> bool:
 
 
 def run_ingestion(workbook_path: Path, connection_string: str) -> dict[str, Any]:
-    with tempfile.TemporaryDirectory(prefix="basketball-savant-refresh-") as temp_directory:
+    with tempfile.TemporaryDirectory(prefix="shotclock-refresh-") as temp_directory:
         output = Path(temp_directory)
         profile_directory = output / "profiles"
         profile_directory.mkdir()

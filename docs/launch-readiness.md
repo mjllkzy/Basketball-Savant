@@ -8,6 +8,12 @@ ShotClock is deployed on Railway at:
 https://basketball-savant-production.up.railway.app
 ```
 
+Target public domain:
+
+```txt
+https://shotclockbb.com
+```
+
 ## Current Production State
 
 - Live release source: `/api/health` field `data.release`. Use that value as `<live-deployment-commit>` when running final launch checks; do not rely on a committed SHA in this document because docs-only releases change the live commit.
@@ -125,7 +131,7 @@ The workflow applies migrations, validates the workbook, refreshes Postgres when
 After the public domain, Sentry, PostHog, uptime-monitor decision, and backup policy are configured, run:
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://www.example.com \
+NEXT_PUBLIC_SITE_URL=https://shotclockbb.com \
 SENTRY_DSN=https://public@sentry.example.com/42 \
 SENTRY_ENVIRONMENT=production \
 NEXT_PUBLIC_POSTHOG_KEY=phc_... \
@@ -135,7 +141,7 @@ SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true \
 python scripts/check_external_launch_gates.py
 
 python scripts/check_launch_readiness.py \
-  --base-url https://www.example.com \
+  --base-url https://shotclockbb.com \
   --expected-commit <live-deployment-commit> \
   --require-custom-domain
 ```
@@ -150,6 +156,7 @@ Use `SHOTCLOCK_UPTIME_MONITOR_DECISION=external-monitor` and set `SHOTCLOCK_UPTI
 - PostCSS overridden to `^8.5.10` to avoid the production advisory range.
 - Production audit at moderate level reports no known vulnerabilities.
 - Security headers are configured in `next.config.mjs`.
+- Launch readiness requires the configured Content Security Policy to deny framing and object embeds, restrict default sources to self, and allow only the app, NBA CDN images, and configured PostHog analytics endpoints.
 - CI and production smoke GitHub Actions are pinned to commit SHAs.
 
 ## Railway Configuration
@@ -157,7 +164,7 @@ Use `SHOTCLOCK_UPTIME_MONITOR_DECISION=external-monitor` and set `SHOTCLOCK_UPTI
 Application service:
 
 - `DATABASE_URL`: set through the Railway Postgres service reference.
-- `NEXT_PUBLIC_SITE_URL`: set to the current Railway service URL.
+- `NEXT_PUBLIC_SITE_URL`: `https://shotclockbb.com`.
 - `SENTRY_DSN`: missing.
 - `SENTRY_ENVIRONMENT`: missing.
 - `NEXT_PUBLIC_POSTHOG_KEY`: missing.
@@ -169,7 +176,11 @@ Application service:
 Domains:
 
 - Active Railway service domain: `basketball-savant-production.up.railway.app`
-- Custom domain: not configured yet.
+- Custom domains attached in Railway: `shotclockbb.com`, `www.shotclockbb.com`
+- Required DNS records:
+  - `shotclockbb.com` CNAME `lgd67kyj.up.railway.app`
+  - `www.shotclockbb.com` CNAME `l35bxp7x.up.railway.app`
+- External HTTPS verification from this workspace reached ShotClock successfully on both custom domains on 2026-06-28.
 
 Postgres volume:
 
@@ -183,13 +194,10 @@ Postgres volume:
 
 These are not code blockers, but they require account or product decisions outside the repository:
 
-1. Choose and configure the public custom domain.
-2. Add the custom domain in Railway and complete DNS verification.
-3. Update `NEXT_PUBLIC_SITE_URL` to the custom domain after DNS is active.
-4. Add Sentry project credentials if server error monitoring should be live.
-5. Add PostHog credentials if growth analytics should be live.
-6. Optional: add an external uptime monitor in addition to GitHub scheduled production smoke checks.
-7. Optional: replace or supplement the current verified rolling `pg_dump` artifacts with Railway PITR or a stricter restore-tested backup process.
+1. Add Sentry project credentials if server error monitoring should be live.
+2. Add PostHog credentials if growth analytics should be live.
+3. Optional: add an external uptime monitor in addition to GitHub scheduled production smoke checks.
+4. Optional: replace or supplement the current verified rolling `pg_dump` artifacts with Railway PITR or a stricter restore-tested backup process.
 
 Use [Final Launch Handoff](final-launch-handoff.md) for the exact non-repo setup commands and validation sequence.
 

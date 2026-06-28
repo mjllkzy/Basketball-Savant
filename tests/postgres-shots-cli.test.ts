@@ -29,7 +29,7 @@ describe("Postgres shot ingestion CLI", () => {
   });
 
   runIfPython("is valid Python", () => {
-    const pycacheDirectory = mkdtempSync(join(tmpdir(), "basketball-savant-pycache-"));
+    const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
     const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/refresh_postgres_shots.py"], {
       cwd: process.cwd(),
       env: {

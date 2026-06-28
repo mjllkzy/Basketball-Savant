@@ -41,7 +41,7 @@ describe("external launch gate CLI", () => {
   });
 
   runIfPython("is valid Python", () => {
-    const pycacheDirectory = mkdtempSync(join(tmpdir(), "basketball-savant-pycache-"));
+    const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
     const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/check_external_launch_gates.py"], {
       cwd: process.cwd(),
       env: {
@@ -86,7 +86,7 @@ describe("external launch gate CLI", () => {
       cwd: process.cwd(),
       env: {
         ...process.env,
-        NEXT_PUBLIC_SITE_URL: "https://www.shotclockanalytics.com",
+        NEXT_PUBLIC_SITE_URL: "https://shotclockbb.com",
         SENTRY_DSN: "https://public@sentry.example.com/42",
         SENTRY_ENVIRONMENT: "production",
         NEXT_PUBLIC_POSTHOG_KEY: "phc_test_123",
@@ -106,7 +106,7 @@ describe("external launch gate CLI", () => {
       cwd: process.cwd(),
       env: {
         ...process.env,
-        NEXT_PUBLIC_SITE_URL: "https://www.shotclockanalytics.com",
+        NEXT_PUBLIC_SITE_URL: "https://shotclockbb.com",
         SENTRY_DSN: "https://public@sentry.example.com/42",
         SENTRY_ENVIRONMENT: "production",
         NEXT_PUBLIC_POSTHOG_KEY: "phc_test_123",

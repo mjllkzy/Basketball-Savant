@@ -28,6 +28,7 @@ describe("production load check CLI", () => {
   it("checks core Postgres APIs and canonical pages", () => {
     const script = readFileSync("scripts/load_check_production.py", "utf8");
 
+    expect(script).toContain("https://shotclockbb.com");
     expect(script).toContain("/api/health");
     expect(script).toContain("/api/players");
     expect(script).toContain("/api/teams");
@@ -49,7 +50,7 @@ describe("production load check CLI", () => {
   const runIfPython = pythonCommand ? it : it.skip;
 
   runIfPython("is valid Python", () => {
-    const pycacheDirectory = mkdtempSync(join(tmpdir(), "basketball-savant-pycache-"));
+    const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
     const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/load_check_production.py"], {
       cwd: process.cwd(),
       env: {

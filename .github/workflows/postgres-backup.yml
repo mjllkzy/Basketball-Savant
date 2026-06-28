@@ -50,9 +50,9 @@ jobs:
 
           mkdir -p "$BACKUP_DIR"
           STAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
-          BACKUP_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.dump"
-          MANIFEST_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.manifest.txt"
-          METADATA_FILE="$BACKUP_DIR/basketball-savant-postgres-$STAMP.metadata.json"
+          BACKUP_FILE="$BACKUP_DIR/shotclock-postgres-$STAMP.dump"
+          MANIFEST_FILE="$BACKUP_DIR/shotclock-postgres-$STAMP.manifest.txt"
+          METADATA_FILE="$BACKUP_DIR/shotclock-postgres-$STAMP.metadata.json"
 
           "$PG_DUMP" \
             --format=custom \
@@ -98,7 +98,7 @@ jobs:
           }
           EOF
 
-          echo "artifact_name=basketball-savant-postgres-backup-$STAMP" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=shotclock-postgres-backup-$STAMP" >> "$GITHUB_OUTPUT"
 
       - name: Upload backup artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       site_url:
-        description: Public custom domain URL, for example https://www.shotclockanalytics.com
+        description: Public custom domain URL, for example https://shotclockbb.com
         required: true
       expected_commit:
         description: Optional production commit SHA to require before checking

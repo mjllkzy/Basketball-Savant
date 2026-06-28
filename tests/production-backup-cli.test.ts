@@ -14,6 +14,7 @@ describe("production Postgres backup workflow", () => {
     expect(workflow).toContain("--format=custom");
     expect(workflow).toContain("pg_restore --list");
     expect(workflow).toContain("shot_attempts");
+    expect(workflow).toContain("shotclock-postgres-backup");
     expect(workflow).toContain("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02");
     expect(workflow).toContain("retention-days: 14");
     expect(workflow).not.toContain("railway ");

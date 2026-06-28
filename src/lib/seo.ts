@@ -25,7 +25,6 @@ export function buildStructuredData(env: NodeJS.ProcessEnv | Record<string, stri
         "name": siteName,
         "url": siteUrl,
         "logo": absoluteUrl("/icon", env),
-        "sameAs": ["https://github.com/mjllkzy/Basketball-Savant"],
       },
       {
         "@type": "SportsOrganization",

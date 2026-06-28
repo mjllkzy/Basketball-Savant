@@ -14,7 +14,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 
-DEFAULT_BASE_URL = "https://basketball-savant-production.up.railway.app"
+DEFAULT_BASE_URL = "https://shotclockbb.com"
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RESPONSE_SECONDS = 8.0
 USER_AGENT = "ShotClock-Production-Smoke/1.0"

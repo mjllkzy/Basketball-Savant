@@ -4,7 +4,8 @@ This is the remaining account-level setup needed after the repo-side launch work
 
 ## Current Verified State
 
-- Production URL: `https://basketball-savant-production.up.railway.app`
+- Current Railway URL: `https://basketball-savant-production.up.railway.app`
+- Target public domain: `https://shotclockbb.com`
 - Release verification source: read the live deployment commit from Railway or `/api/health` and use that value as `<live-deployment-commit>`.
 - Data source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -13,18 +14,25 @@ This is the remaining account-level setup needed after the repo-side launch work
 
 ## Required Before Public Launch
 
-1. Choose the public domain, for example `https://www.shotclockanalytics.com`.
-2. Add that custom domain to the current Railway application service.
-3. Add the DNS records Railway provides at the domain registrar.
-4. Wait until Railway marks the custom domain active.
-5. Set the production site URL:
+1. Keep `shotclockbb.com` and `www.shotclockbb.com` attached to the current Railway application service.
+2. Keep the DNS records below active at the domain registrar.
+3. Keep the production site URL set to the public domain:
 
 ```bash
 railway variable set \
-  NEXT_PUBLIC_SITE_URL=https://www.example.com \
+  NEXT_PUBLIC_SITE_URL=https://shotclockbb.com \
   --service Basketball-Savant \
   --environment production
 ```
+
+Current Railway custom-domain records created on 2026-06-28:
+
+```txt
+shotclockbb.com      CNAME  lgd67kyj.up.railway.app
+www.shotclockbb.com  CNAME  l35bxp7x.up.railway.app
+```
+
+External HTTPS checks against `https://shotclockbb.com/api/health` returned ShotClock successfully from this workspace on 2026-06-28.
 
 6. Create a Sentry project and set:
 
@@ -75,22 +83,22 @@ Do not add the Sentry or PostHog values to `.env`, docs, screenshots, or committ
 After Railway redeploys and DNS is active, run:
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://www.example.com \
+NEXT_PUBLIC_SITE_URL=https://shotclockbb.com \
 SENTRY_DSN='https://public-key@o000000.ingest.sentry.io/000000' \
 SENTRY_ENVIRONMENT=production \
 NEXT_PUBLIC_POSTHOG_KEY='phc_project_key' \
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
 SHOTCLOCK_UPTIME_MONITOR_DECISION=github-smoke-only \
 SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true \
-python scripts/check_external_launch_gates.py --site-url https://www.example.com
+python scripts/check_external_launch_gates.py --site-url https://shotclockbb.com
 
 python scripts/check_launch_readiness.py \
-  --base-url https://www.example.com \
+  --base-url https://shotclockbb.com \
   --expected-commit <live-deployment-commit> \
   --require-custom-domain
 
 python scripts/load_check_production.py \
-  --base-url https://www.example.com \
+  --base-url https://shotclockbb.com \
   --expected-commit <live-deployment-commit> \
   --rounds 3 \
   --concurrency 4 \

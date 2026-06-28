@@ -15,7 +15,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 
-DEFAULT_BASE_URL = "https://basketball-savant-production.up.railway.app"
+DEFAULT_BASE_URL = "https://shotclockbb.com"
 REQUEST_TIMEOUT_SECONDS = 30
 USER_AGENT = "ShotClock-Launch-Readiness/1.0"
 MAX_RESPONSE_SECONDS = 8.0
@@ -28,6 +28,19 @@ SECURITY_HEADER_REQUIREMENTS = {
 }
 SECURITY_HEADER_CONTAINS = {
     "permissions-policy": ("camera=()", "microphone=()", "geolocation=()"),
+    "content-security-policy": (
+        "default-src 'self'",
+        "base-uri 'self'",
+        "frame-ancestors 'none'",
+        "object-src 'none'",
+        "form-action 'self'",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https://cdn.nba.com",
+        "font-src 'self' data:",
+        "connect-src 'self'",
+        "manifest-src 'self'",
+    ),
 }
 
 
