@@ -18,6 +18,16 @@ from typing import Any
 DEFAULT_BASE_URL = "https://basketball-savant-production.up.railway.app"
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RESPONSE_SECONDS = 8.0
+SECURITY_HEADER_REQUIREMENTS = {
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "cross-origin-opener-policy": "same-origin",
+    "strict-transport-security": "max-age=31536000; includeSubDomains",
+}
+SECURITY_HEADER_CONTAINS = {
+    "permissions-policy": ("camera=()", "microphone=()", "geolocation=()"),
+}
 
 
 @dataclass
@@ -30,6 +40,11 @@ class CheckResult:
 
 
 def request(base_url: str, path: str) -> tuple[CheckResult, bytes]:
+    result, body, _headers = request_with_headers(base_url, path)
+    return result, body
+
+
+def request_with_headers(base_url: str, path: str) -> tuple[CheckResult, bytes, dict[str, str]]:
     started = time.perf_counter()
     request_object = urllib.request.Request(
         f"{base_url.rstrip('/')}{path}",
@@ -37,19 +52,20 @@ def request(base_url: str, path: str) -> tuple[CheckResult, bytes]:
     )
     with urllib.request.urlopen(request_object, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         body = response.read()
+        headers = {key.lower(): value for key, value in response.headers.items()}
         result = CheckResult(
             path=path,
             status=response.status,
             elapsed_seconds=round(time.perf_counter() - started, 3),
             bytes_received=len(body),
-            content_type=response.headers.get("content-type", ""),
+            content_type=headers.get("content-type", ""),
         )
 
     if result.status != 200:
         raise RuntimeError(f"{path} returned HTTP {result.status}")
     if result.elapsed_seconds > MAX_RESPONSE_SECONDS:
         raise RuntimeError(f"{path} exceeded {MAX_RESPONSE_SECONDS:.1f}s: {result.elapsed_seconds:.3f}s")
-    return result, body
+    return result, body, headers
 
 
 def json_request(base_url: str, path: str) -> tuple[CheckResult, dict[str, Any]]:
@@ -94,6 +110,27 @@ def validate_health(base_url: str, expected_commit: str | None) -> tuple[CheckRe
         )
 
     return result, health
+
+
+def validate_security_headers(base_url: str) -> CheckResult:
+    result, _body, headers = request_with_headers(base_url, "/")
+
+    for header_name, expected_value in SECURITY_HEADER_REQUIREMENTS.items():
+        actual_value = headers.get(header_name, "").strip()
+        require(
+            actual_value == expected_value,
+            f"/ is missing required {header_name} header value {expected_value!r}; found {actual_value!r}",
+        )
+
+    for header_name, required_parts in SECURITY_HEADER_CONTAINS.items():
+        actual_value = headers.get(header_name, "")
+        missing_parts = [part for part in required_parts if part not in actual_value]
+        require(
+            not missing_parts,
+            f"/ is missing required {header_name} policy values: {', '.join(missing_parts)}",
+        )
+
+    return result
 
 
 def validate_seo(base_url: str) -> list[CheckResult]:
@@ -161,6 +198,7 @@ def main() -> None:
         results: list[CheckResult] = []
         health_result, health = validate_health(base_url, args.expected_commit.strip() or None)
         results.append(health_result)
+        results.append(validate_security_headers(base_url))
         results.extend(validate_seo(base_url))
     except (KeyError, OSError, urllib.error.URLError, ValueError, RuntimeError) as error:
         print(f"Launch readiness check failed: {error}", file=sys.stderr)

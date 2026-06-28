@@ -12,10 +12,14 @@ function findPythonCommand(): string | null {
 }
 
 describe("launch readiness CLI", () => {
-  it("checks health, SEO, manifest, and canonical launch pages", () => {
+  it("checks health, security headers, SEO, manifest, and canonical launch pages", () => {
     const script = readFileSync("scripts/check_launch_readiness.py", "utf8");
 
     expect(script).toContain("/api/health");
+    expect(script).toContain("validate_security_headers");
+    expect(script).toContain("x-content-type-options");
+    expect(script).toContain("strict-transport-security");
+    expect(script).toContain("permissions-policy");
     expect(script).toContain("/robots.txt");
     expect(script).toContain("/sitemap.xml");
     expect(script).toContain("/manifest.webmanifest");
