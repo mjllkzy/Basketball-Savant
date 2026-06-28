@@ -1,12 +1,14 @@
 # Launch Readiness
 
-Last verified: 2026-06-27
+Last verified: 2026-06-28
 
 ShotClock is deployed on Railway at:
 
 ```txt
 https://basketball-savant-production.up.railway.app
 ```
+
+The Railway service domain remains attached as an operational fallback. Browser page requests on that host redirect permanently to `https://shotclockbb.com`; API and health-check routes remain available on the Railway host for monitoring and platform diagnostics.
 
 Target public domain:
 
@@ -177,6 +179,7 @@ Domains:
 
 - Active Railway service domain: `basketball-savant-production.up.railway.app`
 - Custom domains attached in Railway: `shotclockbb.com`, `www.shotclockbb.com`
+- Canonical host behavior: page requests on the Railway service domain redirect to `https://shotclockbb.com`; `/api/*` routes do not redirect.
 - Required DNS records:
   - `shotclockbb.com` CNAME `lgd67kyj.up.railway.app`
   - `www.shotclockbb.com` CNAME `l35bxp7x.up.railway.app`

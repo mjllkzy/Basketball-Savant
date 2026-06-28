@@ -6,6 +6,7 @@ This is the remaining account-level setup needed after the repo-side launch work
 
 - Current Railway URL: `https://basketball-savant-production.up.railway.app`
 - Target public domain: `https://shotclockbb.com`
+- Canonical host behavior: the Railway URL remains available for `/api/*` and health checks, while browser page requests redirect permanently to `https://shotclockbb.com`.
 - Release verification source: read the live deployment commit from Railway or `/api/health` and use that value as `<live-deployment-commit>`.
 - Data source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Runtime data version: `excel-master-2025-26-196c59613934`
