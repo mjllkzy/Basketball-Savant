@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified application release: `b3994d0216049c9b84abba90e1b75e114e961f9a`
+- Latest verified application release: `316091d4617e3da0bad3fd8d8b810c4e57bd7017`
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,9 +34,9 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit b3994d0 --wait-seconds 120
-python scripts/check_launch_readiness.py --expected-commit b3994d0
-python scripts/load_check_production.py --expected-commit b3994d0 --rounds 3 --concurrency 4 --max-p95-seconds 3
+python scripts/smoke_production.py --expected-commit 316091d --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit 316091d
+python scripts/load_check_production.py --expected-commit 316091d --rounds 3 --concurrency 4 --max-p95-seconds 3
 ```
 
 Production smoke results on the deployed Railway site:
@@ -56,14 +56,15 @@ Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.
 
 The conservative load check repeats the core database-backed APIs and canonical pages with light concurrency. It is designed as a launch confidence gate, not a stress test.
 
-GitHub Actions status for `b3994d0`:
+GitHub Actions status for `316091d`:
 
 - CI: success
 - Production Smoke: success
 - Production Load Check: success
+- Production Data Refresh: success
 - Latest Production Postgres Backup: success
 
-Live API cache-header verification for `b3994d0`:
+Live API cache-header verification for `316091d`:
 
 - `/api/players?...`: `Cache-Control: public, s-maxage=300, stale-while-revalidate=3600`
 - `/api/search/shots?...`: `Cache-Control: public, s-maxage=60, stale-while-revalidate=300`
@@ -71,7 +72,7 @@ Live API cache-header verification for `b3994d0`:
 
 Last verified production data refresh:
 
-- Commit: `d541f9e7549a29344131411da3e1201e2614df45`
+- Commit: `316091d4617e3da0bad3fd8d8b810c4e57bd7017`
 - Workflow: Production Data Refresh
 - Status: success
 
@@ -84,7 +85,7 @@ Last verified production backup artifact:
 
 Last verified application-code Railway deployment:
 
-- Deployment: `a60b1242-efff-4d29-8c2c-ecfcd6d704ee`, success
+- Deployment: `e52a826d-9d55-4929-86b1-a3ef40092053`, online
 
 ## Data Pipeline
 
@@ -114,6 +115,8 @@ The workflow applies migrations, validates the workbook, refreshes Postgres when
 `.github/workflows/production-load-check.yml` runs the conservative production load check after successful Production Smoke runs, daily, and on demand.
 
 `.github/workflows/postgres-backup.yml` creates a daily verified `pg_dump` artifact after the overnight data-refresh window and can be run manually before risky data or deployment work. The artifact is intentionally short-retention and does not replace the final Railway backup/PITR policy decision.
+
+`.github/workflows/news-refresh.yml` refreshes the fan-facing news feed from the official NBA.com news index every day at 12:00 PM America/Phoenix and commits `src/lib/data/news.json` only when the validated source-backed feed changes.
 
 `.github/workflows/final-launch-gates.yml` is a manual workflow for the final public-domain launch check. Run it after DNS is active and GitHub secrets are configured for `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY`. It validates the external launch gates, custom-domain SEO readiness, and conservative responsiveness against the selected public URL. If the optional expected commit input is blank, the workflow resolves the live release from `/api/health` and uses it for the readiness and load checks.
 

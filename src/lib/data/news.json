@@ -1,119 +1,128 @@
 [
   {
-    "id": "reports-austin-reaves-lakers-4-year-deal-2026",
-    "title": "Reports: Austin Reaves, Lakers agree to 4-year deal",
+    "id": "celtics-sign-ron-harper-jr-to-extension",
+    "title": "Reports: Celtics re-sign Ron Harper Jr. to long-term extension",
     "category": "Free Agency",
-    "publishedAt": "2026-06-24T16:19:08Z",
+    "publishedAt": "2026-06-27T18:45:06Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/austin-reaves-lakers-free-agency-2026",
-    "summary": "NBA.com, citing multiple reports led by ESPN's Shams Charania, reported that Austin Reaves plans to stay with the Lakers on a four-year, $185 million deal with a player option in the final season."
+    "sourceUrl": "https://www.nba.com/news/celtics-sign-ron-harper-jr-to-extension",
+    "summary": "Former Two-Way guard Ron Harper Jr. reportedly signs three-year extension to remain with Celtics."
   },
   {
-    "id": "five-takeaways-2026-draft-first-round",
-    "title": "5 takeaways: College players rule 1st round of 2026 NBA Draft",
+    "id": "thunder-sign-isaiah-hartenstein-through-2028-29-season",
+    "title": "Report: Thunder re-sign Isaiah Hartenstein through 2028-29 season",
+    "category": "Free Agency",
+    "publishedAt": "2026-06-27T03:40:19Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/thunder-sign-isaiah-hartenstein-through-2028-29-season",
+    "summary": "Friday night, reports emerged that Oklahoma City has agreed to a fresh 3-year contract extension with center Isaiah Hartenstein."
+  },
+  {
+    "id": "reports-champion-knicks-retain-key-reserve-jose-alvarado",
+    "title": "Reports: Champion Knicks retain key reserve Jose Alvarado",
+    "category": "Free Agency",
+    "publishedAt": "2026-06-26T22:36:06Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/reports-champion-knicks-retain-key-reserve-jose-alvarado",
+    "summary": "The Brooklyn native will reportedly return to the New York Knicks on a multiyear contract."
+  },
+  {
+    "id": "2026-nba-summer-league-schedule",
+    "title": "NBA unveils 2026 NBA Summer League Schedule",
+    "category": "League",
+    "publishedAt": "2026-06-26T17:03:28Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/2026-nba-summer-league-schedule",
+    "summary": "The annual summer showcase featuring all 30 teams will once again take place on the UNLV campus."
+  },
+  {
+    "id": "isaiah-joe-trade-pistons-thunder",
+    "title": "Reports: Thunder trade Isaiah Joe to Pistons for picks",
+    "category": "Trade",
+    "publishedAt": "2026-06-26T15:54:10Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/isaiah-joe-trade-pistons-thunder",
+    "summary": "The Pistons add 3-point shooting by picking up Thunder swingman Isaiah Joe from the Thunder."
+  },
+  {
+    "id": "aj-dybantsa-arrives-in-washington-ready-to-work-on-turning-wizards-around",
+    "title": "AJ Dybantsa arrives in Washington, ready to work on turning Wizards around",
     "category": "Draft",
-    "publishedAt": "2026-06-24T04:28:40Z",
+    "publishedAt": "2026-06-26T04:43:45Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/five-takeaways-2026-draft-1st-round",
-    "summary": "NBA.com's first-round recap said the 2026 draft largely avoided major surprises while college players, especially freshmen, dominated the top of the board."
+    "sourceUrl": "https://www.nba.com/news/aj-dybantsa-arrives-in-washington-ready-to-work-on-turning-wizards-around",
+    "summary": "The former BYU star was the Wizards' first No. 1 overall pick since John Wall in 2010."
   },
   {
-    "id": "kings-trade-first-round-pick-29-2026",
-    "title": "Kings trade back into first round, grab No. 29 pick",
-    "category": "Trade",
-    "publishedAt": "2026-06-24T03:41:29Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/cavaliers-kings-trade-2026-nba-draft",
-    "summary": "NBA.com reported that Sacramento traded back into the first round to acquire No. 29 and use it on two-time NCAA champion Alex Karaban."
-  },
-  {
-    "id": "nuggets-spurs-trade-2026-draft",
-    "title": "Nuggets opt for assets, trade No. 26 to Spurs",
-    "category": "Trade",
-    "publishedAt": "2026-06-24T03:07:04Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/nuggets-spurs-trade-2026-nba-draft",
-    "summary": "NBA.com reported that Denver moved the No. 26 pick to San Antonio during Round 1, choosing future assets instead of making the selection."
-  },
-  {
-    "id": "knicks-lakers-mavs-suns-draft-night-swap-2026",
-    "title": "Knicks, Lakers, Mavs and Suns complete Draft-night swap",
-    "category": "Trade",
-    "publishedAt": "2026-06-24T02:48:05Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/knicks-lakers-swap-picks-2026-nba-draft",
-    "summary": "NBA.com reported that a four-team draft-night trade shuffled three first-rounders and sent additional second-round assets across New York, Los Angeles, Dallas and Phoenix."
-  },
-  {
-    "id": "grizzlies-thunder-pistons-pick-swaps-2026",
-    "title": "Grizzlies swap picks with Thunder at No. 17, Pistons at 21",
-    "category": "Trade",
-    "publishedAt": "2026-06-24T02:26:16Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/grizzlies-swap-first-round-picks-thunder-pistons",
-    "summary": "NBA.com reported that Memphis traded down twice in the first round, dealing with Oklahoma City and Detroit to add multiple future second-round picks."
-  },
-  {
-    "id": "wizards-aj-dybantsa-no-1-pick-2026",
-    "title": "Wizards tab AJ Dybantsa with No. 1 overall pick in 2026 NBA Draft",
+    "id": "bucks-brayden-burries-nate-ament-rebuild",
+    "title": "Bucks look to rookies Brayden Burries, Nate Ament to spark their post-Giannis rebuild",
     "category": "Draft",
-    "publishedAt": "2026-06-24T01:19:27Z",
+    "publishedAt": "2026-06-26T04:32:09Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/wizards-take-aj-dybantsa-no-1-2026-draft",
-    "summary": "NBA.com reported that Washington used the top pick on BYU wing AJ Dybantsa, choosing him over fellow headline prospects Darryn Peterson and Cameron Boozer."
+    "sourceUrl": "https://www.nba.com/news/bucks-brayden-burries-nate-ament-rebuild",
+    "summary": "The progress of the duo is pivotal to the rebuilding process of a franchise that hasn’t gotten much production since 2013."
   },
   {
-    "id": "blazers-hire-micah-nori-coach-2026",
-    "title": "Blazers hire Wolves assistant Micah Nori as coach",
-    "category": "Coaching",
-    "publishedAt": "2026-06-23T16:13:38Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/blazers-hire-micah-nori-coach",
-    "summary": "NBA.com reported that Portland hired longtime Timberwolves assistant Micah Nori as its new head coach, replacing interim coach Tiago Splitter."
-  },
-  {
-    "id": "reports-ayo-dosunmu-timberwolves-2026",
-    "title": "Reports: Ayo Dosunmu to re-sign with Timberwolves",
+    "id": "mark-williams-return-to-suns",
+    "title": "Report: Mark Williams plans to sign 3-year deal with Suns",
     "category": "Free Agency",
-    "publishedAt": "2026-06-23T06:25:27Z",
+    "publishedAt": "2026-06-26T00:48:45Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/reports-ayo-dosunmu-to-re-sign-with-timberwolves",
-    "summary": "NBA.com, citing ESPN's Shams Charania and the St. Paul Pioneer Press, reported that Ayo Dosunmu intends to return to Minnesota on a five-year, $112 million deal with a player option in the fifth season."
+    "sourceUrl": "https://www.nba.com/news/mark-williams-return-to-suns",
+    "summary": "The 24-year-old big man was a restricted free agent after scoring 11.7 points and grabbing 8 rebounds per game last season."
   },
   {
-    "id": "reports-giannis-antetokounmpo-heat-blockbuster",
-    "title": "Reports: Heat acquire Giannis Antetokounmpo in blockbuster deal",
-    "category": "Trade",
-    "publishedAt": "2026-06-23T04:11:40Z",
+    "id": "basketball-without-borders-2026-nba-draft",
+    "title": "2026 NBA Draft shines light on Basketball Without Borders' impact",
+    "category": "Draft",
+    "publishedAt": "2026-06-25T23:58:35Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/reports-heat-acquire-giannis-antetokounmpo-in-blockbuster-deal",
-    "summary": "NBA.com, citing The Associated Press, reported that Miami is acquiring Giannis Antetokounmpo and Bobby Portis from Milwaukee for Tyler Herro, Kel'el Ware, Jaime Jaquez Jr., Kasparas Jakucionis and draft assets."
+    "sourceUrl": "https://www.nba.com/news/basketball-without-borders-2026-nba-draft",
+    "summary": "Five Basketball Without Borders alums hear their names called in the first round of the 2026 NBA Draft."
   },
   {
-    "id": "reports-julius-randle-nets-eve-draft",
-    "title": "Reports: Julius Randle traded to Nets on eve of draft",
-    "category": "Trade",
-    "publishedAt": "2026-06-23T03:09:58Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/reports-julius-randle-traded-to-nets-on-eve-of-draft",
-    "summary": "NBA.com, citing multiple reports including ESPN's Shams Charania, reported that Minnesota is sending Julius Randle and No. 28 to Brooklyn in a three-team deal that also moves Nic Claxton to Chicago."
-  },
-  {
-    "id": "reports-trae-young-wizards-four-year-deal",
-    "title": "Reports: Trae Young, Wizards agree to 4-year deal",
-    "category": "Free Agency",
-    "publishedAt": "2026-06-22T19:40:44Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/wizards-trae-young-free-agency-2026",
-    "summary": "NBA.com, citing ESPN's Shams Charania and The Athletic's Josh Robbins, reported that Trae Young will remain in Washington on a four-year deal worth about $212 million with a player option in Year 4."
-  },
-  {
-    "id": "mavericks-hire-dusty-may-coach-2026",
-    "title": "Mavericks hire Michigan's Dusty May as coach",
+    "id": "micah-nori-introduced-blazers",
+    "title": "New coach Micah Nori says Trail Blazers will play hard, smart and together",
     "category": "Coaching",
-    "publishedAt": "2026-06-22T15:23:19Z",
+    "publishedAt": "2026-06-25T23:29:36Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/mavs-hire-dusty-may-coach",
-    "summary": "NBA.com reported that Dallas officially hired Dusty May after his NCAA title run at Michigan, giving the Mavericks a new head coach for 2026-27."
+    "sourceUrl": "https://www.nba.com/news/micah-nori-introduced-blazers",
+    "summary": "Nori, who began his NBA career as an intern for the Toronto Raptors in 1998, is eager to prove himself as the No. 1 guy."
+  },
+  {
+    "id": "4-takeaways-lamelo-ball-naz-reid-trade-minnesota-charlotte",
+    "title": "4 takeaways: How reported LaMelo Ball, Naz Reid trade impacts Wolves, Hornets",
+    "category": "Trade",
+    "publishedAt": "2026-06-25T20:55:24Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/4-takeaways-lamelo-ball-naz-reid-trade-minnesota-charlotte",
+    "summary": "The former All-Star point guard is reportedly headed to Minnesota for big man Naz Reid and future Draft picks."
+  },
+  {
+    "id": "hornets-coby-white-free-agency-2026",
+    "title": "Report: Hornets, Coby White agree to 3-year deal",
+    "category": "Free Agency",
+    "publishedAt": "2026-06-25T16:53:00Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/hornets-coby-white-free-agency-2026",
+    "summary": "The veteran guard played 21 games with Charlotte last season after being acquired in a midseason trade with Chicago."
+  },
+  {
+    "id": "lamelo-ball-trade-timberwolves-2026",
+    "title": "Reports: Wolves land LaMelo Ball in blockbuster trade with Hornets",
+    "category": "Trade",
+    "publishedAt": "2026-06-25T15:52:53Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/lamelo-ball-trade-timberwolves-2026",
+    "summary": "Minnesota continues its reported offseason roster shake-up by adding Charlotte guard LaMelo Ball via a trade."
+  },
+  {
+    "id": "trending-topics-2026-nba-draft-thoughts",
+    "title": "Trending Topics: Which teams improved their rosters most in 2026 Draft?",
+    "category": "Draft",
+    "publishedAt": "2026-06-25T12:49:31Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/trending-topics-2026-nba-draft-thoughts",
+    "summary": "Our writers analyze which teams helped themselves the most in the 2026 NBA Draft."
   }
 ]
