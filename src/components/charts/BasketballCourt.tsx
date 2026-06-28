@@ -16,9 +16,27 @@ export function BasketballCourt({ children, className = "" }: { children?: React
   );
 }
 
+const courtBounds = {
+  hoopX: 250,
+  hoopY: 94,
+  scaleX: 9,
+  scaleY: 8.4,
+  minX: -25,
+  maxX: 25,
+  minY: -5,
+  maxY: 41.75
+};
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
 export function courtPoint(x: number, y: number) {
+  const boundedX = clamp(x, courtBounds.minX, courtBounds.maxX);
+  const boundedY = clamp(y, courtBounds.minY, courtBounds.maxY);
+
   return {
-    cx: 250 + x * 9,
-    cy: 50 + y * 8.4
+    cx: courtBounds.hoopX + boundedX * courtBounds.scaleX,
+    cy: courtBounds.hoopY + boundedY * courtBounds.scaleY
   };
 }
