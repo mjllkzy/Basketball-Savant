@@ -5,8 +5,7 @@ This is the remaining account-level setup needed after the repo-side launch work
 ## Current Verified State
 
 - Production URL: `https://basketball-savant-production.up.railway.app`
-- Last verified application-code baseline: `316091d4617e3da0bad3fd8d8b810c4e57bd7017`
-- Before the final domain launch, read the live deployment commit from Railway or `/api/health` and use that value as `<live-deployment-commit>`.
+- Release verification source: read the live deployment commit from Railway or `/api/health` and use that value as `<live-deployment-commit>`.
 - Data source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Runtime data version: `excel-master-2025-26-196c59613934`
 - Loaded production data: 582 players, 30 teams, 1,315 games, 219,160 shot attempts

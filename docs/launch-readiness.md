@@ -10,7 +10,7 @@ https://basketball-savant-production.up.railway.app
 
 ## Current Production State
 
-- Latest verified application release: `316091d4617e3da0bad3fd8d8b810c4e57bd7017`
+- Live release source: `/api/health` field `data.release`. Use that value as `<live-deployment-commit>` when running final launch checks; do not rely on a committed SHA in this document because docs-only releases change the live commit.
 - Source of truth: `data/raw/nba_data_2025_26.xlsx`
 - Source workbook SHA-256: `196c596139340b0abe43668f0ecd42a1a77321767f1d6cde640251ee35d69169`
 - Runtime data version: `excel-master-2025-26-196c59613934`
@@ -34,9 +34,9 @@ CI=true pnpm dlx pnpm@9.15.9 install --frozen-lockfile
 CI=true pnpm test
 CI=true pnpm build
 pnpm audit --prod --audit-level moderate
-python scripts/smoke_production.py --expected-commit 316091d --wait-seconds 120
-python scripts/check_launch_readiness.py --expected-commit 316091d
-python scripts/load_check_production.py --expected-commit 316091d --rounds 3 --concurrency 4 --max-p95-seconds 3
+python scripts/smoke_production.py --expected-commit <live-deployment-commit> --wait-seconds 120
+python scripts/check_launch_readiness.py --expected-commit <live-deployment-commit>
+python scripts/load_check_production.py --expected-commit <live-deployment-commit> --rounds 3 --concurrency 4 --max-p95-seconds 3
 ```
 
 Production smoke results on the deployed Railway site:
@@ -56,7 +56,7 @@ Launch-readiness smoke also validates `/robots.txt`, `/sitemap.xml`, `/manifest.
 
 The conservative load check repeats the core database-backed APIs and canonical pages with light concurrency. It is designed as a launch confidence gate, not a stress test.
 
-GitHub Actions status for `316091d`:
+GitHub Actions status for the current deployed commit:
 
 - CI: success
 - Production Smoke: success
@@ -64,7 +64,7 @@ GitHub Actions status for `316091d`:
 - Production Data Refresh: success
 - Latest Production Postgres Backup: success
 
-Live API cache-header verification for `316091d`:
+Live API cache-header verification for the current deployed commit:
 
 - `/api/players?...`: `Cache-Control: public, s-maxage=300, stale-while-revalidate=3600`
 - `/api/search/shots?...`: `Cache-Control: public, s-maxage=60, stale-while-revalidate=300`
@@ -72,7 +72,7 @@ Live API cache-header verification for `316091d`:
 
 Last verified production data refresh:
 
-- Commit: `316091d4617e3da0bad3fd8d8b810c4e57bd7017`
+- Commit: current deployed commit from `/api/health`
 - Workflow: Production Data Refresh
 - Status: success
 
