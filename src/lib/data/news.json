@@ -1,5 +1,45 @@
 [
   {
+    "id": "hoops-rumors-southwest-notes-vanvleet-thornton-boozer-pelicans",
+    "title": "Southwest Notes: VanVleet, Thornton, Boozer, Pelicans",
+    "category": "Rumor",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-28T04:06:31.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/southwest-notes-vanvleet-thornton-boozer-pelicans.html",
+    "summary": "In the latest episode of his Unguarded podcast, Rockets guard Fred VanVleet opens up about the extent of the damage he suffered to his right knee last fall, relays Matt Young of The Houston Chronicle (subscription..."
+  },
+  {
+    "id": "hoops-rumors-wizards-seth-trimble-agree-to-exhibit-10-deal",
+    "title": "Wizards, Seth Trimble Agree To Exhibit 10 Deal",
+    "category": "Transaction",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-28T03:33:01.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/wizards-seth-trimble-agree-to-exhibit-10-deal.html",
+    "summary": "Former UNC guard Seth Trimble is joining the Wizards after going undrafted, according to an announcement from the Tar Heels’ men’s basketball team (Twitter link). While the program doesn’t specify the details of..."
+  },
+  {
+    "id": "hoops-rumors-celtics-notes-brown-trail-blazers-trade-team-options-thomas",
+    "title": "Celtics Notes: Brown, Trail Blazers Trade, Team Options, Thomas",
+    "category": "Trade",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-28T03:04:27.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/celtics-notes-brown-trail-blazers-trade-team-options-thomas.html",
+    "summary": "Celtics star Jaylen Brown fired back on Saturday after ESPN’s Bobby Marks did a radio interview where he cited an analytics expert who questions Brown’s value, relays Jay King of The Athletic. “There’s mixed feelings..."
+  },
+  {
+    "id": "hoops-rumors-jimmy-butler-discusses-recovery-from-acl-surgery-hopes-to-stay-with-warriors",
+    "title": "Jimmy Butler Discusses Recovery From ACL Surgery, Hopes To Stay With Warriors",
+    "category": "Injury",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-28T02:00:25.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/jimmy-butler-discusses-recovery-from-acl-surgery-hopes-to-stay-with-warriors.html",
+    "summary": "It will likely be sometime in the middle of winter before Jimmy Butler gets back on an NBA court, but he’s confident that he’ll still be able to make an impact whenever that happens, writes Anthony Slater of ESPN. More..."
+  },
+  {
     "id": "celtics-sign-ron-harper-jr-to-extension",
     "title": "Reports: Celtics re-sign Ron Harper Jr. to long-term extension",
     "category": "Free Agency",
@@ -98,45 +138,5 @@
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/micah-nori-introduced-blazers",
     "summary": "Nori, who began his NBA career as an intern for the Toronto Raptors in 1998, is eager to prove himself as the No. 1 guy."
-  },
-  {
-    "id": "4-takeaways-lamelo-ball-naz-reid-trade-minnesota-charlotte",
-    "title": "4 takeaways: How reported LaMelo Ball, Naz Reid trade impacts Wolves, Hornets",
-    "category": "Trade",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-25T20:55:24Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/4-takeaways-lamelo-ball-naz-reid-trade-minnesota-charlotte",
-    "summary": "The former All-Star point guard is reportedly headed to Minnesota for big man Naz Reid and future Draft picks."
-  },
-  {
-    "id": "hornets-coby-white-free-agency-2026",
-    "title": "Report: Hornets, Coby White agree to 3-year deal",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-25T16:53:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/hornets-coby-white-free-agency-2026",
-    "summary": "The veteran guard played 21 games with Charlotte last season after being acquired in a midseason trade with Chicago."
-  },
-  {
-    "id": "lamelo-ball-trade-timberwolves-2026",
-    "title": "Reports: Wolves land LaMelo Ball in blockbuster trade with Hornets",
-    "category": "Trade",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-25T15:52:53Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/lamelo-ball-trade-timberwolves-2026",
-    "summary": "Minnesota continues its reported offseason roster shake-up by adding Charlotte guard LaMelo Ball via a trade."
-  },
-  {
-    "id": "trending-topics-2026-nba-draft-thoughts",
-    "title": "Trending Topics: Which teams improved their rosters most in 2026 Draft?",
-    "category": "Draft",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-25T12:49:31Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/trending-topics-2026-nba-draft-thoughts",
-    "summary": "Our writers analyze which teams helped themselves the most in the 2026 NBA Draft."
   }
 ]

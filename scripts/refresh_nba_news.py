@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Refresh ShotClock news from NBA.com while preserving source-backed external items."""
+"""Refresh ShotClock news from NBA.com and trusted rumor feeds."""
 
 from __future__ import annotations
 
 import argparse
+import email.utils
 import html
 import json
 import re
 import sys
 import urllib.error
 import urllib.request
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -21,6 +23,7 @@ NBA_NEWS_URL = "https://www.nba.com/news"
 DEFAULT_OUTPUT = Path("src/lib/data/news.json")
 REQUEST_TIMEOUT_SECONDS = 30
 USER_AGENT = "ShotClock-News-Refresh/1.0"
+CONTENT_NAMESPACE = "{http://purl.org/rss/1.0/modules/content/}"
 
 ALLOWED_CATEGORIES = {
     "League",
@@ -50,6 +53,22 @@ REQUIRED_NEWS_FIELDS = {
     "sourceUrl",
     "summary",
 }
+
+
+@dataclass(frozen=True)
+class TrustedRumorSource:
+    name: str
+    url: str
+    allowed_host: str
+
+
+TRUSTED_RUMOR_SOURCES = (
+    TrustedRumorSource(
+        name="Hoops Rumors",
+        url="https://www.hoopsrumors.com/feed",
+        allowed_host="www.hoopsrumors.com",
+    ),
+)
 
 
 @dataclass(frozen=True)
@@ -115,6 +134,13 @@ def validate_external_source_url(value: str) -> str:
     return value
 
 
+def validate_trusted_rumor_url(value: str, source: TrustedRumorSource) -> str:
+    parsed = urlparse(value)
+    if parsed.scheme != "https" or parsed.netloc != source.allowed_host:
+        raise RuntimeError(f"Unsupported {source.name} rumor source URL: {value}")
+    return value
+
+
 def classify_category(article: dict[str, Any]) -> str:
     title = clean_text(article.get("title")).lower()
     primary = article.get("categoryPrimary") or {}
@@ -125,7 +151,7 @@ def classify_category(article: dict[str, Any]) -> str:
         title,
     ]).lower()
 
-    if "injur" in category_blob:
+    if "injur" in category_blob or " acl " in f" {category_blob} ":
         return "Injury"
     if "rumor" in category_blob and "draft" in category_blob:
         return "Draft Rumor"
@@ -144,6 +170,28 @@ def classify_category(article: dict[str, Any]) -> str:
     if "roster" in category_blob:
         return "Roster"
     return "League"
+
+
+def classify_rss_category(title: str, categories: list[str], summary: str) -> str:
+    category_blob = " ".join([title, summary, *categories]).lower()
+
+    if "injur" in category_blob or " acl " in f" {category_blob} ":
+        return "Injury"
+    if "draft" in category_blob and "rumor" in category_blob:
+        return "Draft Rumor"
+    if "free agency" in category_blob or "free agent" in category_blob or "free-agent" in category_blob:
+        return "Free Agency"
+    if "transaction" in category_blob or "sign" in category_blob or "waive" in category_blob or "exhibit 10" in category_blob:
+        return "Transaction"
+    if "trade" in category_blob or "acquire" in category_blob:
+        return "Trade"
+    if "coach" in category_blob:
+        return "Coaching"
+    if "roster" in category_blob:
+        return "Roster"
+    if "draft" in category_blob:
+        return "Draft"
+    return "Rumor"
 
 
 def classify_reporting_status(article: dict[str, Any], *, category: str) -> str:
@@ -230,6 +278,91 @@ def refresh_news(source_url: str, *, limit: int) -> list[dict[str, str]]:
     return [item.to_json() for item in items]
 
 
+def rss_item_to_news_item(item: ET.Element, source: TrustedRumorSource) -> NewsItem | None:
+    title = clean_text(item.findtext("title"))
+    raw_source_url = clean_text(item.findtext("link"))
+    raw_published_at = clean_text(item.findtext("pubDate"))
+    description = clean_text(item.findtext("description"))
+    content = clean_text(item.findtext(f"{CONTENT_NAMESPACE}encoded"))
+    summary = trim_summary(description or content)
+    categories = [clean_text(category.text) for category in item.findall("category") if clean_text(category.text)]
+    category = classify_rss_category(title, categories, summary)
+
+    if not title or not raw_source_url or not raw_published_at or not summary:
+        return None
+    source_url = validate_trusted_rumor_url(raw_source_url, source)
+    published_at = parse_rss_datetime(raw_published_at)
+    if category not in ALLOWED_CATEGORIES:
+        raise RuntimeError(f"Unsupported rumor category {category!r} for {source_url}")
+
+    return NewsItem(
+        id=external_item_id(source, source_url, title),
+        title=title,
+        category=category,
+        reportingStatus="Rumor",
+        publishedAt=published_at,
+        sourceName=source.name,
+        sourceUrl=source_url,
+        summary=summary,
+    )
+
+
+def refresh_trusted_rumor_news(sources: tuple[TrustedRumorSource, ...], *, limit: int, allow_failures: bool) -> list[dict[str, str]]:
+    items: list[NewsItem] = []
+    seen: set[str] = set()
+    for source in sources:
+        try:
+            feed_xml = fetch_text(source.url)
+            feed = ET.fromstring(feed_xml)
+        except (OSError, urllib.error.URLError, ET.ParseError, RuntimeError) as error:
+            if not allow_failures:
+                raise RuntimeError(f"{source.name} rumor refresh failed: {error}") from error
+            print(f"{source.name} rumor refresh skipped: {error}", file=sys.stderr)
+            continue
+
+        for entry in feed.findall("./channel/item"):
+            try:
+                item = rss_item_to_news_item(entry, source)
+            except (ValueError, RuntimeError) as error:
+                if not allow_failures:
+                    raise RuntimeError(f"{source.name} rumor item failed validation: {error}") from error
+                print(f"{source.name} rumor item skipped: {error}", file=sys.stderr)
+                continue
+            if not item or item.id in seen:
+                continue
+            seen.add(item.id)
+            items.append(item)
+
+    items.sort(key=lambda item: parse_iso_datetime(item.publishedAt), reverse=True)
+    return [item.to_json() for item in items[:limit]]
+
+
+def external_item_id(source: TrustedRumorSource, source_url: str, title: str) -> str:
+    parsed = urlparse(source_url)
+    slug = Path(parsed.path).name.removesuffix(".html") or title
+    return f"{slugify(source.name)}-{slugify(slug)}"
+
+
+def slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or "item"
+
+
+def trim_summary(value: str, *, max_length: int = 220) -> str:
+    summary = clean_text(value).replace("[...]", "").replace("[…]", "").strip()
+    if len(summary) <= max_length:
+        return summary
+    trimmed = summary[:max_length].rsplit(" ", 1)[0].rstrip(".,;:")
+    return f"{trimmed}..."
+
+
+def parse_rss_datetime(value: str) -> str:
+    parsed = email.utils.parsedate_to_datetime(value)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
 def validate_existing_news_item(item: Any) -> dict[str, str] | None:
     if not isinstance(item, dict) or not REQUIRED_NEWS_FIELDS.issubset(item):
         return None
@@ -258,10 +391,14 @@ def validate_existing_news_item(item: Any) -> dict[str, str] | None:
 
 def is_iso_datetime(value: str) -> bool:
     try:
-        datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parse_iso_datetime(value)
     except ValueError:
         return False
     return True
+
+
+def parse_iso_datetime(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
 def load_preserved_external_items(path: Path) -> list[dict[str, str]]:
@@ -297,7 +434,7 @@ def merge_news_items(primary: list[dict[str, str]], preserved: list[dict[str, st
         seen.add(key)
         merged.append(item)
 
-    merged.sort(key=lambda item: item["publishedAt"], reverse=True)
+    merged.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
     return merged[:limit]
 
 
@@ -306,6 +443,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source-url", default=NBA_NEWS_URL)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--limit", type=int, default=14)
+    parser.add_argument("--rumor-limit", type=int, default=4)
+    parser.add_argument("--skip-rumors", action="store_true", help="Only refresh NBA.com official news.")
+    parser.add_argument("--require-rumors", action="store_true", help="Fail if trusted rumor sources cannot be refreshed.")
     parser.add_argument("--dry-run", action="store_true", help="Print refreshed JSON instead of writing it.")
     return parser.parse_args()
 
@@ -314,7 +454,12 @@ def main() -> None:
     args = parse_args()
     try:
         payload = refresh_news(args.source_url, limit=args.limit)
-        payload = merge_news_items(payload, load_preserved_external_items(args.output), limit=args.limit)
+        rumor_payload = [] if args.skip_rumors else refresh_trusted_rumor_news(
+            TRUSTED_RUMOR_SOURCES,
+            limit=args.rumor_limit,
+            allow_failures=not args.require_rumors,
+        )
+        payload = merge_news_items([*payload, *rumor_payload], load_preserved_external_items(args.output), limit=args.limit)
     except (OSError, urllib.error.URLError, ValueError, RuntimeError) as error:
         print(f"NBA news refresh failed: {error}", file=sys.stderr)
         raise SystemExit(1) from error

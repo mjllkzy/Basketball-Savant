@@ -14,19 +14,22 @@ function findPythonCommand(): string | null {
 const pythonCommand = findPythonCommand();
 const runIfPython = pythonCommand ? it : it.skip;
 
-describe("NBA news refresh", () => {
-  it("refreshes from NBA.com on a daily noon Phoenix schedule", () => {
+describe("basketball news refresh", () => {
+  it("refreshes NBA.com and trusted rumor sources on a daily noon Phoenix schedule", () => {
     const workflow = readFileSync(".github/workflows/news-refresh.yml", "utf8");
     const script = readFileSync("scripts/refresh_nba_news.py", "utf8");
 
     expect(workflow).toContain('cron: "0 19 * * *"');
     expect(workflow).toContain("python scripts/refresh_nba_news.py");
     expect(workflow).toContain("src/lib/data/news.json");
+    expect(workflow).toContain("Refresh NBA.com and trusted rumor news data");
     expect(script).toContain("https://www.nba.com/news");
+    expect(script).toContain("https://www.hoopsrumors.com/feed");
     expect(script).toContain("__NEXT_DATA__");
     expect(script).toContain("validate_source_url");
     expect(script).toContain("reportingStatus");
     expect(script).toContain("Official");
+    expect(script).toContain("Rumor");
   });
 
   runIfPython("is valid Python", () => {
@@ -91,5 +94,34 @@ describe("NBA news refresh", () => {
       expect.objectContaining({ id: "trusted-rumor", reportingStatus: "Rumor", sourceName: "Trusted NBA Insider" }),
       expect.objectContaining({ id: "official", reportingStatus: "Official", sourceName: "NBA.com" })
     ]);
+  });
+
+  runIfPython("parses trusted RSS rumor items as Rumor status", () => {
+    const script = [
+      "import importlib.util, json, pathlib, sys",
+      "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
+      "module = importlib.util.module_from_spec(spec)",
+      "sys.modules[spec.name] = module",
+      "spec.loader.exec_module(module)",
+      "feed = '''<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\"><channel><item><title>Pacific Notes: Trade Market, Free Agency</title><link>https://www.hoopsrumors.com/2026/06/pacific-notes-trade-market-free-agency.html</link><pubDate>Sun, 28 Jun 2026 04:06:31 +0000</pubDate><category>Free Agents</category><description><![CDATA[Multiple teams are monitoring the market, according to a trusted report.]]></description></item></channel></rss>'''",
+      "source = module.TRUSTED_RUMOR_SOURCES[0]",
+      "root = module.ET.fromstring(feed)",
+      "item = module.rss_item_to_news_item(root.find('./channel/item'), source)",
+      "print(json.dumps(item.to_json()))"
+    ].join("\n");
+
+    const result = spawnSync(pythonCommand!, ["-c", script], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+
+    expect(result.status).toBe(0);
+    const item = JSON.parse(result.stdout) as { category: string; reportingStatus: string; sourceName: string; sourceUrl: string };
+    expect(item).toEqual(expect.objectContaining({
+      category: "Free Agency",
+      reportingStatus: "Rumor",
+      sourceName: "Hoops Rumors",
+      sourceUrl: "https://www.hoopsrumors.com/2026/06/pacific-notes-trade-market-free-agency.html"
+    }));
   });
 });
