@@ -1,6 +1,6 @@
 # Data Import Guide
 
-The app starts with an official NBA Stats snapshot and a parser boundary for future imports from CSV, JSON, official exports, or a database.
+The app uses `data/raw/nba_data_2025_26.xlsx` as the authoritative 2025-26 masterfile. Ingestion preserves the raw workbook, writes generated JSON and SQLite fallback artifacts, and can write the validated data into Postgres for production reads.
 
 ## Location
 
@@ -17,15 +17,31 @@ data/imports/players.csv
 data/imports/shots.json
 ```
 
+## Masterfile Refresh
+
+Local fallback generation:
+
+```bash
+python scripts/ingest_nba_excel.py
+```
+
+Production refresh with Postgres output:
+
+```bash
+DATABASE_URL=postgresql://... python scripts/refresh_production_data.py --write-postgres
+```
+
+The production refresh path applies migrations, validates the workbook checksum and row counts, preserves generated JSON fallbacks, and skips unchanged complete data unless forced. Details are in `docs/production-data-refresh.md`.
+
 ## Official NBA Stats Refresh
 
 ```bash
-npm run refresh:official
-npm run refresh:official -- --include-rosters
-npm run refresh:official:shots
+pnpm refresh:official
+pnpm refresh:official -- --include-rosters
+pnpm refresh:official:shots
 ```
 
-The default refresh writes `src/lib/data/generated/official-snapshot.json`.
+The official snapshot adapter remains available for source updates and shot-cache support. The default refresh writes `src/lib/data/generated/official-snapshot.json`.
 
 The snapshot metadata includes public reference game fixtures for high-visibility displayed games. Each fixture records the expected date, teams, score, NBA.com box-score URL, Basketball Reference box-score URL, and ESPN game URL so tests can cross-check the app's game-log mapping against public sources.
 
@@ -206,6 +222,14 @@ Required fields:
 - defensiveRating
 - netRating
 
-## Production TODO
+## Production Import Rules
 
-Implement a persistent adapter that validates imports, checks foreign keys, stores raw rows, recomputes derived aggregates, and invalidates cached leaderboard/search results.
+New persistent sources should not bypass the masterfile pipeline. Before a new CSV, JSON, API, or provider export writes production data, it must:
+
+- preserve raw source rows or raw values;
+- keep stable player, team, game, and season identifiers;
+- validate foreign keys and required fields;
+- write through an explicit Postgres ingestion run;
+- preserve generated JSON fallback behavior where relevant;
+- log data issues rather than silently fixing or dropping rows;
+- recompute affected summaries and invalidate cached leaderboard/search results.

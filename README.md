@@ -14,15 +14,15 @@ It is an original product direction inspired by the depth of elite sports analyt
 - Zod validation for API query params
 - Vitest tests
 - Official NBA Stats snapshot adapter
-- Development-only reference data generator
-- Future adapters for PostgreSQL, DuckDB, Parquet, official CSV imports, or licensed data feeds
+- Excel masterfile ingestion with generated JSON/SQLite fallbacks
+- Postgres-backed production reads for players, teams, games, shots, and leaderboard APIs
+- Development-only reference data generator retained for local reference
 
 ## Setup
 
 ```bash
-npm install
-npm run refresh:official
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Open `http://localhost:3000`.
@@ -30,10 +30,10 @@ Open `http://localhost:3000`.
 For production-style verification:
 
 ```bash
-npm run test
-npm run lint
-npm run build
-npm start
+pnpm test
+pnpm lint
+pnpm build
+pnpm start
 ```
 
 ## Routes
@@ -55,9 +55,11 @@ npm start
 - `/about` project and data-source notes
 - `/docs/api` API reference
 
-## Real Data
+## Production Data
 
-The app defaults to `src/lib/data/generated/official-snapshot.json`, refreshed from official NBA Stats public JSON endpoints.
+The authoritative 2025-26 baseline is the tracked workbook at `data/raw/nba_data_2025_26.xlsx`. The ingestion pipeline preserves the raw workbook, writes generated JSON and SQLite fallback artifacts, and writes Postgres when explicitly run with database output enabled.
+
+Production reads use Postgres where available and keep generated JSON as the local/degraded fallback. The current pipeline is documented in `docs/production-data-refresh.md`.
 
 NBA Stats is the primary machine-readable source. Public box-score and series pages from Basketball Reference, NBA.com, and ESPN are tracked in snapshot metadata as cross-reference sources for score and series sanity checks.
 
@@ -82,14 +84,12 @@ Current default snapshot coverage:
 - 2025-26 playoff team and player game logs when refreshed
 - Best-effort team roster enrichment when `--include-rosters` is used
 
-Refresh commands:
+Local and production refresh commands:
 
 ```bash
-npm run refresh:official
-npm run refresh:official -- --include-rosters
-npm run refresh:official -- --include-team-game-logs
-npm run refresh:official -- --include-player-game-logs
-npm run refresh:official:shots
+python scripts/ingest_nba_excel.py
+python scripts/refresh_production_data.py
+DATABASE_URL=postgresql://... python scripts/refresh_production_data.py --write-postgres
 ```
 
 The larger game-log and shot-event endpoints can be slower, so they are optional. If they are not loaded, the relevant UI surfaces show empty states or `N/A` rather than fabricated data.
@@ -137,7 +137,7 @@ Formula utilities live in `src/lib/metrics/formulas.ts`. The expected shot value
 
 Place local CSV or JSON files in `data/imports/`. The app includes a CSV parser and a preview endpoint at `POST /api/import/csv`.
 
-Persistent import is intentionally a TODO: wire the parser into a database adapter once the production data source is chosen.
+The production import path is the Excel masterfile pipeline. CSV import remains preview-only until a new source is explicitly approved, mapped, validated, and connected to the same Postgres/raw-value preservation rules used by the masterfile ingestion.
 
 ## Known Limitations
 
