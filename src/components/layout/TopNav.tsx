@@ -11,7 +11,7 @@ export function TopNav() {
             <div className="flex h-10 w-10 items-center justify-center rounded bg-ink text-sm font-black text-white shadow-sm">SC</div>
             <div>
               <div className="text-base font-black uppercase tracking-[0.18em] text-ink">ShotClock</div>
-              <div className="text-xs font-medium text-slate-500">ShotClock Advanced Basketball Analytics</div>
+              <div className="text-xs font-medium text-slate-500">Advanced Basketball Analytics</div>
             </div>
           </Link>
           <CommandSearch />
