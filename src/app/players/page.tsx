@@ -89,6 +89,10 @@ function playerHref(slug: string, seasonType: string) {
   return seasonType === "Regular Season" ? `/players/${slug}` : `/players/${slug}?seasonType=${encodeURIComponent(seasonType)}`;
 }
 
+function formatPlayerAge(age: number | null) {
+  return age === null ? "N/A" : age.toFixed(1);
+}
+
 export default async function PlayersPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
   const q = singleParam(resolvedSearchParams, "q");
@@ -130,7 +134,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
     pos: row.position,
     height: formatPlayerHeight(row.height),
     weight: row.weight || "N/A",
-    age: row.age ?? "N/A",
+    age: formatPlayerAge(row.age),
     games: row.games,
     gamesStarted: row.gamesStarted ?? "N/A",
     min: row.minutesPerGame?.toFixed(1) ?? "N/A",
