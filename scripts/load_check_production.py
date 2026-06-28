@@ -42,7 +42,7 @@ MAX_BYTES_BY_PATH = {
     "/players": 450_000,
     "/teams": 200_000,
     "/compare": 100_000,
-    "/players/luka-doncic": 380_000,
+    "/players/luka-doncic": 300_000,
     "/teams/los-angeles-lakers": 400_000,
     "/similarity": 300_000,
 }
