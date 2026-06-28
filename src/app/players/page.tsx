@@ -23,50 +23,50 @@ export const metadata: Metadata = {
   alternates: { canonical: "/players" },
 };
 
-function identityColumn(key: string, label: string, width: string, sortOrder?: string[]): StatTableColumn {
-  return { key, label, width, align: "center", sortOrder };
+function identityColumn(key: string, label: string, width: string, group: string, sortOrder?: string[]): StatTableColumn {
+  return { key, label, width, group, align: "center", sortOrder };
 }
 
-function metricColumn(key: string, label: string, width = "82px"): StatTableColumn {
-  return { key, label, width, align: "center" };
+function metricColumn(key: string, label: string, group: string, width = "82px"): StatTableColumn {
+  return { key, label, width, group, align: "center" };
 }
 
 const baseColumns: StatTableColumn[] = [
-  { key: "player", label: "Player", hrefKey: "href", width: "260px", truncate: true },
-  identityColumn("team", "Team", "72px"),
-  identityColumn("pos", "Pos", "66px", primaryPositionOrder),
-  identityColumn("height", "Height", "82px"),
-  identityColumn("weight", "Weight", "86px"),
-  identityColumn("age", "Age", "64px"),
-  identityColumn("games", "G", "58px"),
-  metricColumn("min", "MIN", "74px")
+  { key: "player", label: "Player", group: "Profile", hrefKey: "href", width: "260px", truncate: true },
+  identityColumn("team", "Team", "72px", "Profile"),
+  identityColumn("pos", "Pos", "66px", "Profile", primaryPositionOrder),
+  identityColumn("height", "Height", "82px", "Profile"),
+  identityColumn("weight", "Weight", "86px", "Profile"),
+  identityColumn("age", "Age", "64px", "Profile"),
+  identityColumn("games", "G", "58px", "Availability"),
+  metricColumn("min", "MIN", "Availability", "74px")
 ];
 
 const standardColumns: StatTableColumn[] = [
   ...baseColumns,
-  metricColumn("pts", "PTS"),
-  metricColumn("reb", "REB"),
-  metricColumn("ast", "AST"),
-  metricColumn("stl", "STL"),
-  metricColumn("blk", "BLK"),
-  metricColumn("tov", "TOV"),
-  metricColumn("fg", "FG%", "82px"),
-  metricColumn("three", "3P%", "82px"),
-  metricColumn("ft", "FT%", "82px")
+  metricColumn("pts", "PTS", "Production"),
+  metricColumn("reb", "REB", "Production"),
+  metricColumn("ast", "AST", "Production"),
+  metricColumn("stl", "STL", "Defense"),
+  metricColumn("blk", "BLK", "Defense"),
+  metricColumn("tov", "TOV", "Ball Security"),
+  metricColumn("fg", "FG%", "Efficiency", "82px"),
+  metricColumn("three", "3P%", "Efficiency", "82px"),
+  metricColumn("ft", "FT%", "Efficiency", "82px")
 ];
 
 const advancedColumns: StatTableColumn[] = [
   ...baseColumns,
-  metricColumn("ts", "TS%", "82px"),
-  metricColumn("efg", "eFG%", "82px"),
-  metricColumn("usg", "USG%", "82px"),
-  metricColumn("astPct", "AST%", "82px"),
-  metricColumn("rebPct", "REB%", "82px"),
-  metricColumn("tovPct", "TOV%", "82px"),
-  metricColumn("ortg", "ORtg", "82px"),
-  metricColumn("drtg", "DRtg", "82px"),
-  metricColumn("net", "Net", "82px"),
-  metricColumn("pie", "PIE", "82px")
+  metricColumn("ts", "TS%", "Efficiency", "82px"),
+  metricColumn("efg", "eFG%", "Efficiency", "82px"),
+  metricColumn("usg", "USG%", "Creation", "82px"),
+  metricColumn("astPct", "AST%", "Creation", "82px"),
+  metricColumn("rebPct", "REB%", "Rebounding", "82px"),
+  metricColumn("tovPct", "TOV%", "Ball Security", "82px"),
+  metricColumn("ortg", "ORtg", "Impact", "82px"),
+  metricColumn("drtg", "DRtg", "Impact", "82px"),
+  metricColumn("net", "Net", "Impact", "82px"),
+  metricColumn("pie", "PIE", "Impact", "82px")
 ];
 
 function playersHref(searchParams: RouteSearchParams, showAll: boolean) {

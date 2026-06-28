@@ -9,6 +9,7 @@ import { compareStatTableValues, compareStatTableValuesForSort } from "@/lib/tab
 export type StatTableColumn = {
   key: string;
   label: string;
+  group?: string;
   align?: "left" | "right" | "center";
   width?: string;
   minWidth?: string;
@@ -86,6 +87,27 @@ function alignmentClasses(align?: StatTableColumn["align"]) {
   };
 }
 
+function groupBoundaryClasses(columns: StatTableColumn[], index: number) {
+  const group = columns[index]?.group;
+  if (!group) return "";
+  const startsGroup = index === 0 || columns[index - 1]?.group !== group;
+  const endsGroup = index === columns.length - 1 || columns[index + 1]?.group !== group;
+  return `${startsGroup ? "border-l border-slate-300" : ""} ${endsGroup ? "border-r border-slate-300" : ""}`;
+}
+
+function columnGroups(columns: StatTableColumn[]) {
+  return columns.reduce<Array<{ label: string; start: number; span: number }>>((groups, column, index) => {
+    const label = column.group ?? "";
+    const previous = groups[groups.length - 1];
+    if (previous && previous.label === label) {
+      previous.span += 1;
+      return groups;
+    }
+    groups.push({ label, start: index, span: 1 });
+    return groups;
+  }, []);
+}
+
 export function StatTable({
   columns,
   rows,
@@ -105,6 +127,8 @@ export function StatTable({
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const hasColumnSizing = columns.some((column) => column.width || column.minWidth);
+  const hasColumnGroups = columns.some((column) => column.group);
+  const groups = useMemo(() => columnGroups(columns), [columns]);
   const sortedRows = useMemo(() => {
     if (sorting.length === 0) return rows;
 
@@ -171,14 +195,29 @@ export function StatTable({
           </colgroup>
         ) : null}
         <thead className="bg-slate-100 text-xs uppercase tracking-[0.08em] text-slate-600">
+          {hasColumnGroups ? (
+            <tr className="bg-white">
+              {groups.map((group) => (
+                <th key={`${group.label}-${group.start}`} colSpan={group.span} className="border-b border-slate-200 px-1 pt-2 align-bottom">
+                  {group.label ? (
+                    <div className="flex min-h-7 items-center justify-center gap-2 overflow-hidden rounded-t border border-b-0 border-slate-300 bg-slate-50 px-2 text-[10px] font-black tracking-normal text-slate-500">
+                      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />
+                      <span className="min-w-0 truncate">{group.label}</span>
+                    </div>
+                  ) : null}
+                </th>
+              ))}
+            </tr>
+          ) : null}
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header, index) => {
                 const align = alignmentClasses(columns[index]?.align);
+                const groupBoundary = groupBoundaryClasses(columns, index);
                 return (
                   <th
                     key={header.id}
-                    className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 align-middle ${dense ? "py-2" : "py-3"} font-black ${align.header}`}
+                    className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 align-middle ${dense ? "py-2" : "py-3"} font-black ${align.header} ${groupBoundary}`}
                   >
                     <button type="button" onClick={header.column.getToggleSortingHandler()} className={`relative inline-flex w-full items-center gap-1 ${align.button}`}>
                       <span className="truncate">{flexRender(header.column.columnDef.header, header.getContext())}</span>
@@ -196,11 +235,12 @@ export function StatTable({
               {row.getVisibleCells().map((cell, index) => {
                 const column = columns[index];
                 const align = alignmentClasses(column?.align);
+                const groupBoundary = groupBoundaryClasses(columns, index);
                 const accentStyle = rowAccentColorKey && (rowAccentColumnKey ?? columns[0]?.key) === column?.key
                   ? rowAccentStyle(row.original[rowAccentColorKey])
                   : undefined;
                 return (
-                  <td key={cell.id} style={accentStyle} className={`h-14 overflow-hidden whitespace-nowrap px-3 align-middle ${dense ? "py-2" : "py-3"} ${align.cell}`}>
+                  <td key={cell.id} style={accentStyle} className={`h-14 overflow-hidden whitespace-nowrap px-3 align-middle ${dense ? "py-2" : "py-3"} ${align.cell} ${groupBoundary}`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 );

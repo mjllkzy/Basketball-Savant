@@ -40,19 +40,19 @@ export default async function TeamsPage() {
       <div data-data-source={result.source}>
         <StatTable
           columns={[
-            { key: "team", label: "Team", hrefKey: "href", imageKey: "teamLogo", imageAltKey: "teamLogoAlt", imageFallbackKey: "teamLogoFallback" },
-            { key: "conf", label: "Conf" },
-            { key: "record", label: "Record" },
-            { key: "ortg", label: "ORtg", align: "right" },
-            { key: "drtg", label: "DRtg", align: "right" },
-            { key: "net", label: "Net", align: "right" },
-            { key: "pace", label: "Pace", align: "right" },
-            { key: "ts", label: "TS%", align: "right" },
-            { key: "efg", label: "eFG%", align: "right" },
-            { key: "three", label: "3P%", align: "right" },
-            { key: "ast", label: "AST%", align: "right" },
-            { key: "reb", label: "REB%", align: "right" },
-            { key: "tov", label: "TOV%", align: "right" }
+            { key: "team", label: "Team", group: "Profile", hrefKey: "href", imageKey: "teamLogo", imageAltKey: "teamLogoAlt", imageFallbackKey: "teamLogoFallback" },
+            { key: "conf", label: "Conf", group: "Profile" },
+            { key: "record", label: "Record", group: "Profile" },
+            { key: "ortg", label: "ORtg", group: "Ratings", align: "right" },
+            { key: "drtg", label: "DRtg", group: "Ratings", align: "right" },
+            { key: "net", label: "Net", group: "Ratings", align: "right" },
+            { key: "pace", label: "Pace", group: "Tempo", align: "right" },
+            { key: "ts", label: "TS%", group: "Efficiency", align: "right" },
+            { key: "efg", label: "eFG%", group: "Efficiency", align: "right" },
+            { key: "three", label: "3P%", group: "Efficiency", align: "right" },
+            { key: "ast", label: "AST%", group: "Ball Movement", align: "right" },
+            { key: "reb", label: "REB%", group: "Possession", align: "right" },
+            { key: "tov", label: "TOV%", group: "Possession", align: "right" }
           ]}
           rows={rows}
           rowAccentColorKey="teamAccent"
