@@ -1,6 +1,14 @@
+"use client";
+
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+
 type Option = {
   label: string;
   value: string;
+};
+
+type DivisionOption = Option & {
+  conference: "East" | "West";
 };
 
 type TeamFilterFormProps = {
@@ -10,7 +18,7 @@ type TeamFilterFormProps = {
   month?: string;
   seasonTypes: Option[];
   conferences: Option[];
-  divisions: Option[];
+  divisions: DivisionOption[];
   months: Option[];
 };
 
@@ -24,19 +32,41 @@ export function TeamFilterForm({
   divisions,
   months
 }: TeamFilterFormProps) {
+  const [selectedConference, setSelectedConference] = useState(conference ?? "");
+  const [selectedDivision, setSelectedDivision] = useState(division ?? "");
+  useEffect(() => setSelectedConference(conference ?? ""), [conference]);
+  useEffect(() => setSelectedDivision(division ?? ""), [division]);
+
+  const visibleDivisions = useMemo(
+    () => selectedConference
+      ? divisions.filter((option) => option.conference === selectedConference)
+      : divisions,
+    [divisions, selectedConference],
+  );
+
+  function handleConferenceChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextConference = event.target.value;
+    setSelectedConference(nextConference);
+    setSelectedDivision((currentDivision) => {
+      if (!currentDivision || !nextConference) return currentDivision;
+      const divisionOption = divisions.find((option) => option.value === currentDivision);
+      return divisionOption?.conference === nextConference ? currentDivision : "";
+    });
+  }
+
   return (
     <form className="grid gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm" method="get" action="/teams">
       <div className="grid gap-3 md:grid-cols-5">
         <select name="seasonType" defaultValue={seasonType} className="rounded border border-slate-300 px-3 py-2 text-sm">
           {seasonTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
-        <select name="conference" defaultValue={conference ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
+        <select name="conference" value={selectedConference} onChange={handleConferenceChange} className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="">All conferences</option>
           {conferences.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
-        <select name="division" defaultValue={division ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
+        <select name="division" value={selectedDivision} onChange={(event) => setSelectedDivision(event.target.value)} className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="">All divisions</option>
-          {divisions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          {visibleDivisions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
         <select name="month" defaultValue={month ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="">Full season</option>

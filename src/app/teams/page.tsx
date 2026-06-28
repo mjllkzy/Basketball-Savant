@@ -53,6 +53,10 @@ function selectedOption<T extends string>(value: string | undefined, options: Ar
   return options.some((option) => option.value === value) ? (value as T) : undefined;
 }
 
+function divisionsForConference<T extends { conference: "East" | "West" }>(divisions: T[], conference?: "East" | "West") {
+  return conference ? divisions.filter((division) => division.conference === conference) : divisions;
+}
+
 function teamHref(slug: string, seasonType: string) {
   return seasonType === "Regular Season" ? `/teams/${slug}` : `/teams/${slug}?seasonType=${encodeURIComponent(seasonType)}`;
 }
@@ -62,7 +66,8 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
   const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
   const filterOptions = await loadTeamSeasonSummaryFilters({ seasonType });
   const conference = selectedOption(singleParam(resolvedSearchParams, "conference"), filterOptions.conferences);
-  const division = selectedOption(singleParam(resolvedSearchParams, "division"), filterOptions.divisions);
+  const availableDivisions = divisionsForConference(filterOptions.divisions, conference);
+  const division = selectedOption(singleParam(resolvedSearchParams, "division"), availableDivisions);
   const month = selectedOption(singleParam(resolvedSearchParams, "month"), filterOptions.months);
   const result = await listTeamSeasonSummaries({ seasonType, conference, division, month });
   const selectedMonthLabel = filterOptions.months.find((option) => option.value === month)?.label;

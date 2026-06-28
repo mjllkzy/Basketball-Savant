@@ -103,7 +103,7 @@ type TeamSummaryParams = {
 export type TeamSummaryFilterOptions = {
   seasonTypes: Array<{ label: string; value: SeasonType }>;
   conferences: Array<{ label: string; value: "East" | "West" }>;
-  divisions: Array<{ label: string; value: string }>;
+  divisions: Array<{ label: string; value: string; conference: "East" | "West" }>;
   months: Array<{ label: string; value: string }>;
 };
 
@@ -623,9 +623,10 @@ export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParam
     return {
       seasonTypes: seasonTypeOptions,
       conferences: ["East", "West"].map((value) => ({ value: value as "East" | "West", label: value })),
-      divisions: [...new Set(rows.map((team) => team.division).filter(Boolean))]
-        .sort()
-        .map((value) => ({ value, label: value })),
+      divisions: rows
+        .map((team) => ({ value: team.division, label: team.division, conference: team.conference }))
+        .filter((option, index, options) => options.findIndex((candidate) => candidate.value === option.value) === index)
+        .sort((a, b) => a.label.localeCompare(b.label)),
       months: monthOptionsFromGames(officialGames.filter((game) => game.seasonType === seasonType)),
     };
   };
@@ -645,9 +646,13 @@ export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParam
     const conferences = [...new Set(result.rows.map((row) => row.conference).filter((value): value is "East" | "West" => value === "East" || value === "West"))]
       .sort()
       .map((value) => ({ value, label: value }));
-    const divisions = [...new Set(result.rows.map((row) => row.division).filter((value): value is string => Boolean(value)))]
-      .sort()
-      .map((value) => ({ value, label: value }));
+    const divisions = result.rows
+      .filter((row): row is { conference: "East" | "West"; division: string; month: string | null } =>
+        (row.conference === "East" || row.conference === "West") && Boolean(row.division)
+      )
+      .map((row) => ({ value: row.division, label: row.division, conference: row.conference }))
+      .filter((option, index, options) => options.findIndex((candidate) => candidate.value === option.value) === index)
+      .sort((a, b) => a.label.localeCompare(b.label));
     const months = [...new Set(result.rows.map((row) => row.month).filter((value): value is string => Boolean(value)))]
       .sort()
       .map((value) => ({ value, label: monthLabel(value) }));
