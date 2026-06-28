@@ -1,4 +1,5 @@
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
+import { officialBasketballReferenceGamesStartedByPlayerId } from "@/lib/data/official";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -15,6 +16,7 @@ export type PlayerDirectoryRow = {
   weight: number | null;
   age: number | null;
   games: number;
+  gamesStarted: number | null;
   minutesPerGame: number | null;
   pts: number | null;
   reb: number | null;
@@ -70,6 +72,7 @@ export type PlayerDirectoryParams = {
 
 type PlayerDirectoryDbRow = {
   player_slug: string;
+  nba_player_id: string | null;
   player_name: string;
   team_id: string | null;
   primary_team_abbreviation: string | null;
@@ -133,6 +136,9 @@ function numeric(value: number | string | null): number | null {
 }
 
 function mapDbRow(row: PlayerDirectoryDbRow): PlayerDirectoryRow {
+  const gamesStarted = row.nba_player_id
+    ? officialBasketballReferenceGamesStartedByPlayerId.get(row.nba_player_id) ?? null
+    : null;
   return {
     playerSlug: row.player_slug,
     playerName: row.player_name,
@@ -143,6 +149,7 @@ function mapDbRow(row: PlayerDirectoryDbRow): PlayerDirectoryRow {
     weight: row.weight,
     age: row.age,
     games: numeric(row.games) ?? 0,
+    gamesStarted,
     minutesPerGame: numeric(row.minutes),
     pts: numeric(row.pts),
     reb: numeric(row.reb),
@@ -177,6 +184,7 @@ function mapFallbackRow(row: RuntimePlayerFallback): PlayerDirectoryRow {
     weight: row.weight,
     age: row.age,
     games: row.games ?? 0,
+    gamesStarted: row.games_started ?? null,
     minutesPerGame: row.minutes,
     pts: row.pts,
     reb: row.reb,
@@ -311,6 +319,7 @@ export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): P
       `
       SELECT
         p.player_slug,
+        p.nba_player_id,
         p.player_name,
         p.primary_team_id AS team_id,
         p.primary_team_abbreviation,

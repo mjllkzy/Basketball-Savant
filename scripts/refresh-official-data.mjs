@@ -393,6 +393,7 @@ function buildBasketballReferenceCrosscheck(playerAdvancedRegular, advancedRows,
       perGameMatch?.teamAbbreviation ?? "",
       status,
       perGameMatch?.position ?? "",
+      perGameMatch?.gamesStarted ?? null,
       row[headerIndex.TS_PCT],
       advancedMatch?.tsPct ?? null,
       diff(row[headerIndex.TS_PCT], advancedMatch?.tsPct),
@@ -425,6 +426,7 @@ function buildBasketballReferenceCrosscheck(playerAdvancedRegular, advancedRows,
       "BREF_PER_GAME_TEAM_ABBREVIATION",
       "MATCH_STATUS",
       "BREF_POSITION",
+      "BREF_GS",
       "NBA_TS_PCT",
       "BREF_TS_PCT",
       "TS_PCT_ABS_DIFF",
@@ -839,6 +841,7 @@ async function main() {
     : [];
   const basketballReferencePlayerPerGameRows = basketballReferencePerGameHtml
     ? parseBasketballReferenceRows(basketballReferencePerGameHtml, "per_game_stats", {
+        gamesStarted: "games_started",
         efgPct: "efg_pct"
       })
     : [];
@@ -872,7 +875,7 @@ async function main() {
           : []),
         "Basketball Reference, NBA.com box scores, and ESPN game pages are listed as cross-reference sources for public score and series verification.",
         "NBA Stats Advanced player and team tables provide official TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and possession fields.",
-        "Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables; Basketball Reference per-game Pos supplies primary PG/SG/SF/PF/C player positions.",
+        "Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables; Basketball Reference per-game Pos and GS supply primary player positions and games started.",
         "The publicReferenceGames metadata pins the currently displayed NBA Finals games to public NBA.com, Basketball Reference, and ESPN game pages.",
         "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
         "ShotClock derived metrics are calculated locally from official box score totals.",

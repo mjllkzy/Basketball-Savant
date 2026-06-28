@@ -15,6 +15,7 @@ export type RuntimePlayerFallback = {
   weight: number | null;
   age: number | null;
   games: number | null;
+  games_started?: number | null;
   minutes: number | null;
   pts: number | null;
   reb: number | null;

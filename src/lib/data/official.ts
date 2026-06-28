@@ -169,6 +169,14 @@ export const officialDatasetVersion = `official-nba-stats-${officialSnapshot.met
 export const officialMetadata = officialSnapshot.metadata;
 export const officialBasketballReferencePlayerAdvancedCrosscheck = basketballReferencePlayerAdvancedCrosscheckTable;
 export const officialBasketballReferenceTeamAdvancedCrosscheck = basketballReferenceTeamAdvancedCrosscheckTable;
+export const officialBasketballReferenceGamesStartedByPlayerId = new Map(
+  basketballReferencePlayerAdvancedCrosscheckTable.rows
+    .map((row) => [
+      stringValue(basketballReferencePlayerAdvancedCrosscheckTable, row, "PLAYER_ID"),
+      optionalNumberValue(basketballReferencePlayerAdvancedCrosscheckTable, row, "BREF_GS")
+    ] as const)
+    .filter((entry): entry is readonly [string, number] => Boolean(entry[0] && entry[1] !== undefined))
+);
 
 function primaryBasketballReferencePosition(raw: string | undefined): string | undefined {
   const validPositions = new Set(["PG", "SG", "SF", "PF", "C"]);

@@ -13,8 +13,8 @@ import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
-const standardTableMinWidth = "1500px";
-const advancedTableMinWidth = "1580px";
+const standardTableMinWidth = "1564px";
+const advancedTableMinWidth = "1644px";
 const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
 
 export const metadata: Metadata = {
@@ -39,6 +39,7 @@ const baseColumns: StatTableColumn[] = [
   identityColumn("weight", "Weight", "86px", "Profile"),
   identityColumn("age", "Age", "64px", "Profile"),
   identityColumn("games", "G", "58px", "Availability"),
+  identityColumn("gamesStarted", "GS", "64px", "Availability"),
   metricColumn("min", "MIN", "Availability", "74px")
 ];
 
@@ -122,6 +123,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
     weight: row.weight || "N/A",
     age: row.age ?? "N/A",
     games: row.games,
+    gamesStarted: row.gamesStarted ?? "N/A",
     min: row.minutesPerGame?.toFixed(1) ?? "N/A",
     pts: formatMetric("pts", row.pts),
     reb: formatMetric("reb", row.reb),

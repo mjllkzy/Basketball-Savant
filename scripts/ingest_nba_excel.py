@@ -854,6 +854,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
             "player_game_stats": [],
             "players_by_name": {},
             "players_by_name_team": {},
+            "games_started_by_id": {},
         }
 
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
@@ -868,15 +869,19 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
     basketball_reference_rows = table_rows(snapshot, "basketballReferencePlayerAdvancedCrosscheck")
     bio_by_id = {str(row.get("PLAYER_ID")): row for row in player_bio_rows if row.get("PLAYER_ID") is not None}
     primary_position_by_id = {}
+    games_started_by_id = {}
     for row in basketball_reference_rows:
         player_id = str(row.get("PLAYER_ID") or "").strip()
         raw_position = text_value(row.get("BREF_POSITION")).strip()
+        games_started = int_or_none(row.get("BREF_GS"))
         primary_position = next(
             (token for token in re.split(r"[-/,\s]+", raw_position) if token in {"PG", "SG", "SF", "PF", "C"}),
             None,
         )
         if player_id and primary_position:
             primary_position_by_id[player_id] = primary_position
+        if player_id and games_started is not None:
+            games_started_by_id[player_id] = games_started
 
     teams_by_id: dict[str, dict[str, Any]] = {}
     for row in player_index_rows:
@@ -1044,6 +1049,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
         "player_game_stats": player_game_stats,
         "players_by_name": players_by_name,
         "players_by_name_team": players_by_name_team,
+        "games_started_by_id": games_started_by_id,
     }
 
 
@@ -1088,9 +1094,11 @@ def build_runtime_fallbacks(
     official: dict[str, Any],
 ) -> dict[str, Any]:
     runtime_by_slug = {summary["player_slug"]: summary for summary in runtime_summaries}
+    games_started_by_id = official.get("games_started_by_id", {})
     player_rows = []
     for player in players_json:
         reference = find_player_reference(player, official) or {}
+        player_id = str(reference.get("nba_player_id") or "")
         summary = runtime_by_slug.get(player["player_slug"], {})
         player_rows.append(
             {
@@ -1103,6 +1111,7 @@ def build_runtime_fallbacks(
                 "weight": reference.get("weight"),
                 "age": reference.get("age"),
                 "games": int_or_none(summary_numeric(summary, "General - Traditional", "gp")),
+                "games_started": int_or_none(games_started_by_id.get(player_id)),
                 "minutes": summary_numeric(summary, "General - Traditional", "min"),
                 "pts": summary_numeric(summary, "General - Traditional", "pts"),
                 "reb": summary_numeric(summary, "General - Traditional", "reb"),
