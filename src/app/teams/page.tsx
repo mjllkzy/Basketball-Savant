@@ -16,6 +16,7 @@ export default async function TeamsPage() {
   const result = await listTeamSeasonSummaries();
   const rows = result.rows.map((row) => ({
     team: `${row.team.city} ${row.team.name}`,
+    teamAccent: row.team.primaryColor,
     teamLogo: nbaTeamLogoUrl(row.team.id),
     teamLogoAlt: `${row.team.city} ${row.team.name} logo`,
     teamLogoFallback: row.team.abbreviation,
@@ -54,6 +55,8 @@ export default async function TeamsPage() {
             { key: "tov", label: "TOV%", align: "right" }
           ]}
           rows={rows}
+          rowAccentColorKey="teamAccent"
+          rowAccentColumnKey="team"
         />
       </div>
     </div>
