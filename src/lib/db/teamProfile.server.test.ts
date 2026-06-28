@@ -9,9 +9,14 @@ describe("team profile fallback", () => {
     const { loadTeamProfile } = await import("./teamAnalytics.server");
     const profile = await loadTeamProfile("atlanta-hawks");
 
-    expect(profile?.team.abbreviation).toBe("ATL");
-    expect(profile?.rosterRows.length).toBeGreaterThan(10);
-    expect(profile?.games.length).toBeGreaterThan(80);
-    expect(profile?.source).toBe("json");
+    expect(profile).toBeDefined();
+    if (!profile) throw new Error("Expected Atlanta Hawks profile");
+
+    expect(profile.team.abbreviation).toBe("ATL");
+    expect(profile.rosterRows.length).toBeGreaterThan(10);
+    expect(profile.games.length).toBeGreaterThan(80);
+    expect(profile.shots.length).toBeGreaterThan(7_000);
+    expect(profile.shots.every((shot) => shot.teamId === profile.team.id)).toBe(true);
+    expect(profile.source).toBe("json");
   });
 });

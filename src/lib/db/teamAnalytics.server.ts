@@ -230,6 +230,7 @@ export async function loadTeamProfile(idOrSlug: string): Promise<TeamProfileResu
     source: teamResult.source === "postgres"
       && roster.meta.source === "postgres"
       && games.meta.source === "postgres"
+      && shotResult.source === "postgres"
       ? "postgres"
       : "json",
   };

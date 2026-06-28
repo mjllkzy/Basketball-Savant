@@ -5,7 +5,6 @@ import { TeamStyleProfile } from "@/components/charts/TeamStyleProfile";
 import { TeamHeader } from "@/components/domain/TeamHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
-import { getLiveTeamShotChart } from "@/lib/data/liveShotCharts";
 import { gameMatchupLabel } from "@/lib/db/gameAnalytics.server";
 import { listTeamSeasonSummaries, loadTeamProfile } from "@/lib/db/teamAnalytics.server";
 import { formatShortDate } from "@/lib/date";
@@ -39,7 +38,6 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
     listTeamSeasonSummaries(),
   ]);
   if (!profile) notFound();
-  const liveShots = await getLiveTeamShotChart(profile.team.id);
   const rosterRows = profile.rosterRows.map((row) => ({
     player: row.playerName,
     href: `/players/${row.playerSlug}`,
@@ -66,7 +64,7 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
         ))}
       </section>
       <section>
-        <TeamShotMap shots={liveShots} maxShots={400} />
+        <TeamShotMap shots={profile.shots} maxShots={260} />
       </section>
       <section className="grid gap-4">
         <TeamStyleProfile team={profile.aggregate} teams={teamSummaries.rows} />
