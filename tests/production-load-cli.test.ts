@@ -33,6 +33,9 @@ describe("production load check CLI", () => {
     expect(script).toContain("/api/teams");
     expect(script).toContain("/api/leaderboards");
     expect(script).toContain("/api/games");
+    expect(script).toContain('"/players"');
+    expect(script).toContain('"/teams"');
+    expect(script).toContain('"/compare"');
     expect(script).toContain("/players/luka-doncic");
     expect(script).toContain("/teams/los-angeles-lakers");
     expect(script).toContain("ThreadPoolExecutor");

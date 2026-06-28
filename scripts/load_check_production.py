@@ -25,6 +25,9 @@ DEFAULT_PATHS = [
     "/api/leaderboards?metric=pts&limit=25&minGames=30",
     "/api/games?pageSize=10",
     "/",
+    "/players",
+    "/teams",
+    "/compare",
     "/players/luka-doncic",
     "/teams/los-angeles-lakers",
     "/similarity",
@@ -36,9 +39,12 @@ MAX_BYTES_BY_PATH = {
     "/api/leaderboards?metric=pts&limit=25&minGames=30": 120_000,
     "/api/games?pageSize=10": 50_000,
     "/": 100_000,
-    "/players/luka-doncic": 450_000,
-    "/teams/los-angeles-lakers": 500_000,
-    "/similarity": 350_000,
+    "/players": 450_000,
+    "/teams": 200_000,
+    "/compare": 100_000,
+    "/players/luka-doncic": 380_000,
+    "/teams/los-angeles-lakers": 400_000,
+    "/similarity": 300_000,
 }
 
 
