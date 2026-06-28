@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PercentileRadar } from "@/components/charts/PercentileRadar";
 import { RollingLineChart } from "@/components/charts/RollingLineChart";
-import { ShotChart } from "@/components/charts/ShotChart";
+import { ShotChart, sampleShotsForChart } from "@/components/charts/ShotChart";
 import { PlayerHeader } from "@/components/domain/PlayerHeader";
 import { PlayerSnapshot } from "@/components/domain/PlayerSnapshot";
 import { PlayTypeBreakdown } from "@/components/domain/PlayTypeBreakdown";
@@ -69,6 +69,8 @@ export default async function PlayerPage({ params }: { params: Promise<{ playerI
     pm: line.plusMinus
   }));
   const hasShotEvents = profile.shots.length > 0;
+  const shotChartSampleSize = 120;
+  const shotChartShots = sampleShotsForChart(profile.shots, shotChartSampleSize);
   const masterProfile = await loadMasterPlayerProfileDbFirst({ slug: profile.masterSlug, playerName: profile.player.name });
   const keyStats = masterProfile ? masterProfileKeyStats(masterProfile) : [];
   const categoryRows = masterProfile ? masterProfileCategorySummary(masterProfile).slice(0, 8) : [];
@@ -125,7 +127,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ playerI
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         {hasShotEvents ? (
-          <ShotChart shots={profile.shots} colorBy="xpts" maxShots={180} />
+          <ShotChart shots={shotChartShots} colorBy="xpts" maxShots={shotChartSampleSize} totalAttempts={profile.shots.length} />
         ) : (
           <FeedRequiredPanel title="Shot Chart Feed Required" detail="This player has official season and game-log stats loaded, but row-level shot events are not present in the current snapshot." />
         )}
