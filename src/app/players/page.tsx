@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
+import { officialTeams } from "@/lib/data/official";
 import { listPlayerDirectory, loadPlayerDirectoryFilters } from "@/lib/db/playerDirectory.server";
 import { formatMetric } from "@/lib/metrics/format";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
@@ -13,6 +14,7 @@ const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct"
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
 const standardTableMinWidth = "1500px";
 const advancedTableMinWidth = "1580px";
+const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
 
 export const metadata: Metadata = {
   title: "NBA Players",
@@ -113,6 +115,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
     player: row.playerName,
     href: `/players/${row.playerSlug}`,
     team: row.teamAbbreviation,
+    teamAccent: teamPrimaryColorByAbbreviation.get(row.teamAbbreviation) ?? "#0f766e",
     pos: row.position,
     height: row.height,
     weight: row.weight || "N/A",
@@ -163,6 +166,8 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         rows={rows}
         layout="fixed"
         minWidth={tableMinWidth}
+        rowAccentColorKey="teamAccent"
+        rowAccentColumnKey="player"
       />
       <div className="flex flex-col items-center justify-between gap-3 rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm sm:flex-row">
         <span>

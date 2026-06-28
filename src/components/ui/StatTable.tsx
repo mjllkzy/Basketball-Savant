@@ -22,6 +22,22 @@ export type StatTableColumn = {
 
 export type StatTableRow = Record<string, string | number | null | undefined>;
 
+function rgba(hex: string, alpha: number) {
+  const normalized = hex.replace("#", "");
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return `rgba(15, 118, 110, ${alpha})`;
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function rowAccentStyle(value: StatTableRow[string]) {
+  if (typeof value !== "string" || !value) return undefined;
+  return {
+    background: `linear-gradient(90deg, ${rgba(value, 0.2)} 0%, ${rgba(value, 0.12)} 38%, rgba(255, 255, 255, 0.96) 74%, #ffffff 100%)`,
+  };
+}
+
 function CellImage({ src, alt, fallback }: { src: string; alt: string; fallback: string }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -75,13 +91,17 @@ export function StatTable({
   rows,
   dense = false,
   layout = "auto",
-  minWidth
+  minWidth,
+  rowAccentColorKey,
+  rowAccentColumnKey
 }: {
   columns: StatTableColumn[];
   rows: StatTableRow[];
   dense?: boolean;
   layout?: "auto" | "fixed";
   minWidth?: string;
+  rowAccentColorKey?: string;
+  rowAccentColumnKey?: string;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const hasColumnSizing = columns.some((column) => column.width || column.minWidth);
@@ -174,9 +194,13 @@ export function StatTable({
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
               {row.getVisibleCells().map((cell, index) => {
-                const align = alignmentClasses(columns[index]?.align);
+                const column = columns[index];
+                const align = alignmentClasses(column?.align);
+                const accentStyle = rowAccentColorKey && (rowAccentColumnKey ?? columns[0]?.key) === column?.key
+                  ? rowAccentStyle(row.original[rowAccentColorKey])
+                  : undefined;
                 return (
-                  <td key={cell.id} className={`h-14 overflow-hidden whitespace-nowrap px-3 align-middle ${dense ? "py-2" : "py-3"} ${align.cell}`}>
+                  <td key={cell.id} style={accentStyle} className={`h-14 overflow-hidden whitespace-nowrap px-3 align-middle ${dense ? "py-2" : "py-3"} ${align.cell}`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 );
