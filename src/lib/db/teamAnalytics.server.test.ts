@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDatabasePool } from "./client.server";
-import { listTeamSeasonSummaries } from "./teamAnalytics.server";
+import { listTeamSeasonSummaries, loadTeamSeasonSummaryFilters } from "./teamAnalytics.server";
 
 describe("database-backed team analytics", () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;
@@ -22,5 +22,26 @@ describe("database-backed team analytics", () => {
     expect(result.source).toBe("json");
     expect(result.rows).toHaveLength(30);
     expect(result.rows.every((row) => row.games > 0)).toBe(true);
+  }, 15_000);
+
+  it("filters generated team summaries by conference, division, and month", async () => {
+    const filters = await loadTeamSeasonSummaryFilters();
+    const month = filters.months[0]?.value;
+
+    expect(filters.conferences.map((option) => option.value)).toContain("East");
+    expect(filters.divisions.map((option) => option.value)).toContain("Atlantic");
+    expect(month).toMatch(/^\d{4}-\d{2}$/);
+
+    const east = await listTeamSeasonSummaries({ conference: "East" });
+    expect(east.rows.length).toBeGreaterThan(0);
+    expect(east.rows.every((row) => row.team.conference === "East")).toBe(true);
+
+    const atlantic = await listTeamSeasonSummaries({ division: "Atlantic" });
+    expect(atlantic.rows.length).toBeGreaterThan(0);
+    expect(atlantic.rows.every((row) => row.team.division === "Atlantic")).toBe(true);
+
+    const monthly = await listTeamSeasonSummaries({ month });
+    expect(monthly.rows.length).toBeGreaterThan(0);
+    expect(monthly.rows.every((row) => row.games > 0 && row.games < 82)).toBe(true);
   }, 15_000);
 });

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { TeamFilterForm } from "@/components/domain/TeamFilterForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
-import { listTeamSeasonSummaries } from "@/lib/db/teamAnalytics.server";
+import { listTeamSeasonSummaries, loadTeamSeasonSummaryFilters } from "@/lib/db/teamAnalytics.server";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
+import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl } from "@/lib/teamBranding";
 
 const entityColumnWidth = "290px";
@@ -46,8 +48,20 @@ const teamColumns: StatTableColumn[] = [
   centerColumn("tov", "TOV%", "Possession", secondaryColumnWidth)
 ];
 
-export default async function TeamsPage() {
-  const result = await listTeamSeasonSummaries();
+function selectedOption<T extends string>(value: string | undefined, options: Array<{ value: T }>) {
+  return options.some((option) => option.value === value) ? (value as T) : undefined;
+}
+
+export default async function TeamsPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
+  const [resolvedSearchParams, filterOptions] = await Promise.all([
+    searchParams,
+    loadTeamSeasonSummaryFilters(),
+  ]);
+  const conference = selectedOption(singleParam(resolvedSearchParams, "conference"), filterOptions.conferences);
+  const division = selectedOption(singleParam(resolvedSearchParams, "division"), filterOptions.divisions);
+  const month = selectedOption(singleParam(resolvedSearchParams, "month"), filterOptions.months);
+  const result = await listTeamSeasonSummaries({ conference, division, month });
+  const selectedMonthLabel = filterOptions.months.find((option) => option.value === month)?.label;
   const rows = result.rows.map((row) => ({
     team: `${row.team.city} ${row.team.name}`,
     teamAccent: row.team.primaryColor,
@@ -70,7 +84,24 @@ export default async function TeamsPage() {
   }));
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="Team Index" title="Teams" description="Official team records, ratings, pace, shooting, ball movement, and rebounding context." />
+      <PageHeader
+        eyebrow="Team Index"
+        title="Teams"
+        description={selectedMonthLabel
+          ? `Official team records, ratings, pace, shooting, ball movement, and rebounding context for ${selectedMonthLabel}.`
+          : "Official team records, ratings, pace, shooting, ball movement, and rebounding context."}
+      />
+      <TeamFilterForm
+        conference={conference}
+        division={division}
+        month={month}
+        conferences={filterOptions.conferences}
+        divisions={filterOptions.divisions}
+        months={filterOptions.months}
+      />
+      <div data-data-source={result.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
+        Showing <strong className="text-ink">{rows.length}</strong> teams{selectedMonthLabel ? <> for <strong className="text-ink">{selectedMonthLabel}</strong></> : null}.
+      </div>
       <div data-data-source={result.source}>
         <StatTable
           columns={teamColumns}
