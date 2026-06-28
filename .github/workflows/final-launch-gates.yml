@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       site_url:
-        description: Public custom domain URL, for example https://www.basketballsavant.com
+        description: Public custom domain URL, for example https://www.shotclockanalytics.com
         required: true
       expected_commit:
         description: Optional production commit SHA to require before checking
@@ -47,6 +47,9 @@ jobs:
       SENTRY_ENVIRONMENT: production
       NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com' }}
+      SHOTCLOCK_UPTIME_MONITOR_DECISION: ${{ inputs.uptime_monitor_decision }}
+      SHOTCLOCK_UPTIME_MONITOR_URL: ${{ inputs.uptime_monitor_url }}
+      SHOTCLOCK_BACKUP_POLICY_CONFIRMED: ${{ inputs.backup_policy_confirmed }}
       BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION: ${{ inputs.uptime_monitor_decision }}
       BASKETBALL_SAVANT_UPTIME_MONITOR_URL: ${{ inputs.uptime_monitor_url }}
       BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED: ${{ inputs.backup_policy_confirmed }}
@@ -77,7 +80,7 @@ jobs:
           site_url = os.environ["SITE_URL"].rstrip("/")
           request = urllib.request.Request(
               f"{site_url}/api/health",
-              headers={"User-Agent": "Basketball-Savant-Final-Launch-Gates/1.0"},
+              headers={"User-Agent": "ShotClock-Final-Launch-Gates/1.0"},
           )
           with urllib.request.urlopen(request, timeout=30) as response:
               payload = json.loads(response.read())

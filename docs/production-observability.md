@@ -44,17 +44,19 @@ A successful response must be HTTP 200 and report `schemaReady: true` and `dataR
 The GitHub Production Smoke workflow runs hourly and after successful CI deployments. It checks the database-backed APIs, canonical pages, SEO files, and manifest. If a separate uptime service is added, set:
 
 ```txt
-BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=external-monitor
-BASKETBALL_SAVANT_UPTIME_MONITOR_URL=https://...
+SHOTCLOCK_UPTIME_MONITOR_DECISION=external-monitor
+SHOTCLOCK_UPTIME_MONITOR_URL=https://...
 ```
 
 The current production decision is to use GitHub Production Smoke as the uptime monitor. Railway has:
 
 ```txt
-BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only
+SHOTCLOCK_UPTIME_MONITOR_DECISION=github-smoke-only
 ```
 
-If a separate uptime service is added later, change the decision to `external-monitor` and set `BASKETBALL_SAVANT_UPTIME_MONITOR_URL`.
+If a separate uptime service is added later, change the decision to `external-monitor` and set `SHOTCLOCK_UPTIME_MONITOR_URL`.
+
+The legacy `BASKETBALL_SAVANT_*` launch-gate names are still accepted for existing environments, but new configuration should use `SHOTCLOCK_*`.
 
 ## Load Check
 

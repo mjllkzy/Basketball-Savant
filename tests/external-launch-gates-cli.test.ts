@@ -34,6 +34,8 @@ describe("external launch gate CLI", () => {
     expect(script).toContain("NEXT_PUBLIC_SITE_URL");
     expect(script).toContain("SENTRY_DSN");
     expect(script).toContain("NEXT_PUBLIC_POSTHOG_KEY");
+    expect(script).toContain("SHOTCLOCK_BACKUP_POLICY_CONFIRMED");
+    expect(script).toContain("SHOTCLOCK_UPTIME_MONITOR_DECISION");
     expect(script).toContain("BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED");
     expect(script).toContain("BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION");
   });
@@ -55,11 +57,15 @@ describe("external launch gate CLI", () => {
   runIfPython("fails clearly when required external gates are missing", () => {
     const env = { ...process.env };
     delete env.NEXT_PUBLIC_SITE_URL;
+    delete env.SHOTCLOCK_URL;
     delete env.BASKETBALL_SAVANT_URL;
     delete env.SENTRY_DSN;
     delete env.SENTRY_ENVIRONMENT;
     delete env.NEXT_PUBLIC_POSTHOG_KEY;
     delete env.NEXT_PUBLIC_POSTHOG_HOST;
+    delete env.SHOTCLOCK_BACKUP_POLICY_CONFIRMED;
+    delete env.SHOTCLOCK_UPTIME_MONITOR_DECISION;
+    delete env.SHOTCLOCK_UPTIME_MONITOR_URL;
     delete env.BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED;
     delete env.BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION;
     delete env.BASKETBALL_SAVANT_UPTIME_MONITOR_URL;
@@ -80,7 +86,27 @@ describe("external launch gate CLI", () => {
       cwd: process.cwd(),
       env: {
         ...process.env,
-        NEXT_PUBLIC_SITE_URL: "https://www.basketballsavant.com",
+        NEXT_PUBLIC_SITE_URL: "https://www.shotclockanalytics.com",
+        SENTRY_DSN: "https://public@sentry.example.com/42",
+        SENTRY_ENVIRONMENT: "production",
+        NEXT_PUBLIC_POSTHOG_KEY: "phc_test_123",
+        NEXT_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com",
+        SHOTCLOCK_BACKUP_POLICY_CONFIRMED: "true",
+        SHOTCLOCK_UPTIME_MONITOR_DECISION: "github-smoke-only",
+      },
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('"status": "ready"');
+  });
+
+  runIfPython("accepts legacy Basketball Savant launch gate environment names", () => {
+    const result = spawnSync(pythonCommand!, ["scripts/check_external_launch_gates.py"], {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        NEXT_PUBLIC_SITE_URL: "https://www.shotclockanalytics.com",
         SENTRY_DSN: "https://public@sentry.example.com/42",
         SENTRY_ENVIRONMENT: "production",
         NEXT_PUBLIC_POSTHOG_KEY: "phc_test_123",

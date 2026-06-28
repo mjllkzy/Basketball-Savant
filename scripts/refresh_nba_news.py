@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 NBA_NEWS_URL = "https://www.nba.com/news"
 DEFAULT_OUTPUT = Path("src/lib/data/news.json")
 REQUEST_TIMEOUT_SECONDS = 30
-USER_AGENT = "Basketball-Savant-News-Refresh/1.0"
+USER_AGENT = "ShotClock-News-Refresh/1.0"
 
 ALLOWED_CATEGORIES = {
     "League",

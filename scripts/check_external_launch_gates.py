@@ -37,6 +37,14 @@ def truthy(value: str | None) -> bool:
     return clean(value).lower() in {"1", "true", "yes", "y"}
 
 
+def first_configured_env(env: Mapping[str, str], *names: str) -> str:
+    for name in names:
+        value = clean(env.get(name))
+        if value:
+            return value
+    return ""
+
+
 def require_https_url(value: str, *, allow_railway_domain: bool = False) -> tuple[bool, str]:
     parsed = urlparse(value)
     if parsed.scheme != "https" or not parsed.netloc:
@@ -102,25 +110,37 @@ def check_posthog(env: Mapping[str, str]) -> list[GateResult]:
 
 
 def check_backup_policy(env: Mapping[str, str], backup_policy_confirmed: bool) -> GateResult:
-    if backup_policy_confirmed or truthy(env.get("BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED")):
+    if backup_policy_confirmed or truthy(first_configured_env(
+        env,
+        "SHOTCLOCK_BACKUP_POLICY_CONFIRMED",
+        "BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED",
+    )):
         return GateResult("backup_policy", True, "backup/PITR policy decision is confirmed")
     return GateResult(
         "backup_policy",
         False,
-        "confirm Railway backup/PITR or external backup policy with BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED=true",
+        "confirm Railway backup/PITR or external backup policy with SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true",
     )
 
 
 def check_uptime_decision(env: Mapping[str, str]) -> list[GateResult]:
-    decision = clean(env.get("BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION"))
-    monitor_url = clean(env.get("BASKETBALL_SAVANT_UPTIME_MONITOR_URL"))
+    decision = first_configured_env(
+        env,
+        "SHOTCLOCK_UPTIME_MONITOR_DECISION",
+        "BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION",
+    )
+    monitor_url = first_configured_env(
+        env,
+        "SHOTCLOCK_UPTIME_MONITOR_URL",
+        "BASKETBALL_SAVANT_UPTIME_MONITOR_URL",
+    )
 
     if decision not in UPTIME_DECISIONS:
         return [
             GateResult(
                 "uptime_monitor_decision",
                 False,
-                "set BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION to github-smoke-only or external-monitor",
+                "set SHOTCLOCK_UPTIME_MONITOR_DECISION to github-smoke-only or external-monitor",
             )
         ]
 
@@ -128,7 +148,7 @@ def check_uptime_decision(env: Mapping[str, str]) -> list[GateResult]:
     if decision == "external-monitor":
         if is_placeholder(monitor_url):
             results.append(
-                GateResult("uptime_monitor_url", False, "BASKETBALL_SAVANT_UPTIME_MONITOR_URL is required")
+                GateResult("uptime_monitor_url", False, "SHOTCLOCK_UPTIME_MONITOR_URL is required")
             )
         else:
             ok, details = require_https_url(monitor_url, allow_railway_domain=True)
@@ -146,7 +166,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--site-url",
-        default=clean(os.environ.get("NEXT_PUBLIC_SITE_URL") or os.environ.get("BASKETBALL_SAVANT_URL")),
+        default=clean(
+            os.environ.get("NEXT_PUBLIC_SITE_URL")
+            or os.environ.get("SHOTCLOCK_URL")
+            or os.environ.get("BASKETBALL_SAVANT_URL")
+        ),
         help="Public canonical site URL to validate. Defaults to NEXT_PUBLIC_SITE_URL.",
     )
     parser.add_argument(

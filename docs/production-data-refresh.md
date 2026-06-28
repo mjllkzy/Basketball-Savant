@@ -62,5 +62,5 @@ The application is protected by Railway Postgres storage plus configured usage a
 After that decision is made, set the local validation flag when running the launch gate check:
 
 ```bash
-BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED=true python scripts/check_external_launch_gates.py
+SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true python scripts/check_external_launch_gates.py
 ```

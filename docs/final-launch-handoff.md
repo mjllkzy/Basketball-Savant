@@ -13,8 +13,8 @@ This is the remaining account-level setup needed after the repo-side launch work
 
 ## Required Before Public Launch
 
-1. Choose the public domain, for example `https://www.basketballsavant.com`.
-2. Add that custom domain to the Railway `Basketball-Savant` service.
+1. Choose the public domain, for example `https://www.shotclockanalytics.com`.
+2. Add that custom domain to the current Railway application service.
 3. Add the DNS records Railway provides at the domain registrar.
 4. Wait until Railway marks the custom domain active.
 5. Set the production site URL:
@@ -50,11 +50,13 @@ railway variable set \
 
 ```bash
 railway variable set \
-  BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only \
-  BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED=true \
+  SHOTCLOCK_UPTIME_MONITOR_DECISION=github-smoke-only \
+  SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true \
   --service Basketball-Savant \
   --environment production
 ```
+
+The legacy `BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION`, `BASKETBALL_SAVANT_UPTIME_MONITOR_URL`, and `BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED` names still work as fallbacks, but new setup should use the `SHOTCLOCK_*` names.
 
 ## GitHub Secrets For Final Gate Workflow
 
@@ -78,8 +80,8 @@ SENTRY_DSN='https://public-key@o000000.ingest.sentry.io/000000' \
 SENTRY_ENVIRONMENT=production \
 NEXT_PUBLIC_POSTHOG_KEY='phc_project_key' \
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
-BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only \
-BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED=true \
+SHOTCLOCK_UPTIME_MONITOR_DECISION=github-smoke-only \
+SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true \
 python scripts/check_external_launch_gates.py --site-url https://www.example.com
 
 python scripts/check_launch_readiness.py \

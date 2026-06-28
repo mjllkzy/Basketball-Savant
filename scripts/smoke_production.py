@@ -17,6 +17,7 @@ from typing import Any
 DEFAULT_BASE_URL = "https://basketball-savant-production.up.railway.app"
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RESPONSE_SECONDS = 8.0
+USER_AGENT = "ShotClock-Production-Smoke/1.0"
 
 
 @dataclass
@@ -31,7 +32,7 @@ def request(base_url: str, path: str) -> tuple[CheckResult, bytes]:
     started = time.perf_counter()
     request_object = urllib.request.Request(
         f"{base_url.rstrip('/')}{path}",
-        headers={"User-Agent": "Basketball-Savant-Production-Smoke/1.0"},
+        headers={"User-Agent": USER_AGENT},
     )
     with urllib.request.urlopen(request_object, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         body = response.read()
@@ -123,7 +124,10 @@ def validate(base_url: str) -> list[CheckResult]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base-url", default=os.environ.get("BASKETBALL_SAVANT_URL", DEFAULT_BASE_URL))
+    parser.add_argument(
+        "--base-url",
+        default=os.environ.get("SHOTCLOCK_URL") or os.environ.get("BASKETBALL_SAVANT_URL", DEFAULT_BASE_URL),
+    )
     parser.add_argument("--expected-commit", default=os.environ.get("EXPECTED_COMMIT", ""))
     parser.add_argument("--wait-seconds", type=int, default=0)
     return parser.parse_args()

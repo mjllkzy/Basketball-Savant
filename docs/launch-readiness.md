@@ -130,8 +130,8 @@ SENTRY_DSN=https://public@sentry.example.com/42 \
 SENTRY_ENVIRONMENT=production \
 NEXT_PUBLIC_POSTHOG_KEY=phc_... \
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
-BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=github-smoke-only \
-BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED=true \
+SHOTCLOCK_UPTIME_MONITOR_DECISION=github-smoke-only \
+SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true \
 python scripts/check_external_launch_gates.py
 
 python scripts/check_launch_readiness.py \
@@ -140,7 +140,7 @@ python scripts/check_launch_readiness.py \
   --require-custom-domain
 ```
 
-Use `BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION=external-monitor` and set `BASKETBALL_SAVANT_UPTIME_MONITOR_URL=https://...` if a third-party uptime monitor is added instead of relying only on the scheduled GitHub Production Smoke workflow.
+Use `SHOTCLOCK_UPTIME_MONITOR_DECISION=external-monitor` and set `SHOTCLOCK_UPTIME_MONITOR_URL=https://...` if a third-party uptime monitor is added instead of relying only on the scheduled GitHub Production Smoke workflow.
 
 ## Security Baseline
 
@@ -162,8 +162,9 @@ Application service:
 - `SENTRY_ENVIRONMENT`: missing.
 - `NEXT_PUBLIC_POSTHOG_KEY`: missing.
 - `NEXT_PUBLIC_POSTHOG_HOST`: defaults to `https://us.i.posthog.com`.
-- `BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION`: `github-smoke-only`.
-- `BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED`: `true`.
+- `SHOTCLOCK_UPTIME_MONITOR_DECISION`: `github-smoke-only`.
+- `SHOTCLOCK_BACKUP_POLICY_CONFIRMED`: `true`.
+- Legacy `BASKETBALL_SAVANT_*` launch-gate names still work as fallbacks.
 
 Domains:
 

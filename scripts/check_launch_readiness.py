@@ -17,6 +17,7 @@ from typing import Any
 
 DEFAULT_BASE_URL = "https://basketball-savant-production.up.railway.app"
 REQUEST_TIMEOUT_SECONDS = 30
+USER_AGENT = "ShotClock-Launch-Readiness/1.0"
 MAX_RESPONSE_SECONDS = 8.0
 SECURITY_HEADER_REQUIREMENTS = {
     "x-content-type-options": "nosniff",
@@ -48,7 +49,7 @@ def request_with_headers(base_url: str, path: str) -> tuple[CheckResult, bytes, 
     started = time.perf_counter()
     request_object = urllib.request.Request(
         f"{base_url.rstrip('/')}{path}",
-        headers={"User-Agent": "Basketball-Savant-Launch-Readiness/1.0"},
+        headers={"User-Agent": USER_AGENT},
     )
     with urllib.request.urlopen(request_object, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         body = response.read()
@@ -178,7 +179,10 @@ def validate_seo(base_url: str) -> list[CheckResult]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base-url", default=os.environ.get("BASKETBALL_SAVANT_URL", DEFAULT_BASE_URL))
+    parser.add_argument(
+        "--base-url",
+        default=os.environ.get("SHOTCLOCK_URL") or os.environ.get("BASKETBALL_SAVANT_URL", DEFAULT_BASE_URL),
+    )
     parser.add_argument("--expected-commit", default=os.environ.get("EXPECTED_COMMIT", ""))
     parser.add_argument(
         "--require-custom-domain",

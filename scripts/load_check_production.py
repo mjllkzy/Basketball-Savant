@@ -18,6 +18,7 @@ from typing import Any
 
 DEFAULT_BASE_URL = "https://basketball-savant-production.up.railway.app"
 REQUEST_TIMEOUT_SECONDS = 30
+USER_AGENT = "ShotClock-Production-Load-Check/1.0"
 DEFAULT_PATHS = [
     "/api/health",
     "/api/players?pageSize=25&sort=pts&order=desc&minGames=30",
@@ -74,7 +75,7 @@ def request(base_url: str, path: str) -> RequestResult:
     started = time.perf_counter()
     request_object = urllib.request.Request(
         f"{base_url.rstrip('/')}{path}",
-        headers={"User-Agent": "Basketball-Savant-Production-Load-Check/1.0"},
+        headers={"User-Agent": USER_AGENT},
     )
     try:
         with urllib.request.urlopen(request_object, timeout=REQUEST_TIMEOUT_SECONDS) as response:
@@ -98,7 +99,7 @@ def wait_for_release(base_url: str, expected_commit: str, wait_seconds: int) -> 
             try:
                 request_object = urllib.request.Request(
                     f"{base_url.rstrip('/')}/api/health",
-                    headers={"User-Agent": "Basketball-Savant-Production-Load-Check/1.0"},
+                    headers={"User-Agent": USER_AGENT},
                 )
                 with urllib.request.urlopen(request_object, timeout=REQUEST_TIMEOUT_SECONDS) as response:
                     payload = json.loads(response.read())
@@ -145,7 +146,10 @@ def summarize(results: list[RequestResult]) -> dict[str, Any]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base-url", default=os.environ.get("BASKETBALL_SAVANT_URL", DEFAULT_BASE_URL))
+    parser.add_argument(
+        "--base-url",
+        default=os.environ.get("SHOTCLOCK_URL") or os.environ.get("BASKETBALL_SAVANT_URL", DEFAULT_BASE_URL),
+    )
     parser.add_argument("--expected-commit", default=os.environ.get("EXPECTED_COMMIT", ""))
     parser.add_argument("--wait-seconds", type=int, default=0)
     parser.add_argument("--rounds", type=int, default=3, help="Number of times each core route is requested.")
