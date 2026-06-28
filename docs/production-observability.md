@@ -22,7 +22,14 @@ NEXT_PUBLIC_POSTHOG_KEY=
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
-The browser integration uses cookieless, memory-only analytics. It disables autocapture and session recording, and records explicit page views plus Core Web Vitals.
+The browser integration uses cookieless, memory-only analytics. It disables autocapture and session recording, and records:
+
+- explicit page views
+- Core Web Vitals
+- `navigation_click` events for same-site links
+- `outbound_link_click` events for external source links
+
+Interaction events include only page area, current pathname, target pathname, external-link status, external target domain, and download status. They intentionally do not include full URLs, query strings, search input text, user IDs, or session recordings.
 
 ## Uptime
 
