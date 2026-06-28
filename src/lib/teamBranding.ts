@@ -1,7 +1,12 @@
 import type { CSSProperties } from "react";
 import type { Team } from "@/lib/types";
 
+const teamLogoUrlOverrides: Record<string, string> = {
+  "1610612745": "https://cdn.nba.com/logos/nba/1610612745/primary/L/logo.svg?v=2026-06-04",
+};
+
 export function nbaTeamLogoUrl(teamId: string) {
+  if (teamLogoUrlOverrides[teamId]) return teamLogoUrlOverrides[teamId];
   return `https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`;
 }
 
