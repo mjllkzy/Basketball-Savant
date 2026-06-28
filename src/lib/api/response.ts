@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { captureServerException } from "@/lib/telemetry/sentry.server";
 
 export const PUBLIC_DATA_CACHE_CONTROL = "public, s-maxage=300, stale-while-revalidate=3600";
 export const SHORT_DATA_CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=300";
@@ -42,8 +43,18 @@ export function badRequest(error: unknown) {
   return NextResponse.json({ data: null, error: { code: "BAD_REQUEST", message: "Invalid request" } }, { status: 400 });
 }
 
-export function serverError(error: unknown) {
+function normalizeError(error: unknown) {
+  if (error instanceof Error) return error;
+  if (typeof error === "string" && error.trim()) return new Error(error.trim());
+  return new Error("Unknown API server error");
+}
+
+export function serverError(error: unknown, context: Record<string, unknown> = {}) {
   console.error("API server error", error);
+  void captureServerException(normalizeError(error), {
+    source: "api_response_helper",
+    ...context,
+  }).catch(() => undefined);
   return NextResponse.json(
     { data: null, error: { code: "SERVER_ERROR", message: "Unexpected server error" } },
     { status: 500 }

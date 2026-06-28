@@ -11,7 +11,7 @@ SENTRY_DSN=
 SENTRY_ENVIRONMENT=production
 ```
 
-Sentry runs only on the server through its envelope API. The client error boundary sends a small, rate-limited same-origin payload to `/api/telemetry/error`; the browser does not download a Sentry SDK and no user identifiers are included.
+Sentry runs only on the server through its envelope API. The client error boundary sends a small, rate-limited same-origin payload to `/api/telemetry/error`, and API routes that use the shared `serverError` helper report 500-class failures from the server. The browser does not download a Sentry SDK and no user identifiers are included.
 
 ## PostHog
 

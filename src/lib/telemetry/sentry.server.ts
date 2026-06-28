@@ -42,7 +42,7 @@ export async function captureServerException(error: Error, context: Record<strin
     event_id: eventId,
     sent_at: sentAt,
     dsn: endpoint.dsn,
-    sdk: { name: "basketball-savant.server", version: "1.0.0" },
+    sdk: { name: "shotclock.server", version: "1.0.0" },
   };
   const event = {
     event_id: eventId,
