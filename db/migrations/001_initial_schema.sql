@@ -1,4 +1,4 @@
--- Phase 3.1 database foundation for ShotClock.
+-- Phase 3.1 database foundation for Basketball Savant.
 -- Transactions are managed by scripts/migrate-postgres.mjs.
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
