@@ -26,6 +26,8 @@ USER_AGENT = "ShotClock-News-Refresh/1.0"
 CONTENT_NAMESPACE = "{http://purl.org/rss/1.0/modules/content/}"
 DEFAULT_OFFICIAL_LIMIT = 10
 DEFAULT_RUMOR_LIMIT = 10
+MAX_NEWS_TITLE_LENGTH = 88
+MAX_NEWS_SUMMARY_LENGTH = 155
 
 ALLOWED_CATEGORIES = {
     "League",
@@ -44,6 +46,7 @@ ALLOWED_REPORTING_STATUSES = {
     "Official",
     "Rumor",
 }
+
 
 @dataclass(frozen=True)
 class TrustedRumorSource:
@@ -108,6 +111,95 @@ def clean_text(value: Any) -> str:
     text = html.unescape(str(value or ""))
     text = re.sub(r"<[^>]+>", "", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def smart_trim(value: str, *, max_length: int, ellipsis: bool = False) -> str:
+    text = re.sub(r"\s+", " ", value).strip(" ,;:-–—")
+    if len(text) <= max_length:
+        return text
+
+    trim_limit = max_length - 3 if ellipsis else max_length
+    clipped = text[: trim_limit + 1]
+    for separator in [", ", "; ", " – ", " - ", ": "]:
+        candidate = clipped.rsplit(separator, 1)[0].strip(" ,;:-–—")
+        if len(candidate) >= trim_limit * 0.55:
+            return f"{candidate}..." if ellipsis else candidate
+
+    candidate = clipped.rsplit(" ", 1)[0].strip(" ,;:-–—")
+    if not candidate:
+        candidate = text[:trim_limit].strip(" ,;:-–—")
+    return f"{candidate}..." if ellipsis else candidate
+
+
+def summarize_title(value: str) -> str:
+    title = clean_text(value)
+    title = re.sub(r"^(?:Report|Reports|Rumor|Rumors|NBA Rumors):\s*", "", title, flags=re.IGNORECASE)
+    title = re.sub(r"^Stein/Fischer[’']s Latest:\s*", "", title, flags=re.IGNORECASE)
+    title = re.sub(r"^([A-Za-z0-9 .&'’/-]+?)\s+Rumors:\s*", r"\1: ", title)
+    title = re.sub(r"^([A-Za-z0-9 .&'’/-]+?)\s+Notes:\s*", r"\1: ", title)
+    title = re.sub(r"\s*,?\s+(?:And\s+)?More$", "", title, flags=re.IGNORECASE)
+    title = re.sub(r"\s+", " ", title).strip(" ,;:-–—")
+    return smart_trim(title, max_length=MAX_NEWS_TITLE_LENGTH)
+
+
+def split_sentences(value: str) -> list[str]:
+    protected = {
+        "No.": "No<dot>",
+        "Jr.": "Jr<dot>",
+        "Sr.": "Sr<dot>",
+        "Dr.": "Dr<dot>",
+        "Mr.": "Mr<dot>",
+        "Ms.": "Ms<dot>",
+    }
+    text = value
+    for original, replacement in protected.items():
+        text = text.replace(original, replacement)
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    return [sentence.replace("<dot>", ".").strip() for sentence in sentences if sentence.strip()]
+
+
+def clean_summary_sentence(value: str) -> str:
+    sentence = clean_text(value)
+    sentence = re.sub(r"^\d{1,2}:\d{2}\s*(?:am|pm):\s*", "", sentence, flags=re.IGNORECASE)
+    sentence = re.sub(r"\((?:[^)]*(?:Twitter|X link|YouTube|Instagram|subscription|link|via)[^)]*)\)", "", sentence, flags=re.IGNORECASE)
+    sentence = re.sub(r"^In (?:the latest episode|an episode|an interview|a radio interview)[^,]+,\s*", "", sentence, flags=re.IGNORECASE)
+    sentence = re.sub(r"\b(on|On) (?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b\s*", "", sentence)
+    sentence = re.sub(
+        r",?\s+(?:according to|per|relays|writes|league sources tell|sources tell|source tells|the team announced|the program announced)\b.*$",
+        "",
+        sentence,
+        flags=re.IGNORECASE,
+    )
+    sentence = re.sub(r"\bMore\s*$", "", sentence, flags=re.IGNORECASE)
+    sentence = sentence.replace("[...]", "").replace("[…]", "").strip()
+    sentence = re.sub(r"\s+,", ",", sentence)
+    return re.sub(r"\s+", " ", sentence).strip(" ,;:-–—")
+
+
+def low_information_summary(value: str) -> bool:
+    lowered = value.lower()
+    return lowered in {"the move is official", "the deal is official"} or lowered.startswith("the move is official")
+
+
+def summarize_description(value: str) -> str:
+    summary = clean_text(value).replace("[...]", "").replace("[…]", "").replace("More...", "").strip()
+    sentences = split_sentences(summary)
+    cleaned_sentences = [clean_summary_sentence(sentence) for sentence in sentences]
+    useful = [sentence for sentence in cleaned_sentences if sentence and not low_information_summary(sentence)]
+    if not useful:
+        useful = [sentence for sentence in cleaned_sentences if sentence]
+    if not useful:
+        return smart_trim(summary, max_length=MAX_NEWS_SUMMARY_LENGTH, ellipsis=True)
+
+    concise = useful[0]
+    if len(concise) < 80 and len(useful) > 1:
+        combined = f"{concise}. {useful[1].rstrip('.')}"
+        if len(combined) <= MAX_NEWS_SUMMARY_LENGTH:
+            concise = combined
+
+    if concise and concise[-1] not in ".!?":
+        concise = f"{concise}."
+    return smart_trim(concise, max_length=MAX_NEWS_SUMMARY_LENGTH, ellipsis=True)
 
 
 def validate_source_url(value: str) -> str:
@@ -203,14 +295,16 @@ def article_to_news_item(article: dict[str, Any]) -> NewsItem | None:
         return None
 
     slug = clean_text(article.get("slug") or article.get("name"))
-    title = clean_text(article.get("title") or article.get("shortTitle"))
+    raw_title = clean_text(article.get("title") or article.get("shortTitle"))
     source_url = validate_source_url(clean_text(article.get("permalink") or f"{NBA_NEWS_URL}/{slug}"))
     published_at = clean_text(article.get("date") or article.get("modified"))
-    summary = clean_text(article.get("excerpt"))
+    raw_summary = clean_text(article.get("excerpt"))
+    title = summarize_title(raw_title)
+    summary = summarize_description(raw_summary)
     category = classify_category(article)
     reporting_status = classify_reporting_status(article, category=category)
 
-    if not slug or not title or not published_at or not summary:
+    if not slug or not raw_title or not published_at or not raw_summary:
         raise RuntimeError(f"NBA.com article is missing required fields: {article!r}")
     if category not in ALLOWED_CATEGORIES:
         raise RuntimeError(f"Unsupported news category {category!r} for {slug}")
@@ -262,16 +356,17 @@ def refresh_news(source_url: str, *, limit: int) -> list[dict[str, str]]:
 
 
 def rss_item_to_news_item(item: ET.Element, source: TrustedRumorSource) -> NewsItem | None:
-    title = clean_text(item.findtext("title"))
+    raw_title = clean_text(item.findtext("title"))
     raw_source_url = clean_text(item.findtext("link"))
     raw_published_at = clean_text(item.findtext("pubDate"))
     description = clean_text(item.findtext("description"))
     content = clean_text(item.findtext(f"{CONTENT_NAMESPACE}encoded"))
-    summary = trim_summary(description or content)
+    title = summarize_title(raw_title)
+    summary = summarize_description(description or content)
     categories = [clean_text(category.text) for category in item.findall("category") if clean_text(category.text)]
-    category = classify_rss_category(title, categories, summary)
+    category = classify_rss_category(raw_title, categories, summary)
 
-    if not title or not raw_source_url or not raw_published_at or not summary:
+    if not raw_title or not raw_source_url or not raw_published_at or not summary:
         return None
     source_url = validate_trusted_rumor_url(raw_source_url, source)
     published_at = parse_rss_datetime(raw_published_at)
@@ -329,14 +424,6 @@ def external_item_id(source: TrustedRumorSource, source_url: str, title: str) ->
 def slugify(value: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
     return slug or "item"
-
-
-def trim_summary(value: str, *, max_length: int = 220) -> str:
-    summary = clean_text(value).replace("[...]", "").replace("[…]", "").strip()
-    if len(summary) <= max_length:
-        return summary
-    trimmed = summary[:max_length].rsplit(" ", 1)[0].rstrip(".,;:")
-    return f"{trimmed}..."
 
 
 def parse_rss_datetime(value: str) -> str:
