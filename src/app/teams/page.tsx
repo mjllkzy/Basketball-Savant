@@ -1,16 +1,48 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { StatTable } from "@/components/ui/StatTable";
+import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { listTeamSeasonSummaries } from "@/lib/db/teamAnalytics.server";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
 import { nbaTeamLogoUrl } from "@/lib/teamBranding";
+
+const teamTableMinWidth = "1308px";
 
 export const metadata: Metadata = {
   title: "NBA Teams",
   description: "Compare 2025-26 NBA team records, ratings, pace, shooting, ball movement, and rebounding.",
   alternates: { canonical: "/teams" },
 };
+
+function centerColumn(key: string, label: string, group: string, width: string): StatTableColumn {
+  return { key, label, group, width, align: "center" };
+}
+
+const teamColumns: StatTableColumn[] = [
+  {
+    key: "team",
+    label: "Team",
+    group: "Profile",
+    hrefKey: "href",
+    imageKey: "teamLogo",
+    imageAltKey: "teamLogoAlt",
+    imageFallbackKey: "teamLogoFallback",
+    width: "290px",
+    truncate: true
+  },
+  centerColumn("conf", "Conf", "Profile", "70px"),
+  centerColumn("record", "Record", "Profile", "90px"),
+  centerColumn("ortg", "ORtg", "Ratings", "86px"),
+  centerColumn("drtg", "DRtg", "Ratings", "86px"),
+  centerColumn("net", "Net", "Ratings", "86px"),
+  centerColumn("pace", "Pace", "Tempo", "80px"),
+  centerColumn("ts", "TS%", "Efficiency", "84px"),
+  centerColumn("efg", "eFG%", "Efficiency", "84px"),
+  centerColumn("three", "3P%", "Efficiency", "84px"),
+  centerColumn("ast", "AST%", "Ball Movement", "100px"),
+  centerColumn("reb", "REB%", "Possession", "84px"),
+  centerColumn("tov", "TOV%", "Possession", "84px")
+];
 
 export default async function TeamsPage() {
   const result = await listTeamSeasonSummaries();
@@ -39,22 +71,10 @@ export default async function TeamsPage() {
       <PageHeader eyebrow="Team Index" title="Teams" description="Official team records, ratings, pace, shooting, ball movement, and rebounding context." />
       <div data-data-source={result.source}>
         <StatTable
-          columns={[
-            { key: "team", label: "Team", group: "Profile", hrefKey: "href", imageKey: "teamLogo", imageAltKey: "teamLogoAlt", imageFallbackKey: "teamLogoFallback" },
-            { key: "conf", label: "Conf", group: "Profile" },
-            { key: "record", label: "Record", group: "Profile" },
-            { key: "ortg", label: "ORtg", group: "Ratings", align: "right" },
-            { key: "drtg", label: "DRtg", group: "Ratings", align: "right" },
-            { key: "net", label: "Net", group: "Ratings", align: "right" },
-            { key: "pace", label: "Pace", group: "Tempo", align: "right" },
-            { key: "ts", label: "TS%", group: "Efficiency", align: "right" },
-            { key: "efg", label: "eFG%", group: "Efficiency", align: "right" },
-            { key: "three", label: "3P%", group: "Efficiency", align: "right" },
-            { key: "ast", label: "AST%", group: "Ball Movement", align: "right" },
-            { key: "reb", label: "REB%", group: "Possession", align: "right" },
-            { key: "tov", label: "TOV%", group: "Possession", align: "right" }
-          ]}
+          columns={teamColumns}
           rows={rows}
+          layout="fixed"
+          minWidth={teamTableMinWidth}
           rowAccentColorKey="teamAccent"
           rowAccentColumnKey="team"
         />
