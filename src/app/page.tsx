@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BarChart3, ExternalLink, GitCompare, Newspaper, Users } from "lucide-react";
 import { ShotClockMark } from "@/components/brand/ShotClockMark";
-import { categoryTone, formatNewsDate, getRecentNews, reportingStatusTone } from "@/lib/news";
+import { NEWS_RETENTION_DAYS, categoryTone, formatNewsDate, getRecentNews, reportingStatusTone } from "@/lib/news";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -16,7 +16,7 @@ const tools = [
 ];
 
 export default function HomePage() {
-  const latestNews = getRecentNews(3);
+  const latestNews = getRecentNews(3, { withinDays: NEWS_RETENTION_DAYS });
 
   return (
     <div className="grid gap-6">

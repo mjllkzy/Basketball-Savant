@@ -2,9 +2,11 @@ import Link from "next/link";
 import { ExternalLink, Newspaper } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
+  NEWS_RETENTION_DAYS,
   categoryTone,
   filterNewsFeed,
   formatNewsDate,
+  getBiggestOfficialNewsLead,
   newsFeedCount,
   newsFeedFilters,
   normalizeNewsFilter,
@@ -38,16 +40,17 @@ function NewsCard({ item }: { item: NewsItem }) {
 export default async function NewsPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
   const activeFilter = normalizeNewsFilter(singleParam(resolvedSearchParams, "filter"));
-  const filteredNews = filterNewsFeed(activeFilter);
-  const featured = filteredNews[0];
-  const remaining = filteredNews.slice(1);
+  const newsWindow = { withinDays: NEWS_RETENTION_DAYS };
+  const filteredNews = filterNewsFeed(activeFilter, newsWindow);
+  const featured = getBiggestOfficialNewsLead(newsWindow);
+  const remaining = filteredNews.filter((item) => item.id !== featured?.id);
 
   return (
     <div className="grid gap-5">
       <PageHeader
         eyebrow="News Desk"
         title="NBA News"
-        description="Recent NBA headlines, roster movement, injury notes, draft reports, and league context pulled from credible basketball sources."
+        description="Important NBA headlines, roster movement, injury notes, draft reports, and league context from the rolling 3-day news window."
         actions={
           <nav className="inline-flex rounded border border-slate-200 bg-white p-1 shadow-sm" aria-label="News feed filter">
             {newsFeedFilters.map((filter) => {
@@ -60,7 +63,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
                   className={`inline-flex min-h-9 items-center gap-2 rounded px-3 text-xs font-black uppercase tracking-[0.12em] ${active ? "bg-ink text-white" : "text-slate-600 hover:bg-slate-50 hover:text-ink"}`}
                 >
                   {filter.label}
-                  <span className={`rounded px-1.5 py-0.5 text-[10px] ${active ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"}`}>{newsFeedCount(filter.value)}</span>
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] ${active ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"}`}>{newsFeedCount(filter.value, newsWindow)}</span>
                 </Link>
               );
             })}
@@ -75,7 +78,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
               <div>
                 <div className="mb-3 inline-flex items-center gap-2 rounded border border-white/15 bg-white/10 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-teal-100">
                   <Newspaper className="h-4 w-4" />
-                  Latest Lead
+                  Biggest Lead
                 </div>
                 <h2 className="text-3xl font-black tracking-tight sm:text-4xl">{featured.title}</h2>
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-200">{featured.summary}</p>
@@ -94,10 +97,16 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
             </div>
           </section>
 
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {remaining.map((item) => <NewsCard key={item.id} item={item} />)}
-          </section>
+          {remaining.length ? (
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {remaining.map((item) => <NewsCard key={item.id} item={item} />)}
+            </section>
+          ) : null}
         </>
+      ) : filteredNews.length ? (
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredNews.map((item) => <NewsCard key={item.id} item={item} />)}
+        </section>
       ) : (
         <section className="rounded border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600 shadow-sm">
           No news items match this filter.

@@ -27,6 +27,7 @@ describe("basketball news refresh", () => {
     expect(script).toContain("https://www.hoopsrumors.com/feed");
     expect(script).toContain("DEFAULT_OFFICIAL_LIMIT = 10");
     expect(script).toContain("DEFAULT_RUMOR_LIMIT = 10");
+    expect(script).toContain("DEFAULT_RETENTION_DAYS = 3");
     expect(script).toContain("__NEXT_DATA__");
     expect(script).toContain("validate_source_url");
     expect(script).toContain("reportingStatus");
@@ -50,16 +51,21 @@ describe("basketball news refresh", () => {
     expect(result.status).toBe(0);
   });
 
-  runIfPython("keeps separate 10-item official and rumor windows while dropping older extras", () => {
+  runIfPython("keeps separate 10-item official and rumor windows while dropping stale extras", () => {
     const script = [
       "import importlib.util, json, pathlib, sys",
+      "from datetime import datetime, timedelta, timezone",
       "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
       "module = importlib.util.module_from_spec(spec)",
       "sys.modules[spec.name] = module",
       "spec.loader.exec_module(module)",
-      "official = [{'id':f'official-{i}','title':f'Official item {i}','category':'League','reportingStatus':'Official','publishedAt':f'2026-06-{28-i:02d}T12:00:00.000Z','sourceName':'NBA.com','sourceUrl':f'https://www.nba.com/news/official-{i}','summary':'Official NBA.com item summary.'} for i in range(12)]",
-      "rumors = [{'id':f'rumor-{i}','title':f'Rumor item {i}','category':'Rumor','reportingStatus':'Rumor','publishedAt':f'2026-06-{28-i:02d}T06:00:00.000Z','sourceName':'Hoops Rumors','sourceUrl':f'https://www.hoopsrumors.com/2026/06/rumor-{i}.html','summary':'Trusted rumor item summary.'} for i in range(12)]",
-      "selected = module.select_display_news_items(official, rumors, official_limit=10, rumor_limit=10)",
+      "now = datetime(2026, 6, 28, 12, 0, tzinfo=timezone.utc)",
+      "stamp = lambda hours: (now - timedelta(hours=hours)).isoformat(timespec='milliseconds').replace('+00:00','Z')",
+      "official = [{'id':f'official-{i}','title':f'Official trade item {i}','category':'Trade','reportingStatus':'Official','publishedAt':stamp(i),'sourceName':'NBA.com','sourceUrl':f'https://www.nba.com/news/official-{i}','summary':'Official NBA.com item summary.'} for i in range(12)]",
+      "rumors = [{'id':f'rumor-{i}','title':f'Rumor trade item {i}','category':'Trade','reportingStatus':'Rumor','publishedAt':stamp(i),'sourceName':'Hoops Rumors','sourceUrl':f'https://www.hoopsrumors.com/2026/06/rumor-{i}.html','summary':'Trusted rumor item summary.'} for i in range(12)]",
+      "official.append({'id':'old-official','title':'Old official blockbuster trade','category':'Trade','reportingStatus':'Official','publishedAt':stamp(100),'sourceName':'NBA.com','sourceUrl':'https://www.nba.com/news/old-official','summary':'Old official item summary.'})",
+      "rumors.append({'id':'old-rumor','title':'Old rumor blockbuster trade','category':'Trade','reportingStatus':'Rumor','publishedAt':stamp(100),'sourceName':'Hoops Rumors','sourceUrl':'https://www.hoopsrumors.com/2026/06/old-rumor.html','summary':'Old rumor item summary.'})",
+      "selected = module.select_display_news_items(official, rumors, official_limit=10, rumor_limit=10, retention_days=3, reference_time=now)",
       "print(json.dumps(selected))"
     ].join("\n");
 
@@ -75,6 +81,7 @@ describe("basketball news refresh", () => {
     expect(selected.filter((item) => item.reportingStatus === "Rumor")).toHaveLength(10);
     expect(selected.some((item) => item.id === "official-10" || item.id === "official-11")).toBe(false);
     expect(selected.some((item) => item.id === "rumor-10" || item.id === "rumor-11")).toBe(false);
+    expect(selected.some((item) => item.id === "old-official" || item.id === "old-rumor")).toBe(false);
     const timestamps = selected.map((item) => new Date(item.publishedAt).getTime());
     expect(timestamps).toEqual([...timestamps].sort((a, b) => b - a));
   });

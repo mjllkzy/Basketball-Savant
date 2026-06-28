@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -26,6 +26,7 @@ USER_AGENT = "ShotClock-News-Refresh/1.0"
 CONTENT_NAMESPACE = "{http://purl.org/rss/1.0/modules/content/}"
 DEFAULT_OFFICIAL_LIMIT = 10
 DEFAULT_RUMOR_LIMIT = 10
+DEFAULT_RETENTION_DAYS = 3
 MAX_NEWS_TITLE_LENGTH = 88
 MAX_NEWS_SUMMARY_LENGTH = 155
 
@@ -46,6 +47,29 @@ ALLOWED_REPORTING_STATUSES = {
     "Official",
     "Rumor",
 }
+
+CATEGORY_IMPORTANCE = {
+    "Trade": 95,
+    "Free Agency": 88,
+    "Transaction": 82,
+    "Injury": 78,
+    "Draft": 64,
+    "Draft Rumor": 62,
+    "Coaching": 54,
+    "Roster": 48,
+    "League": 42,
+    "Rumor": 38,
+}
+
+KEYWORD_IMPORTANCE = (
+    (r"\b(trade|traded|acquire|acquired)\b", 18),
+    (r"\b(blockbuster|star)\b", 16),
+    (r"\b(re-sign|sign|extension|contract|deal)\b", 14),
+    (r"\b(champion|finals|all-star|mvp|award)\b", 12),
+    (r"\b(injury|injured|surgery|torn|acl|achilles)\b", 12),
+    (r"\b(waive|waived|release|released)\b", 10),
+    (r"\b(draft|lottery|rookie)\b", 8),
+)
 
 
 @dataclass(frozen=True)
@@ -437,6 +461,26 @@ def parse_iso_datetime(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
+def news_importance_score(item: dict[str, str]) -> int:
+    text = f"{item.get('title', '')} {item.get('summary', '')}".lower()
+    score = CATEGORY_IMPORTANCE.get(item.get("category", ""), 35)
+    if item.get("reportingStatus") == "Official":
+        score += 6
+    for pattern, weight in KEYWORD_IMPORTANCE:
+        if re.search(pattern, text):
+            score += weight
+    if "takeaways" in text or "trending topics" in text:
+        score -= 28
+    if "summer league schedule" in text or "schedule" in text:
+        score -= 10
+    return score
+
+
+def within_retention_window(item: dict[str, str], *, reference_time: datetime, retention_days: int) -> bool:
+    cutoff = reference_time - timedelta(days=retention_days)
+    return parse_iso_datetime(item["publishedAt"]) >= cutoff
+
+
 def dedupe_news_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
     deduped: list[dict[str, str]] = []
     seen: set[str] = set()
@@ -449,10 +493,23 @@ def dedupe_news_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
     return deduped
 
 
-def recent_news_by_status(items: list[dict[str, str]], status: str, *, limit: int) -> list[dict[str, str]]:
-    filtered = [item for item in dedupe_news_items(items) if item["reportingStatus"] == status]
-    filtered.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
-    return filtered[:limit]
+def display_news_by_status(
+    items: list[dict[str, str]],
+    status: str,
+    *,
+    limit: int,
+    retention_days: int,
+    reference_time: datetime,
+) -> list[dict[str, str]]:
+    filtered = [
+        item
+        for item in dedupe_news_items(items)
+        if item["reportingStatus"] == status and within_retention_window(item, reference_time=reference_time, retention_days=retention_days)
+    ]
+    filtered.sort(key=lambda item: (news_importance_score(item), parse_iso_datetime(item["publishedAt"])), reverse=True)
+    selected = filtered[:limit]
+    selected.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
+    return selected
 
 
 def select_display_news_items(
@@ -461,10 +518,13 @@ def select_display_news_items(
     *,
     official_limit: int,
     rumor_limit: int,
+    retention_days: int = DEFAULT_RETENTION_DAYS,
+    reference_time: datetime | None = None,
 ) -> list[dict[str, str]]:
+    reference_time = reference_time or datetime.now(timezone.utc)
     selected = [
-        *recent_news_by_status(official_items, "Official", limit=official_limit),
-        *recent_news_by_status(rumor_items, "Rumor", limit=rumor_limit),
+        *display_news_by_status(official_items, "Official", limit=official_limit, retention_days=retention_days, reference_time=reference_time),
+        *display_news_by_status(rumor_items, "Rumor", limit=rumor_limit, retention_days=retention_days, reference_time=reference_time),
     ]
     selected.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
     return selected
@@ -476,6 +536,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--limit", "--official-limit", dest="official_limit", type=int, default=DEFAULT_OFFICIAL_LIMIT, help="Official NBA.com items to display.")
     parser.add_argument("--rumor-limit", type=int, default=DEFAULT_RUMOR_LIMIT, help="Trusted rumor items to display.")
+    parser.add_argument("--retention-days", type=int, default=DEFAULT_RETENTION_DAYS, help="Rolling news window to keep in the generated feed.")
     parser.add_argument("--skip-rumors", action="store_true", help="Only refresh NBA.com official news.")
     parser.add_argument("--require-rumors", action="store_true", help="Fail if trusted rumor sources cannot be refreshed.")
     parser.add_argument("--dry-run", action="store_true", help="Print refreshed JSON instead of writing it.")
@@ -485,10 +546,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     try:
-        official_payload = refresh_news(args.source_url, limit=max(args.official_limit * 2, args.official_limit))
+        if args.retention_days < 1:
+            raise RuntimeError("--retention-days must be at least 1")
+
+        official_fetch_limit = max(args.official_limit * 4, args.official_limit, 20)
+        rumor_fetch_limit = max(args.rumor_limit * 4, args.rumor_limit, 20)
+        reference_time = datetime.now(timezone.utc)
+        official_payload = refresh_news(args.source_url, limit=official_fetch_limit)
         rumor_payload = [] if args.skip_rumors else refresh_trusted_rumor_news(
             TRUSTED_RUMOR_SOURCES,
-            limit=args.rumor_limit,
+            limit=rumor_fetch_limit,
             allow_failures=not args.require_rumors,
         )
         payload = select_display_news_items(
@@ -496,13 +563,15 @@ def main() -> None:
             rumor_payload,
             official_limit=args.official_limit,
             rumor_limit=0 if args.skip_rumors else args.rumor_limit,
+            retention_days=args.retention_days,
+            reference_time=reference_time,
         )
         official_count = sum(1 for item in payload if item["reportingStatus"] == "Official")
         rumor_count = sum(1 for item in payload if item["reportingStatus"] == "Rumor")
-        if official_count < args.official_limit:
-            raise RuntimeError(f"NBA.com news refresh produced only {official_count} official items")
-        if args.require_rumors and not args.skip_rumors and rumor_count < args.rumor_limit:
-            raise RuntimeError(f"Trusted rumor refresh produced only {rumor_count} rumor items")
+        if official_count == 0:
+            raise RuntimeError(f"NBA.com news refresh produced no official items from the last {args.retention_days} days")
+        if args.require_rumors and not args.skip_rumors and rumor_count == 0:
+            raise RuntimeError(f"Trusted rumor refresh produced no rumor items from the last {args.retention_days} days")
     except (OSError, urllib.error.URLError, ValueError, RuntimeError) as error:
         print(f"NBA news refresh failed: {error}", file=sys.stderr)
         raise SystemExit(1) from error
@@ -520,6 +589,7 @@ def main() -> None:
         "items": len(payload),
         "official": sum(1 for item in payload if item["reportingStatus"] == "Official"),
         "rumors": sum(1 for item in payload if item["reportingStatus"] == "Rumor"),
+        "retentionDays": args.retention_days,
         "source": args.source_url,
         "latest": payload[0]["publishedAt"] if payload else None,
     }, indent=2))

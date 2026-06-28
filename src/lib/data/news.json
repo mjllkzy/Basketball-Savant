@@ -1,15 +1,5 @@
 [
   {
-    "id": "hoops-rumors-southwest-notes-vanvleet-thornton-boozer-pelicans",
-    "title": "Southwest: VanVleet, Thornton, Boozer, Pelicans",
-    "category": "League",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-28T04:06:31.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/southwest-notes-vanvleet-thornton-boozer-pelicans.html",
-    "summary": "Rockets guard Fred VanVleet opens up about the extent of the damage he suffered to his right knee last fall."
-  },
-  {
     "id": "hoops-rumors-wizards-seth-trimble-agree-to-exhibit-10-deal",
     "title": "Wizards, Seth Trimble Agree To Exhibit 10 Deal",
     "category": "Transaction",
@@ -50,26 +40,6 @@
     "summary": "After posting the league’s best record at 64-18, the Thunder picked up three players in this week’s draft who they believe will make them even better."
   },
   {
-    "id": "hoops-rumors-nets-dayron-sharpe-agree-to-push-back-option-decision-date",
-    "title": "Nets, Day’Ron Sharpe Agree To Push Back Option Decision Date",
-    "category": "League",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-28T00:04:47.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/nets-dayron-sharpe-agree-to-push-back-option-decision-date.html",
-    "summary": "The Nets and Day’Ron Sharpe have agreed to push back the decision on his $6.25MM team option for next season from Sunday to Monday."
-  },
-  {
-    "id": "hoops-rumors-tyrese-haliburton-feels-like-healthy-nba-player",
-    "title": "Tyrese Haliburton Feels Like ‘Healthy NBA Player’",
-    "category": "League",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-27T23:00:52.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/tyrese-haliburton-feels-like-healthy-nba-player.html",
-    "summary": "Pacers guard Tyrese Haliburton, who has been out of action since suffering a torn Achilles tendon in Game 7 of the 2025 NBA Finals..."
-  },
-  {
     "id": "hoops-rumors-magic-to-waive-jonathan-isaac",
     "title": "Magic Waive Jonathan Isaac",
     "category": "Transaction",
@@ -100,6 +70,16 @@
     "summary": "Appearing on ESPN Cleveland, Brian Windhorst says he views Cavaliers veteran Max Strus as a possible trade candidate as the team looks to move under the..."
   },
   {
+    "id": "hoops-rumors-lakers-deandre-ayton-expected-to-exercise-player-option",
+    "title": "Lakers’ Deandre Ayton Expected To Exercise Player Option?",
+    "category": "Free Agency",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-27T18:50:48.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/lakers-deandre-ayton-expected-to-exercise-player-option.html",
+    "summary": "Within a round-up of several trade and free agent rumors from various reporters, Kurt Helin of NBC Sports."
+  },
+  {
     "id": "celtics-sign-ron-harper-jr-to-extension",
     "title": "Celtics re-sign Ron Harper Jr. to long-term extension",
     "category": "Free Agency",
@@ -108,6 +88,26 @@
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/celtics-sign-ron-harper-jr-to-extension",
     "summary": "Former Two-Way guard Ron Harper Jr. reportedly signs three-year extension to remain with Celtics."
+  },
+  {
+    "id": "hoops-rumors-celtics-to-re-sign-ron-harper-jr-on-three-year-contract",
+    "title": "Celtics To Re-Sign Ron Harper Jr. On Three-Year Contract",
+    "category": "Transaction",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-27T17:24:30.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/celtics-to-re-sign-ron-harper-jr-on-three-year-contract.html",
+    "summary": "The Celtics are declining their $2.6MM option on guard/forward Ron Harper Jr. and re-signing him to a three-year, $9MM contract."
+  },
+  {
+    "id": "hoops-rumors-houston-mallette-to-join-bulls-on-exhibit-10-deal",
+    "title": "Houston Mallette To Join Bulls On Exhibit 10 Deal",
+    "category": "Transaction",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-27T16:46:41.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/houston-mallette-to-join-bulls-on-exhibit-10-deal.html",
+    "summary": "Rookie guard Houston Mallette is set to sign with the Bulls after going undrafted out of Alabama, reports Blake Byler of BamaOnLine ."
   },
   {
     "id": "thunder-sign-isaiah-hartenstein-through-2028-29-season",
@@ -130,16 +130,6 @@
     "summary": "The Brooklyn native will reportedly return to the New York Knicks on a multiyear contract."
   },
   {
-    "id": "2026-nba-summer-league-schedule",
-    "title": "NBA unveils 2026 NBA Summer League Schedule",
-    "category": "League",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-26T17:03:28Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-nba-summer-league-schedule",
-    "summary": "The annual summer showcase featuring all 30 teams will once again take place on the UNLV campus."
-  },
-  {
     "id": "isaiah-joe-trade-pistons-thunder",
     "title": "Thunder trade Isaiah Joe to Pistons for picks",
     "category": "Trade",
@@ -158,16 +148,6 @@
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/aj-dybantsa-arrives-in-washington-ready-to-work-on-turning-wizards-around",
     "summary": "The former BYU star was the Wizards' first No. 1 overall pick since John Wall in 2010."
-  },
-  {
-    "id": "bucks-brayden-burries-nate-ament-rebuild",
-    "title": "Bucks look to rookies Brayden Burries, Nate Ament to spark their post-Giannis rebuild",
-    "category": "Draft",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-26T04:32:09Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/bucks-brayden-burries-nate-ament-rebuild",
-    "summary": "The progress of the duo is pivotal to the rebuilding process of a franchise that hasn’t gotten much production since 2013."
   },
   {
     "id": "mark-williams-return-to-suns",
@@ -190,13 +170,33 @@
     "summary": "Five Basketball Without Borders alums hear their names called in the first round of the 2026 NBA Draft."
   },
   {
-    "id": "micah-nori-introduced-blazers",
-    "title": "New coach Micah Nori says Trail Blazers will play hard, smart and together",
-    "category": "Coaching",
+    "id": "4-takeaways-lamelo-ball-naz-reid-trade-minnesota-charlotte",
+    "title": "4 takeaways: How reported LaMelo Ball, Naz Reid trade impacts Wolves, Hornets",
+    "category": "Trade",
     "reportingStatus": "Official",
-    "publishedAt": "2026-06-25T23:29:36Z",
+    "publishedAt": "2026-06-25T20:55:24Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/micah-nori-introduced-blazers",
-    "summary": "Nori, who began his NBA career as an intern for the Toronto Raptors in 1998, is eager to prove himself as the No. 1 guy."
+    "sourceUrl": "https://www.nba.com/news/4-takeaways-lamelo-ball-naz-reid-trade-minnesota-charlotte",
+    "summary": "The former All-Star point guard is reportedly headed to Minnesota for big man Naz Reid and future Draft picks."
+  },
+  {
+    "id": "hornets-coby-white-free-agency-2026",
+    "title": "Hornets, Coby White agree to 3-year deal",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-25T16:53:00Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/hornets-coby-white-free-agency-2026",
+    "summary": "The veteran guard played 21 games with Charlotte last season after being acquired in a midseason trade with Chicago."
+  },
+  {
+    "id": "lamelo-ball-trade-timberwolves-2026",
+    "title": "Wolves land LaMelo Ball in blockbuster trade with Hornets",
+    "category": "Trade",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-25T15:52:53Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/lamelo-ball-trade-timberwolves-2026",
+    "summary": "Minnesota continues its reported offseason roster shake-up by adding Charlotte guard LaMelo Ball via a trade."
   }
 ]
