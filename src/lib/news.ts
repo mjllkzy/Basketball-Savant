@@ -12,10 +12,13 @@ export type NewsCategory =
   | "Trade"
   | "Rumor";
 
+export type NewsReportingStatus = "Official" | "Rumor";
+
 export type NewsItem = {
   id: string;
   title: string;
   category: NewsCategory;
+  reportingStatus: NewsReportingStatus;
   publishedAt: string;
   sourceName: string;
   sourceUrl: string;
@@ -56,5 +59,15 @@ export function categoryTone(category: NewsCategory) {
       return "border-orange-200 bg-orange-50 text-orange-800";
     default:
       return "border-teal-200 bg-teal-50 text-signal";
+  }
+}
+
+export function reportingStatusTone(status: NewsReportingStatus) {
+  switch (status) {
+    case "Rumor":
+      return "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-800";
+    case "Official":
+    default:
+      return "border-slate-200 bg-white text-slate-700";
   }
 }

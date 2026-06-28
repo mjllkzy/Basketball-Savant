@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh ShotClock news from the official NBA.com news index."""
+"""Refresh ShotClock news from NBA.com while preserving source-backed external items."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -34,12 +35,29 @@ ALLOWED_CATEGORIES = {
     "Rumor",
 }
 
+ALLOWED_REPORTING_STATUSES = {
+    "Official",
+    "Rumor",
+}
+
+REQUIRED_NEWS_FIELDS = {
+    "id",
+    "title",
+    "category",
+    "reportingStatus",
+    "publishedAt",
+    "sourceName",
+    "sourceUrl",
+    "summary",
+}
+
 
 @dataclass(frozen=True)
 class NewsItem:
     id: str
     title: str
     category: str
+    reportingStatus: str
     publishedAt: str
     sourceName: str
     sourceUrl: str
@@ -50,6 +68,7 @@ class NewsItem:
             "id": self.id,
             "title": self.title,
             "category": self.category,
+            "reportingStatus": self.reportingStatus,
             "publishedAt": self.publishedAt,
             "sourceName": self.sourceName,
             "sourceUrl": self.sourceUrl,
@@ -89,6 +108,13 @@ def validate_source_url(value: str) -> str:
     return value
 
 
+def validate_external_source_url(value: str) -> str:
+    parsed = urlparse(value)
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise RuntimeError(f"Unsupported external news source URL: {value}")
+    return value
+
+
 def classify_category(article: dict[str, Any]) -> str:
     title = clean_text(article.get("title")).lower()
     primary = article.get("categoryPrimary") or {}
@@ -120,6 +146,19 @@ def classify_category(article: dict[str, Any]) -> str:
     return "League"
 
 
+def classify_reporting_status(article: dict[str, Any], *, category: str) -> str:
+    title = clean_text(article.get("title")).lower()
+    category_blob = " ".join([
+        clean_text(article.get("category")),
+        clean_text((article.get("categoryPrimary") or {}).get("name") if isinstance(article.get("categoryPrimary"), dict) else ""),
+        title,
+    ]).lower()
+
+    if category in {"Rumor", "Draft Rumor"} or "rumor" in category_blob:
+        return "Rumor"
+    return "Official"
+
+
 def article_to_news_item(article: dict[str, Any]) -> NewsItem | None:
     if article.get("status") and article.get("status") != "publish":
         return None
@@ -138,16 +177,20 @@ def article_to_news_item(article: dict[str, Any]) -> NewsItem | None:
     published_at = clean_text(article.get("date") or article.get("modified"))
     summary = clean_text(article.get("excerpt"))
     category = classify_category(article)
+    reporting_status = classify_reporting_status(article, category=category)
 
     if not slug or not title or not published_at or not summary:
         raise RuntimeError(f"NBA.com article is missing required fields: {article!r}")
     if category not in ALLOWED_CATEGORIES:
         raise RuntimeError(f"Unsupported news category {category!r} for {slug}")
+    if reporting_status not in ALLOWED_REPORTING_STATUSES:
+        raise RuntimeError(f"Unsupported reporting status {reporting_status!r} for {slug}")
 
     return NewsItem(
         id=slug,
         title=title,
         category=category,
+        reportingStatus=reporting_status,
         publishedAt=published_at,
         sourceName="NBA.com",
         sourceUrl=source_url,
@@ -187,6 +230,77 @@ def refresh_news(source_url: str, *, limit: int) -> list[dict[str, str]]:
     return [item.to_json() for item in items]
 
 
+def validate_existing_news_item(item: Any) -> dict[str, str] | None:
+    if not isinstance(item, dict) or not REQUIRED_NEWS_FIELDS.issubset(item):
+        return None
+
+    normalized = {field: clean_text(item.get(field)) for field in REQUIRED_NEWS_FIELDS}
+    if normalized["category"] not in ALLOWED_CATEGORIES:
+        return None
+    if normalized["reportingStatus"] not in ALLOWED_REPORTING_STATUSES:
+        return None
+    if normalized["sourceName"] == "NBA.com":
+        return None
+    if not is_iso_datetime(normalized["publishedAt"]):
+        return None
+    validate_external_source_url(normalized["sourceUrl"])
+    return {
+        "id": normalized["id"],
+        "title": normalized["title"],
+        "category": normalized["category"],
+        "reportingStatus": normalized["reportingStatus"],
+        "publishedAt": normalized["publishedAt"],
+        "sourceName": normalized["sourceName"],
+        "sourceUrl": normalized["sourceUrl"],
+        "summary": normalized["summary"],
+    }
+
+
+def is_iso_datetime(value: str) -> bool:
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
+
+
+def load_preserved_external_items(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+
+    try:
+        current = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+
+    if not isinstance(current, list):
+        return []
+
+    preserved: list[dict[str, str]] = []
+    for item in current:
+        try:
+            normalized = validate_existing_news_item(item)
+        except RuntimeError:
+            continue
+        if normalized:
+            preserved.append(normalized)
+    return preserved
+
+
+def merge_news_items(primary: list[dict[str, str]], preserved: list[dict[str, str]], *, limit: int) -> list[dict[str, str]]:
+    merged: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for item in [*primary, *preserved]:
+        key = f"{item['sourceUrl']}::{item['title']}"
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(item)
+
+    merged.sort(key=lambda item: item["publishedAt"], reverse=True)
+    return merged[:limit]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-url", default=NBA_NEWS_URL)
@@ -200,6 +314,7 @@ def main() -> None:
     args = parse_args()
     try:
         payload = refresh_news(args.source_url, limit=args.limit)
+        payload = merge_news_items(payload, load_preserved_external_items(args.output), limit=args.limit)
     except (OSError, urllib.error.URLError, ValueError, RuntimeError) as error:
         print(f"NBA news refresh failed: {error}", file=sys.stderr)
         raise SystemExit(1) from error
