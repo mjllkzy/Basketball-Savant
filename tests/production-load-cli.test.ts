@@ -37,6 +37,9 @@ describe("production load check CLI", () => {
     expect(script).toContain("/teams/los-angeles-lakers");
     expect(script).toContain("ThreadPoolExecutor");
     expect(script).toContain("--max-p95-seconds");
+    expect(script).toContain("MAX_BYTES_BY_PATH");
+    expect(script).toContain("max_bytes_allowed");
+    expect(script).toContain("--disable-byte-budgets");
   });
 
   const pythonCommand = findPythonCommand();

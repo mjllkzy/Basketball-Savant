@@ -29,6 +29,17 @@ DEFAULT_PATHS = [
     "/teams/los-angeles-lakers",
     "/similarity",
 ]
+MAX_BYTES_BY_PATH = {
+    "/api/health": 15_000,
+    "/api/players?pageSize=25&sort=pts&order=desc&minGames=30": 100_000,
+    "/api/teams?pageSize=30": 25_000,
+    "/api/leaderboards?metric=pts&limit=25&minGames=30": 120_000,
+    "/api/games?pageSize=10": 50_000,
+    "/": 100_000,
+    "/players/luka-doncic": 450_000,
+    "/teams/los-angeles-lakers": 500_000,
+    "/similarity": 350_000,
+}
 
 
 @dataclass
@@ -117,6 +128,7 @@ def summarize(results: list[RequestResult]) -> dict[str, Any]:
             "max_seconds": round(max(timings), 3) if timings else None,
             "bytes_min": min((result.bytes_received for result in path_results), default=0),
             "bytes_max": max((result.bytes_received for result in path_results), default=0),
+            "max_bytes_allowed": MAX_BYTES_BY_PATH.get(path),
         })
     return {
         "requests": len(results),
@@ -134,6 +146,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--concurrency", type=int, default=4, help="Maximum concurrent requests.")
     parser.add_argument("--max-p95-seconds", type=float, default=3.0)
     parser.add_argument("--max-failure-rate", type=float, default=0.0)
+    parser.add_argument(
+        "--disable-byte-budgets",
+        action="store_true",
+        help="Skip response-size regression checks for intentional one-off investigations.",
+    )
     return parser.parse_args()
 
 
@@ -162,7 +179,14 @@ def main() -> None:
         path_summary for path_summary in summary["paths"]
         if path_summary["p95_seconds"] is None or path_summary["p95_seconds"] > args.max_p95_seconds
     ]
-    status = "ok" if failure_rate <= args.max_failure_rate and not slow_paths else "failed"
+    oversized_paths = [] if args.disable_byte_budgets else [
+        path_summary for path_summary in summary["paths"]
+        if (
+            path_summary["max_bytes_allowed"] is not None
+            and path_summary["bytes_max"] > path_summary["max_bytes_allowed"]
+        )
+    ]
+    status = "ok" if failure_rate <= args.max_failure_rate and not slow_paths and not oversized_paths else "failed"
     output = {
         "status": status,
         "base_url": base_url,
@@ -170,6 +194,7 @@ def main() -> None:
         "concurrency": concurrency,
         "max_p95_seconds": args.max_p95_seconds,
         "max_failure_rate": args.max_failure_rate,
+        "byte_budgets_enabled": not args.disable_byte_budgets,
         "failure_rate": round(failure_rate, 4),
         **summary,
     }
@@ -177,7 +202,14 @@ def main() -> None:
 
     if status != "ok":
         failures = [asdict(result) for result in results if result.status != 200 or result.error is not None][:10]
-        print(json.dumps({"slow_paths": slow_paths, "sample_failures": failures}, indent=2), file=sys.stderr)
+        print(
+            json.dumps({
+                "slow_paths": slow_paths,
+                "oversized_paths": oversized_paths,
+                "sample_failures": failures,
+            }, indent=2),
+            file=sys.stderr,
+        )
         raise SystemExit(1)
 
 
