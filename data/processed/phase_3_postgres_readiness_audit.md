@@ -2,7 +2,7 @@
 
 Date: 2026-06-23
 
-Goal: plan the safest path from generated JSON/SQLite-style files to Postgres without breaking the current Basketball Savant site.
+Goal: plan the safest path from generated JSON/SQLite-style files to Postgres without breaking the current ShotClock site.
 
 This audit is planning-only. No Postgres tables were created, no Railway settings were changed, no environment variables were modified, and the existing JSON data flow was not removed.
 
@@ -637,7 +637,7 @@ Use:
 Do not change Railway yet. When ready:
 
 1. Add a Railway Postgres service to the project.
-2. Let Railway inject `DATABASE_URL` into the Basketball Savant service.
+2. Let Railway inject `DATABASE_URL` into the ShotClock service.
 3. Keep `DATABASE_URL` server-only. Do not create `NEXT_PUBLIC_DATABASE_URL`.
 4. Locally, keep working without `DATABASE_URL`; JSON fallback remains active.
 5. Add migrations before any production DB write.

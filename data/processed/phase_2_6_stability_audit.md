@@ -2,7 +2,7 @@
 
 Date: 2026-06-23
 
-Scope: conservative hardening of the existing Basketball Savant data flow after Phase 2.5. This phase did not redesign pages, change navigation, change deployment settings, start Postgres, or modify the raw Excel workbook.
+Scope: conservative hardening of the existing ShotClock data flow after Phase 2.5. This phase did not redesign pages, change navigation, change deployment settings, start Postgres, or modify the raw Excel workbook.
 
 ## 1. Pages And Components Audited
 
