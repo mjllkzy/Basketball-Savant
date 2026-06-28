@@ -43,6 +43,9 @@ export function badRequest(error: unknown) {
 }
 
 export function serverError(error: unknown) {
-  const message = error instanceof Error ? error.message : "Unexpected error";
-  return NextResponse.json({ data: null, error: { code: "SERVER_ERROR", message } }, { status: 500 });
+  console.error("API server error", error);
+  return NextResponse.json(
+    { data: null, error: { code: "SERVER_ERROR", message: "Unexpected server error" } },
+    { status: 500 }
+  );
 }
