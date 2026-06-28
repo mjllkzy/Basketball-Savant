@@ -1,5 +1,6 @@
 import type { Shot } from "@/lib/types";
 import { BasketballCourt, courtPoint } from "@/components/charts/BasketballCourt";
+import { ShotZoneLayer } from "@/components/charts/ShotZoneLayer";
 
 export function sampleShotsForChart<T>(shots: T[], maxShots: number): T[] {
   const safeMaxShots = Math.max(0, Math.floor(maxShots));
@@ -42,6 +43,7 @@ export function ShotChart({
             Official shot events unavailable
           </text>
         ) : null}
+        <ShotZoneLayer shots={shots} variant="fill" />
         {visible.map((shot) => {
           const point = courtPoint(shot.x, shot.y);
           const color = colorBy === "xpts" ? `rgba(15, 118, 110, ${Math.max(0.35, Math.min(0.95, shot.expectedPoints / 1.5))})` : shot.made ? "#15803d" : "#b91c1c";
@@ -54,6 +56,7 @@ export function ShotChart({
             </circle>
           );
         })}
+        <ShotZoneLayer shots={shots} variant="hover" />
       </BasketballCourt>
     </div>
   );

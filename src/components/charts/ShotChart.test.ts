@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import type { Shot } from "@/lib/types";
 import { sampleShotsForChart, shotChartAttemptLabel } from "./ShotChart";
 import { courtPoint } from "./BasketballCourt";
+import { shotZoneStats } from "./ShotZoneLayer";
 
 describe("shot chart payload helpers", () => {
   it("samples large shot sets evenly instead of taking only the first rows", () => {
@@ -19,5 +21,26 @@ describe("shot chart payload helpers", () => {
     expect(courtPoint(-23.8, -1).cx).toBeCloseTo(35.8);
     expect(courtPoint(-23.8, -1).cy).toBeCloseTo(85.6);
     expect(courtPoint(0, 73.4).cy).toBeCloseTo(444.7);
+  });
+
+  it("summarizes shot zone efficiency for hover overlays", () => {
+    const stats = shotZoneStats([
+      { shotZone: "Rim", made: true, pointsValue: 2 },
+      { shotZone: "Rim", made: false, pointsValue: 2 },
+      { shotZone: "Above Break Three", made: true, pointsValue: 3 }
+    ] as Shot[]);
+
+    expect(stats.find((stat) => stat.zone === "Rim")).toMatchObject({
+      attempts: 2,
+      made: 1,
+      fgPct: 0.5,
+      efgPct: 0.5
+    });
+    expect(stats.find((stat) => stat.zone === "Above Break Three")).toMatchObject({
+      attempts: 1,
+      made: 1,
+      fgPct: 1,
+      efgPct: 1.5
+    });
   });
 });

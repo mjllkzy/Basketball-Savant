@@ -1,23 +1,7 @@
-import type { Shot, ShotZone } from "@/lib/types";
+import type { Shot } from "@/lib/types";
 import { BasketballCourt, courtPoint } from "@/components/charts/BasketballCourt";
-import { safeDiv } from "@/lib/metrics/formulas";
+import { ShotZoneLayer, shotZoneStats } from "@/components/charts/ShotZoneLayer";
 import { formatMetric } from "@/lib/metrics/format";
-
-type ZoneShape = { x: number; y: number; width: number; height: number; rx?: number };
-
-const zones: Array<{ zone: ShotZone; shapes: ZoneShape[] }> = [
-  { zone: "Rim", shapes: [{ x: 205, y: 62, width: 90, height: 70, rx: 16 }] },
-  { zone: "Short Midrange", shapes: [{ x: 150, y: 125, width: 200, height: 100, rx: 18 }] },
-  { zone: "Long Midrange", shapes: [{ x: 95, y: 230, width: 310, height: 92, rx: 18 }] },
-  {
-    zone: "Corner Three",
-    shapes: [
-      { x: 16, y: 60, width: 70, height: 130, rx: 14 },
-      { x: 414, y: 60, width: 70, height: 130, rx: 14 }
-    ]
-  },
-  { zone: "Above Break Three", shapes: [{ x: 80, y: 325, width: 340, height: 105, rx: 20 }] }
-];
 
 function sampleShots(shots: Shot[], maxShots: number) {
   if (shots.length <= maxShots) return shots;
@@ -25,27 +9,8 @@ function sampleShots(shots: Shot[], maxShots: number) {
   return Array.from({ length: maxShots }, (_, index) => shots[Math.floor(index * step)]);
 }
 
-function zoneStats(shots: Shot[]) {
-  const totalAttempts = shots.length;
-  return zones.map(({ zone }) => {
-    const zoneShots = shots.filter((shot) => shot.shotZone === zone);
-    const attempts = zoneShots.length;
-    const made = zoneShots.filter((shot) => shot.made).length;
-    const points = zoneShots.reduce((sum, shot) => sum + (shot.made ? shot.pointsValue : 0), 0);
-    return {
-      zone,
-      attempts,
-      made,
-      attemptShare: safeDiv(attempts, totalAttempts) ?? 0,
-      fgPct: safeDiv(made, attempts) ?? 0,
-      efgPct: safeDiv(points, attempts * 2) ?? 0
-    };
-  });
-}
-
 export function TeamShotMap({ shots, maxShots = 650 }: { shots: Shot[]; maxShots?: number }) {
-  const stats = zoneStats(shots);
-  const maxAttempts = Math.max(...stats.map((stat) => stat.attempts), 1);
+  const stats = shotZoneStats(shots);
   const visibleShots = sampleShots(shots, maxShots);
   const populatedStats = stats.filter((stat) => stat.attempts > 0);
   const mostUsed = [...populatedStats].sort((a, b) => b.attempts - a.attempts)[0];
@@ -72,30 +37,7 @@ export function TeamShotMap({ shots, maxShots = 650 }: { shots: Shot[]; maxShots
               Official shot events unavailable
             </text>
           ) : null}
-          {zones.map(({ zone, shapes }) => {
-            const stat = stats.find((item) => item.zone === zone)!;
-            const opacity = Math.max(0.08, Math.min(0.56, 0.1 + (stat.attempts / maxAttempts) * 0.46));
-            const title = `${zone}: ${stat.attempts.toLocaleString()} attempts (${formatMetric("usage_rate", stat.attemptShare)} of shots), FG ${formatMetric("fg_pct", stat.fgPct)}, eFG ${formatMetric("efg_pct", stat.efgPct)}`;
-            return (
-              <g key={zone}>
-                <title>{title}</title>
-                {shapes.map((shape, index) => (
-                  <rect
-                    key={`${zone}-${index}`}
-                    x={shape.x}
-                    y={shape.y}
-                    width={shape.width}
-                    height={shape.height}
-                    rx={shape.rx ?? 12}
-                    fill="#0f766e"
-                    opacity={opacity}
-                    stroke="#0f766e"
-                    strokeWidth="1.5"
-                  />
-                ))}
-              </g>
-            );
-          })}
+          <ShotZoneLayer shots={shots} variant="fill" />
           {visibleShots.map((shot) => {
             const point = courtPoint(shot.x, shot.y);
             return (
@@ -113,6 +55,7 @@ export function TeamShotMap({ shots, maxShots = 650 }: { shots: Shot[]; maxShots
               </circle>
             );
           })}
+          <ShotZoneLayer shots={shots} variant="hover" />
         </BasketballCourt>
 
         <div className="grid content-start gap-4">
