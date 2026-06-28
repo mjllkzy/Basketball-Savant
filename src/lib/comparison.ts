@@ -1,5 +1,6 @@
 import type { PlayerSeasonAggregate } from "@/lib/types";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
+import { formatPlayerHeight } from "@/lib/playerHeight";
 
 export type ComparisonWinner = "left" | "right" | "tie";
 
@@ -45,7 +46,7 @@ const minimumSimilarityGames = 30;
 
 export function heightToInches(height: string | null | undefined): number | null {
   if (!height) return null;
-  const match = height.trim().match(/^(\d+)-(\d+)$/);
+  const match = height.trim().match(/^(\d+)[-'](\d+)$/);
   if (!match) return null;
   return Number(match[1]) * 12 + Number(match[2]);
 }
@@ -151,7 +152,7 @@ function buildSimilarityContext(target: PlayerSeasonAggregate, rows: PlayerSeaso
 
 export function playerSimilaritySummary(row: PlayerSeasonAggregate) {
   return {
-    height: row.player.height || "N/A",
+    height: formatPlayerHeight(row.player.height),
     weight: row.player.weight ? `${row.player.weight} lb` : "N/A",
     wingspan: "Not loaded",
     position: row.player.position,

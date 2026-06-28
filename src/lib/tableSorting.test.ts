@@ -46,6 +46,7 @@ describe("table sorting", () => {
   it("does not parse records, heights, or dates as plain numbers", () => {
     expect(parseSortableNumber("46-36")).toBeNull();
     expect(parseSortableNumber("6-11")).toBeNull();
+    expect(parseSortableNumber("6'11")).toBeNull();
     expect(parseSortableNumber("6/13/26")).toBeNull();
   });
 });

@@ -1,5 +1,6 @@
 import type { Player, Team } from "@/lib/types";
 import { PlayerHeadshot } from "@/components/domain/PlayerHeadshot";
+import { formatPlayerHeight } from "@/lib/playerHeight";
 
 type PlayerFactSource = Pick<Player, "age" | "college" | "country" | "draftYear" | "draftPick" | "handedness">;
 
@@ -28,7 +29,7 @@ export function PlayerHeader({ player, team }: { player: Player; team: Team }) {
   const bioLine = [
     player.jerseyNumber ? `#${player.jerseyNumber}` : undefined,
     player.position !== "N/A" ? player.position : undefined,
-    player.height !== "N/A" ? player.height : undefined,
+    player.height !== "N/A" ? formatPlayerHeight(player.height) : undefined,
     player.weight ? `${player.weight} lb` : undefined
   ].filter(Boolean);
   const facts = playerHeaderFacts(player);

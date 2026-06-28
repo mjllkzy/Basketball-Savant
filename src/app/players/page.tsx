@@ -6,6 +6,7 @@ import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
 import { officialTeams } from "@/lib/data/official";
 import { listPlayerDirectory, loadPlayerDirectoryFilters } from "@/lib/db/playerDirectory.server";
 import { formatMetric } from "@/lib/metrics/format";
+import { formatPlayerHeight } from "@/lib/playerHeight";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
@@ -117,7 +118,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
     team: row.teamAbbreviation,
     teamAccent: teamPrimaryColorByAbbreviation.get(row.teamAbbreviation) ?? "#0f766e",
     pos: row.position,
-    height: row.height,
+    height: formatPlayerHeight(row.height),
     weight: row.weight || "N/A",
     age: row.age ?? "N/A",
     games: row.games,

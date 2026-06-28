@@ -12,6 +12,7 @@ import {
   type PlayerOption,
 } from "@/lib/db/playerAnalytics.server";
 import { formatMetric } from "@/lib/metrics/format";
+import { formatPlayerHeight } from "@/lib/playerHeight";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
 
@@ -74,7 +75,7 @@ function PlayerCard({ profile }: { profile: ComparisonPlayer }) {
           </div>
           <h2 className="mt-1 text-2xl font-black text-ink">{profile.player.name}</h2>
           <p className="mt-1 text-sm text-slate-600">
-            {profile.player.height} · {profile.player.weight || "N/A"} lb · Age {profile.player.age}
+            {formatPlayerHeight(profile.player.height)} · {profile.player.weight || "N/A"} lb · Age {profile.player.age}
             {heightInches ? ` · ${heightInches} in` : ""}
           </p>
         </div>

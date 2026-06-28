@@ -6,6 +6,7 @@ import { playerSeasonAggregates } from "@/lib/data/queries";
 describe("comparison helpers", () => {
   it("parses NBA height strings", () => {
     expect(heightToInches("6-8")).toBe(80);
+    expect(heightToInches("6'8")).toBe(80);
     expect(heightToInches("7-0")).toBe(84);
     expect(heightToInches("N/A")).toBeNull();
   });
@@ -62,7 +63,7 @@ describe("comparison helpers", () => {
 
   it("summarizes player physicals and box production for the similarity UI", () => {
     const summary = playerSimilaritySummary(playerSeasonAggregates[0]);
-    expect(summary.height).toMatch(/^\d-\d{1,2}$/);
+    expect(summary.height).toMatch(/^\d'\d{1,2}$/);
     expect(summary.weight).toContain("lb");
     expect(summary.wingspan).toBe("Not loaded");
     expect(summary.ppg).toBeGreaterThanOrEqual(0);
