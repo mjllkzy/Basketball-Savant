@@ -166,7 +166,7 @@ Basketball Reference and public NBA Stats aggregate tables are credible sources 
 - Licensed API credentials or scheduled exports from a provider that permits derived public display.
 - CSV/JSON exports with stable NBA-compatible `gameId`, `teamId`, and `playerId` values.
 - A clear data dictionary for coordinates, timestamps, shot context, possession context, and lineup stint definitions.
-- Confirmation that Basketball Savant can store raw rows and show derived metrics on a public Railway deployment.
+- Confirmation that ShotClock can store raw rows and show derived metrics on a public Railway deployment.
 
 Minimum fields for tracking/event metrics:
 

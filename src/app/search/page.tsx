@@ -95,7 +95,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         eyebrow="Advanced Search"
         title="Possession and Shot Search"
         description="Filter official shot and possession events when those feeds are loaded; unavailable event-only fields stay empty rather than generated."
-        actions={<><ShareUrlButton /><ExportCsvButton rows={tableRows} filename="basketball-savant-shot-search.csv" /></>}
+        actions={<><ShareUrlButton /><ExportCsvButton rows={tableRows} filename="shotclock-shot-search.csv" /></>}
       />
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         <FilterPanel>

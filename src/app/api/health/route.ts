@@ -17,7 +17,7 @@ export async function GET() {
   const databaseShots = connected ? database.currentShotAttempts : 0;
   return ok({
     status: database.status === "unavailable" ? "degraded" : "ok",
-    name: "Basketball Savant",
+    name: "ShotClock",
     release: process.env.RAILWAY_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? null,
     version: `excel-master-${fallback.metadata.season}-${fallback.metadata.source_workbook_sha256.slice(0, 12)}`,
     provider: "NBA Excel masterfile, NBA Stats, and Basketball Reference cross-checks",

@@ -23,10 +23,10 @@ export default function OpenGraphImage() {
         }}
       >
         <div style={{ color: "#5eead4", fontSize: 28, fontWeight: 800, letterSpacing: 5 }}>
-          ADVANCED BASKETBALL BREAKDOWNS
+          ADVANCED BASKETBALL ANALYTICS
         </div>
         <div style={{ marginTop: 26, fontSize: 82, fontWeight: 900, letterSpacing: 2 }}>
-          Basketball Savant
+          ShotClock
         </div>
         <div style={{ marginTop: 24, maxWidth: 980, color: "#cbd5e1", fontSize: 34, lineHeight: 1.35 }}>
           NBA player, team, comparison, and similarity analysis powered by the 2025-26 masterfile.

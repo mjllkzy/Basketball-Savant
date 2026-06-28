@@ -1,6 +1,6 @@
-# Basketball Savant
+# ShotClock
 
-Basketball Savant is a professional basketball analytics portal: advanced search, custom leaderboards, player pages, team pages, gamefeed, visual labs, comparison tools, similarity search, glossary, and API routes.
+ShotClock is a professional basketball analytics portal: advanced search, custom leaderboards, player pages, team pages, gamefeed, visual labs, comparison tools, similarity search, glossary, and API routes.
 
 It is an original product direction inspired by the depth of elite sports analytics tools. It does not include official logos, protected league assets, proprietary layouts, or scraped protected data.
 
@@ -148,7 +148,7 @@ Persistent import is intentionally a TODO: wire the parser into a database adapt
 
 ## Tracking Feed Requirements
 
-To turn on shot quality, defender distance, play type PPP, touch maps, pass networks, gravity, and rebound-chance metrics, Basketball Savant needs row-level event or tracking data with stable game IDs, player IDs, team IDs, event timestamps, shot coordinates, closest defender or matchup IDs, defender distance, touch time, dribble count, shot clock, play type tags, pass/rebound/contest events, and source licensing terms that allow display in the app. A CSV export, database URL, or licensed provider API can work as long as those fields are present and can be mapped to NBA Stats IDs.
+To turn on shot quality, defender distance, play type PPP, touch maps, pass networks, gravity, and rebound-chance metrics, ShotClock needs row-level event or tracking data with stable game IDs, player IDs, team IDs, event timestamps, shot coordinates, closest defender or matchup IDs, defender distance, touch time, dribble count, shot clock, play type tags, pass/rebound/contest events, and source licensing terms that allow display in the app. A CSV export, database URL, or licensed provider API can work as long as those fields are present and can be mapped to NBA Stats IDs.
 
 ## Roadmap
 

@@ -44,11 +44,11 @@ Metrics that require tracking, matchup, play-type tagging, defender distance, pa
 
 Expected-shot fields are registry definitions only until a real shot-event or tracking feed is connected. In the default official NBA Stats snapshot, expected FG%, shot quality, actual-minus-expected, rim/three/midrange shot quality, and clutch shot quality return `N/A` rather than locally estimated values.
 
-When a licensed or public event feed is added, the adapter must persist the source expected values or the complete shot-context inputs used to calculate them. The model output should be treated as Basketball Savant analysis, not an official NBA fact, unless the upstream source explicitly provides the value.
+When a licensed or public event feed is added, the adapter must persist the source expected values or the complete shot-context inputs used to calculate them. The model output should be treated as ShotClock analysis, not an official NBA fact, unless the upstream source explicitly provides the value.
 
 ## Tracking Feed Requirements
 
-Shot quality, defender distance, play-type PPP, touch maps, pass networks, gravity, contest value, rebound chances, and matchup difficulty need row-level event/tracking data. The minimum useful feed includes NBA Stats-compatible game IDs, team IDs, player IDs, period/clock or event timestamps, shot x/y coordinates, shot zone/type, closest defender ID, defender distance, touch time, dribble count, shot clock, play type, pass events, rebound chances, boxouts, contests, matchup assignments, and terms that allow Basketball Savant to display derived results.
+Shot quality, defender distance, play-type PPP, touch maps, pass networks, gravity, contest value, rebound chances, and matchup difficulty need row-level event/tracking data. The minimum useful feed includes NBA Stats-compatible game IDs, team IDs, player IDs, period/clock or event timestamps, shot x/y coordinates, shot zone/type, closest defender ID, defender distance, touch time, dribble count, shot clock, play type, pass events, rebound chances, boxouts, contests, matchup assignments, and terms that allow ShotClock to display derived results.
 
 Basketball Reference is used as a public cross-check and formula reference for overlapping advanced/rate stats. It does not include the row-level optical tracking fields needed for defender distance, shot quality models, touch maps, pass maps, lineup networks, or matchup assignments.
 

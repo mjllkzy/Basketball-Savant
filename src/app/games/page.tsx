@@ -24,7 +24,7 @@ export default async function GamesPage() {
         <StatTable columns={[{ key: "date", label: "Date" }, { key: "matchup", label: "Matchup", hrefKey: "href" }, { key: "score", label: "Score" }, { key: "context", label: "Context" }, { key: "leadingScorer", label: "Leading Scorer", hrefKey: "leadingScorerHref" }]} rows={rows} />
       ) : (
         <div className="rounded border border-dashed border-slate-300 bg-white p-6 text-sm leading-6 text-slate-600 shadow-sm">
-          Official game-log rows are not loaded in the current NBA Stats snapshot, so Basketball Savant is hiding game scores and dates rather than fabricating them.
+          Official game-log rows are not loaded in the current NBA Stats snapshot, so ShotClock is hiding game scores and dates rather than fabricating them.
         </div>
       )}
     </div>

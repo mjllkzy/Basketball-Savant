@@ -50,7 +50,7 @@ export default async function LeaderboardsPage({ searchParams }: { searchParams:
         <div className="rounded border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600 shadow-sm">
           <h2 className="mb-2 text-lg font-black text-ink">{metric.label} Feed Required</h2>
           <p>
-            Basketball Savant will not rank this metric from box-score aggregates. It needs row-level event, lineup, model, or tracking data with stable game, team, and player IDs before values can be displayed.
+            ShotClock will not rank this metric from box-score aggregates. It needs row-level event, lineup, model, or tracking data with stable game, team, and player IDs before values can be displayed.
           </p>
           <Link href="/visuals?tab=Data%20Coverage" className="mt-3 inline-flex rounded border border-slate-200 px-3 py-2 text-sm font-black text-ink hover:bg-slate-50">
             View Data Coverage

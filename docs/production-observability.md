@@ -1,6 +1,6 @@
 # Production Observability
 
-Basketball Savant keeps analytics and error reporting optional. The app builds and runs without any telemetry environment variables.
+ShotClock keeps analytics and error reporting optional. The app builds and runs without any telemetry environment variables.
 
 ## Sentry
 

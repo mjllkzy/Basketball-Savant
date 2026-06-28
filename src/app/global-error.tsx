@@ -20,7 +20,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
     <html lang="en">
       <body className="grid min-h-screen place-items-center bg-slate-50 p-6 text-ink">
         <main className="w-full max-w-lg rounded border border-slate-200 bg-white p-6 text-center shadow-sm">
-          <h1 className="text-2xl font-black">Basketball Savant hit an unexpected error</h1>
+          <h1 className="text-2xl font-black">ShotClock hit an unexpected error</h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             The error has been recorded when monitoring is configured. Try the request again.
           </p>

@@ -2,7 +2,7 @@
 
 import { Download } from "lucide-react";
 
-export function ExportCsvButton({ rows, filename = "basketball-savant-export.csv" }: { rows: Array<Record<string, unknown>>; filename?: string }) {
+export function ExportCsvButton({ rows, filename = "shotclock-export.csv" }: { rows: Array<Record<string, unknown>>; filename?: string }) {
   function exportCsv() {
     if (!rows.length) return;
     const headers = Object.keys(rows[0]);

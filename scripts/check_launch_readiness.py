@@ -151,11 +151,12 @@ def validate_seo(base_url: str) -> list[CheckResult]:
 
     manifest_result, manifest = json_request(base_url, "/manifest.webmanifest")
     results.append(manifest_result)
-    require(manifest.get("name") == "Basketball Savant", "Manifest name is not Basketball Savant")
+    require(manifest.get("name") == "ShotClock Advanced Basketball Analytics", "Manifest name is not ShotClock Advanced Basketball Analytics")
+    require(manifest.get("short_name") == "ShotClock", "Manifest short_name is not ShotClock")
     require(manifest.get("start_url") == "/", "Manifest start_url is not /")
 
     page_checks = [
-        ("/", "Basketball Savant"),
+        ("/", "ShotClock"),
         ("/players", "Players"),
         ("/teams", "Teams"),
         ("/compare", "Compare"),
@@ -165,7 +166,7 @@ def validate_seo(base_url: str) -> list[CheckResult]:
         result, html = text_request(base_url, path)
         results.append(result)
         require_contains(html, expected, path)
-        require_contains(html, "Basketball Savant", path)
+        require_contains(html, "ShotClock", path)
         if path == "/":
             require_contains(html, 'type="application/ld+json"', path)
             require_contains(html, '"@type":"WebSite"', path)

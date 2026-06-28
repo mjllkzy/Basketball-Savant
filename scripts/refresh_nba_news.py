@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh Basketball Savant news from the official NBA.com news index."""
+"""Refresh ShotClock news from the official NBA.com news index."""
 
 from __future__ import annotations
 

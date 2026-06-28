@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a conservative production load check against core Basketball Savant routes."""
+"""Run a conservative production load check against core ShotClock routes."""
 
 from __future__ import annotations
 

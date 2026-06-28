@@ -24,7 +24,7 @@ export default function Icon() {
           letterSpacing: 4,
         }}
       >
-        BS
+        SC
       </div>
     ),
     size,

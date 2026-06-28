@@ -3,12 +3,12 @@ import "./globals.css";
 import { Telemetry } from "@/components/analytics/Telemetry";
 import { AppShell } from "@/components/layout/AppShell";
 import { StructuredData } from "@/components/seo/StructuredData";
-import { getSiteUrl, siteDescription, siteName } from "@/lib/site";
+import { getSiteUrl, siteDescription, siteName, siteTitle } from "@/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: siteName,
+    default: siteTitle,
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
@@ -17,14 +17,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName,
-    title: siteName,
+    title: siteTitle,
     description: siteDescription,
     url: "/",
     images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteName,
+    title: siteTitle,
     description: siteDescription,
     images: ["/opengraph-image"],
   },

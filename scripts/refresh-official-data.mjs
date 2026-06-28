@@ -875,7 +875,7 @@ async function main() {
         "Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables; Basketball Reference per-game Pos supplies primary PG/SG/SF/PF/C player positions.",
         "The publicReferenceGames metadata pins the currently displayed NBA Finals games to public NBA.com, Basketball Reference, and ESPN game pages.",
         "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
-        "Basketball Savant derived metrics are calculated locally from official box score totals.",
+        "ShotClock derived metrics are calculated locally from official box score totals.",
         "Tracking-only metrics are unavailable unless a licensed tracking source is connected."
       ],
       publicReferenceGames,

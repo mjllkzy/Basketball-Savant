@@ -263,7 +263,7 @@ export const metricRegistry: MetricDefinition[] = [
     ? {
         ...definition,
         requiresTracking: true,
-        glossaryMarkdown: `${definition.glossaryMarkdown} This metric stays N/A until Basketball Savant has the required event, lineup, model, or tracking feed.`
+        glossaryMarkdown: `${definition.glossaryMarkdown} This metric stays N/A until ShotClock has the required event, lineup, model, or tracking feed.`
       }
     : definition
 );

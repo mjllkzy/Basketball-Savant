@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { absoluteUrl, getSiteUrl } from "./site";
+import { absoluteUrl, getSiteUrl, siteName, siteTitle } from "./site";
 
 describe("site URL configuration", () => {
+  it("uses ShotClock brand constants", () => {
+    expect(siteName).toBe("ShotClock");
+    expect(siteTitle).toBe("ShotClock Advanced Basketball Analytics");
+  });
+
   it("uses the production Railway domain when no custom domain is configured", () => {
     expect(getSiteUrl({})).toBe("https://basketball-savant-production.up.railway.app");
   });

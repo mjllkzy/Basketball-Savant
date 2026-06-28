@@ -8,10 +8,10 @@ export function TopNav() {
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-3 px-3 py-3 sm:px-5 lg:px-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded bg-ink text-sm font-black text-white shadow-sm">BS</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-ink text-sm font-black text-white shadow-sm">SC</div>
             <div>
-              <div className="text-base font-black uppercase tracking-[0.18em] text-ink">Basketball Savant</div>
-              <div className="text-xs font-medium text-slate-500">Advanced Basketball Breakdowns</div>
+              <div className="text-base font-black uppercase tracking-[0.18em] text-ink">ShotClock</div>
+              <div className="text-xs font-medium text-slate-500">ShotClock Advanced Basketball Analytics</div>
             </div>
           </Link>
           <CommandSearch />

@@ -2,7 +2,7 @@
 
 Last verified: 2026-06-27
 
-Basketball Savant is deployed on Railway at:
+ShotClock is deployed on Railway at:
 
 ```txt
 https://basketball-savant-production.up.railway.app

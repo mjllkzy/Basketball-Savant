@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Basketball Savant",
-    short_name: "Basketball Savant",
+    name: "ShotClock Advanced Basketball Analytics",
+    short_name: "ShotClock",
     description: "Advanced NBA player and team analysis.",
     start_url: "/",
     display: "standalone",

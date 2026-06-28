@@ -108,7 +108,7 @@ def validate(base_url: str) -> list[CheckResult]:
         require(source == "postgres", f"{path} used {source or 'unknown'} instead of Postgres")
 
     page_checks = [
-        ("/", b"Basketball Savant"),
+        ("/", b"ShotClock"),
         ("/players/luka-doncic", "Luka Don".encode()),
         ("/teams/los-angeles-lakers", b"Los Angeles Lakers"),
         ("/visuals", b"Visualization Studio"),
