@@ -13,6 +13,7 @@ export type NewsCategory =
   | "Rumor";
 
 export type NewsReportingStatus = "Official" | "Rumor";
+export type NewsFeedFilter = "all" | "official" | "rumors";
 
 export type NewsItem = {
   id: string;
@@ -28,6 +29,27 @@ export type NewsItem = {
 export const newsFeed = [...(newsItems as NewsItem[])].sort((a, b) => (
   new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
 ));
+
+export const newsFeedFilters: Array<{ value: NewsFeedFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "official", label: "Official" },
+  { value: "rumors", label: "Rumors" },
+];
+
+export function normalizeNewsFilter(value: string | undefined): NewsFeedFilter {
+  if (value === "official" || value === "rumors") return value;
+  return "all";
+}
+
+export function filterNewsFeed(filter: NewsFeedFilter) {
+  if (filter === "official") return newsFeed.filter((item) => item.reportingStatus === "Official");
+  if (filter === "rumors") return newsFeed.filter((item) => item.reportingStatus === "Rumor");
+  return newsFeed;
+}
+
+export function newsFeedCount(filter: NewsFeedFilter) {
+  return filterNewsFeed(filter).length;
+}
 
 export function getRecentNews(limit = 4) {
   return newsFeed.slice(0, limit);

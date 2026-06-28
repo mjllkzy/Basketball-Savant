@@ -29,7 +29,7 @@ jobs:
         run: python -m py_compile scripts/refresh_nba_news.py
 
       - name: Refresh NBA.com and trusted rumor news data
-        run: python scripts/refresh_nba_news.py
+        run: python scripts/refresh_nba_news.py --require-rumors
 
       - name: Commit refreshed news when changed
         run: |

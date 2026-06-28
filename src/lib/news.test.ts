@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatNewsDate, getRecentNews, newsFeed, reportingStatusTone } from "./news";
+import { filterNewsFeed, formatNewsDate, getRecentNews, newsFeed, normalizeNewsFilter, reportingStatusTone } from "./news";
 
 describe("news feed", () => {
   it("keeps all news items source-backed", () => {
@@ -28,6 +28,16 @@ describe("news feed", () => {
   it("returns a limited homepage preview", () => {
     expect(getRecentNews(3)).toHaveLength(3);
     expect(getRecentNews(3)[0].title).toBe(newsFeed[0].title);
+  });
+
+  it("filters official and rumor news explicitly", () => {
+    expect(normalizeNewsFilter("official")).toBe("official");
+    expect(normalizeNewsFilter("rumors")).toBe("rumors");
+    expect(normalizeNewsFilter("bad")).toBe("all");
+    expect(filterNewsFeed("official").every((item) => item.reportingStatus === "Official")).toBe(true);
+    expect(filterNewsFeed("rumors").every((item) => item.reportingStatus === "Rumor")).toBe(true);
+    expect(filterNewsFeed("official")).toHaveLength(10);
+    expect(filterNewsFeed("rumors")).toHaveLength(10);
   });
 
   it("formats dates for fan-facing cards", () => {

@@ -24,6 +24,8 @@ DEFAULT_OUTPUT = Path("src/lib/data/news.json")
 REQUEST_TIMEOUT_SECONDS = 30
 USER_AGENT = "ShotClock-News-Refresh/1.0"
 CONTENT_NAMESPACE = "{http://purl.org/rss/1.0/modules/content/}"
+DEFAULT_OFFICIAL_LIMIT = 10
+DEFAULT_RUMOR_LIMIT = 10
 
 ALLOWED_CATEGORIES = {
     "League",
@@ -42,18 +44,6 @@ ALLOWED_REPORTING_STATUSES = {
     "Official",
     "Rumor",
 }
-
-REQUIRED_NEWS_FIELDS = {
-    "id",
-    "title",
-    "category",
-    "reportingStatus",
-    "publishedAt",
-    "sourceName",
-    "sourceUrl",
-    "summary",
-}
-
 
 @dataclass(frozen=True)
 class TrustedRumorSource:
@@ -124,13 +114,6 @@ def validate_source_url(value: str) -> str:
     parsed = urlparse(value)
     if parsed.scheme != "https" or parsed.netloc != "www.nba.com" or not parsed.path.startswith("/news/"):
         raise RuntimeError(f"Unsupported NBA news source URL: {value}")
-    return value
-
-
-def validate_external_source_url(value: str) -> str:
-    parsed = urlparse(value)
-    if parsed.scheme != "https" or not parsed.netloc:
-        raise RuntimeError(f"Unsupported external news source URL: {value}")
     return value
 
 
@@ -363,87 +346,49 @@ def parse_rss_datetime(value: str) -> str:
     return parsed.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
-def validate_existing_news_item(item: Any) -> dict[str, str] | None:
-    if not isinstance(item, dict) or not REQUIRED_NEWS_FIELDS.issubset(item):
-        return None
-
-    normalized = {field: clean_text(item.get(field)) for field in REQUIRED_NEWS_FIELDS}
-    if normalized["category"] not in ALLOWED_CATEGORIES:
-        return None
-    if normalized["reportingStatus"] not in ALLOWED_REPORTING_STATUSES:
-        return None
-    if normalized["sourceName"] == "NBA.com":
-        return None
-    if not is_iso_datetime(normalized["publishedAt"]):
-        return None
-    validate_external_source_url(normalized["sourceUrl"])
-    return {
-        "id": normalized["id"],
-        "title": normalized["title"],
-        "category": normalized["category"],
-        "reportingStatus": normalized["reportingStatus"],
-        "publishedAt": normalized["publishedAt"],
-        "sourceName": normalized["sourceName"],
-        "sourceUrl": normalized["sourceUrl"],
-        "summary": normalized["summary"],
-    }
-
-
-def is_iso_datetime(value: str) -> bool:
-    try:
-        parse_iso_datetime(value)
-    except ValueError:
-        return False
-    return True
-
-
 def parse_iso_datetime(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
-def load_preserved_external_items(path: Path) -> list[dict[str, str]]:
-    if not path.exists():
-        return []
-
-    try:
-        current = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return []
-
-    if not isinstance(current, list):
-        return []
-
-    preserved: list[dict[str, str]] = []
-    for item in current:
-        try:
-            normalized = validate_existing_news_item(item)
-        except RuntimeError:
-            continue
-        if normalized:
-            preserved.append(normalized)
-    return preserved
-
-
-def merge_news_items(primary: list[dict[str, str]], preserved: list[dict[str, str]], *, limit: int) -> list[dict[str, str]]:
-    merged: list[dict[str, str]] = []
+def dedupe_news_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
+    deduped: list[dict[str, str]] = []
     seen: set[str] = set()
-    for item in [*primary, *preserved]:
+    for item in items:
         key = f"{item['sourceUrl']}::{item['title']}"
         if key in seen:
             continue
         seen.add(key)
-        merged.append(item)
+        deduped.append(item)
+    return deduped
 
-    merged.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
-    return merged[:limit]
+
+def recent_news_by_status(items: list[dict[str, str]], status: str, *, limit: int) -> list[dict[str, str]]:
+    filtered = [item for item in dedupe_news_items(items) if item["reportingStatus"] == status]
+    filtered.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
+    return filtered[:limit]
+
+
+def select_display_news_items(
+    official_items: list[dict[str, str]],
+    rumor_items: list[dict[str, str]],
+    *,
+    official_limit: int,
+    rumor_limit: int,
+) -> list[dict[str, str]]:
+    selected = [
+        *recent_news_by_status(official_items, "Official", limit=official_limit),
+        *recent_news_by_status(rumor_items, "Rumor", limit=rumor_limit),
+    ]
+    selected.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
+    return selected
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-url", default=NBA_NEWS_URL)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--limit", type=int, default=14)
-    parser.add_argument("--rumor-limit", type=int, default=4)
+    parser.add_argument("--limit", "--official-limit", dest="official_limit", type=int, default=DEFAULT_OFFICIAL_LIMIT, help="Official NBA.com items to display.")
+    parser.add_argument("--rumor-limit", type=int, default=DEFAULT_RUMOR_LIMIT, help="Trusted rumor items to display.")
     parser.add_argument("--skip-rumors", action="store_true", help="Only refresh NBA.com official news.")
     parser.add_argument("--require-rumors", action="store_true", help="Fail if trusted rumor sources cannot be refreshed.")
     parser.add_argument("--dry-run", action="store_true", help="Print refreshed JSON instead of writing it.")
@@ -453,13 +398,24 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     try:
-        payload = refresh_news(args.source_url, limit=args.limit)
+        official_payload = refresh_news(args.source_url, limit=max(args.official_limit * 2, args.official_limit))
         rumor_payload = [] if args.skip_rumors else refresh_trusted_rumor_news(
             TRUSTED_RUMOR_SOURCES,
             limit=args.rumor_limit,
             allow_failures=not args.require_rumors,
         )
-        payload = merge_news_items([*payload, *rumor_payload], load_preserved_external_items(args.output), limit=args.limit)
+        payload = select_display_news_items(
+            official_payload,
+            rumor_payload,
+            official_limit=args.official_limit,
+            rumor_limit=0 if args.skip_rumors else args.rumor_limit,
+        )
+        official_count = sum(1 for item in payload if item["reportingStatus"] == "Official")
+        rumor_count = sum(1 for item in payload if item["reportingStatus"] == "Rumor")
+        if official_count < args.official_limit:
+            raise RuntimeError(f"NBA.com news refresh produced only {official_count} official items")
+        if args.require_rumors and not args.skip_rumors and rumor_count < args.rumor_limit:
+            raise RuntimeError(f"Trusted rumor refresh produced only {rumor_count} rumor items")
     except (OSError, urllib.error.URLError, ValueError, RuntimeError) as error:
         print(f"NBA news refresh failed: {error}", file=sys.stderr)
         raise SystemExit(1) from error
@@ -475,6 +431,8 @@ def main() -> None:
         "status": "updated",
         "output": str(args.output),
         "items": len(payload),
+        "official": sum(1 for item in payload if item["reportingStatus"] == "Official"),
+        "rumors": sum(1 for item in payload if item["reportingStatus"] == "Rumor"),
         "source": args.source_url,
         "latest": payload[0]["publishedAt"] if payload else None,
     }, indent=2))
