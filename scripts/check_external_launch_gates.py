@@ -15,6 +15,7 @@ from urllib.parse import urlparse
 
 PLACEHOLDER_VALUES = {"", "todo", "tbd", "changeme", "change-me", "placeholder", "example"}
 UPTIME_DECISIONS = {"github-smoke-only", "external-monitor"}
+TELEMETRY_DECISIONS = {"configured", "deferred"}
 
 
 @dataclass
@@ -70,10 +71,22 @@ def check_site_url(env: Mapping[str, str], site_url: str, allow_railway_domain: 
     return GateResult("custom_domain", True, f"custom site URL configured for {details}")
 
 
-def check_sentry(env: Mapping[str, str]) -> list[GateResult]:
+def check_sentry(env: Mapping[str, str], decision: str) -> list[GateResult]:
     dsn = clean(env.get("SENTRY_DSN"))
     environment = clean(env.get("SENTRY_ENVIRONMENT"))
     results: list[GateResult] = []
+
+    if decision not in TELEMETRY_DECISIONS:
+        return [
+            GateResult(
+                "sentry_decision",
+                False,
+                "set SHOTCLOCK_SENTRY_DECISION to configured or deferred",
+            )
+        ]
+
+    if decision == "deferred":
+        return [GateResult("sentry_decision", True, "Sentry is explicitly deferred for this launch")]
 
     if is_placeholder(dsn):
         results.append(GateResult("sentry_dsn", False, "SENTRY_DSN is missing"))
@@ -87,13 +100,26 @@ def check_sentry(env: Mapping[str, str]) -> list[GateResult]:
     else:
         results.append(GateResult("sentry_environment", True, "Sentry environment is production"))
 
+    results.insert(0, GateResult("sentry_decision", True, "Sentry is required for this launch"))
     return results
 
 
-def check_posthog(env: Mapping[str, str]) -> list[GateResult]:
+def check_posthog(env: Mapping[str, str], decision: str) -> list[GateResult]:
     key = clean(env.get("NEXT_PUBLIC_POSTHOG_KEY"))
     host = clean(env.get("NEXT_PUBLIC_POSTHOG_HOST")) or "https://us.i.posthog.com"
     results: list[GateResult] = []
+
+    if decision not in TELEMETRY_DECISIONS:
+        return [
+            GateResult(
+                "posthog_decision",
+                False,
+                "set SHOTCLOCK_POSTHOG_DECISION to configured or deferred",
+            )
+        ]
+
+    if decision == "deferred":
+        return [GateResult("posthog_decision", True, "PostHog is explicitly deferred for this launch")]
 
     if is_placeholder(key):
         results.append(GateResult("posthog_key", False, "NEXT_PUBLIC_POSTHOG_KEY is missing"))
@@ -106,6 +132,7 @@ def check_posthog(env: Mapping[str, str]) -> list[GateResult]:
     else:
         results.append(GateResult("posthog_host", True, f"PostHog host configured for {details}"))
 
+    results.insert(0, GateResult("posthog_decision", True, "PostHog is required for this launch"))
     return results
 
 
@@ -183,6 +210,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Treat the backup/PITR policy decision as confirmed for this run.",
     )
+    parser.add_argument(
+        "--sentry-decision",
+        choices=sorted(TELEMETRY_DECISIONS),
+        default=clean(os.environ.get("SHOTCLOCK_SENTRY_DECISION") or "configured"),
+        help="Whether Sentry must be configured or is explicitly deferred for this launch.",
+    )
+    parser.add_argument(
+        "--posthog-decision",
+        choices=sorted(TELEMETRY_DECISIONS),
+        default=clean(os.environ.get("SHOTCLOCK_POSTHOG_DECISION") or "configured"),
+        help="Whether PostHog must be configured or is explicitly deferred for this launch.",
+    )
     return parser.parse_args()
 
 
@@ -193,8 +232,8 @@ def main() -> None:
 
     results: list[GateResult] = [
         check_site_url(env, site_url, args.allow_railway_domain),
-        *check_sentry(env),
-        *check_posthog(env),
+        *check_sentry(env, args.sentry_decision),
+        *check_posthog(env, args.posthog_decision),
         *check_uptime_decision(env),
         check_backup_policy(env, args.backup_policy_confirmed),
     ]

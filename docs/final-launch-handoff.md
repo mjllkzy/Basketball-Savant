@@ -1,6 +1,6 @@
 # Final Launch Handoff
 
-This is the remaining account-level setup needed after the repo-side launch work. Do not commit secrets to the repository.
+This is the remaining account-level setup and validation path after the repo-side launch work. Do not commit secrets to the repository.
 
 ## Current Verified State
 
@@ -35,27 +35,18 @@ www.shotclockbb.com  CNAME  l35bxp7x.up.railway.app
 
 External HTTPS checks against `https://shotclockbb.com/api/health` returned ShotClock successfully from this workspace on 2026-06-28.
 
-6. Create a Sentry project and set:
+4. Keep paid telemetry explicitly deferred unless that product decision changes:
 
 ```bash
 railway variable set \
-  SENTRY_DSN='https://public-key@o000000.ingest.sentry.io/000000' \
-  SENTRY_ENVIRONMENT=production \
-  --service Basketball-Savant \
-  --environment production
-```
-
-7. Create a PostHog project and set:
-
-```bash
-railway variable set \
-  NEXT_PUBLIC_POSTHOG_KEY='phc_project_key' \
+  SHOTCLOCK_SENTRY_DECISION=deferred \
+  SHOTCLOCK_POSTHOG_DECISION=deferred \
   NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
   --service Basketball-Savant \
   --environment production
 ```
 
-8. Keep the current uptime and backup policy flags unless those decisions change:
+5. Keep the current uptime and backup policy flags unless those decisions change:
 
 ```bash
 railway variable set \
@@ -67,14 +58,46 @@ railway variable set \
 
 The legacy `BASKETBALL_SAVANT_UPTIME_MONITOR_DECISION`, `BASKETBALL_SAVANT_UPTIME_MONITOR_URL`, and `BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED` names still work as fallbacks, but new setup should use the `SHOTCLOCK_*` names.
 
-## GitHub Secrets For Final Gate Workflow
+## Optional Paid Telemetry Later
 
-The manual `Final Launch Gates` workflow also needs these GitHub secrets:
+Sentry and PostHog are implemented but intentionally not required for the current launch because the paid telemetry products are deferred. If that changes, set the decisions to `configured` and provide the credentials below.
+
+Sentry:
+
+```bash
+railway variable set \
+  SHOTCLOCK_SENTRY_DECISION=configured \
+  SENTRY_DSN='https://public-key@o000000.ingest.sentry.io/000000' \
+  SENTRY_ENVIRONMENT=production \
+  --service Basketball-Savant \
+  --environment production
+```
+
+PostHog:
+
+```bash
+railway variable set \
+  SHOTCLOCK_POSTHOG_DECISION=configured \
+  NEXT_PUBLIC_POSTHOG_KEY='phc_project_key' \
+  NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
+  --service Basketball-Savant \
+  --environment production
+```
+
+If telemetry is configured later, the manual `Final Launch Gates` workflow also needs these GitHub secrets:
 
 ```bash
 gh secret set SENTRY_DSN
 gh secret set NEXT_PUBLIC_POSTHOG_KEY
 gh variable set NEXT_PUBLIC_POSTHOG_HOST --body https://us.i.posthog.com
+```
+
+For the current deferred-telemetry launch, configure the non-secret GitHub workflow variables only:
+
+```bash
+gh variable set NEXT_PUBLIC_POSTHOG_HOST --body https://us.i.posthog.com
+gh variable set SHOTCLOCK_SENTRY_DECISION --body deferred
+gh variable set SHOTCLOCK_POSTHOG_DECISION --body deferred
 ```
 
 Do not add the Sentry or PostHog values to `.env`, docs, screenshots, or committed files.
@@ -85,9 +108,8 @@ After Railway redeploys and DNS is active, run:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://shotclockbb.com \
-SENTRY_DSN='https://public-key@o000000.ingest.sentry.io/000000' \
-SENTRY_ENVIRONMENT=production \
-NEXT_PUBLIC_POSTHOG_KEY='phc_project_key' \
+SHOTCLOCK_SENTRY_DECISION=deferred \
+SHOTCLOCK_POSTHOG_DECISION=deferred \
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
 SHOTCLOCK_UPTIME_MONITOR_DECISION=github-smoke-only \
 SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true \
@@ -111,6 +133,8 @@ Then run the manual GitHub `Final Launch Gates` workflow with:
 - `site_url`: the public custom domain.
 - `expected_commit`: optional. Leave it blank to let the workflow resolve the live release from `/api/health`, or provide the full commit SHA from the live Railway deployment.
 - `uptime_monitor_decision`: `github-smoke-only`, unless an external monitor was added.
+- `sentry_decision`: `deferred` for the current no-paid-telemetry launch, or `configured` if Sentry credentials were added.
+- `posthog_decision`: `deferred` for the current no-paid-telemetry launch, or `configured` if PostHog credentials were added.
 - `backup_policy_confirmed`: `true`.
 
 ## Completion Criteria
@@ -119,8 +143,7 @@ The launch goal is complete only when:
 
 - The public custom domain resolves over HTTPS.
 - `NEXT_PUBLIC_SITE_URL` matches the public custom domain.
-- Sentry DSN and `SENTRY_ENVIRONMENT=production` are configured.
-- PostHog public key and host are configured.
+- Sentry and PostHog decisions are explicitly set to `deferred` or `configured`; the current approved launch path is `deferred`.
 - External launch gates pass without `--allow-railway-domain`.
 - Custom-domain launch readiness passes with `--require-custom-domain`.
 - Production Smoke and Production Load Check pass against the custom domain.

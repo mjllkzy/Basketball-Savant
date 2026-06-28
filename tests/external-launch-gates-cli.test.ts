@@ -20,8 +20,12 @@ describe("external launch gate CLI", () => {
 
     expect(workflow).toContain("workflow_dispatch:");
     expect(workflow).toContain("site_url:");
+    expect(workflow).toContain("sentry_decision:");
+    expect(workflow).toContain("posthog_decision:");
     expect(workflow).toContain("secrets.SENTRY_DSN");
     expect(workflow).toContain("secrets.NEXT_PUBLIC_POSTHOG_KEY");
+    expect(workflow).toContain("SHOTCLOCK_SENTRY_DECISION");
+    expect(workflow).toContain("SHOTCLOCK_POSTHOG_DECISION");
     expect(workflow).toContain("scripts/check_external_launch_gates.py");
     expect(workflow).toContain("--require-custom-domain");
     expect(workflow).toContain("scripts/load_check_production.py");
@@ -34,6 +38,8 @@ describe("external launch gate CLI", () => {
     expect(script).toContain("NEXT_PUBLIC_SITE_URL");
     expect(script).toContain("SENTRY_DSN");
     expect(script).toContain("NEXT_PUBLIC_POSTHOG_KEY");
+    expect(script).toContain("SHOTCLOCK_SENTRY_DECISION");
+    expect(script).toContain("SHOTCLOCK_POSTHOG_DECISION");
     expect(script).toContain("SHOTCLOCK_BACKUP_POLICY_CONFIRMED");
     expect(script).toContain("SHOTCLOCK_UPTIME_MONITOR_DECISION");
     expect(script).toContain("BASKETBALL_SAVANT_BACKUP_POLICY_CONFIRMED");
@@ -63,6 +69,8 @@ describe("external launch gate CLI", () => {
     delete env.SENTRY_ENVIRONMENT;
     delete env.NEXT_PUBLIC_POSTHOG_KEY;
     delete env.NEXT_PUBLIC_POSTHOG_HOST;
+    delete env.SHOTCLOCK_SENTRY_DECISION;
+    delete env.SHOTCLOCK_POSTHOG_DECISION;
     delete env.SHOTCLOCK_BACKUP_POLICY_CONFIRMED;
     delete env.SHOTCLOCK_UPTIME_MONITOR_DECISION;
     delete env.SHOTCLOCK_UPTIME_MONITOR_URL;
@@ -99,6 +107,26 @@ describe("external launch gate CLI", () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toContain('"status": "ready"');
+  });
+
+  runIfPython("passes when paid telemetry is explicitly deferred", () => {
+    const result = spawnSync(pythonCommand!, ["scripts/check_external_launch_gates.py"], {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        NEXT_PUBLIC_SITE_URL: "https://shotclockbb.com",
+        SHOTCLOCK_SENTRY_DECISION: "deferred",
+        SHOTCLOCK_POSTHOG_DECISION: "deferred",
+        SHOTCLOCK_BACKUP_POLICY_CONFIRMED: "true",
+        SHOTCLOCK_UPTIME_MONITOR_DECISION: "github-smoke-only",
+      },
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('"status": "ready"');
+    expect(result.stdout).toContain('"sentry_decision"');
+    expect(result.stdout).toContain('"posthog_decision"');
   });
 
   runIfPython("accepts legacy Basketball Savant launch gate environment names", () => {

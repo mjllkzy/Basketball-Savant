@@ -2,6 +2,13 @@
 
 ShotClock keeps analytics and error reporting optional. The app builds and runs without any telemetry environment variables.
 
+The current launch decision is to defer paid Sentry and PostHog setup. Keep these non-secret decisions configured until that changes:
+
+```txt
+SHOTCLOCK_SENTRY_DECISION=deferred
+SHOTCLOCK_POSTHOG_DECISION=deferred
+```
+
 ## Sentry
 
 Configure these Railway variables on the application service:
@@ -76,10 +83,12 @@ The GitHub Production Load Check workflow also runs this conservative check afte
 
 ## Final Validation
 
-After Sentry and PostHog are configured, run the external launch gate check from a shell that contains the production variable values:
+For the current deferred-telemetry launch, run the external launch gate check with the explicit decisions:
 
 ```bash
-python scripts/check_external_launch_gates.py
+SHOTCLOCK_SENTRY_DECISION=deferred \
+SHOTCLOCK_POSTHOG_DECISION=deferred \
+python scripts/check_external_launch_gates.py --site-url https://shotclockbb.com
 ```
 
-The same validation is available as the manual GitHub Final Launch Gates workflow. It expects `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY` as GitHub secrets, accepts the public custom domain as a workflow input, and then runs the external gate, launch-readiness, and conservative load checks against that domain. See [Final Launch Handoff](final-launch-handoff.md) for the exact setup sequence.
+The same validation is available as the manual GitHub Final Launch Gates workflow. It accepts `deferred` or `configured` Sentry/PostHog decisions, accepts the public custom domain as a workflow input, and then runs the external gate, launch-readiness, and conservative load checks against that domain. See [Final Launch Handoff](final-launch-handoff.md) for the exact setup sequence.

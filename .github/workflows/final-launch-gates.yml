@@ -22,6 +22,22 @@ on:
         description: Required only when uptime_monitor_decision is external-monitor
         required: false
         default: ""
+      sentry_decision:
+        description: Require Sentry credentials or defer paid error monitoring for this launch
+        required: true
+        default: deferred
+        type: choice
+        options:
+          - deferred
+          - configured
+      posthog_decision:
+        description: Require PostHog credentials or defer paid product analytics for this launch
+        required: true
+        default: deferred
+        type: choice
+        options:
+          - deferred
+          - configured
       backup_policy_confirmed:
         description: Confirm Railway backup/PITR or an external backup policy has been reviewed
         required: true
@@ -47,6 +63,8 @@ jobs:
       SENTRY_ENVIRONMENT: production
       NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com' }}
+      SHOTCLOCK_SENTRY_DECISION: ${{ inputs.sentry_decision }}
+      SHOTCLOCK_POSTHOG_DECISION: ${{ inputs.posthog_decision }}
       SHOTCLOCK_UPTIME_MONITOR_DECISION: ${{ inputs.uptime_monitor_decision }}
       SHOTCLOCK_UPTIME_MONITOR_URL: ${{ inputs.uptime_monitor_url }}
       SHOTCLOCK_BACKUP_POLICY_CONFIRMED: ${{ inputs.backup_policy_confirmed }}

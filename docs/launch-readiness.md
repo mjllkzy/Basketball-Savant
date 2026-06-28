@@ -126,17 +126,16 @@ The workflow applies migrations, validates the workbook, refreshes Postgres when
 
 `.github/workflows/news-refresh.yml` refreshes the fan-facing news feed from the official NBA.com news index every day at 12:00 PM America/Phoenix and commits `src/lib/data/news.json` only when the validated source-backed feed changes.
 
-`.github/workflows/final-launch-gates.yml` is a manual workflow for the final public-domain launch check. Run it after DNS is active and GitHub secrets are configured for `SENTRY_DSN` and `NEXT_PUBLIC_POSTHOG_KEY`. It validates the external launch gates, custom-domain SEO readiness, and conservative responsiveness against the selected public URL. If the optional expected commit input is blank, the workflow resolves the live release from `/api/health` and uses it for the readiness and load checks.
+`.github/workflows/final-launch-gates.yml` is a manual workflow for the final public-domain launch check. It supports the current no-paid-telemetry launch path by setting Sentry and PostHog decisions to `deferred`, while still allowing `configured` later if credentials are added. It validates the external launch gates, custom-domain SEO readiness, and conservative responsiveness against the selected public URL. If the optional expected commit input is blank, the workflow resolves the live release from `/api/health` and uses it for the readiness and load checks.
 
 ## Final External Gate Validation
 
-After the public domain, Sentry, PostHog, uptime-monitor decision, and backup policy are configured, run:
+After the public domain, telemetry decisions, uptime-monitor decision, and backup policy are configured, run:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://shotclockbb.com \
-SENTRY_DSN=https://public@sentry.example.com/42 \
-SENTRY_ENVIRONMENT=production \
-NEXT_PUBLIC_POSTHOG_KEY=phc_... \
+SHOTCLOCK_SENTRY_DECISION=deferred \
+SHOTCLOCK_POSTHOG_DECISION=deferred \
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com \
 SHOTCLOCK_UPTIME_MONITOR_DECISION=github-smoke-only \
 SHOTCLOCK_BACKUP_POLICY_CONFIRMED=true \
@@ -167,10 +166,12 @@ Application service:
 
 - `DATABASE_URL`: set through the Railway Postgres service reference.
 - `NEXT_PUBLIC_SITE_URL`: `https://shotclockbb.com`.
-- `SENTRY_DSN`: missing.
-- `SENTRY_ENVIRONMENT`: missing.
-- `NEXT_PUBLIC_POSTHOG_KEY`: missing.
-- `NEXT_PUBLIC_POSTHOG_HOST`: defaults to `https://us.i.posthog.com`.
+- `SHOTCLOCK_SENTRY_DECISION`: `deferred`.
+- `SHOTCLOCK_POSTHOG_DECISION`: `deferred`.
+- `SENTRY_DSN`: intentionally not set while Sentry is deferred.
+- `SENTRY_ENVIRONMENT`: intentionally not set while Sentry is deferred.
+- `NEXT_PUBLIC_POSTHOG_KEY`: intentionally not set while PostHog is deferred.
+- `NEXT_PUBLIC_POSTHOG_HOST`: `https://us.i.posthog.com`.
 - `SHOTCLOCK_UPTIME_MONITOR_DECISION`: `github-smoke-only`.
 - `SHOTCLOCK_BACKUP_POLICY_CONFIRMED`: `true`.
 - Legacy `BASKETBALL_SAVANT_*` launch-gate names still work as fallbacks.
@@ -195,15 +196,15 @@ Postgres volume:
 
 ## Remaining External Launch Gates
 
-These are not code blockers, but they require account or product decisions outside the repository:
+These are not code blockers. Current decisions are recorded so launch validation can pass without paid telemetry:
 
-1. Add Sentry project credentials if server error monitoring should be live.
-2. Add PostHog credentials if growth analytics should be live.
-3. Optional: add an external uptime monitor in addition to GitHub scheduled production smoke checks.
-4. Optional: replace or supplement the current verified rolling `pg_dump` artifacts with Railway PITR or a stricter restore-tested backup process.
+1. Sentry server error monitoring is deferred.
+2. PostHog product analytics is deferred.
+3. Optional later: add an external uptime monitor in addition to GitHub scheduled production smoke checks.
+4. Optional later: replace or supplement the current verified rolling `pg_dump` artifacts with Railway PITR or a stricter restore-tested backup process.
 
 Use [Final Launch Handoff](final-launch-handoff.md) for the exact non-repo setup commands and validation sequence.
 
 ## Safe Next Product Work
 
-The platform is ready for feature work after the external launch gates are decided. Suggested next website additions should build on the existing Postgres-backed data layer and preserve the masterfile ingestion path as the authoritative 2025-26 baseline.
+The platform is ready for feature work after the final launch gates pass with the recorded telemetry decisions. Suggested next website additions should build on the existing Postgres-backed data layer and preserve the masterfile ingestion path as the authoritative 2025-26 baseline.
