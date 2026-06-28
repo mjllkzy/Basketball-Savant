@@ -1,9 +1,10 @@
-import type { Game, MetricValue, Player, PlayerGameStat, PlayerSeasonAggregate, Team } from "@/lib/types";
+import type { Game, MetricValue, Player, PlayerGameStat, PlayerSeasonAggregate, SeasonType, Team } from "@/lib/types";
 import { playerSimilaritySummary, similarPlayers } from "@/lib/comparison";
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { percentileRank, trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
+import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
 import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 
@@ -325,8 +326,9 @@ function mapComparisonRow(row: ComparisonDbRow): ComparisonPlayer {
   };
 }
 
-async function jsonPlayerOptions(): Promise<PlayerOption[]> {
-  const { players } = await loadRuntimeFallbacks();
+async function jsonPlayerOptions(seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<PlayerOption[]> {
+  const { players, metadata } = await loadRuntimeFallbacks();
+  if (metadata.season_type !== seasonType) return [];
   return players.map((player) => ({
     slug: player.player_slug,
     name: player.player_name,
@@ -335,8 +337,9 @@ async function jsonPlayerOptions(): Promise<PlayerOption[]> {
   }));
 }
 
-async function jsonComparisonPlayers(slugs?: string[]): Promise<ComparisonPlayer[]> {
-  const { players, teams } = await loadRuntimeFallbacks();
+async function jsonComparisonPlayers(slugs?: string[], seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<ComparisonPlayer[]> {
+  const { players, teams, metadata } = await loadRuntimeFallbacks();
+  if (metadata.season_type !== seasonType) return [];
   const selected = slugs ? new Set(slugs) : null;
   const tsValues = players.flatMap((player) => player.ts_pct === null ? [] : [player.ts_pct]);
   const usageValues = players.flatMap((player) => player.usage_rate === null ? [] : [player.usage_rate]);
@@ -408,7 +411,7 @@ async function jsonComparisonPlayers(slugs?: string[]): Promise<ComparisonPlayer
   });
 }
 
-export async function listComparisonPlayerOptions(): Promise<PlayerOption[]> {
+export async function listComparisonPlayerOptions(seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<PlayerOption[]> {
   try {
     const result = await queryDatabase<PlayerOptionDbRow>(
       `
@@ -420,10 +423,12 @@ export async function listComparisonPlayerOptions(): Promise<PlayerOption[]> {
         p.position
       FROM players p
       JOIN current_player_season_summaries s USING (player_slug)
+      WHERE s.season_type = $1
       ORDER BY p.player_name
       `,
+      [seasonType],
     );
-    if (!result) return jsonPlayerOptions();
+    if (!result) return jsonPlayerOptions(seasonType);
     return result.rows.map((row) => ({
       id: row.nba_player_id ?? row.player_slug,
       slug: row.player_slug,
@@ -432,11 +437,11 @@ export async function listComparisonPlayerOptions(): Promise<PlayerOption[]> {
       position: row.position ?? "N/A",
     }));
   } catch {
-    return jsonPlayerOptions();
+    return jsonPlayerOptions(seasonType);
   }
 }
 
-export async function loadComparisonPlayers(slugs: string[]): Promise<ComparisonPlayer[]> {
+export async function loadComparisonPlayers(slugs: string[], seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<ComparisonPlayer[]> {
   const requested = Array.from(new Set(slugs.filter(Boolean))).slice(0, 2);
   if (!requested.length) return [];
 
@@ -450,6 +455,7 @@ export async function loadComparisonPlayers(slugs: string[]): Promise<Comparison
           percent_rank() OVER (ORDER BY s.usage_rate) * 100 AS usage_percentile,
           percent_rank() OVER (ORDER BY s.pie) * 100 AS pie_percentile
         FROM current_player_season_summaries s
+        WHERE s.season_type = $2
       )
       SELECT
         p.player_slug,
@@ -483,21 +489,21 @@ export async function loadComparisonPlayers(slugs: string[]): Promise<Comparison
       LEFT JOIN teams t ON t.id = p.primary_team_id
       WHERE p.player_slug = ANY($1::text[])
       `,
-      [requested],
+      [requested, seasonType],
     );
-    if (!result) return jsonComparisonPlayers(requested);
+    if (!result) return jsonComparisonPlayers(requested, seasonType);
     const bySlug = new Map(result.rows.map((row) => [row.player_slug, mapComparisonRow(row)]));
     return requested.flatMap((slug) => {
       const player = bySlug.get(slug);
       return player ? [player] : [];
     });
   } catch {
-    return jsonComparisonPlayers(requested);
+    return jsonComparisonPlayers(requested, seasonType);
   }
 }
 
-async function jsonSimilarityResult(playerSlug: string): Promise<PlayerSimilarityResult | null> {
-  const players = await jsonComparisonPlayers();
+async function jsonSimilarityResult(playerSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<PlayerSimilarityResult | null> {
+  const players = await jsonComparisonPlayers(undefined, seasonType);
   const target = players.find((player) => player.player.slug === playerSlug);
   if (!target) return null;
 
@@ -519,7 +525,7 @@ async function jsonSimilarityResult(playerSlug: string): Promise<PlayerSimilarit
   };
 }
 
-export async function loadAllComparisonPlayers(): Promise<{ rows: ComparisonPlayer[]; source: "postgres" | "json" }> {
+export async function loadAllComparisonPlayers(seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<{ rows: ComparisonPlayer[]; source: "postgres" | "json" }> {
   try {
     const result = await queryDatabase<ComparisonDbRow>(`
       WITH ranked AS (
@@ -529,6 +535,7 @@ export async function loadAllComparisonPlayers(): Promise<{ rows: ComparisonPlay
           percent_rank() OVER (ORDER BY s.usage_rate) * 100 AS usage_percentile,
           percent_rank() OVER (ORDER BY s.pie) * 100 AS pie_percentile
         FROM current_player_season_summaries s
+        WHERE s.season_type = $1
       )
       SELECT
         p.player_slug,
@@ -560,21 +567,21 @@ export async function loadAllComparisonPlayers(): Promise<{ rows: ComparisonPlay
       FROM ranked
       JOIN players p USING (player_slug)
       LEFT JOIN teams t ON t.id = p.primary_team_id
-    `);
+    `, [seasonType]);
     if (result?.rows.length) {
       return { rows: result.rows.map(mapComparisonRow), source: "postgres" };
     }
   } catch {
     // Compact generated summaries remain the fallback.
   }
-  return { rows: await jsonComparisonPlayers(), source: "json" };
+  return { rows: await jsonComparisonPlayers(undefined, seasonType), source: "json" };
 }
 
-export async function loadPlayerSimilarity(playerSlug: string): Promise<PlayerSimilarityResult | null> {
+export async function loadPlayerSimilarity(playerSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<PlayerSimilarityResult | null> {
   if (!playerSlug) return null;
-  const loaded = await loadAllComparisonPlayers();
+  const loaded = await loadAllComparisonPlayers(seasonType);
   const target = loaded.rows.find((player) => player.player.slug === playerSlug);
-  if (!target) return jsonSimilarityResult(playerSlug);
+  if (!target) return jsonSimilarityResult(playerSlug, seasonType);
   const matches = similarPlayers(target.aggregate, loaded.rows.map((player) => player.aggregate), 10).map((row) => ({
     player: row.aggregate.player,
     team: row.aggregate.team,
@@ -596,7 +603,7 @@ function profileInputMatches(player: ComparisonPlayer, input: string) {
   return Boolean(trailingId && player.player.id === trailingId);
 }
 
-function playerMetricValues(target: ComparisonPlayer, players: ComparisonPlayer[]): MetricValue[] {
+function playerMetricValues(target: ComparisonPlayer, players: ComparisonPlayer[], seasonType: SeasonType): MetricValue[] {
   return metricRegistry.flatMap((metric): MetricValue[] => {
     const value = calculatePlayerMetric(metric.key, target.aggregate);
     if (value === null || !Number.isFinite(value)) return [];
@@ -610,7 +617,7 @@ function playerMetricValues(target: ComparisonPlayer, players: ComparisonPlayer[
       entityType: "player",
       entityId: target.player.id,
       season: target.aggregate.season,
-      seasonType: "Regular Season",
+      seasonType,
       value,
       percentile: percentileRank(value, values, metric.higherIsBetter),
       rank: sorted.findIndex((candidate) => candidate === value) + 1,
@@ -671,15 +678,18 @@ function mapProfileGameRow(row: PlayerProfileGameDbRow) {
   return { ...line, game, opponent };
 }
 
-export async function loadPlayerProfileAnalytics(input: string) {
-  const loaded = await loadAllComparisonPlayers();
+export async function loadPlayerProfileAnalytics(input: string, requestedSeasonType: SeasonType = DEFAULT_SEASON_TYPE) {
+  const seasonType = parseSeasonType(requestedSeasonType);
+  const loaded = await loadAllComparisonPlayers(seasonType);
   const target = loaded.rows.find((player) => profileInputMatches(player, input));
   if (!target) {
+    if (seasonType !== DEFAULT_SEASON_TYPE) return undefined;
     const query = await import("@/lib/data/queries");
     const fallback = query.getPlayerProfile(input);
     return fallback ? { ...fallback, source: "json" as const } : undefined;
   }
   if (loaded.source === "json") {
+    if (seasonType !== DEFAULT_SEASON_TYPE) return undefined;
     const query = await import("@/lib/data/queries");
     const fallback = query.getPlayerProfile(target.player.slug) ?? query.getPlayerProfile(input);
     return fallback ? { ...fallback, source: "json" as const } : undefined;
@@ -711,8 +721,9 @@ export async function loadPlayerProfileAnalytics(input: string) {
       JOIN current_games game USING (game_id)
       JOIN teams opponent ON opponent.id = stat.opponent_team_id
       WHERE stat.player_slug = $1
+        AND game.season_type = $2
       ORDER BY game.game_date DESC, game.game_id DESC
-    `, [target.player.slug]);
+    `, [target.player.slug, seasonType]);
     if (!gameResult) throw new Error("Player game logs unavailable");
     const gameLog = gameResult.rows.map(mapProfileGameRow).map((line) => ({
       ...line,
@@ -745,12 +756,12 @@ export async function loadPlayerProfileAnalytics(input: string) {
     }));
     const teamIds = new Set(gameLog.map((line) => line.teamId));
     if (!teamIds.size) teamIds.add(target.team.id);
-    const postgresShots = await listShotAttempts({ playerId: target.player.id });
+    const postgresShots = await listShotAttempts({ playerId: target.player.id, seasonType });
     const shots = postgresShots.source === "postgres" && postgresShots.rows.length
       ? postgresShots.rows
-      : Array.from(teamIds)
+      : seasonType === DEFAULT_SEASON_TYPE ? Array.from(teamIds)
         .flatMap((teamId) => getCachedTeamShotChart(teamId))
-        .filter((shot) => shot.playerId === target.player.id);
+        .filter((shot) => shot.playerId === target.player.id) : [];
     return {
       source: "postgres" as const,
       player: target.player,
@@ -759,10 +770,11 @@ export async function loadPlayerProfileAnalytics(input: string) {
       masterSlug: target.player.slug,
       gameLog,
       shots,
-      metricValues: playerMetricValues({ ...target, aggregate }, loaded.rows),
+      metricValues: playerMetricValues({ ...target, aggregate }, loaded.rows, seasonType),
       similar: matches.slice(0, 5),
     };
   } catch {
+    if (seasonType !== DEFAULT_SEASON_TYPE) return undefined;
     const query = await import("@/lib/data/queries");
     const fallback = query.getPlayerProfile(target.player.slug) ?? query.getPlayerProfile(input);
     return fallback ? { ...fallback, source: "json" as const } : undefined;

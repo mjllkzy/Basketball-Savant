@@ -43,5 +43,8 @@ describe("database-backed team analytics", () => {
     const monthly = await listTeamSeasonSummaries({ month });
     expect(monthly.rows.length).toBeGreaterThan(0);
     expect(monthly.rows.every((row) => row.games > 0 && row.games < 82)).toBe(true);
+    expect(monthly.rows.every((row) => row.officialTsPct !== null && row.officialTsPct > 0 && row.officialTsPct < 1)).toBe(true);
+    expect(monthly.rows.every((row) => row.officialEfgPct !== null && row.officialEfgPct > 0 && row.officialEfgPct < 1)).toBe(true);
+    expect(monthly.rows.every((row) => row.pace > 50 && row.pace < 130)).toBe(true);
   }, 15_000);
 });

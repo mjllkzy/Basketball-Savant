@@ -1,5 +1,6 @@
-import type { Game, Player, PlayerGameStat, Team, TeamGameStat } from "@/lib/types";
+import type { Game, Player, PlayerGameStat, SeasonType, Team, TeamGameStat } from "@/lib/types";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
+import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
 import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 
@@ -13,6 +14,7 @@ export type GameListParams = {
   teamId?: string;
   status?: string;
   season?: string;
+  seasonType?: SeasonType;
   date?: string;
 };
 
@@ -399,15 +401,17 @@ const gameSelect = `
 
 async function jsonGameList(params: GameListParams): Promise<GameListResult> {
   const query = await import("@/lib/data/queries");
+  const seasonType = parseSeasonType(params.seasonType);
   const result = query.listGames({
-    page: params.page,
-    pageSize: params.pageSize,
+    all: true,
     teamId: params.teamId,
     season: params.season,
     date: params.date,
   });
+  const rows = result.rows.filter((game) => game.seasonType === seasonType);
+  const paged = query.paginate(rows, params);
   return {
-    rows: result.rows.map((game) => {
+    rows: paged.rows.map((game) => {
       const homeTeam = query.getTeamByIdOrSlug(game.homeTeamId)!;
       const awayTeam = query.getTeamByIdOrSlug(game.awayTeamId)!;
       const leader = query.getGameLeadingScorer(game.id);
@@ -420,11 +424,12 @@ async function jsonGameList(params: GameListParams): Promise<GameListResult> {
           : null,
       };
     }),
-    meta: { ...result.meta, source: "json" },
+    meta: { ...paged.meta, source: "json" },
   };
 }
 
 export async function listGameAnalytics(params: GameListParams = {}): Promise<GameListResult> {
+  const seasonType = parseSeasonType(params.seasonType ?? DEFAULT_SEASON_TYPE);
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
   const values: unknown[] = [];
@@ -437,6 +442,7 @@ export async function listGameAnalytics(params: GameListParams = {}): Promise<Ga
     const placeholder = addValue(params.teamId);
     conditions.push(`(g.home_team_id = ${placeholder} OR g.away_team_id = ${placeholder})`);
   }
+  conditions.push(`g.season_type = ${addValue(seasonType)}`);
   if (params.season) conditions.push(`g.season = ${addValue(params.season)}`);
   if (params.date) conditions.push(`g.game_date = ${addValue(params.date)}::date`);
   if (params.status) conditions.push(`g.status = ${addValue(params.status)}`);

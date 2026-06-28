@@ -24,6 +24,7 @@ export const listQuerySchema = z.object({
   teamId: z.string().trim().optional(),
   position: z.string().trim().optional(),
   season: z.string().trim().optional(),
+  seasonType: z.enum(["Regular Season", "Playoffs"]).optional(),
   minGames: z.coerce.number().int().min(0).optional(),
   minMinutes: z.coerce.number().min(0).optional()
 });
@@ -35,7 +36,8 @@ export const teamQuerySchema = z.object({
   sort: z.string().trim().max(60).optional(),
   order: z.enum(["asc", "desc"]).optional(),
   conference: z.enum(["East", "West"]).optional(),
-  division: z.string().trim().optional()
+  division: z.string().trim().optional(),
+  seasonType: z.enum(["Regular Season", "Playoffs"]).optional()
 });
 
 export const shotQuerySchema = z.object({
@@ -48,6 +50,7 @@ export const shotQuerySchema = z.object({
   teamId: z.string().trim().optional(),
   opponent: z.string().trim().optional(),
   season: z.string().trim().optional(),
+  seasonType: z.enum(["Regular Season", "Playoffs"]).optional(),
   quarter: z.coerce.number().int().min(1).max(4).optional(),
   clutch: boolish,
   garbageTime: boolish,

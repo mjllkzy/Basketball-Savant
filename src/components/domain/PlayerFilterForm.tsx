@@ -14,8 +14,10 @@ type PlayerFilterFormProps = {
   teamId?: string;
   position?: string;
   statView: "standard" | "advanced";
+  seasonType: string;
   minMinutes: number;
   minGames: number;
+  seasonTypes: Option[];
   teamOptions: Option[];
   positionOptions: string[];
 };
@@ -27,8 +29,10 @@ export function PlayerFilterForm({
   teamId,
   position,
   statView,
+  seasonType,
   minMinutes,
   minGames,
+  seasonTypes,
   teamOptions,
   positionOptions
 }: PlayerFilterFormProps) {
@@ -37,7 +41,7 @@ export function PlayerFilterForm({
 
   return (
     <form className="grid gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm" method="get" action="/players">
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="grid gap-3 md:grid-cols-6">
         <SmartSearchInput
           name="q"
           defaultValue={q}
@@ -57,6 +61,9 @@ export function PlayerFilterForm({
         <select name="view" defaultValue={statView} aria-label="Stat view" className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="standard">Standard Stats</option>
           <option value="advanced">Advanced Stats</option>
+        </select>
+        <select name="seasonType" defaultValue={seasonType} aria-label="Season type" className="rounded border border-slate-300 px-3 py-2 text-sm">
+          {seasonTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
         <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Apply</button>
       </div>

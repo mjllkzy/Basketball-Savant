@@ -5,6 +5,7 @@ import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { listTeamSeasonSummaries, loadTeamSeasonSummaryFilters } from "@/lib/db/teamAnalytics.server";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
+import { parseSeasonType } from "@/lib/seasonTypes";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl } from "@/lib/teamBranding";
 
@@ -52,15 +53,18 @@ function selectedOption<T extends string>(value: string | undefined, options: Ar
   return options.some((option) => option.value === value) ? (value as T) : undefined;
 }
 
+function teamHref(slug: string, seasonType: string) {
+  return seasonType === "Regular Season" ? `/teams/${slug}` : `/teams/${slug}?seasonType=${encodeURIComponent(seasonType)}`;
+}
+
 export default async function TeamsPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
-  const [resolvedSearchParams, filterOptions] = await Promise.all([
-    searchParams,
-    loadTeamSeasonSummaryFilters(),
-  ]);
+  const resolvedSearchParams = await searchParams;
+  const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
+  const filterOptions = await loadTeamSeasonSummaryFilters({ seasonType });
   const conference = selectedOption(singleParam(resolvedSearchParams, "conference"), filterOptions.conferences);
   const division = selectedOption(singleParam(resolvedSearchParams, "division"), filterOptions.divisions);
   const month = selectedOption(singleParam(resolvedSearchParams, "month"), filterOptions.months);
-  const result = await listTeamSeasonSummaries({ conference, division, month });
+  const result = await listTeamSeasonSummaries({ seasonType, conference, division, month });
   const selectedMonthLabel = filterOptions.months.find((option) => option.value === month)?.label;
   const rows = result.rows.map((row) => ({
     team: `${row.team.city} ${row.team.name}`,
@@ -68,7 +72,7 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
     teamLogo: nbaTeamLogoUrl(row.team.id),
     teamLogoAlt: `${row.team.city} ${row.team.name} logo`,
     teamLogoFallback: row.team.abbreviation,
-    href: `/teams/${row.team.slug}`,
+    href: teamHref(row.team.slug, seasonType),
     conf: row.team.conference,
     record: `${row.wins}-${row.losses}`,
     ortg: formatMetric("off_rating", calculateTeamMetric("off_rating", row)),
@@ -88,19 +92,21 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
         eyebrow="Team Index"
         title="Teams"
         description={selectedMonthLabel
-          ? `Official team records, ratings, pace, shooting, ball movement, and rebounding context for ${selectedMonthLabel}.`
-          : "Official team records, ratings, pace, shooting, ball movement, and rebounding context."}
+          ? `Official ${seasonType.toLowerCase()} team records, ratings, pace, shooting, ball movement, and rebounding context for ${selectedMonthLabel}.`
+          : `Official ${seasonType.toLowerCase()} team records, ratings, pace, shooting, ball movement, and rebounding context.`}
       />
       <TeamFilterForm
+        seasonType={seasonType}
         conference={conference}
         division={division}
         month={month}
+        seasonTypes={filterOptions.seasonTypes}
         conferences={filterOptions.conferences}
         divisions={filterOptions.divisions}
         months={filterOptions.months}
       />
       <div data-data-source={result.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
-        Showing <strong className="text-ink">{rows.length}</strong> teams{selectedMonthLabel ? <> for <strong className="text-ink">{selectedMonthLabel}</strong></> : null}.
+        Showing <strong className="text-ink">{rows.length}</strong> {seasonType.toLowerCase()} teams{selectedMonthLabel ? <> for <strong className="text-ink">{selectedMonthLabel}</strong></> : null}.
       </div>
       <div data-data-source={result.source}>
         <StatTable

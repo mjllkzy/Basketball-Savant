@@ -8,6 +8,7 @@ import { listPlayerDirectory, loadPlayerDirectoryFilters } from "@/lib/db/player
 import { formatMetric } from "@/lib/metrics/format";
 import { formatPlayerHeight } from "@/lib/playerHeight";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
+import { parseSeasonType } from "@/lib/seasonTypes";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
@@ -84,12 +85,17 @@ function playersHref(searchParams: RouteSearchParams, showAll: boolean) {
   return query ? `/players?${query}` : "/players";
 }
 
+function playerHref(slug: string, seasonType: string) {
+  return seasonType === "Regular Season" ? `/players/${slug}` : `/players/${slug}?seasonType=${encodeURIComponent(seasonType)}`;
+}
+
 export default async function PlayersPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
   const q = singleParam(resolvedSearchParams, "q");
   const teamId = singleParam(resolvedSearchParams, "teamId");
   const position = singleParam(resolvedSearchParams, "position");
   const statView = singleParam(resolvedSearchParams, "view") === "advanced" ? "advanced" : "standard";
+  const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
   const sortMetrics = statView === "advanced" ? advancedSortMetrics : standardSortMetrics;
   const defaultSort = statView === "advanced" ? "pie" : "pts";
   const requestedSort = singleParam(resolvedSearchParams, "sort") ?? defaultSort;
@@ -99,11 +105,12 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const showAll = booleanParam(resolvedSearchParams, "showAll") === true;
   const order = singleParam(resolvedSearchParams, "order") === "asc" ? "asc" : "desc";
   const [filterOptions, result] = await Promise.all([
-    loadPlayerDirectoryFilters(),
+    loadPlayerDirectoryFilters(seasonType),
     listPlayerDirectory({
       q,
       teamId,
       position,
+      seasonType,
       sort,
       order,
       minGames,
@@ -117,7 +124,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const selectedPosition = positionOptions.includes(position ?? "") ? position : undefined;
   const rows = result.rows.map((row) => ({
     player: row.playerName,
-    href: `/players/${row.playerSlug}`,
+    href: playerHref(row.playerSlug, seasonType),
     team: row.teamAbbreviation,
     teamAccent: teamPrimaryColorByAbbreviation.get(row.teamAbbreviation) ?? "#0f766e",
     pos: row.position,
@@ -158,13 +165,15 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         teamId={teamId}
         position={selectedPosition}
         statView={statView}
+        seasonType={seasonType}
         minMinutes={minMinutes}
         minGames={minGames}
+        seasonTypes={filterOptions.seasonTypes}
         teamOptions={filterOptions.teams}
         positionOptions={positionOptions}
       />
       <div data-data-source={result.meta.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
-        Showing <strong className="text-ink">{result.meta.total}</strong> players with at least <strong className="text-ink">{minMinutes.toLocaleString()}</strong> total minutes and <strong className="text-ink">{minGames}</strong> games played.
+        Showing <strong className="text-ink">{result.meta.total}</strong> {seasonType.toLowerCase()} players with at least <strong className="text-ink">{minMinutes.toLocaleString()}</strong> total minutes and <strong className="text-ink">{minGames}</strong> games played.
       </div>
       <StatTable
         columns={columns}

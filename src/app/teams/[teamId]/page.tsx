@@ -10,6 +10,8 @@ import { listTeamSeasonSummaries, loadTeamProfile } from "@/lib/db/teamAnalytics
 import { formatShortDate } from "@/lib/date";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
+import { parseSeasonType } from "@/lib/seasonTypes";
+import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export async function generateMetadata({ params }: { params: Promise<{ teamId: string }> }): Promise<Metadata> {
   const { teamId } = await params;
@@ -31,11 +33,12 @@ export async function generateMetadata({ params }: { params: Promise<{ teamId: s
   };
 }
 
-export default async function TeamPage({ params }: { params: Promise<{ teamId: string }> }) {
-  const { teamId } = await params;
+export default async function TeamPage({ params, searchParams }: { params: Promise<{ teamId: string }>; searchParams: Promise<RouteSearchParams> }) {
+  const [{ teamId }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
   const [profile, teamSummaries] = await Promise.all([
-    loadTeamProfile(teamId),
-    listTeamSeasonSummaries(),
+    loadTeamProfile(teamId, seasonType),
+    listTeamSeasonSummaries({ seasonType }),
   ]);
   if (!profile) notFound();
   const rosterRows = profile.rosterRows.map((row) => ({

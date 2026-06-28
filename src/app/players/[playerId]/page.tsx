@@ -16,6 +16,8 @@ import { formatShortDate } from "@/lib/date";
 import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import { formatMetric, toPercentagePoints } from "@/lib/metrics/format";
+import { parseSeasonType } from "@/lib/seasonTypes";
+import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export async function generateMetadata({ params }: { params: Promise<{ playerId: string }> }): Promise<Metadata> {
   const { playerId } = await params;
@@ -47,9 +49,10 @@ function FeedRequiredPanel({ title, detail }: { title: string; detail: string })
   );
 }
 
-export default async function PlayerPage({ params }: { params: Promise<{ playerId: string }> }) {
-  const { playerId } = await params;
-  const profile = await loadPlayerProfileAnalytics(playerId);
+export default async function PlayerPage({ params, searchParams }: { params: Promise<{ playerId: string }>; searchParams: Promise<RouteSearchParams> }) {
+  const [{ playerId }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
+  const profile = await loadPlayerProfileAnalytics(playerId, seasonType);
   if (!profile) notFound();
   const radarKeys = ["pts", "reb", "ast", "stl", "blk", "ts_pct", "usage_rate", "three_pct"];
   const radarData = radarKeys.map((key) => ({

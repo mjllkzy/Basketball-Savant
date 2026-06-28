@@ -1,4 +1,4 @@
-import type { Shot } from "@/lib/types";
+import type { SeasonType, Shot } from "@/lib/types";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -46,6 +46,7 @@ export type ShotAttemptScope = {
   playerId?: string;
   gameId?: string;
   season?: string;
+  seasonType?: SeasonType;
 };
 
 export type ShotAttemptResult = {
@@ -105,61 +106,68 @@ export async function listShotAttempts(scope: ShotAttemptScope): Promise<ShotAtt
   const values: string[] = [];
   if (scope.teamId) {
     values.push(scope.teamId);
-    filters.push(`team_id = $${values.length}`);
+    filters.push(`shot.team_id = $${values.length}`);
   }
   if (scope.playerId) {
     values.push(scope.playerId);
-    filters.push(`(player_id = $${values.length} OR player_slug = $${values.length})`);
+    filters.push(`(shot.player_id = $${values.length} OR shot.player_slug = $${values.length})`);
   }
   if (scope.gameId) {
     values.push(scope.gameId);
-    filters.push(`game_id = $${values.length}`);
+    filters.push(`shot.game_id = $${values.length}`);
   }
   if (scope.season) {
     values.push(scope.season);
-    filters.push(`season = $${values.length}`);
+    filters.push(`shot.season = $${values.length}`);
+  }
+  if (scope.seasonType) {
+    values.push(scope.seasonType);
+    filters.push(`game.season_type = $${values.length}`);
   }
   if (!filters.length) return { rows: [], source: "unavailable" };
 
   try {
     const result = await queryDatabase<ShotAttemptDbRow>(`
       SELECT
-        shot_id,
-        possession_id,
-        game_id,
-        season,
-        player_id,
-        team_id,
-        quarter,
-        clock,
-        loc_x,
-        loc_y,
-        shot_distance,
-        shot_zone,
-        shot_type,
-        points_value,
-        made,
-        assisted,
-        dribbles_before_shot,
-        touch_time,
-        defender_distance,
-        closest_defender,
-        contest_level,
-        shot_clock,
-        expected_fg_pct,
-        expected_points,
-        actual_minus_expected,
-        play_type,
-        is_clutch,
-        is_transition,
-        is_catch_and_shoot,
-        is_pull_up,
-        is_at_rim,
-        is_corner_three,
-        is_above_break_three
-      FROM current_shot_attempts
+        shot.shot_id,
+        shot.possession_id,
+        shot.game_id,
+        shot.season,
+        shot.player_id,
+        shot.team_id,
+        shot.quarter,
+        shot.clock,
+        shot.loc_x,
+        shot.loc_y,
+        shot.shot_distance,
+        shot.shot_zone,
+        shot.shot_type,
+        shot.points_value,
+        shot.made,
+        shot.assisted,
+        shot.dribbles_before_shot,
+        shot.touch_time,
+        shot.defender_distance,
+        shot.closest_defender,
+        shot.contest_level,
+        shot.shot_clock,
+        shot.expected_fg_pct,
+        shot.expected_points,
+        shot.actual_minus_expected,
+        shot.play_type,
+        shot.is_clutch,
+        shot.is_transition,
+        shot.is_catch_and_shoot,
+        shot.is_pull_up,
+        shot.is_at_rim,
+        shot.is_corner_three,
+        shot.is_above_break_three
+      FROM current_shot_attempts shot
+      JOIN current_games game
+        ON game.ingestion_run_id = shot.ingestion_run_id
+        AND game.game_id = shot.game_id
       WHERE ${filters.join(" AND ")}
-      ORDER BY game_id DESC, quarter, clock DESC, shot_id
+      ORDER BY shot.game_id DESC, quarter, clock DESC, shot_id
     `, values);
     if (!result) return { rows: [], source: "unavailable" };
     return { rows: result.rows.map(mapShot), source: "postgres" };

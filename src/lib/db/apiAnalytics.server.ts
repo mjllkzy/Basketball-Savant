@@ -1,6 +1,7 @@
 import { percentileRank } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
-import type { PlayerSeasonAggregate, Team } from "@/lib/types";
+import type { PlayerSeasonAggregate, SeasonType, Team } from "@/lib/types";
+import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
 import { loadAllComparisonPlayers } from "./playerAnalytics.server";
 import { listTeamSeasonSummaries } from "./teamAnalytics.server";
 
@@ -21,6 +22,7 @@ export type ApiPlayerFilters = ApiPageParams & {
   teamId?: string;
   position?: string;
   season?: string;
+  seasonType?: SeasonType;
   minGames?: number;
   minMinutes?: number;
 };
@@ -29,6 +31,7 @@ export type ApiTeamFilters = ApiPageParams & {
   q?: string;
   conference?: string;
   division?: string;
+  seasonType?: SeasonType;
 };
 
 type ApiMeta = {
@@ -77,7 +80,8 @@ function compareNullable(left: number | null, right: number | null, order: "asc"
 }
 
 export async function listPlayerApiRecords(params: ApiPlayerFilters = {}) {
-  const loaded = await loadAllComparisonPlayers();
+  const seasonType = parseSeasonType(params.seasonType ?? DEFAULT_SEASON_TYPE);
+  const loaded = await loadAllComparisonPlayers(seasonType);
   const rows = loaded.rows
     .map((row) => row.aggregate)
     .filter((row) => textMatches(
@@ -123,7 +127,8 @@ export async function listPlayerApiRecords(params: ApiPlayerFilters = {}) {
 }
 
 export async function listTeamApiRecords(params: ApiTeamFilters = {}) {
-  const loaded = await listTeamSeasonSummaries();
+  const seasonType = parseSeasonType(params.seasonType ?? DEFAULT_SEASON_TYPE);
+  const loaded = await listTeamSeasonSummaries({ seasonType });
   const rows = loaded.rows
     .map((row) => row.team)
     .filter((team) => textMatches(`${team.city} ${team.name} ${team.abbreviation}`, params.q))

@@ -1,4 +1,4 @@
-import type { Game, Lineup, Shot, Team, TeamGameStat, TeamSeasonAggregate } from "@/lib/types";
+import type { Game, Lineup, SeasonType, Shot, Team, TeamGameStat, TeamSeasonAggregate } from "@/lib/types";
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
 import { officialGames, officialTeamGameStats } from "@/lib/data/official";
 import { listGameAnalytics, type GameListItem } from "./gameAnalytics.server";
@@ -6,6 +6,7 @@ import { listPlayerDirectory, type PlayerDirectoryRow } from "./playerDirectory.
 import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
+import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/teamAnalytics.server.ts can only be imported on the server.");
@@ -93,12 +94,14 @@ type TeamGameSummaryDbRow = {
 };
 
 type TeamSummaryParams = {
+  seasonType?: SeasonType;
   conference?: "East" | "West";
   division?: string;
   month?: string;
 };
 
 export type TeamSummaryFilterOptions = {
+  seasonTypes: Array<{ label: string; value: SeasonType }>;
   conferences: Array<{ label: string; value: "East" | "West" }>;
   divisions: Array<{ label: string; value: string }>;
   months: Array<{ label: string; value: string }>;
@@ -148,6 +151,10 @@ function monthLabel(value: string) {
 
 function normalizeMonth(value?: string) {
   return value && /^\d{4}-\d{2}$/.test(value) ? value : undefined;
+}
+
+function selectedSeasonType(params: Pick<TeamSummaryParams, "seasonType">) {
+  return parseSeasonType(params.seasonType);
 }
 
 function filterTeamAggregateRows(rows: TeamSeasonAggregate[], params: TeamSummaryParams) {
@@ -271,6 +278,12 @@ function emptyAccumulator(team: Team, season: string): TeamMonthAccumulator {
   };
 }
 
+function paceMinutes(row: TeamMonthAccumulator) {
+  if (row.minutes <= 0) return 0;
+  const minutesPerGame = row.games > 0 ? row.minutes / row.games : row.minutes;
+  return minutesPerGame <= 75 ? row.minutes : row.minutes / 5;
+}
+
 function finalizeAccumulator(row: TeamMonthAccumulator): TeamSeasonAggregate {
   const offRating = optionalRate(row.pts, row.possessions, 100);
   const defRating = optionalRate(row.ptsAllowed, row.opponentPossessions, 100);
@@ -299,18 +312,18 @@ function finalizeAccumulator(row: TeamMonthAccumulator): TeamSeasonAggregate {
     offRating,
     defRating,
     netRating: offRating !== null && defRating !== null ? offRating - defRating : null,
-    assistPct: optionalRate(row.ast, row.fgm, 100),
-    offensiveReboundPct: optionalRate(row.oreb, row.oreb + row.opponentDreb, 100),
-    defensiveReboundPct: optionalRate(row.dreb, row.dreb + row.opponentOreb, 100),
-    reboundPct: optionalRate(row.reb, row.reb + row.opponentReb, 100),
-    turnoverPct: optionalRate(row.tov, row.possessions, 100),
-    officialEfgPct: optionalRate(row.fgm + 0.5 * row.threePm, row.fga, 100),
-    officialTsPct: optionalRate(row.pts, 2 * (row.fga + 0.44 * row.fta), 100),
+    assistPct: optionalRate(row.ast, row.fgm),
+    offensiveReboundPct: optionalRate(row.oreb, row.oreb + row.opponentDreb),
+    defensiveReboundPct: optionalRate(row.dreb, row.dreb + row.opponentOreb),
+    reboundPct: optionalRate(row.reb, row.reb + row.opponentReb),
+    turnoverPct: optionalRate(row.tov, row.possessions),
+    officialEfgPct: optionalRate(row.fgm + 0.5 * row.threePm, row.fga),
+    officialTsPct: optionalRate(row.pts, 2 * (row.fga + 0.44 * row.fta)),
     pie: null,
     expectedPoints: 0,
     rimFrequency: 0,
-    threeFrequency: optionalRate(row.threePa, row.fga, 100) ?? 0,
-    pace: optionalRate(48 * (row.possessions + row.opponentPossessions), 2 * (row.minutes / 5)) ?? 0,
+    threeFrequency: optionalRate(row.threePa, row.fga) ?? 0,
+    pace: optionalRate(48 * (row.possessions + row.opponentPossessions), 2 * paceMinutes(row)) ?? 0,
     shotQuality: 0,
   };
 }
@@ -362,7 +375,11 @@ function aggregateTeamGameRows(
 async function monthlyJsonFallback(params: TeamSummaryParams): Promise<TeamSummaryResult> {
   const month = normalizeMonth(params.month);
   if (!month) return { source: "json", rows: [] };
-  const { teams } = await loadRuntimeFallbacks();
+  const seasonType = selectedSeasonType(params);
+  const { teams, metadata } = await loadRuntimeFallbacks();
+  if (metadata.season_type !== seasonType && !officialGames.some((game) => game.seasonType === seasonType)) {
+    return { source: "json", rows: [] };
+  }
   const teamsById = new Map(
     teams.map((row) => [
       row.team_id,
@@ -375,7 +392,7 @@ async function monthlyJsonFallback(params: TeamSummaryParams): Promise<TeamSumma
     const game = gameById.get(line.gameId);
     const team = teamsById.get(line.teamId);
     const opponentLine = teamLineByGameAndTeam.get(`${line.gameId}:${line.opponentTeamId}`);
-    if (!game || !team || !opponentLine || !game.date.startsWith(month)) return [];
+    if (!game || !team || !opponentLine || game.seasonType !== seasonType || !game.date.startsWith(month)) return [];
     if (params.conference && team.conference !== params.conference) return [];
     if (params.division && team.division !== params.division) return [];
     return [{ team, season: game.season, line, opponentLine }];
@@ -385,21 +402,28 @@ async function monthlyJsonFallback(params: TeamSummaryParams): Promise<TeamSumma
 
 async function jsonFallback(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
   if (params.month) return monthlyJsonFallback(params);
+  const seasonType = selectedSeasonType(params);
   const { teams } = await loadRuntimeFallbacks();
   return {
     source: "json",
-    rows: filterTeamAggregateRows(teams.map((row) => mapTeamSummary({
-      ...row,
-      id: row.team_id,
-    })), params),
+    rows: filterTeamAggregateRows(
+      teams
+        .filter((row) => row.season_type === seasonType)
+        .map((row) => mapTeamSummary({
+          ...row,
+          id: row.team_id,
+        })),
+      params,
+    ),
   };
 }
 
 async function listMonthlyTeamSummaries(params: TeamSummaryParams): Promise<TeamSummaryResult> {
   const month = normalizeMonth(params.month);
   if (!month) return jsonFallback(params);
-  const values: unknown[] = [month];
-  const filters = ["to_char(g.game_date, 'YYYY-MM') = $1"];
+  const seasonType = selectedSeasonType(params);
+  const values: unknown[] = [month, seasonType];
+  const filters = ["to_char(g.game_date, 'YYYY-MM') = $1", "g.season_type = $2"];
   if (params.conference) {
     values.push(params.conference);
     filters.push(`t.conference = $${values.length}`);
@@ -514,8 +538,10 @@ async function listMonthlyTeamSummaries(params: TeamSummaryParams): Promise<Team
 
 export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
   if (params.month) return listMonthlyTeamSummaries(params);
+  const seasonType = selectedSeasonType(params);
   const values: unknown[] = [];
-  const filters: string[] = [];
+  const filters: string[] = [`s.season_type = $${values.length + 1}`];
+  values.push(seasonType);
   if (params.conference) {
     values.push(params.conference);
     filters.push(`t.conference = $${values.length}`);
@@ -571,7 +597,7 @@ export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): P
         s.three_frequency
       FROM current_team_season_summaries s
       JOIN teams t ON t.id = s.team_id
-      ${filters.length ? `WHERE ${filters.join(" AND ")}` : ""}
+      WHERE ${filters.join(" AND ")}
       ORDER BY t.city, t.name
     `, values);
     if (!result?.rows.length) return jsonFallback(params);
@@ -587,16 +613,20 @@ function monthOptionsFromGames(games: Game[]) {
     .map((value) => ({ value, label: monthLabel(value) }));
 }
 
-export async function loadTeamSeasonSummaryFilters(): Promise<TeamSummaryFilterOptions> {
+export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParams, "seasonType"> = {}): Promise<TeamSummaryFilterOptions> {
+  const seasonType = selectedSeasonType(params);
   const fallback = async (): Promise<TeamSummaryFilterOptions> => {
     const { teams } = await loadRuntimeFallbacks();
-    const rows = teams.map((row) => mapTeamSummary({ ...row, id: row.team_id }).team);
+    const rows = teams
+      .filter((row) => row.season_type === seasonType)
+      .map((row) => mapTeamSummary({ ...row, id: row.team_id }).team);
     return {
+      seasonTypes: seasonTypeOptions,
       conferences: ["East", "West"].map((value) => ({ value: value as "East" | "West", label: value })),
       divisions: [...new Set(rows.map((team) => team.division).filter(Boolean))]
         .sort()
         .map((value) => ({ value, label: value })),
-      months: monthOptionsFromGames(officialGames),
+      months: monthOptionsFromGames(officialGames.filter((game) => game.seasonType === seasonType)),
     };
   };
 
@@ -605,10 +635,12 @@ export async function loadTeamSeasonSummaryFilters(): Promise<TeamSummaryFilterO
       SELECT DISTINCT t.conference, t.division, NULL::text AS month
       FROM teams t
       JOIN current_team_season_summaries s ON s.team_id = t.id
+      WHERE s.season_type = $1
       UNION
       SELECT NULL::text AS conference, NULL::text AS division, to_char(date_trunc('month', g.game_date), 'YYYY-MM') AS month
       FROM current_games g
-    `);
+      WHERE g.season_type = $1
+    `, [seasonType]);
     if (!result?.rows.length) return fallback();
     const conferences = [...new Set(result.rows.map((row) => row.conference).filter((value): value is "East" | "West" => value === "East" || value === "West"))]
       .sort()
@@ -620,6 +652,7 @@ export async function loadTeamSeasonSummaryFilters(): Promise<TeamSummaryFilterO
       .sort()
       .map((value) => ({ value, label: monthLabel(value) }));
     return {
+      seasonTypes: seasonTypeOptions,
       conferences: conferences.length ? conferences : (await fallback()).conferences,
       divisions,
       months,
@@ -629,8 +662,8 @@ export async function loadTeamSeasonSummaryFilters(): Promise<TeamSummaryFilterO
   }
 }
 
-export async function loadTeamProfile(idOrSlug: string): Promise<TeamProfileResult | null> {
-  const teamResult = await listTeamSeasonSummaries();
+export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<TeamProfileResult | null> {
+  const teamResult = await listTeamSeasonSummaries({ seasonType });
   const normalized = idOrSlug.trim().toLowerCase();
   const aggregate = teamResult.rows.find((row) =>
     row.team.id === idOrSlug
@@ -640,10 +673,10 @@ export async function loadTeamProfile(idOrSlug: string): Promise<TeamProfileResu
   if (!aggregate) return null;
 
   const [roster, games] = await Promise.all([
-    listPlayerDirectory({ teamId: aggregate.team.id, all: true, minGames: 0, minMinutes: 0 }),
-    listGameAnalytics({ teamId: aggregate.team.id, pageSize: 100 }),
+    listPlayerDirectory({ teamId: aggregate.team.id, all: true, minGames: 0, minMinutes: 0, seasonType }),
+    listGameAnalytics({ teamId: aggregate.team.id, seasonType, pageSize: 100 }),
   ]);
-  const shotResult = await listShotAttempts({ teamId: aggregate.team.id });
+  const shotResult = await listShotAttempts({ teamId: aggregate.team.id, seasonType });
   return {
     team: aggregate.team,
     aggregate,
@@ -651,7 +684,7 @@ export async function loadTeamProfile(idOrSlug: string): Promise<TeamProfileResu
     games: games.rows,
     shots: shotResult.source === "postgres" && shotResult.rows.length
       ? shotResult.rows
-      : getCachedTeamShotChart(aggregate.team.id),
+      : seasonType === DEFAULT_SEASON_TYPE ? getCachedTeamShotChart(aggregate.team.id) : [],
     lineups: [],
     source: teamResult.source === "postgres"
       && roster.meta.source === "postgres"
