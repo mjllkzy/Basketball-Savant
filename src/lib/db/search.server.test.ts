@@ -22,4 +22,18 @@ describe("database-backed command search", () => {
     expect(results.some((result) => result.label === "Luka Dončić")).toBe(true);
     expect(results.every((result) => result.href.startsWith("/"))).toBe(true);
   });
+
+  it("can restrict autocomplete results to players", async () => {
+    const results = await searchSite("Luka", 6, ["player"]);
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.every((result) => result.type === "player")).toBe(true);
+  });
+
+  it("can restrict autocomplete results to teams", async () => {
+    const results = await searchSite("Hawks", 6, ["team"]);
+
+    expect(results.some((result) => result.label === "Atlanta Hawks")).toBe(true);
+    expect(results.every((result) => result.type === "team")).toBe(true);
+  });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SmartSearchInput } from "@/components/ui/SmartSearchInput";
 import { defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 
 type Option = {
@@ -19,6 +20,8 @@ type PlayerFilterFormProps = {
   positionOptions: string[];
 };
 
+const playerSearchResultTypes = ["player"] as const;
+
 export function PlayerFilterForm({
   q,
   teamId,
@@ -35,7 +38,14 @@ export function PlayerFilterForm({
   return (
     <form className="grid gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm" method="get" action="/players">
       <div className="grid gap-3 md:grid-cols-5">
-        <input name="q" defaultValue={q} placeholder="Search player" className="rounded border border-slate-300 px-3 py-2 text-sm" />
+        <SmartSearchInput
+          name="q"
+          defaultValue={q}
+          placeholder="Search player"
+          resultTypes={playerSearchResultTypes}
+          noMatchesText="No matching players"
+          labelClassName="min-h-10 px-3 py-0"
+        />
         <select name="teamId" defaultValue={teamId ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="">All teams</option>
           {teamOptions.map((team) => <option key={team.value} value={team.value}>{team.label}</option>)}
