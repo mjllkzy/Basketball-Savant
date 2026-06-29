@@ -9,6 +9,7 @@ import { formatMetric } from "@/lib/metrics/format";
 import { formatPlayerHeight } from "@/lib/playerHeight";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import { parseSeasonType } from "@/lib/seasonTypes";
+import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
@@ -85,8 +86,12 @@ function playersHref(searchParams: RouteSearchParams, showAll: boolean) {
   return query ? `/players?${query}` : "/players";
 }
 
-function playerHref(slug: string, seasonType: string) {
-  return seasonType === "Regular Season" ? `/players/${slug}` : `/players/${slug}?seasonType=${encodeURIComponent(seasonType)}`;
+function playerHref(slug: string, seasonType: string, season: string) {
+  const params = new URLSearchParams();
+  if (season !== DEFAULT_SEASON) params.set("season", season);
+  if (seasonType !== "Regular Season") params.set("seasonType", seasonType);
+  const query = params.toString();
+  return query ? `/players/${slug}?${query}` : `/players/${slug}`;
 }
 
 function formatPlayerAge(age: number | null) {
@@ -99,6 +104,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const teamId = singleParam(resolvedSearchParams, "teamId");
   const position = singleParam(resolvedSearchParams, "position");
   const statView = singleParam(resolvedSearchParams, "view") === "advanced" ? "advanced" : "standard";
+  const season = parseSeason(singleParam(resolvedSearchParams, "season"));
   const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
   const sortMetrics = statView === "advanced" ? advancedSortMetrics : standardSortMetrics;
   const defaultSort = statView === "advanced" ? "pie" : "pts";
@@ -109,11 +115,12 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const showAll = booleanParam(resolvedSearchParams, "showAll") === true;
   const order = singleParam(resolvedSearchParams, "order") === "asc" ? "asc" : "desc";
   const [filterOptions, result] = await Promise.all([
-    loadPlayerDirectoryFilters(seasonType),
+    loadPlayerDirectoryFilters(seasonType, season),
     listPlayerDirectory({
       q,
       teamId,
       position,
+      season,
       seasonType,
       sort,
       order,
@@ -128,7 +135,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const selectedPosition = positionOptions.includes(position ?? "") ? position : undefined;
   const rows = result.rows.map((row) => ({
     player: row.playerName,
-    href: playerHref(row.playerSlug, seasonType),
+    href: playerHref(row.playerSlug, seasonType, season),
     team: row.teamAbbreviation,
     teamAccent: teamPrimaryColorByAbbreviation.get(row.teamAbbreviation) ?? "#0f766e",
     pos: row.position,
@@ -169,15 +176,17 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         teamId={teamId}
         position={selectedPosition}
         statView={statView}
+        season={season}
         seasonType={seasonType}
         minMinutes={minMinutes}
         minGames={minGames}
+        seasons={filterOptions.seasons}
         seasonTypes={filterOptions.seasonTypes}
         teamOptions={filterOptions.teams}
         positionOptions={positionOptions}
       />
       <div data-data-source={result.meta.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
-        Showing <strong className="text-ink">{result.meta.total}</strong> {seasonType.toLowerCase()} players with at least <strong className="text-ink">{minMinutes.toLocaleString()}</strong> total minutes and <strong className="text-ink">{minGames}</strong> games played.
+        Showing <strong className="text-ink">{result.meta.total}</strong> {season} {seasonType.toLowerCase()} players with at least <strong className="text-ink">{minMinutes.toLocaleString()}</strong> total minutes and <strong className="text-ink">{minGames}</strong> games played.
       </div>
       <StatTable
         columns={columns}

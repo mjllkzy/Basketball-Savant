@@ -2,6 +2,7 @@ import { filterShotCollection, filterShotRows, type ShotCollectionFilters } from
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import type { SeasonType, Shot } from "@/lib/types";
 import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
+import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { loadGameAnalyticsByIds, type GameListItem } from "./gameAnalytics.server";
 import { listComparisonPlayerOptions, loadPlayerProfileAnalytics } from "./playerAnalytics.server";
 import { listTeamSeasonSummaries } from "./teamAnalytics.server";
@@ -50,23 +51,24 @@ export async function loadShotSearchOptions() {
 }
 
 async function scopedShots(filters: ShotSearchFilters): Promise<{ rows: Shot[]; source: "postgres" | "json" | "unavailable" }> {
+  const season = parseSeason(filters.season);
   const seasonType = parseSeasonType(filters.seasonType ?? DEFAULT_SEASON_TYPE);
   if (filters.playerId) {
-    const profile = await loadPlayerProfileAnalytics(filters.playerId, seasonType);
+    const profile = await loadPlayerProfileAnalytics(filters.playerId, seasonType, season);
     return {
       rows: profile?.shots ?? [],
       source: profile?.source ?? "unavailable",
     };
   }
   if (filters.teamId) {
-    const postgresShots = await listShotAttempts({ teamId: filters.teamId, seasonType });
+    const postgresShots = await listShotAttempts({ teamId: filters.teamId, season, seasonType });
     if (postgresShots.source === "postgres" && postgresShots.rows.length) {
       return {
         rows: postgresShots.rows,
         source: "postgres",
       };
     }
-    if (seasonType !== DEFAULT_SEASON_TYPE) {
+    if (season !== DEFAULT_SEASON || seasonType !== DEFAULT_SEASON_TYPE) {
       return {
         rows: [],
         source: postgresShots.source,

@@ -12,10 +12,12 @@ type DivisionOption = Option & {
 };
 
 type TeamFilterFormProps = {
+  season: string;
   seasonType: string;
   conference?: string;
   division?: string;
   month?: string;
+  seasons: Option[];
   seasonTypes: Option[];
   conferences: Option[];
   divisions: DivisionOption[];
@@ -23,10 +25,12 @@ type TeamFilterFormProps = {
 };
 
 export function TeamFilterForm({
+  season,
   seasonType,
   conference,
   division,
   month,
+  seasons,
   seasonTypes,
   conferences,
   divisions,
@@ -57,7 +61,10 @@ export function TeamFilterForm({
 
   return (
     <form className="grid gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm" method="get" action="/teams">
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <select name="season" defaultValue={season} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
+          {seasons.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
         <select name="seasonType" defaultValue={seasonType} className="rounded border border-slate-300 px-3 py-2 text-sm">
           {seasonTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>

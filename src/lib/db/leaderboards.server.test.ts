@@ -24,4 +24,11 @@ describe("database-backed leaderboards", () => {
     expect(result.rows[0].value).not.toBeNull();
     expect(result.rows.every((row) => row.playerSlug.length > 0)).toBe(true);
   }, 30_000);
+
+  it("does not reuse generated 2025-26 leaders for the upcoming season", async () => {
+    const result = await listPlayerLeaderboard("pts", 10, "2026-27");
+
+    expect(result.source).toBe("json");
+    expect(result.rows).toHaveLength(0);
+  }, 30_000);
 });

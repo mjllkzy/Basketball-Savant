@@ -7,6 +7,7 @@ import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
+import { DEFAULT_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/teamAnalytics.server.ts can only be imported on the server.");
@@ -94,6 +95,7 @@ type TeamGameSummaryDbRow = {
 };
 
 type TeamSummaryParams = {
+  season?: string;
   seasonType?: SeasonType;
   conference?: "East" | "West";
   division?: string;
@@ -101,6 +103,7 @@ type TeamSummaryParams = {
 };
 
 export type TeamSummaryFilterOptions = {
+  seasons: SeasonOption[];
   seasonTypes: Array<{ label: string; value: SeasonType }>;
   conferences: Array<{ label: string; value: "East" | "West" }>;
   divisions: Array<{ label: string; value: string; conference: "East" | "West" }>;
@@ -157,9 +160,14 @@ function selectedSeasonType(params: Pick<TeamSummaryParams, "seasonType">) {
   return parseSeasonType(params.seasonType);
 }
 
+function selectedSeason(params: Pick<TeamSummaryParams, "season">) {
+  return parseSeason(params.season);
+}
+
 function filterTeamAggregateRows(rows: TeamSeasonAggregate[], params: TeamSummaryParams) {
   return rows.filter((row) =>
-    (!params.conference || row.team.conference === params.conference)
+    (!params.season || row.season === parseSeason(params.season))
+    && (!params.conference || row.team.conference === params.conference)
     && (!params.division || row.team.division === params.division)
   );
 }
@@ -375,12 +383,13 @@ function aggregateTeamGameRows(
 async function teamGameJsonFallback(params: TeamSummaryParams): Promise<TeamSummaryResult> {
   const month = normalizeMonth(params.month);
   if (params.month && !month) return { source: "json", rows: [] };
+  const season = selectedSeason(params);
   const seasonType = selectedSeasonType(params);
   const { teams, metadata } = await loadRuntimeFallbacks();
-  if (metadata.season_type !== seasonType && !officialGames.some((game) => game.seasonType === seasonType)) {
+  if ((metadata.season !== season || metadata.season_type !== seasonType) && !officialGames.some((game) => game.season === season && game.seasonType === seasonType)) {
     return { source: "json", rows: [] };
   }
-  const seasonTeams = teams.filter((row) => row.season_type === seasonType);
+  const seasonTeams = teams.filter((row) => row.season === season && row.season_type === seasonType);
   const teamRows = seasonTeams.length ? seasonTeams : teams;
   const teamsById = new Map(
     teamRows.map((row) => [
@@ -394,7 +403,7 @@ async function teamGameJsonFallback(params: TeamSummaryParams): Promise<TeamSumm
     const game = gameById.get(line.gameId);
     const team = teamsById.get(line.teamId);
     const opponentLine = teamLineByGameAndTeam.get(`${line.gameId}:${line.opponentTeamId}`);
-    if (!game || !team || !opponentLine || game.seasonType !== seasonType) return [];
+    if (!game || !team || !opponentLine || game.season !== season || game.seasonType !== seasonType) return [];
     if (month && !game.date.startsWith(month)) return [];
     if (params.conference && team.conference !== params.conference) return [];
     if (params.division && team.division !== params.division) return [];
@@ -405,9 +414,10 @@ async function teamGameJsonFallback(params: TeamSummaryParams): Promise<TeamSumm
 
 async function jsonFallback(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
   if (params.month) return teamGameJsonFallback(params);
+  const season = selectedSeason(params);
   const seasonType = selectedSeasonType(params);
   const { teams } = await loadRuntimeFallbacks();
-  const summaryRows = teams.filter((row) => row.season_type === seasonType);
+  const summaryRows = teams.filter((row) => row.season === season && row.season_type === seasonType);
   if (!summaryRows.length && seasonType === "Playoffs") return teamGameJsonFallback(params);
   return {
     source: "json",
@@ -425,9 +435,10 @@ async function jsonFallback(params: TeamSummaryParams = {}): Promise<TeamSummary
 async function listTeamGameSummaries(params: TeamSummaryParams): Promise<TeamSummaryResult> {
   const month = normalizeMonth(params.month);
   if (params.month && !month) return jsonFallback(params);
+  const season = selectedSeason(params);
   const seasonType = selectedSeasonType(params);
-  const values: unknown[] = [seasonType];
-  const filters = ["g.season_type = $1"];
+  const values: unknown[] = [seasonType, season];
+  const filters = ["g.season_type = $1", "g.season = $2"];
   if (month) {
     values.push(month);
     filters.push(`to_char(g.game_date, 'YYYY-MM') = $${values.length}`);
@@ -545,11 +556,15 @@ async function listTeamGameSummaries(params: TeamSummaryParams): Promise<TeamSum
 }
 
 export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
+  const season = selectedSeason(params);
   const seasonType = selectedSeasonType(params);
   if (params.month || seasonType === "Playoffs") return listTeamGameSummaries(params);
   const values: unknown[] = [];
-  const filters: string[] = [`s.season_type = $${values.length + 1}`];
+  const filters: string[] = [];
   values.push(seasonType);
+  filters.push(`s.season_type = $${values.length}`);
+  values.push(season);
+  filters.push(`s.season = $${values.length}`);
   if (params.conference) {
     values.push(params.conference);
     filters.push(`t.conference = $${values.length}`);
@@ -621,36 +636,48 @@ function monthOptionsFromGames(games: Game[]) {
     .map((value) => ({ value, label: monthLabel(value) }));
 }
 
-export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParams, "seasonType"> = {}): Promise<TeamSummaryFilterOptions> {
+export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParams, "season" | "seasonType"> = {}): Promise<TeamSummaryFilterOptions> {
+  const season = selectedSeason(params);
   const seasonType = selectedSeasonType(params);
   const fallback = async (): Promise<TeamSummaryFilterOptions> => {
-    const { teams } = await loadRuntimeFallbacks();
-    const seasonTeams = teams.filter((row) => row.season_type === seasonType);
+    const { teams, metadata } = await loadRuntimeFallbacks();
+    const seasonTeams = teams.filter((row) => row.season === season && row.season_type === seasonType);
     const teamRows = seasonTeams.length ? seasonTeams : teams;
     const rows = teamRows
       .map((row) => mapTeamSummary({ ...row, id: row.team_id }).team);
     return {
+      seasons: mergeSeasonOptions([metadata.season]),
       seasonTypes: seasonTypeOptions,
       conferences: ["East", "West"].map((value) => ({ value: value as "East" | "West", label: value })),
       divisions: rows
         .map((team) => ({ value: team.division, label: team.division, conference: team.conference }))
         .filter((option, index, options) => options.findIndex((candidate) => candidate.value === option.value) === index)
         .sort((a, b) => a.label.localeCompare(b.label)),
-      months: monthOptionsFromGames(officialGames.filter((game) => game.seasonType === seasonType)),
+      months: monthOptionsFromGames(officialGames.filter((game) => game.season === season && game.seasonType === seasonType)),
     };
   };
 
   try {
-    const result = await queryDatabase<{ conference: "East" | "West" | null; division: string | null; month: string | null }>(`
+    const [seasonResult, result] = await Promise.all([
+      queryDatabase<{ season: string }>(`
+        SELECT DISTINCT season FROM current_team_season_summaries
+        UNION
+        SELECT DISTINCT season FROM current_games
+        ORDER BY season DESC
+      `),
+      queryDatabase<{ conference: "East" | "West" | null; division: string | null; month: string | null }>(`
       SELECT DISTINCT t.conference, t.division, NULL::text AS month
       FROM teams t
       JOIN current_team_season_summaries s ON s.team_id = t.id
       WHERE s.season_type = $1
+        AND s.season = $2
       UNION
       SELECT NULL::text AS conference, NULL::text AS division, to_char(date_trunc('month', g.game_date), 'YYYY-MM') AS month
       FROM current_games g
       WHERE g.season_type = $1
-    `, [seasonType]);
+        AND g.season = $2
+    `, [seasonType, season]),
+    ]);
     if (!result?.rows.length) return fallback();
     const conferences = [...new Set(result.rows.map((row) => row.conference).filter((value): value is "East" | "West" => value === "East" || value === "West"))]
       .sort()
@@ -667,6 +694,7 @@ export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParam
       .map((value) => ({ value, label: monthLabel(value) }));
     const fallbackOptions = conferences.length && divisions.length && months.length ? null : await fallback();
     return {
+      seasons: mergeSeasonOptions(seasonResult?.rows.map((row) => row.season)),
       seasonTypes: seasonTypeOptions,
       conferences: conferences.length ? conferences : fallbackOptions?.conferences ?? [],
       divisions: divisions.length ? divisions : fallbackOptions?.divisions ?? [],
@@ -677,8 +705,9 @@ export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParam
   }
 }
 
-export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<TeamProfileResult | null> {
-  const teamResult = await listTeamSeasonSummaries({ seasonType });
+export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<TeamProfileResult | null> {
+  const selected = parseSeason(season);
+  const teamResult = await listTeamSeasonSummaries({ season: selected, seasonType });
   const normalized = idOrSlug.trim().toLowerCase();
   const aggregate = teamResult.rows.find((row) =>
     row.team.id === idOrSlug
@@ -688,10 +717,10 @@ export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType =
   if (!aggregate) return null;
 
   const [roster, games] = await Promise.all([
-    listPlayerDirectory({ teamId: aggregate.team.id, all: true, minGames: 0, minMinutes: 0, seasonType }),
-    listGameAnalytics({ teamId: aggregate.team.id, seasonType, pageSize: 100 }),
+    listPlayerDirectory({ teamId: aggregate.team.id, all: true, minGames: 0, minMinutes: 0, season: selected, seasonType }),
+    listGameAnalytics({ teamId: aggregate.team.id, season: selected, seasonType, pageSize: 100 }),
   ]);
-  const shotResult = await listShotAttempts({ teamId: aggregate.team.id, seasonType });
+  const shotResult = await listShotAttempts({ teamId: aggregate.team.id, season: selected, seasonType });
   return {
     team: aggregate.team,
     aggregate,
@@ -699,7 +728,7 @@ export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType =
     games: games.rows,
     shots: shotResult.source === "postgres" && shotResult.rows.length
       ? shotResult.rows
-      : seasonType === DEFAULT_SEASON_TYPE ? getCachedTeamShotChart(aggregate.team.id) : [],
+      : selected === DEFAULT_SEASON && seasonType === DEFAULT_SEASON_TYPE ? getCachedTeamShotChart(aggregate.team.id) : [],
     lineups: [],
     source: teamResult.source === "postgres"
       && roster.meta.source === "postgres"

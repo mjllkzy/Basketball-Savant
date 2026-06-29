@@ -63,4 +63,15 @@ describe("database-backed team analytics", () => {
     expect(result.rows.every((row) => row.officialEfgPct !== null && row.officialEfgPct > 0 && row.officialEfgPct < 1)).toBe(true);
     expect(result.rows.every((row) => row.pace > 50 && row.pace < 130)).toBe(true);
   }, 15_000);
+
+  it("keeps the upcoming season selectable without falling back to prior-season team stats", async () => {
+    const [filters, result] = await Promise.all([
+      loadTeamSeasonSummaryFilters({ season: "2026-27" }),
+      listTeamSeasonSummaries({ season: "2026-27" }),
+    ]);
+
+    expect(filters.seasons.map((option) => option.value)).toContain("2026-27");
+    expect(result.source).toBe("json");
+    expect(result.rows).toHaveLength(0);
+  }, 15_000);
 });

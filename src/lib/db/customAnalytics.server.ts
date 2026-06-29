@@ -1,5 +1,6 @@
 import { calculatePlayerMetric, calculateTeamMetric, getMetric } from "@/lib/metrics/registry";
 import type { Player, Team } from "@/lib/types";
+import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { loadAllComparisonPlayers } from "./playerAnalytics.server";
 import { listTeamSeasonSummaries } from "./teamAnalytics.server";
 
@@ -30,7 +31,9 @@ function validatedMetricKeys(metricKeys: string[]) {
 export async function getCustomLeaderboardAnalytics(
   entityType: CustomLeaderboardEntity,
   requestedMetricKeys: string[],
+  season = DEFAULT_SEASON,
 ): Promise<CustomLeaderboardResult> {
+  const selectedSeason = parseSeason(season);
   const metricKeys = validatedMetricKeys(requestedMetricKeys);
   if (entityType === "lineups") {
     return {
@@ -41,7 +44,7 @@ export async function getCustomLeaderboardAnalytics(
   }
 
   if (entityType === "teams") {
-    const loaded = await listTeamSeasonSummaries();
+    const loaded = await listTeamSeasonSummaries({ season: selectedSeason });
     return {
       source: loaded.source,
       rows: loaded.rows.map((aggregate) => ({
@@ -53,7 +56,7 @@ export async function getCustomLeaderboardAnalytics(
     };
   }
 
-  const loaded = await loadAllComparisonPlayers();
+  const loaded = await loadAllComparisonPlayers(undefined, selectedSeason);
   return {
     source: loaded.source,
     rows: loaded.rows.map(({ player, team, aggregate }) => ({

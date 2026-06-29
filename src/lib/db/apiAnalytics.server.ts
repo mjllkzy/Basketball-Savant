@@ -2,6 +2,7 @@ import { percentileRank } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import type { PlayerSeasonAggregate, SeasonType, Team } from "@/lib/types";
 import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
+import { parseSeason } from "@/lib/seasons";
 import { loadAllComparisonPlayers } from "./playerAnalytics.server";
 import { listTeamSeasonSummaries } from "./teamAnalytics.server";
 
@@ -31,6 +32,7 @@ export type ApiTeamFilters = ApiPageParams & {
   q?: string;
   conference?: string;
   division?: string;
+  season?: string;
   seasonType?: SeasonType;
 };
 
@@ -80,8 +82,9 @@ function compareNullable(left: number | null, right: number | null, order: "asc"
 }
 
 export async function listPlayerApiRecords(params: ApiPlayerFilters = {}) {
+  const season = parseSeason(params.season);
   const seasonType = parseSeasonType(params.seasonType ?? DEFAULT_SEASON_TYPE);
-  const loaded = await loadAllComparisonPlayers(seasonType);
+  const loaded = await loadAllComparisonPlayers(seasonType, season);
   const rows = loaded.rows
     .map((row) => row.aggregate)
     .filter((row) => textMatches(
@@ -93,7 +96,6 @@ export async function listPlayerApiRecords(params: ApiPlayerFilters = {}) {
       || row.team.slug === params.teamId
       || row.team.abbreviation === params.teamId)
     .filter((row) => positionMatches(row.player.position, params.position))
-    .filter((row) => !params.season || row.season === params.season)
     .filter((row) => params.minGames === undefined || row.games >= params.minGames)
     .filter((row) => params.minMinutes === undefined || row.minutes >= params.minMinutes);
 
@@ -127,8 +129,9 @@ export async function listPlayerApiRecords(params: ApiPlayerFilters = {}) {
 }
 
 export async function listTeamApiRecords(params: ApiTeamFilters = {}) {
+  const season = parseSeason(params.season);
   const seasonType = parseSeasonType(params.seasonType ?? DEFAULT_SEASON_TYPE);
-  const loaded = await listTeamSeasonSummaries({ seasonType });
+  const loaded = await listTeamSeasonSummaries({ season, seasonType });
   const rows = loaded.rows
     .map((row) => row.team)
     .filter((team) => textMatches(`${team.city} ${team.name} ${team.abbreviation}`, params.q))

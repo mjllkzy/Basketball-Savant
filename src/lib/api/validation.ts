@@ -37,6 +37,7 @@ export const teamQuerySchema = z.object({
   order: z.enum(["asc", "desc"]).optional(),
   conference: z.enum(["East", "West"]).optional(),
   division: z.string().trim().optional(),
+  season: z.string().trim().optional(),
   seasonType: z.enum(["Regular Season", "Playoffs"]).optional()
 });
 

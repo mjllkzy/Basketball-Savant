@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SimilarPlayersTable } from "@/components/domain/SimilarPlayersTable";
 import { listComparisonPlayerOptions, loadPlayerSimilarity } from "@/lib/db/playerAnalytics.server";
+import { baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { playerSimilaritySummary } from "@/lib/comparison";
 
@@ -22,10 +23,11 @@ function decimal(value: number) {
 
 export default async function SimilarityPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
-  const options = await listComparisonPlayerOptions();
+  const season = parseSeason(singleParam(resolvedSearchParams, "season"));
+  const options = await listComparisonPlayerOptions(undefined, season);
   const selected = singleParam(resolvedSearchParams, "player") ?? options[0]?.slug ?? "";
-  const result = await loadPlayerSimilarity(selected);
-  const fallback = !result && options[0] ? await loadPlayerSimilarity(options[0].slug) : null;
+  const result = await loadPlayerSimilarity(selected, undefined, season);
+  const fallback = !result && options[0] ? await loadPlayerSimilarity(options[0].slug, undefined, season) : null;
   const similarity = result ?? fallback;
 
   if (!similarity) {
@@ -44,7 +46,10 @@ export default async function SimilarityPage({ searchParams }: { searchParams: P
   return (
     <div className="grid gap-4">
       <PageHeader eyebrow="Similarity" title="Player Similarity Finder" description="Find the closest player profiles using masterfile production, scoring ratios, playmaking ratios, physical build, and position context." />
-      <form className="grid gap-3 rounded border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[1fr_120px]">
+      <form className="grid gap-3 rounded border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[160px_1fr_120px]">
+        <select name="season" defaultValue={season} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
+          {baseSeasonOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
         <select name="player" defaultValue={profile.player.slug} className="rounded border border-slate-300 px-3 py-2 text-sm">
           {options.map((option) => <option key={option.slug} value={option.slug}>{option.name} · {option.teamAbbreviation} · {option.position}</option>)}
         </select>
@@ -82,7 +87,7 @@ export default async function SimilarityPage({ searchParams }: { searchParams: P
         </div>
       </section>
       <div data-data-source={similarity.source}>
-        <SimilarPlayersTable rows={similarity.matches} />
+        <SimilarPlayersTable rows={similarity.matches} season={season} />
       </div>
     </div>
   );

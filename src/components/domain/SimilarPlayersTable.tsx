@@ -1,11 +1,20 @@
 import Link from "next/link";
+import { DEFAULT_SEASON } from "@/lib/seasons";
 import type { SimilarPlayerMatch } from "@/lib/db/playerAnalytics.server";
 
 function decimal(value: number) {
   return value.toFixed(1);
 }
 
-export function SimilarPlayersTable({ rows }: { rows: SimilarPlayerMatch[] }) {
+function playerHref(slug: string, season: string, seasonType: string) {
+  const params = new URLSearchParams();
+  if (season !== DEFAULT_SEASON) params.set("season", season);
+  if (seasonType !== "Regular Season") params.set("seasonType", seasonType);
+  const query = params.toString();
+  return query ? `/players/${slug}?${query}` : `/players/${slug}`;
+}
+
+export function SimilarPlayersTable({ rows, season = DEFAULT_SEASON, seasonType = "Regular Season" }: { rows: SimilarPlayerMatch[]; season?: string; seasonType?: string }) {
   return (
     <div className="rounded border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 p-3 text-sm font-black text-ink">Most Similar Players</div>
@@ -28,7 +37,7 @@ export function SimilarPlayersTable({ rows }: { rows: SimilarPlayerMatch[] }) {
               <tr key={row.player.id} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
                 <td className="px-3 py-3 font-black text-slate-400">{index + 1}</td>
                 <td className="px-3 py-3">
-                  <Link href={`/players/${row.player.slug}`} className="font-black text-signal hover:underline">{row.player.name}</Link>
+                  <Link href={playerHref(row.player.slug, season, seasonType)} className="font-black text-signal hover:underline">{row.player.name}</Link>
                   <div className="mt-1 text-xs text-slate-500">{row.team.abbreviation} · {row.summary.games} G · {decimal(row.summary.minutesPerGame)} MPG</div>
                 </td>
                 <td className="px-3 py-3 text-xs leading-5 text-slate-600">

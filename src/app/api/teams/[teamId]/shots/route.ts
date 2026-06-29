@@ -8,7 +8,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
   try {
     const { teamId } = await params;
     const query = parseSearchParams(shotQuerySchema, request);
-    const profile = await loadTeamProfile(teamId, parseSeasonType(query.seasonType));
+    const profile = await loadTeamProfile(teamId, parseSeasonType(query.seasonType), query.season);
     if (!profile) return notFound("Team not found");
     const result = filterShotCollection(profile.shots, query);
     return cachedOk(result.rows, result.meta, SHORT_DATA_CACHE_CONTROL);

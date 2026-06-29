@@ -13,6 +13,7 @@ import {
 } from "@/lib/db/playerAnalytics.server";
 import { formatMetric } from "@/lib/metrics/format";
 import { formatPlayerHeight } from "@/lib/playerHeight";
+import { DEFAULT_SEASON, baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
 
@@ -52,7 +53,11 @@ function WinnerIcon({ winner }: { winner: ComparisonWinner }) {
   return <span aria-label="Tie" className="inline-flex h-9 w-12 items-center justify-center rounded bg-slate-100 text-slate-500"><Minus className="h-6 w-6" /></span>;
 }
 
-function PlayerCard({ profile }: { profile: ComparisonPlayer }) {
+function playerProfileHref(slug: string, season: string) {
+  return season === DEFAULT_SEASON ? `/players/${slug}` : `/players/${slug}?season=${encodeURIComponent(season)}`;
+}
+
+function PlayerCard({ profile, season }: { profile: ComparisonPlayer; season: string }) {
   const heightInches = heightToInches(profile.player.height);
   const logoUrl = nbaTeamLogoUrl(profile.team.id);
   const accentColor = teamAccentColor(profile.team);
@@ -79,7 +84,7 @@ function PlayerCard({ profile }: { profile: ComparisonPlayer }) {
             {heightInches ? ` · ${heightInches} in` : ""}
           </p>
         </div>
-        <Link href={`/players/${profile.player.slug}`} className="rounded border border-slate-200 px-3 py-2 text-xs font-black text-ink hover:bg-slate-50">Profile</Link>
+        <Link href={playerProfileHref(profile.player.slug, season)} className="rounded border border-slate-200 px-3 py-2 text-xs font-black text-ink hover:bg-slate-50">Profile</Link>
       </div>
       <div className="mt-4 grid gap-2">
         <PercentileBar label="True Shooting" value={profile.percentiles.tsPct} />
@@ -93,6 +98,7 @@ function PlayerCard({ profile }: { profile: ComparisonPlayer }) {
 export default async function ComparePage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
   const mode = singleParam(resolvedSearchParams, "mode");
+  const season = parseSeason(singleParam(resolvedSearchParams, "season"));
 
   if (mode !== "compare") {
     return (
@@ -140,15 +146,15 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
     );
   }
 
-  const options = await listComparisonPlayerOptions();
+  const options = await listComparisonPlayerOptions(undefined, season);
   const fallbackLeft = options.find((player) => player.slug === "luka-doncic")?.slug ?? options[0]?.slug ?? "";
   const fallbackRight = options.find((player) => player.slug === "nikola-jokic")?.slug ?? options[1]?.slug ?? fallbackLeft;
   const leftSlug = singleParam(resolvedSearchParams, "left") ?? fallbackLeft;
   const rightSlug = singleParam(resolvedSearchParams, "right") ?? fallbackRight;
-  let [leftProfile, rightProfile] = await loadComparisonPlayers([leftSlug, rightSlug]);
+  let [leftProfile, rightProfile] = await loadComparisonPlayers([leftSlug, rightSlug], undefined, season);
 
   if (!leftProfile || !rightProfile) {
-    [leftProfile, rightProfile] = await loadComparisonPlayers([fallbackLeft, fallbackRight]);
+    [leftProfile, rightProfile] = await loadComparisonPlayers([fallbackLeft, fallbackRight], undefined, season);
   }
 
   if (!leftProfile || !rightProfile) {
@@ -170,15 +176,21 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
       <section className="rounded border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-xl font-black text-ink">Side-by-Side</h2>
-        <form className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_120px]">
+        <form className="mt-4 grid gap-3 lg:grid-cols-[160px_1fr_1fr_120px]">
           <input type="hidden" name="mode" value="compare" />
+          <label className="grid gap-1">
+            <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Season</span>
+            <select name="season" defaultValue={season} className="rounded border border-slate-300 px-3 py-2 text-sm">
+              {baseSeasonOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </label>
           <PlayerSelect name="left" label="Left Player" value={leftProfile.player.slug} options={options} />
           <PlayerSelect name="right" label="Right Player" value={rightProfile.player.slug} options={options} />
           <button className="self-end rounded bg-ink px-3 py-2 text-sm font-black text-white">Compare</button>
         </form>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <PlayerCard profile={leftProfile} />
-          <PlayerCard profile={rightProfile} />
+          <PlayerCard profile={leftProfile} season={season} />
+          <PlayerCard profile={rightProfile} season={season} />
         </div>
         <div className="table-scroll mt-4 overflow-x-auto rounded border border-slate-200">
           <table className="min-w-full table-fixed border-collapse bg-white text-sm">

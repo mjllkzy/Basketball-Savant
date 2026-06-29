@@ -1,6 +1,7 @@
 import { getMetric } from "@/lib/metrics/registry";
 import { percentileRank } from "@/lib/metrics/formulas";
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
+import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -61,8 +62,9 @@ function numeric(value: number | string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-async function jsonFallback(metricKey: string, limit: number): Promise<PlayerLeaderboardResult> {
-  const { players } = await loadRuntimeFallbacks();
+async function jsonFallback(metricKey: string, limit: number, season = DEFAULT_SEASON): Promise<PlayerLeaderboardResult> {
+  const { players, metadata } = await loadRuntimeFallbacks();
+  if (metadata.season !== parseSeason(season)) return { source: "json", rows: [] };
   const valueFor = fallbackMetricValues[metricKey];
   if (!valueFor) return { source: "json", rows: [] };
   const metric = getMetric(metricKey);
@@ -113,9 +115,10 @@ const fallbackMetricValues: Record<string, (row: RuntimePlayerFallback) => numbe
   pie: (row) => row.pie,
 };
 
-export async function listPlayerLeaderboard(metricKey: string, limit = 50): Promise<PlayerLeaderboardResult> {
+export async function listPlayerLeaderboard(metricKey: string, limit = 50, season = DEFAULT_SEASON): Promise<PlayerLeaderboardResult> {
   const column = metricColumns[metricKey];
-  if (!column) return jsonFallback(metricKey, limit);
+  if (!column) return jsonFallback(metricKey, limit, season);
+  const selectedSeason = parseSeason(season);
 
   const metric = getMetric(metricKey);
   const sortDirection = metric.higherIsBetter ? "DESC" : "ASC";
@@ -132,6 +135,8 @@ export async function listPlayerLeaderboard(metricKey: string, limit = 50): Prom
           percent_rank() OVER (ORDER BY s.${column} ${percentileDirection}) * 100 AS percentile
         FROM current_player_season_summaries s
         WHERE s.${column} IS NOT NULL
+          AND s.season = $2
+          AND s.season_type = 'Regular Season'
       )
       SELECT
         p.player_slug,
@@ -145,8 +150,8 @@ export async function listPlayerLeaderboard(metricKey: string, limit = 50): Prom
       JOIN players p USING (player_slug)
       ORDER BY ranked.metric_value ${sortDirection} NULLS LAST, p.player_name
       LIMIT $1
-    `, [safeLimit]);
-    if (!result?.rows.length) return jsonFallback(metricKey, safeLimit);
+    `, [safeLimit, selectedSeason]);
+    if (!result?.rows.length) return jsonFallback(metricKey, safeLimit, selectedSeason);
 
     return {
       source: "postgres",
@@ -162,6 +167,6 @@ export async function listPlayerLeaderboard(metricKey: string, limit = 50): Prom
       })),
     };
   } catch {
-    return jsonFallback(metricKey, safeLimit);
+    return jsonFallback(metricKey, safeLimit, selectedSeason);
   }
 }

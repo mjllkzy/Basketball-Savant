@@ -17,6 +17,7 @@ import { trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, getMetric } from "@/lib/metrics/registry";
 import { formatMetric, toPercentagePoints } from "@/lib/metrics/format";
 import { parseSeasonType } from "@/lib/seasonTypes";
+import { parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export async function generateMetadata({ params }: { params: Promise<{ playerId: string }> }): Promise<Metadata> {
@@ -51,8 +52,9 @@ function FeedRequiredPanel({ title, detail }: { title: string; detail: string })
 
 export default async function PlayerPage({ params, searchParams }: { params: Promise<{ playerId: string }>; searchParams: Promise<RouteSearchParams> }) {
   const [{ playerId }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const season = parseSeason(singleParam(resolvedSearchParams, "season"));
   const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
-  const profile = await loadPlayerProfileAnalytics(playerId, seasonType);
+  const profile = await loadPlayerProfileAnalytics(playerId, seasonType, season);
   if (!profile) notFound();
   const radarKeys = ["pts", "reb", "ast", "stl", "blk", "ts_pct", "usage_rate", "three_pct"];
   const radarData = radarKeys.map((key) => ({
@@ -139,7 +141,7 @@ export default async function PlayerPage({ params, searchParams }: { params: Pro
             {radarKeys.map((key) => <PercentileBar key={key} label={getMetric(key).label} value={profile.metricValues.find((value) => value.metricKey === key)?.percentile ?? 0} />)}
           </div>
           <div className="mt-4 rounded bg-slate-100 p-3 text-sm leading-6 text-slate-600">
-            {profile.player.name} is shown from the 2025-26 Excel masterfile with NBA Stats and Basketball Reference cross-checks. Tracking-only measures stay hidden until a row-level event or optical source is connected.
+              {profile.player.name} is shown from the {profile.aggregate.season} Excel masterfile with NBA Stats and Basketball Reference cross-checks. Tracking-only measures stay hidden until a row-level event or optical source is connected.
           </div>
         </div>
       </section>
@@ -157,7 +159,7 @@ export default async function PlayerPage({ params, searchParams }: { params: Pro
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         <StatTable dense columns={[{ key: "date", label: "Date" }, { key: "game", label: "Opp" }, { key: "pts", label: "PTS", align: "right" }, { key: "reb", label: "REB", align: "right" }, { key: "ast", label: "AST", align: "right" }, { key: "stl", label: "STL", align: "right" }, { key: "blk", label: "BLK", align: "right" }, { key: "tov", label: "TOV", align: "right" }, { key: "ts", label: "TS", align: "right" }, { key: "pm", label: "+/-", align: "right" }]} rows={gameRows} />
-        <SimilarPlayersTable rows={profile.similar} />
+        <SimilarPlayersTable rows={profile.similar} season={season} seasonType={seasonType} />
       </section>
       <FeedRequiredPanel title="Lineup Network Feed Required" detail="Five-player lineup ratings need lineup stint rows with possessions, offensive rating, defensive rating, and net rating." />
     </div>

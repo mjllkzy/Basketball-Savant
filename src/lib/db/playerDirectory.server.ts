@@ -2,6 +2,7 @@ import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/run
 import { officialBasketballReferenceGamesStartedByPlayerId } from "@/lib/data/official";
 import type { SeasonType } from "@/lib/types";
 import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
+import { DEFAULT_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -53,6 +54,7 @@ export type PlayerDirectoryResult = {
 };
 
 export type PlayerDirectoryFilters = {
+  seasons: SeasonOption[];
   seasonTypes: Array<{ label: string; value: SeasonType }>;
   teams: Array<{ label: string; value: string }>;
   positions: string[];
@@ -252,13 +254,14 @@ async function jsonFallback(params: PlayerDirectoryParams): Promise<PlayerDirect
   const page = params.all ? 1 : Math.max(1, params.page ?? 1);
   const requestedPageSize = params.all ? 1000 : params.pageSize ?? 20;
   const pageSize = Math.min(1000, Math.max(1, requestedPageSize));
+  const season = parseSeason(params.season);
   const seasonType = parseSeasonType(params.seasonType);
   const query = params.q?.trim().toLowerCase();
   const positions = params.position === "G" ? ["PG", "SG"] : params.position === "F" ? ["SF", "PF"] : params.position ? [params.position] : [];
   const sortKey = fallbackSortValues[params.sort ?? "name"] ? params.sort ?? "name" : "name";
   const order = params.order ?? (sortKey === "name" ? "asc" : "desc");
   const sortValue = fallbackSortValues[sortKey];
-  const sourceRows = metadata.season_type === seasonType ? players : [];
+  const sourceRows = metadata.season === season && metadata.season_type === seasonType ? players : [];
   const filtered = sourceRows
     .filter((row) => !query || `${row.player_name} ${row.team_abbreviation ?? ""} ${row.position ?? ""}`.toLowerCase().includes(query))
     .filter((row) => !params.teamId || row.team_id === params.teamId || row.team_abbreviation === params.teamId)
@@ -282,6 +285,7 @@ async function jsonFallback(params: PlayerDirectoryParams): Promise<PlayerDirect
 }
 
 export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): Promise<PlayerDirectoryResult> {
+  const season = parseSeason(params.season);
   const seasonType = parseSeasonType(params.seasonType);
   const page = params.all ? 1 : Math.max(1, params.page ?? 1);
   const requestedPageSize = params.all ? 1000 : params.pageSize ?? 20;
@@ -297,6 +301,7 @@ export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): P
   };
 
   where.push(`s.season_type = ${addValue(seasonType)}`);
+  where.push(`s.season = ${addValue(season)}`);
 
   if (params.q?.trim()) {
     const placeholder = addValue(`%${params.q.trim()}%`);
@@ -385,26 +390,35 @@ export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): P
   }
 }
 
-export async function loadPlayerDirectoryFilters(seasonType: SeasonType = DEFAULT_SEASON_TYPE): Promise<PlayerDirectoryFilters> {
+export async function loadPlayerDirectoryFilters(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerDirectoryFilters> {
+  const selectedSeason = parseSeason(season);
   try {
-    const [teamResult, positionResult] = await Promise.all([
+    const [seasonResult, teamResult, positionResult] = await Promise.all([
+      queryDatabase<{ season: string }>(`
+        SELECT DISTINCT season
+        FROM current_player_season_summaries
+        ORDER BY season DESC
+      `),
       queryDatabase<{ id: string; abbreviation: string }>(`
         SELECT DISTINCT t.id, t.abbreviation
         FROM teams t
         JOIN current_player_season_summaries s ON s.team_id = t.id
         WHERE s.season_type = $1
+          AND s.season = $2
         ORDER BY t.abbreviation
-      `, [seasonType]),
+      `, [seasonType, selectedSeason]),
       queryDatabase<{ position: string }>(`
         SELECT DISTINCT p.position
         FROM players p
         JOIN current_player_season_summaries s USING (player_slug)
         WHERE s.season_type = $1
+          AND s.season = $2
           AND p.position IN ('PG', 'SG', 'SF', 'PF', 'C')
-      `, [seasonType]),
+      `, [seasonType, selectedSeason]),
     ]);
     if (teamResult?.rows.length && positionResult?.rows.length) {
       return {
+        seasons: mergeSeasonOptions(seasonResult?.rows.map((row) => row.season)),
         seasonTypes: seasonTypeOptions,
         teams: teamResult.rows.map((team) => ({ label: team.abbreviation, value: team.id })),
         positions: positionResult.rows.map((row) => row.position),
@@ -416,11 +430,13 @@ export async function loadPlayerDirectoryFilters(seasonType: SeasonType = DEFAUL
   }
 
   const { players, teams, metadata } = await loadRuntimeFallbacks();
-  const sourcePlayers = metadata.season_type === seasonType ? players : [];
+  const sourcePlayers = metadata.season === selectedSeason && metadata.season_type === seasonType ? players : [];
   return {
+    seasons: mergeSeasonOptions([metadata.season]),
     seasonTypes: seasonTypeOptions,
     teams: teams.map((team) => ({ label: team.abbreviation, value: team.team_id })),
-    positions: Array.from(new Set(sourcePlayers.map((player) => player.position).filter((position): position is string => Boolean(position && position !== "N/A")))),
+    positions: Array.from(new Set(sourcePlayers.map((player) => player.position).filter((position): position is string => Boolean(position && position !== "N/A"))))
+      .concat(sourcePlayers.length ? [] : ["PG", "SG", "SF", "PF", "C"]),
     source: "json",
   };
 }

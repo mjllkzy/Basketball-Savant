@@ -5,13 +5,15 @@ import { StatTable } from "@/components/ui/StatTable";
 import { getCustomLeaderboardAnalytics } from "@/lib/db/customAnalytics.server";
 import { getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
+import { baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export default async function CustomLeaderboardPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
   const entityType = (singleParam(resolvedSearchParams, "entityType") ?? "players") as "players" | "teams" | "lineups";
+  const season = parseSeason(singleParam(resolvedSearchParams, "season"));
   const metricKeys = (singleParam(resolvedSearchParams, "metrics") ?? "pts,reb,ast,stl,blk,ts_pct,efg_pct,usage_rate").split(",").filter(Boolean);
-  const leaderboard = await getCustomLeaderboardAnalytics(entityType, metricKeys);
+  const leaderboard = await getCustomLeaderboardAnalytics(entityType, metricKeys, season);
   const rows = leaderboard.rows.slice(0, 100).map((row, index) => ({
     rank: index + 1,
     entity: row.label,
@@ -25,7 +27,10 @@ export default async function CustomLeaderboardPage({ searchParams }: { searchPa
   return (
     <div className="grid gap-4">
       <PageHeader eyebrow="Custom Builder" title="Custom Leaderboard" description="Choose entity type and metric columns. URL params preserve the table state for sharing." actions={<><ShareUrlButton /><ExportCsvButton rows={rows} filename="custom-leaderboard.csv" /></>} />
-      <form className="grid gap-3 rounded border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[180px_1fr_120px]">
+      <form className="grid gap-3 rounded border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[160px_180px_1fr_120px]">
+        <select name="season" defaultValue={season} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
+          {baseSeasonOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
         <select name="entityType" defaultValue={entityType} className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="players">Players</option>
           <option value="teams">Teams</option>
