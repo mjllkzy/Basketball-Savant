@@ -45,7 +45,7 @@ export function PlayerFilterForm({
 
   return (
     <form className="grid gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm" method="get" action="/players">
-      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-7">
+      <div className="grid gap-3 md:grid-cols-3">
         <SmartSearchInput
           name="q"
           defaultValue={q}
@@ -54,6 +54,12 @@ export function PlayerFilterForm({
           noMatchesText="No matching players"
           labelClassName="min-h-10 px-3 py-0"
         />
+        <select name="season" defaultValue={season} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
+          {seasons.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
+        <select name="seasonType" defaultValue={seasonType} aria-label="Season type" className="rounded border border-slate-300 px-3 py-2 text-sm">
+          {seasonTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
         <select name="teamId" defaultValue={teamId ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="">All teams</option>
           {teamOptions.map((team) => <option key={team.value} value={team.value}>{team.label}</option>)}
@@ -66,13 +72,7 @@ export function PlayerFilterForm({
           <option value="standard">Standard Stats</option>
           <option value="advanced">Advanced Stats</option>
         </select>
-        <select name="season" defaultValue={season} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
-          {seasons.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
-        <select name="seasonType" defaultValue={seasonType} aria-label="Season type" className="rounded border border-slate-300 px-3 py-2 text-sm">
-          {seasonTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
-        <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Apply</button>
+        <button className="min-h-10 rounded bg-ink px-3 py-2 text-sm font-black text-white md:col-span-3">Apply</button>
       </div>
 
       <div className="grid gap-3 rounded border border-slate-200 bg-slate-50 p-3 md:grid-cols-2">
