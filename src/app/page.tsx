@@ -3,7 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BarChart3, ExternalLink, GitCompare, Newspaper, Users } from "lucide-react";
 import { ShotClockMark } from "@/components/brand/ShotClockMark";
-import { NEWS_RETENTION_DAYS, categoryTone, formatNewsDate, getRecentNews, reportingStatusTone } from "@/lib/news";
+import { NewsMetaBadges } from "@/components/domain/NewsMetaBadges";
+import { NEWS_RETENTION_DAYS, getRecentNews } from "@/lib/news";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -71,11 +72,7 @@ export default function HomePage() {
         <div className="grid gap-3 lg:grid-cols-3">
           {latestNews.map((item) => (
             <article key={item.id} className="rounded border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className={`rounded border px-2 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${categoryTone(item.category)}`}>{item.category}</span>
-                <span className={`rounded border px-2 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${reportingStatusTone(item.reportingStatus)}`}>{item.reportingStatus}</span>
-                <span className="text-xs font-bold text-slate-500">{formatNewsDate(item.publishedAt)}</span>
-              </div>
+              <NewsMetaBadges item={item} className="mb-3" />
               <h3 className="text-base font-black leading-tight text-ink">{item.title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">{item.summary}</p>
               <Link href={item.sourceUrl} className="mt-3 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-signal hover:text-ink">
