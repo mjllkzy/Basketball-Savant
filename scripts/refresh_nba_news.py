@@ -29,6 +29,7 @@ DEFAULT_RUMOR_LIMIT = 10
 DEFAULT_RETENTION_DAYS = 3
 MAX_NEWS_TITLE_LENGTH = 88
 MAX_NEWS_SUMMARY_LENGTH = 155
+PERSON_NAME_PATTERN = r"[A-Z][A-Za-z'’.-]+(?:\s+(?:[A-Z][A-Za-z'’.-]+|Jr\.|Sr\.|II|III|IV)){0,3}"
 
 ALLOWED_CATEGORIES = {
     "League",
@@ -155,7 +156,104 @@ def smart_trim(value: str, *, max_length: int, ellipsis: bool = False) -> str:
     return f"{candidate}..." if ellipsis else candidate
 
 
-def summarize_title(value: str) -> str:
+def clean_headline_subject(value: str) -> str:
+    text = clean_text(value)
+    text = re.sub(r"^(?:Although|While|After)\s+", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+(?:if|has|have|was|were|is|are|who|that)$", "", text, flags=re.IGNORECASE)
+    return text.strip(" .,…")
+
+
+def clean_headline_destination(value: str) -> str:
+    text = clean_text(value)
+    text = re.sub(r"^(?:Although|While|After)\s+", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"^the\s+", "", text, flags=re.IGNORECASE)
+    return text.strip(" .,…")
+
+
+def title_action_suffix(category: str, reporting_status: str) -> str:
+    if category == "Trade":
+        return "Trade Rumors Heat Up" if reporting_status == "Rumor" else "Trade Is Official"
+    if category in {"Free Agency", "Transaction"}:
+        return "Market Heats Up" if reporting_status == "Rumor" else "Deal Is Official"
+    return "Buzz Builds" if reporting_status == "Rumor" else "Move Is Official"
+
+
+def rewrite_trade_headline(title: str, *, reporting_status: str) -> str | None:
+    match = re.match(r"^(.+?),\s+(.+?)\s+(?:Discussing|Discuss|Talking|Have Talked About)\s+(.+?)\s+Trade$", title, flags=re.IGNORECASE)
+    if match:
+        destination = clean_headline_destination(match.group(1))
+        player = clean_headline_subject(match.group(3))
+        suffix = "Trade Rumors Heat Up" if reporting_status == "Rumor" else "Trade Talks Heat Up"
+        return f"{player}-to-{destination} {suffix}"
+
+    match = re.match(r"^(.+?)\s+Trading\s+(.+?)\s+To\s+(.+)$", title, flags=re.IGNORECASE)
+    if match:
+        player = clean_headline_subject(match.group(2))
+        destination = clean_headline_destination(match.group(3))
+        suffix = "Trade Buzz Builds" if reporting_status == "Rumor" else "Trade Is Official"
+        return f"{player}-to-{destination} {suffix}"
+
+    match = re.match(r"^(.+?)\s+sends?\s+(.+?)\s+to\s+(.+?)\s+for\s+(.+)$", title, flags=re.IGNORECASE)
+    if match:
+        player = clean_headline_subject(match.group(2))
+        destination = clean_headline_destination(match.group(3))
+        return_piece = clean_text(match.group(4))
+        return f"{player}-to-{destination} Trade Brings Back {return_piece}"
+
+    return None
+
+
+def rewrite_summary_headline(title: str, summary: str, *, category: str, reporting_status: str) -> str | None:
+    summary_text = clean_text(summary)
+
+    match = re.search(rf"(?i:trade that would send)\s+({PERSON_NAME_PATTERN})\s+(?i:back to)\s+([A-Z][A-Za-z .'-]+)", summary_text)
+    if match:
+        player = clean_headline_subject(match.group(1))
+        destination = clean_headline_destination(match.group(2))
+        return f"{player}-to-{destination} Trade Rumors Heat Up"
+
+    match = re.search(rf"(?i:connecting the)\s+(.+?)\s+(?i:to)\s+(?i:(?:the\s+)?(?:[A-Za-z ]+\s+)?star)\s+({PERSON_NAME_PATTERN})", summary_text)
+    if match and category == "Trade":
+        destination = clean_headline_destination(match.group(1))
+        player = clean_headline_subject(match.group(2))
+        return f"{player}-to-{destination} Trade Rumors Swirl"
+
+    match = re.search(rf"(?i:(?:the\s+)?)([A-Z][A-Za-z ]+?)\s+(?i:have had internal discussions).*?(?i:trade for)\s+({PERSON_NAME_PATTERN})", summary_text)
+    if match and category == "Trade":
+        destination = clean_headline_destination(match.group(1))
+        player = clean_headline_subject(match.group(2))
+        return f"{player}-to-{destination} Trade Rumors Swirl"
+
+    match = re.search(rf"(?i:trade rumors involving)\s+({PERSON_NAME_PATTERN})", summary_text)
+    if match and category == "Trade":
+        player = clean_headline_subject(match.group(1))
+        return f"{player} Trade Rumors Keep Heating Up"
+
+    match = re.search(rf"(?i:won[’']?t be able to re-sign)\s+({PERSON_NAME_PATTERN})", summary_text)
+    if match:
+        player = clean_headline_subject(match.group(1))
+        team = title.split(":", 1)[0].strip() if ":" in title else ""
+        return f"{player}-{team} Exit Buzz Grows" if team else f"{player} Exit Buzz Grows"
+
+    match = re.search(rf"(?i:interest in)\s+(?i:(?:[A-Za-z]+\s+)?(?:wing|guard|center|forward|big man))\s+({PERSON_NAME_PATTERN})", summary_text)
+    if match:
+        player = clean_headline_subject(match.group(1))
+        return f"{player} Free-Agent Market Heats Up"
+
+    match = re.search(rf"(?:Although\s+)?({PERSON_NAME_PATTERN})\s+(?i:was reportedly underwhelmed by the)\s+(.+?)\s+(?i:initial contract offers)", summary_text)
+    if match:
+        player = clean_headline_subject(match.group(1))
+        team = clean_text(match.group(2)).removesuffix("‘").removesuffix("'")
+        return f"{player}-{team} Contract Talks Hit Snag"
+
+    if title.lower().startswith("latest on ") and category:
+        player = title[len("Latest On "):].strip()
+        return f"{player} {title_action_suffix(category, reporting_status)}"
+
+    return None
+
+
+def summarize_title(value: str, *, summary: str = "", category: str = "", reporting_status: str = "") -> str:
     title = clean_text(value)
     title = re.sub(r"^(?:Report|Reports|Rumor|Rumors|NBA Rumors):\s*", "", title, flags=re.IGNORECASE)
     title = re.sub(r"^Stein/Fischer[’']s Latest:\s*", "", title, flags=re.IGNORECASE)
@@ -163,6 +261,14 @@ def summarize_title(value: str) -> str:
     title = re.sub(r"^([A-Za-z0-9 .&'’/-]+?)\s+Notes:\s*", r"\1: ", title)
     title = re.sub(r"\s*,?\s+(?:And\s+)?More$", "", title, flags=re.IGNORECASE)
     title = re.sub(r"\s+", " ", title).strip(" ,;:-–—")
+
+    rewritten = (
+        rewrite_trade_headline(title, reporting_status=reporting_status)
+        or rewrite_summary_headline(title, summary, category=category, reporting_status=reporting_status)
+    )
+    if rewritten:
+        return smart_trim(rewritten, max_length=MAX_NEWS_TITLE_LENGTH)
+
     return smart_trim(title, max_length=MAX_NEWS_TITLE_LENGTH)
 
 
@@ -323,10 +429,10 @@ def article_to_news_item(article: dict[str, Any]) -> NewsItem | None:
     source_url = validate_source_url(clean_text(article.get("permalink") or f"{NBA_NEWS_URL}/{slug}"))
     published_at = clean_text(article.get("date") or article.get("modified"))
     raw_summary = clean_text(article.get("excerpt"))
-    title = summarize_title(raw_title)
-    summary = summarize_description(raw_summary)
     category = classify_category(article)
     reporting_status = classify_reporting_status(article, category=category)
+    title = summarize_title(raw_title, summary=raw_summary, category=category, reporting_status=reporting_status)
+    summary = summarize_description(raw_summary)
 
     if not slug or not raw_title or not published_at or not raw_summary:
         raise RuntimeError(f"NBA.com article is missing required fields: {article!r}")
@@ -385,10 +491,10 @@ def rss_item_to_news_item(item: ET.Element, source: TrustedRumorSource) -> NewsI
     raw_published_at = clean_text(item.findtext("pubDate"))
     description = clean_text(item.findtext("description"))
     content = clean_text(item.findtext(f"{CONTENT_NAMESPACE}encoded"))
-    title = summarize_title(raw_title)
     summary = summarize_description(description or content)
     categories = [clean_text(category.text) for category in item.findall("category") if clean_text(category.text)]
     category = classify_rss_category(raw_title, categories, summary)
+    title = summarize_title(raw_title, summary=summary, category=category, reporting_status="Rumor")
 
     if not raw_title or not raw_source_url or not raw_published_at or not summary:
         return None

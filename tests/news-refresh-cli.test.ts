@@ -128,7 +128,8 @@ describe("basketball news refresh", () => {
       "root = module.ET.fromstring(feed)",
       "official = module.article_to_news_item(article).to_json()",
       "rumor = module.rss_item_to_news_item(root.find('./channel/item'), source).to_json()",
-      "print(json.dumps({'official': official, 'rumor': rumor}))"
+      "kawhi = module.summarize_title('Raptors, Clippers Discussing Kawhi Leonard Trade', summary='The Raptors and Clippers have been talking this weekend about a trade that would send Kawhi Leonard back to Toronto.', category='Trade', reporting_status='Rumor')",
+      "print(json.dumps({'official': official, 'rumor': rumor, 'kawhi': kawhi}))"
     ].join("\n");
 
     const result = spawnSync(pythonCommand!, ["-c", script], {
@@ -140,10 +141,12 @@ describe("basketball news refresh", () => {
     const parsed = JSON.parse(result.stdout) as {
       official: { title: string; summary: string };
       rumor: { title: string; summary: string };
+      kawhi: string;
     };
     expect(parsed.official.title).toBe("Celtics re-sign Ron Harper Jr. to long-term extension");
     expect(parsed.official.summary).toBe("Former Two-Way guard Ron Harper Jr. reportedly signs three-year extension to remain with Celtics.");
-    expect(parsed.rumor.title).toBe("Nuggets, Mamukelashvili, Hachimura");
+    expect(parsed.rumor.title).toBe("Jaylen Brown-to-Nuggets Trade Rumors Swirl");
+    expect(parsed.kawhi).toBe("Kawhi Leonard-to-Raptors Trade Rumors Heat Up");
     expect(parsed.rumor.summary.length).toBeLessThanOrEqual(155);
     expect(parsed.rumor.summary).not.toMatch(/sources tell|Twitter|More/i);
   });
