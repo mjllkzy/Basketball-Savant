@@ -176,6 +176,16 @@ function optionClassName(label: string | null | undefined) {
   return "";
 }
 
+function isDecidedCurrentSeasonOption(season: ContractSeason, label: string | null | undefined) {
+  const kind = optionKind(label);
+  return season === "2025-26" && (kind === "player" || kind === "team" || kind === "mutual");
+}
+
+function displayContractDetail(season: ContractSeason, optionLabel: string | null | undefined, guaranteeLabel: string | null | undefined) {
+  if (isDecidedCurrentSeasonOption(season, optionLabel)) return guaranteeLabel;
+  return optionLabel ?? guaranteeLabel;
+}
+
 const contractLegend = [
   { label: "Player option", className: "border-amber-200 bg-amber-50 text-amber-700" },
   { label: "Team option", className: "border-sky-200 bg-sky-50 text-sky-700" },
@@ -245,7 +255,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         return contractSeasons.reduce<Record<string, string | number | null | undefined>>((contractRow, contractSeason) => {
           const key = contractSalaryKey(contractSeason);
           const amount = row.salaryBySeason[contractSeason];
-          const detail = row.optionsBySeason[contractSeason] ?? row.guaranteeStatusBySeason[contractSeason];
+          const detail = displayContractDetail(contractSeason, row.optionsBySeason[contractSeason], row.guaranteeStatusBySeason[contractSeason]);
           const code = optionCode(detail);
           contractRow[key] = amount === undefined ? "--" : `${formatMoney(amount)}${code ? ` ${code}` : ""}`;
           contractRow[`${key}Sort`] = amount ?? null;
