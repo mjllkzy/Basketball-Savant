@@ -73,7 +73,10 @@ jobs:
             team_season_summaries \
             games \
             player_game_stats \
-            shot_attempts
+            shot_attempts \
+            player_contract_sources \
+            player_contracts \
+            player_contract_salaries
           do
             grep -Eq "TABLE( DATA)? public ${table}\\b" "$MANIFEST_FILE"
           done

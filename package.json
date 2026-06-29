@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p ${PORT:-3000}",
     "db:migrate": "node scripts/migrate-postgres.mjs",
+    "contracts:import": "python3 scripts/import_player_contracts.py",
     "refresh:official": "node scripts/refresh-official-data.mjs",
     "refresh:official:shots": "node scripts/refresh-official-data.mjs --regular-season-shots",
     "refresh:team-shots": "node scripts/refresh-team-shot-cache.mjs",
