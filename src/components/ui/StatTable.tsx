@@ -16,6 +16,8 @@ export type StatTableColumn = {
   truncate?: boolean;
   sortOrder?: string[];
   sortValueKey?: string;
+  subValueKey?: string;
+  subValueClassName?: string;
   valueClassNameKey?: string;
   hrefKey?: string;
   imageKey?: string;
@@ -162,10 +164,17 @@ export function StatTable({
           const imageUrl = column.imageKey ? info.row.original[column.imageKey] : undefined;
           const imageAlt = column.imageAltKey ? info.row.original[column.imageAltKey] : undefined;
           const imageFallback = column.imageFallbackKey ? info.row.original[column.imageFallbackKey] : undefined;
+          const subValue = column.subValueKey ? info.row.original[column.subValueKey] : undefined;
+          const subFormatted = subValue === null || subValue === undefined || String(subValue).trim().length === 0 ? "" : String(subValue);
           const valueClassName = column.valueClassNameKey && typeof info.row.original[column.valueClassNameKey] === "string"
             ? String(info.row.original[column.valueClassNameKey])
             : "";
-          const content = (
+          const content = subFormatted ? (
+            <span className="inline-flex max-w-full flex-col items-center justify-center gap-0.5 leading-tight">
+              <span className={["font-black", valueClassName].filter(Boolean).join(" ") || undefined}>{formatted}</span>
+              <span className={`text-[11px] font-bold normal-case tracking-normal text-slate-500 ${column.subValueClassName ?? ""}`.trim()}>{subFormatted}</span>
+            </span>
+          ) : (
             <span className={imageUrl ? `inline-flex min-h-7 max-w-full items-center gap-2 ${column.truncate ? "min-w-0" : ""}` : column.truncate ? "block truncate" : undefined}>
               {imageUrl ? (
                 <CellImage

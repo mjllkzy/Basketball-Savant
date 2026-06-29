@@ -4,7 +4,14 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
 import { officialTeams } from "@/lib/data/official";
-import { contractSeasons, listPlayerContracts, type ContractSeason } from "@/lib/db/playerContracts.server";
+import {
+  contractSeasons,
+  contractSummarySortValue,
+  listPlayerContracts,
+  summarizeContractSalaries,
+  type ContractSeason,
+  type ContractSummary,
+} from "@/lib/db/playerContracts.server";
 import { listPlayerDirectory, loadPlayerDirectoryFilters } from "@/lib/db/playerDirectory.server";
 import { formatMetric } from "@/lib/metrics/format";
 import { formatPlayerHeight } from "@/lib/playerHeight";
@@ -16,14 +23,15 @@ import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "
 
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
-const contractSortMetrics = ["selected_salary", "guaranteed", "player", "team", "position", ...contractSeasons.map((season) => `salary_${season.replace("-", "_")}`)];
+const contractSortMetrics = ["selected_salary", "original_contract", "current_contract", "guaranteed", "player", "team", "position", ...contractSeasons.map((season) => `salary_${season.replace("-", "_")}`)];
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
 const entityColumnWidth = "290px";
 const secondaryColumnWidth = "86px";
+const contractSummaryColumnWidth = "150px";
 const contractSalaryColumnWidth = "126px";
 const standardTableMinWidth = "1752px";
 const advancedTableMinWidth = "1838px";
-const contractTableMinWidth = "1370px";
+const contractTableMinWidth = "1670px";
 const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
 
 export const metadata: Metadata = {
@@ -100,6 +108,24 @@ const contractColumns: StatTableColumn[] = [
   { key: "player", label: "Player", group: "Profile", hrefKey: "href", width: entityColumnWidth, truncate: true },
   identityColumn("team", "Team", secondaryColumnWidth, "Profile"),
   identityColumn("pos", "Pos", secondaryColumnWidth, "Profile", primaryPositionOrder),
+  {
+    key: "original_contract",
+    label: "Original",
+    group: "Contract Summary",
+    align: "center",
+    width: contractSummaryColumnWidth,
+    sortValueKey: "original_contractSort",
+    subValueKey: "original_contractSub",
+  },
+  {
+    key: "current_contract",
+    label: "Current",
+    group: "Contract Summary",
+    align: "center",
+    width: contractSummaryColumnWidth,
+    sortValueKey: "current_contractSort",
+    subValueKey: "current_contractSub",
+  },
   ...contractSeasons.map(contractSalaryColumn),
   {
     key: "guaranteed",
@@ -143,6 +169,20 @@ function formatMoney(amount: number | null | undefined, missingLabel = "--") {
     return `$${value.toLocaleString("en-US", { minimumFractionDigits: value >= 10 ? 1 : 2, maximumFractionDigits: value >= 10 ? 1 : 2 })}M`;
   }
   return `$${amount.toLocaleString("en-US")}`;
+}
+
+function formatContractSummary(summary: ContractSummary | null) {
+  if (!summary) {
+    return {
+      main: "--",
+      sub: "No data",
+    };
+  }
+  const yearsLabel = summary.years === 1 ? "1 yr" : `${summary.years} yrs`;
+  return {
+    main: `${formatMoney(summary.averageAnnualValue)} AAV`,
+    sub: `${formatMoney(summary.total)} / ${yearsLabel}`,
+  };
 }
 
 function optionKind(label: string | null | undefined) {
@@ -242,12 +282,22 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const selectedPosition = positionOptions.includes(position ?? "") ? position : undefined;
   const rows = isContractView
     ? contractResult!.rows.map((row) => {
+        const originalContract = summarizeContractSalaries(row.salaryBySeason);
+        const currentContract = summarizeContractSalaries(row.salaryBySeason, season as ContractSeason);
+        const originalContractDisplay = formatContractSummary(originalContract);
+        const currentContractDisplay = formatContractSummary(currentContract);
         const base = {
           player: row.playerName,
           href: row.playerSlug ? playerHref(row.playerSlug, seasonType, season) : undefined,
           team: row.teamAbbreviation,
           teamAccent: teamPrimaryColorByAbbreviation.get(row.teamAbbreviation) ?? "#0f766e",
           pos: row.position ?? "N/A",
+          original_contract: originalContractDisplay.main,
+          original_contractSub: originalContractDisplay.sub,
+          original_contractSort: contractSummarySortValue(originalContract),
+          current_contract: currentContractDisplay.main,
+          current_contractSub: currentContractDisplay.sub,
+          current_contractSort: contractSummarySortValue(currentContract),
           guaranteed: formatMoney(row.guaranteedAmount, "Unavailable"),
           guaranteedSort: row.guaranteedAmount,
           guaranteedClass: row.needsFollowup ? "font-black text-slate-600" : "",

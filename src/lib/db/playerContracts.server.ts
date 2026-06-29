@@ -27,6 +27,12 @@ export type PlayerContractRow = {
   needsFollowup: boolean;
 };
 
+export type ContractSummary = {
+  years: number;
+  total: number;
+  averageAnnualValue: number;
+};
+
 export type PlayerContractResult = {
   rows: PlayerContractRow[];
   meta: {
@@ -163,10 +169,32 @@ function selectedSeasonSalary(row: PlayerContractRow, season: ContractSeason) {
   return row.salaryBySeason[season] ?? null;
 }
 
+export function summarizeContractSalaries(salaries: Partial<Record<ContractSeason, number>>, fromSeason?: ContractSeason): ContractSummary | null {
+  const startIndex = fromSeason ? contractSeasons.indexOf(fromSeason) : 0;
+  const seasons = contractSeasons
+    .slice(Math.max(0, startIndex))
+    .map((season) => salaries[season])
+    .filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount));
+  if (seasons.length === 0) return null;
+  const total = seasons.reduce((sum, amount) => sum + amount, 0);
+  return {
+    years: seasons.length,
+    total,
+    averageAnnualValue: total / seasons.length,
+  };
+}
+
+export function contractSummarySortValue(summary: ContractSummary | null) {
+  if (!summary) return null;
+  return summary.years * 1_000_000_000_000 + summary.total;
+}
+
 function sortValue(row: PlayerContractRow, sort: string, season: ContractSeason): number | string | null {
   if (sort === "player") return row.playerName;
   if (sort === "team") return row.teamAbbreviation;
   if (sort === "position") return row.position ?? "";
+  if (sort === "original_contract") return contractSummarySortValue(summarizeContractSalaries(row.salaryBySeason));
+  if (sort === "current_contract") return contractSummarySortValue(summarizeContractSalaries(row.salaryBySeason, season));
   if (sort === "guaranteed") return row.guaranteedAmount;
   if (sort.startsWith("salary_")) {
     const key = sort.replace("salary_", "").replace("_", "-") as ContractSeason;
