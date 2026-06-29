@@ -20,6 +20,7 @@ describe("player contract import CLI", () => {
     const detailMigration = readFileSync("db/migrations/009_player_contract_details.sql", "utf8");
     const script = readFileSync("scripts/import_player_contracts.py", "utf8");
     const optionScript = readFileSync("scripts/sync_player_contract_options.py", "utf8");
+    const dealScript = readFileSync("scripts/sync_player_contract_deals.py", "utf8");
     const workflow = readFileSync(".github/workflows/data-refresh.yml", "utf8");
     const backup = readFileSync(".github/workflows/postgres-backup.yml", "utf8");
     const packageJson = readFileSync("package.json", "utf8");
@@ -36,13 +37,17 @@ describe("player contract import CLI", () => {
     expect(script).toContain("guarantee_status_by_season");
     expect(optionScript).toContain("salary-pl");
     expect(optionScript).toContain("salary-tm");
+    expect(dealScript).toContain("SPOTRAC_CONTRACTS_URL");
+    expect(dealScript).toContain("player_contract_deals_2025_2031.json");
     expect(packageJson).toContain("contracts:sync-options");
+    expect(packageJson).toContain("contracts:sync-deals");
     expect(workflow).toContain("scripts/import_player_contracts.py --write-postgres");
     expect(backup).toContain("player_contract_salaries");
   });
 
   it("stores the complete raw contract source", () => {
     const payload = JSON.parse(readFileSync("data/raw/player_contracts_2025_2031.json", "utf8"));
+    const dealPayload = JSON.parse(readFileSync("data/raw/player_contract_deals_2025_2031.json", "utf8"));
 
     expect(payload.metadata.row_count).toBe(530);
     expect(payload.metadata.season_columns).toEqual([
@@ -65,6 +70,23 @@ describe("player contract import CLI", () => {
         "2026-27": "Player Option",
       },
     });
+    expect(dealPayload.metadata.row_count).toBe(530);
+    expect(dealPayload.contracts.find((row: { player_name: string }) => row.player_name === "Austin Reaves")).toMatchObject({
+      deals: expect.arrayContaining([
+        expect.objectContaining({
+          start_year: 2023,
+          end_year: 2026,
+          years: 4,
+          total: 53827872,
+        }),
+        expect.objectContaining({
+          start_year: 2026,
+          end_year: 2029,
+          years: 4,
+          total: 184800000,
+        }),
+      ]),
+    });
   });
 
   runIfPython("is valid Python", () => {
@@ -84,6 +106,20 @@ describe("player contract import CLI", () => {
   runIfPython("contract option sync script is valid Python", () => {
     const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
     const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/sync_player_contract_options.py"], {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        PYTHONPYCACHEPREFIX: pycacheDirectory,
+      },
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+  });
+
+  runIfPython("contract deal sync script is valid Python", () => {
+    const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
+    const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/sync_player_contract_deals.py"], {
       cwd: process.cwd(),
       env: {
         ...process.env,

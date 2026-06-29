@@ -18,6 +18,8 @@ export type StatTableColumn = {
   sortValueKey?: string;
   subValueKey?: string;
   subValueClassName?: string;
+  noteValueKey?: string;
+  noteValueClassName?: string;
   valueClassNameKey?: string;
   hrefKey?: string;
   imageKey?: string;
@@ -166,13 +168,16 @@ export function StatTable({
           const imageFallback = column.imageFallbackKey ? info.row.original[column.imageFallbackKey] : undefined;
           const subValue = column.subValueKey ? info.row.original[column.subValueKey] : undefined;
           const subFormatted = subValue === null || subValue === undefined || String(subValue).trim().length === 0 ? "" : String(subValue);
+          const noteValue = column.noteValueKey ? info.row.original[column.noteValueKey] : undefined;
+          const noteFormatted = noteValue === null || noteValue === undefined || String(noteValue).trim().length === 0 ? "" : String(noteValue);
           const valueClassName = column.valueClassNameKey && typeof info.row.original[column.valueClassNameKey] === "string"
             ? String(info.row.original[column.valueClassNameKey])
             : "";
-          const content = subFormatted ? (
+          const content = subFormatted || noteFormatted ? (
             <span className="inline-flex max-w-full flex-col items-center justify-center gap-0.5 leading-tight">
               <span className={["font-black", valueClassName].filter(Boolean).join(" ") || undefined}>{formatted}</span>
-              <span className={`text-[11px] font-bold normal-case tracking-normal text-slate-500 ${column.subValueClassName ?? ""}`.trim()}>{subFormatted}</span>
+              {subFormatted ? <span className={`text-[11px] font-bold normal-case tracking-normal text-slate-500 ${column.subValueClassName ?? ""}`.trim()}>{subFormatted}</span> : null}
+              {noteFormatted ? <span className={`max-w-full truncate text-[10px] font-black uppercase tracking-[0.08em] text-signal ${column.noteValueClassName ?? ""}`.trim()}>{noteFormatted}</span> : null}
             </span>
           ) : (
             <span className={imageUrl ? `inline-flex min-h-7 max-w-full items-center gap-2 ${column.truncate ? "min-w-0" : ""}` : column.truncate ? "block truncate" : undefined}>

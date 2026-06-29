@@ -25,12 +25,29 @@ export type PlayerContractRow = {
   guaranteeStatusBySeason: Partial<Record<ContractSeason, string>>;
   guaranteedAmount: number | null;
   needsFollowup: boolean;
+  contractDeals: ContractDeal[];
 };
 
 export type ContractSummary = {
   years: number;
   total: number;
   averageAnnualValue: number;
+};
+
+export type ContractDeal = {
+  source: string;
+  sourceUrl: string | null;
+  label: string;
+  startYear: number;
+  endYear: number;
+  years: number;
+  total: number | null;
+  averageAnnualValue: number | null;
+  guaranteedAtSign: number | null;
+  totalGuaranteed: number | null;
+  freeAgent: string | null;
+  signedUsing: string | null;
+  pending: boolean;
 };
 
 export type PlayerContractResult = {
@@ -73,6 +90,39 @@ type ContractJsonPayload = {
   contracts: ContractJsonRow[];
 };
 
+type ContractDealJsonRow = {
+  source_rank: number;
+  player_name: string;
+  matched_player_slug?: string | null;
+  matched_player_name?: string | null;
+  team_abbreviation: string;
+  deals?: Array<{
+    source?: string | null;
+    source_url?: string | null;
+    label?: string | null;
+    start_year?: number | string | null;
+    end_year?: number | string | null;
+    years?: number | string | null;
+    total?: number | string | null;
+    average_annual_value?: number | string | null;
+    guaranteed_at_sign?: number | string | null;
+    total_guaranteed?: number | string | null;
+    free_agent?: string | null;
+    signed_using?: string | null;
+    pending?: boolean | null;
+  }>;
+};
+
+type ContractDealJsonPayload = {
+  contracts: ContractDealJsonRow[];
+};
+
+type ContractDealLookup = {
+  byRank: Map<number, ContractDeal[]>;
+  bySlug: Map<string, ContractDeal[]>;
+  byNameTeam: Map<string, ContractDeal[]>;
+};
+
 type PlayerContractDbRow = {
   source_rank: number | string;
   player_slug: string | null;
@@ -89,6 +139,7 @@ type PlayerContractDbRow = {
 };
 
 const teamByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team]));
+let contractDealLookupPromise: Promise<ContractDealLookup> | null = null;
 
 function numeric(value: number | string | null | undefined): number | null {
   if (value === null || value === undefined) return null;
@@ -124,6 +175,75 @@ function playerLookup(players: RuntimePlayerFallback[]) {
   return new Map(players.map((player) => [player.player_slug, player]));
 }
 
+function normalizedContractName(value: string) {
+  const asciiText = value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  const tokens = asciiText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+  while (tokens.length > 0 && ["jr", "sr", "ii", "iii", "iv", "v"].includes(tokens[tokens.length - 1])) {
+    tokens.pop();
+  }
+  return tokens.join(" ");
+}
+
+function dealLookupKey(playerName: string, teamAbbreviation: string) {
+  return `${normalizedContractName(playerName)}|${teamAbbreviation}`;
+}
+
+function jsonDealToContractDeal(deal: NonNullable<ContractDealJsonRow["deals"]>[number]): ContractDeal | null {
+  const startYear = numeric(deal.start_year);
+  const endYear = numeric(deal.end_year);
+  const years = numeric(deal.years);
+  if (!startYear || !endYear || !years) return null;
+  return {
+    source: deal.source?.trim() || "Spotrac",
+    sourceUrl: deal.source_url?.trim() || null,
+    label: deal.label?.trim() || "",
+    startYear,
+    endYear,
+    years,
+    total: numeric(deal.total),
+    averageAnnualValue: numeric(deal.average_annual_value),
+    guaranteedAtSign: numeric(deal.guaranteed_at_sign),
+    totalGuaranteed: numeric(deal.total_guaranteed),
+    freeAgent: deal.free_agent?.trim() || null,
+    signedUsing: deal.signed_using?.trim() || null,
+    pending: Boolean(deal.pending),
+  };
+}
+
+async function loadContractDealLookup(): Promise<ContractDealLookup> {
+  if (!contractDealLookupPromise) {
+    contractDealLookupPromise = readFile(path.join(process.cwd(), "data", "raw", "player_contract_deals_2025_2031.json"), "utf8")
+      .then((source) => {
+        const payload = JSON.parse(source) as ContractDealJsonPayload;
+        const byRank = new Map<number, ContractDeal[]>();
+        const bySlug = new Map<string, ContractDeal[]>();
+        const byNameTeam = new Map<string, ContractDeal[]>();
+        for (const row of payload.contracts ?? []) {
+          const deals = (row.deals ?? []).map(jsonDealToContractDeal).filter((deal): deal is ContractDeal => deal !== null);
+          if (deals.length === 0) continue;
+          const sourceRank = numeric(row.source_rank);
+          if (sourceRank !== null) byRank.set(sourceRank, deals);
+          if (row.matched_player_slug) bySlug.set(row.matched_player_slug, deals);
+          byNameTeam.set(dealLookupKey(row.matched_player_name || row.player_name, row.team_abbreviation), deals);
+        }
+        return { byRank, bySlug, byNameTeam };
+      })
+      .catch(() => ({ byRank: new Map(), bySlug: new Map(), byNameTeam: new Map() }));
+  }
+  return contractDealLookupPromise;
+}
+
+function attachContractDeals(rows: PlayerContractRow[], lookup: ContractDealLookup) {
+  return rows.map((row) => ({
+    ...row,
+    contractDeals:
+      lookup.byRank.get(row.sourceRank) ??
+      (row.playerSlug ? lookup.bySlug.get(row.playerSlug) : undefined) ??
+      lookup.byNameTeam.get(dealLookupKey(row.playerName, row.teamAbbreviation)) ??
+      [],
+  }));
+}
+
 function dbRowToContract(row: PlayerContractDbRow): PlayerContractRow {
   const team = teamByAbbreviation.get(row.team_abbreviation);
   return {
@@ -138,6 +258,7 @@ function dbRowToContract(row: PlayerContractDbRow): PlayerContractRow {
     guaranteeStatusBySeason: stringRecord(row.guarantee_status_by_season),
     guaranteedAmount: numeric(row.guaranteed_amount),
     needsFollowup: Boolean(row.needs_followup),
+    contractDeals: [],
   };
 }
 
@@ -156,6 +277,7 @@ function jsonRowToContract(row: ContractJsonRow, playersBySlug: Map<string, Runt
     guaranteeStatusBySeason: stringRecord(row.guarantee_status_by_season),
     guaranteedAmount: row.guaranteed ?? null,
     needsFollowup: Boolean(row.needs_followup),
+    contractDeals: [],
   };
 }
 
@@ -169,10 +291,19 @@ function selectedSeasonSalary(row: PlayerContractRow, season: ContractSeason) {
   return row.salaryBySeason[season] ?? null;
 }
 
-export function summarizeContractSalaries(salaries: Partial<Record<ContractSeason, number>>, fromSeason?: ContractSeason): ContractSummary | null {
+function seasonStartYear(season: ContractSeason) {
+  return Number(season.slice(0, 4));
+}
+
+function seasonFromStartYear(year: number) {
+  return contractSeasons.find((season) => seasonStartYear(season) === year);
+}
+
+export function summarizeContractSalaries(salaries: Partial<Record<ContractSeason, number>>, fromSeason?: ContractSeason, throughSeason?: ContractSeason): ContractSummary | null {
   const startIndex = fromSeason ? contractSeasons.indexOf(fromSeason) : 0;
+  const endIndex = throughSeason ? contractSeasons.indexOf(throughSeason) : contractSeasons.length - 1;
   const seasons = contractSeasons
-    .slice(Math.max(0, startIndex))
+    .slice(Math.max(0, startIndex), Math.max(startIndex, endIndex) + 1)
     .map((season) => salaries[season])
     .filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount));
   if (seasons.length === 0) return null;
@@ -189,12 +320,57 @@ export function contractSummarySortValue(summary: ContractSummary | null) {
   return summary.years * 1_000_000_000_000 + summary.total;
 }
 
+export function contractDealSummary(deal: ContractDeal | null): ContractSummary | null {
+  if (!deal?.total || !deal.years) return null;
+  return {
+    years: deal.years,
+    total: deal.total,
+    averageAnnualValue: deal.averageAnnualValue ?? deal.total / deal.years,
+  };
+}
+
+export function selectActiveContractDeal(deals: ContractDeal[], season: ContractSeason) {
+  const year = seasonStartYear(season);
+  const activeDeals = deals
+    .filter((deal) => deal.startYear <= year && deal.endYear >= year)
+    .sort((left, right) => right.startYear - left.startYear || right.endYear - left.endYear || Number(right.pending) - Number(left.pending));
+  return activeDeals[0] ?? null;
+}
+
+export function selectNextContractDeal(deals: ContractDeal[], season: ContractSeason) {
+  const year = seasonStartYear(season);
+  const nextDeals = deals
+    .filter((deal) => deal.startYear > year)
+    .sort((left, right) => left.startYear - right.startYear || right.endYear - left.endYear);
+  return nextDeals[0] ?? null;
+}
+
+export function summarizeRemainingContract(salaries: Partial<Record<ContractSeason, number>>, deal: ContractDeal | null, season: ContractSeason) {
+  if (!deal) return summarizeContractSalaries(salaries, season);
+  const currentYear = Math.max(seasonStartYear(season), deal.startYear);
+  const yearsRemaining = Math.max(0, deal.endYear - currentYear + 1);
+  if (yearsRemaining === 0) return null;
+
+  const throughSeason = seasonFromStartYear(deal.endYear);
+  const salarySummary = summarizeContractSalaries(salaries, season, throughSeason);
+  const expectedRemaining = deal.averageAnnualValue ? deal.averageAnnualValue * yearsRemaining : deal.total && deal.years ? (deal.total / deal.years) * yearsRemaining : null;
+  if (salarySummary && salarySummary.years === yearsRemaining && (!expectedRemaining || salarySummary.total >= expectedRemaining * 0.6)) {
+    return salarySummary;
+  }
+  if (!expectedRemaining) return salarySummary;
+  return {
+    years: yearsRemaining,
+    total: Math.round(expectedRemaining),
+    averageAnnualValue: Math.round(expectedRemaining / yearsRemaining),
+  };
+}
+
 function sortValue(row: PlayerContractRow, sort: string, season: ContractSeason): number | string | null {
   if (sort === "player") return row.playerName;
   if (sort === "team") return row.teamAbbreviation;
   if (sort === "position") return row.position ?? "";
-  if (sort === "original_contract") return contractSummarySortValue(summarizeContractSalaries(row.salaryBySeason));
-  if (sort === "current_contract") return contractSummarySortValue(summarizeContractSalaries(row.salaryBySeason, season));
+  if (sort === "original_contract") return contractSummarySortValue(contractDealSummary(selectActiveContractDeal(row.contractDeals, season)) ?? summarizeContractSalaries(row.salaryBySeason));
+  if (sort === "current_contract") return contractSummarySortValue(summarizeRemainingContract(row.salaryBySeason, selectActiveContractDeal(row.contractDeals, season), season));
   if (sort === "guaranteed") return row.guaranteedAmount;
   if (sort.startsWith("salary_")) {
     const key = sort.replace("salary_", "").replace("_", "-") as ContractSeason;
@@ -247,12 +423,13 @@ function filterAndPageContracts(rows: PlayerContractRow[], params: PlayerContrac
 }
 
 async function jsonFallback(params: PlayerContractParams): Promise<PlayerContractResult> {
-  const [source, runtime] = await Promise.all([
+  const [source, runtime, dealLookup] = await Promise.all([
     readFile(path.join(process.cwd(), "data", "raw", "player_contracts_2025_2031.json"), "utf8"),
     loadRuntimeFallbacks(),
+    loadContractDealLookup(),
   ]);
   const payload = JSON.parse(source) as ContractJsonPayload;
-  const rows = payload.contracts.map((row) => jsonRowToContract(row, playerLookup(runtime.players)));
+  const rows = attachContractDeals(payload.contracts.map((row) => jsonRowToContract(row, playerLookup(runtime.players))), dealLookup);
   return filterAndPageContracts(rows, params, "json");
 }
 
@@ -277,7 +454,8 @@ export async function listPlayerContracts(params: PlayerContractParams = {}): Pr
         ON player.player_slug = contract.player_slug
     `);
     if (!result) return jsonFallback(params);
-    return filterAndPageContracts(result.rows.map(dbRowToContract), params, "postgres");
+    const dealLookup = await loadContractDealLookup();
+    return filterAndPageContracts(attachContractDeals(result.rows.map(dbRowToContract), dealLookup), params, "postgres");
   } catch {
     return jsonFallback(params);
   }

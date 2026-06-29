@@ -11,6 +11,7 @@
     "db:migrate": "node scripts/migrate-postgres.mjs",
     "contracts:import": "python3 scripts/import_player_contracts.py",
     "contracts:sync-options": "python3 scripts/sync_player_contract_options.py --write",
+    "contracts:sync-deals": "python3 scripts/sync_player_contract_deals.py",
     "refresh:official": "node scripts/refresh-official-data.mjs",
     "refresh:official:shots": "node scripts/refresh-official-data.mjs --regular-season-shots",
     "refresh:team-shots": "node scripts/refresh-team-shot-cache.mjs",
