@@ -12,6 +12,7 @@ import {
   type PlayerOption,
 } from "@/lib/db/playerAnalytics.server";
 import { formatMetric } from "@/lib/metrics/format";
+import { displayAgeFromBirthDate } from "@/lib/playerAge";
 import { formatPlayerHeight } from "@/lib/playerHeight";
 import { DEFAULT_SEASON, baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
@@ -61,6 +62,7 @@ function PlayerCard({ profile, season }: { profile: ComparisonPlayer; season: st
   const heightInches = heightToInches(profile.player.height);
   const logoUrl = nbaTeamLogoUrl(profile.team.id);
   const accentColor = teamAccentColor(profile.team);
+  const age = displayAgeFromBirthDate(profile.player.birthDate, profile.player.age);
   return (
     <div className="rounded border border-slate-200 bg-white p-5 shadow-sm" style={teamTintStyle(profile.team)}>
       <div className="flex items-start justify-between gap-3">
@@ -80,7 +82,7 @@ function PlayerCard({ profile, season }: { profile: ComparisonPlayer; season: st
           </div>
           <h2 className="mt-1 text-2xl font-black text-ink">{profile.player.name}</h2>
           <p className="mt-1 text-sm text-slate-600">
-            {formatPlayerHeight(profile.player.height)} · {profile.player.weight || "N/A"} lb · Age {profile.player.age}
+            {formatPlayerHeight(profile.player.height)} · {profile.player.weight || "N/A"} lb · Age {age}
             {heightInches ? ` · ${heightInches} in` : ""}
           </p>
         </div>

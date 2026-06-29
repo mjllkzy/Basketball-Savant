@@ -150,6 +150,7 @@ const aggregateRows: PlayerSeasonAggregate[] = masterSummaries.map((summary) => 
     height: heightFromMaster(bios.height, officialPlayer?.height ?? "N/A"),
     weight: Math.round(firstNumber(bios.weight) ?? officialPlayer?.weight ?? 0),
     age: Math.round(firstNumber(bios.age, traditional.age, advanced.age) ?? officialPlayer?.age ?? 0),
+    birthDate: officialPlayer?.birthDate,
     draftYear: draftNumber(bios.draft_year, officialPlayer?.draftYear ?? 0),
     draftRound: draftNumber(bios.draft_round, officialPlayer?.draftRound ?? 0),
     draftPick: draftNumber(bios.draft_number, officialPlayer?.draftPick ?? 0),

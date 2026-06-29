@@ -1,9 +1,11 @@
 import type { Game, MetricValue, Player, PlayerGameStat, PlayerSeasonAggregate, SeasonType, Team } from "@/lib/types";
 import { playerSimilaritySummary, similarPlayers } from "@/lib/comparison";
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
+import { officialPlayerBirthDateById } from "@/lib/data/official";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { percentileRank, trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
+import { decimalAgeFromBirthDate, normalizeBirthDate } from "@/lib/playerAge";
 import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { queryDatabase } from "./client.server";
@@ -61,6 +63,7 @@ type ComparisonDbRow = {
   height: string | null;
   weight: number | null;
   age: number | null;
+  birth_date: Date | string | null;
   college: string | null;
   country: string | null;
   jersey_number: string | null;
@@ -202,12 +205,17 @@ function percentile(value: number | null, values: number[]) {
   return Math.round(((belowOrEqual - 1) / Math.max(values.length - 1, 1)) * 100);
 }
 
+function rowBirthDate(value: Date | string | null | undefined, playerId: string | null) {
+  return normalizeBirthDate(value) ?? (playerId ? officialPlayerBirthDateById.get(playerId) ?? null : null);
+}
+
 function mapComparisonRow(row: ComparisonDbRow): ComparisonPlayer {
   const games = Math.round(numeric(row.games) ?? 0);
   const fgPct = numeric(row.fg_pct);
   const threePct = numeric(row.three_pct);
   const ftPct = numeric(row.ft_pct);
   const teamId = row.primary_team_id ?? row.primary_team_abbreviation ?? "";
+  const birthDate = rowBirthDate(row.birth_date, row.nba_player_id);
   const player: Player = {
     id: row.nba_player_id ?? row.app_player_id ?? row.player_slug,
     name: row.player_name,
@@ -216,7 +224,8 @@ function mapComparisonRow(row: ComparisonDbRow): ComparisonPlayer {
     position: row.position ?? "N/A",
     height: row.height ?? "N/A",
     weight: row.weight ?? 0,
-    age: row.age ?? 0,
+    age: decimalAgeFromBirthDate(birthDate) ?? row.age ?? 0,
+    birthDate: birthDate ?? undefined,
     draftYear: row.draft_year ?? 0,
     draftRound: row.draft_round ?? 0,
     draftPick: row.draft_pick ?? 0,
@@ -363,6 +372,7 @@ async function jsonComparisonPlayers(slugs?: string[], seasonType: SeasonType = 
       height: player.height,
       weight: player.weight,
       age: player.age,
+      birth_date: player.birth_date ?? null,
       college: null,
       country: null,
       jersey_number: null,
@@ -474,6 +484,7 @@ export async function loadComparisonPlayers(slugs: string[], seasonType: SeasonT
         p.height,
         p.weight,
         p.age,
+        p.birth_date,
         p.college,
         p.country,
         p.jersey_number,
@@ -556,6 +567,7 @@ export async function loadAllComparisonPlayers(seasonType: SeasonType = DEFAULT_
         p.height,
         p.weight,
         p.age,
+        p.birth_date,
         p.college,
         p.country,
         p.jersey_number,

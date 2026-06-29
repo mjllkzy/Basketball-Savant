@@ -1,5 +1,6 @@
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
-import { officialBasketballReferenceGamesStartedByPlayerId } from "@/lib/data/official";
+import { officialBasketballReferenceGamesStartedByPlayerId, officialPlayerBirthDateById } from "@/lib/data/official";
+import { decimalAgeFromBirthDate, normalizeBirthDate } from "@/lib/playerAge";
 import type { SeasonType } from "@/lib/types";
 import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
@@ -18,6 +19,7 @@ export type PlayerDirectoryRow = {
   height: string;
   weight: number | null;
   age: number | null;
+  birthDate: string | null;
   games: number;
   gamesStarted: number | null;
   minutesPerGame: number | null;
@@ -86,6 +88,7 @@ type PlayerDirectoryDbRow = {
   height: string | null;
   weight: number | null;
   age: number | null;
+  birth_date: Date | string | null;
   games: number | string | null;
   minutes: number | string | null;
   pts: number | string | null;
@@ -141,10 +144,15 @@ function numeric(value: number | string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function rowBirthDate(value: Date | string | null | undefined, playerId: string | null) {
+  return normalizeBirthDate(value) ?? (playerId ? officialPlayerBirthDateById.get(playerId) ?? null : null);
+}
+
 function mapDbRow(row: PlayerDirectoryDbRow): PlayerDirectoryRow {
   const gamesStarted = row.nba_player_id
     ? officialBasketballReferenceGamesStartedByPlayerId.get(row.nba_player_id) ?? null
     : null;
+  const birthDate = rowBirthDate(row.birth_date, row.nba_player_id);
   return {
     playerSlug: row.player_slug,
     playerName: row.player_name,
@@ -153,7 +161,8 @@ function mapDbRow(row: PlayerDirectoryDbRow): PlayerDirectoryRow {
     position: row.position ?? "N/A",
     height: row.height ?? "N/A",
     weight: row.weight,
-    age: row.age,
+    age: decimalAgeFromBirthDate(birthDate) ?? row.age,
+    birthDate,
     games: numeric(row.games) ?? 0,
     gamesStarted,
     minutesPerGame: numeric(row.minutes),
@@ -180,6 +189,7 @@ function mapDbRow(row: PlayerDirectoryDbRow): PlayerDirectoryRow {
 }
 
 function mapFallbackRow(row: RuntimePlayerFallback): PlayerDirectoryRow {
+  const birthDate = normalizeBirthDate(row.birth_date);
   return {
     playerSlug: row.player_slug,
     playerName: row.player_name,
@@ -188,7 +198,8 @@ function mapFallbackRow(row: RuntimePlayerFallback): PlayerDirectoryRow {
     position: row.position ?? "N/A",
     height: row.height ?? "N/A",
     weight: row.weight,
-    age: row.age,
+    age: decimalAgeFromBirthDate(birthDate) ?? row.age,
+    birthDate,
     games: row.games ?? 0,
     gamesStarted: row.games_started ?? null,
     minutesPerGame: row.minutes,
@@ -341,6 +352,7 @@ export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): P
         p.height,
         p.weight,
         p.age,
+        p.birth_date,
         s.games,
         s.minutes,
         s.pts,

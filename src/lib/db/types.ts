@@ -61,6 +61,7 @@ export type PlayerDbRow = {
   height_inches: string | null;
   weight: number | null;
   age: number | null;
+  birth_date: Date | string | null;
   college: string | null;
   country: string | null;
   jersey_number: string | null;

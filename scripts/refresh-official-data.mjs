@@ -167,6 +167,12 @@ const nbaHeaders = {
   Referer: "https://www.nba.com/stats/"
 };
 
+const nbaPageHeaders = {
+  ...nbaHeaders,
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  Referer: "https://www.nba.com/"
+};
+
 const basketballReferenceHeaders = {
   "User-Agent":
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -725,6 +731,182 @@ function snapshotOrResponseTable(json) {
   return table(json);
 }
 
+const birthDateMonthNumbers = new Map(Object.entries({
+  JAN: 1,
+  FEB: 2,
+  MAR: 3,
+  APR: 4,
+  MAY: 5,
+  JUN: 6,
+  JUL: 7,
+  AUG: 8,
+  SEP: 9,
+  OCT: 10,
+  NOV: 11,
+  DEC: 12
+}));
+
+function padDatePart(value) {
+  return String(value).padStart(2, "0");
+}
+
+function normalizeBirthDate(raw) {
+  if (raw === null || raw === undefined) return null;
+  const text = String(raw).trim();
+  if (!text) return null;
+  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  const shortMonth = text.match(/^([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})$/);
+  if (shortMonth) {
+    const month = birthDateMonthNumbers.get(shortMonth[1].toUpperCase());
+    return month ? `${shortMonth[3]}-${padDatePart(month)}-${padDatePart(Number(shortMonth[2]))}` : null;
+  }
+  const longMonth = text.match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
+  if (longMonth) {
+    const month = birthDateMonthNumbers.get(longMonth[1].slice(0, 3).toUpperCase());
+    return month ? `${longMonth[3]}-${padDatePart(month)}-${padDatePart(Number(longMonth[2]))}` : null;
+  }
+  return null;
+}
+
+function tableRowsByHeader(tableData) {
+  return (tableData?.rows ?? []).map((row) => Object.fromEntries((tableData.headers ?? []).map((header, index) => [header, row[index]])));
+}
+
+function slugifyPlayer(value) {
+  return String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function playerIndexName(row) {
+  return `${row.PLAYER_FIRST_NAME ?? ""} ${row.PLAYER_LAST_NAME ?? ""}`.trim();
+}
+
+function playerProfileSlug(row) {
+  return String(row.PLAYER_SLUG ?? "").trim() || slugifyPlayer(playerIndexName(row));
+}
+
+function nextDataJson(html) {
+  const match = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/);
+  return match ? JSON.parse(match[1]) : null;
+}
+
+function findBirthDateInObject(candidate) {
+  if (!candidate || typeof candidate !== "object") return null;
+  if (Array.isArray(candidate)) {
+    for (const item of candidate) {
+      const found = findBirthDateInObject(item);
+      if (found) return found;
+    }
+    return null;
+  }
+  for (const [key, value] of Object.entries(candidate)) {
+    if (/^BIRTH_?DATE$/i.test(key) || /^BIRTHDATE$/i.test(key)) {
+      const normalized = normalizeBirthDate(value);
+      if (normalized) return normalized;
+    }
+  }
+  if (Array.isArray(candidate.headers) && Array.isArray(candidate.rowSet)) {
+    const index = candidate.headers.findIndex((header) => /^BIRTH_?DATE$/i.test(String(header)) || /^BIRTHDATE$/i.test(String(header)));
+    if (index >= 0) {
+      for (const row of candidate.rowSet) {
+        const normalized = normalizeBirthDate(row[index]);
+        if (normalized) return normalized;
+      }
+    }
+  }
+  for (const value of Object.values(candidate)) {
+    const found = findBirthDateInObject(value);
+    if (found) return found;
+  }
+  return null;
+}
+
+async function fetchPlayerProfileBirthdate(playerId, playerSlug) {
+  const url = `https://www.nba.com/player/${playerId}/${playerSlug}`;
+  const html = await fetchText(`player profile birthdate ${playerId}`, url, nbaPageHeaders);
+  const birthDate = findBirthDateInObject(nextDataJson(html)) || normalizeBirthDate(html.match(/BIRTHDATE<\/p><p[^>]*>([^<]+)/)?.[1]);
+  if (!birthDate) throw new Error(`Unable to parse player profile birthdate for ${playerId}.`);
+  return { birthDate, sourceUrl: url };
+}
+
+async function fetchOptionalPlayerProfileBirthdate(playerId, playerSlug) {
+  try {
+    return await fetchPlayerProfileBirthdate(playerId, playerSlug);
+  } catch (error) {
+    if (!allowPartial) throw error;
+    console.warn(`Skipping player profile birthdate ${playerId}: ${error instanceof Error ? error.message : String(error)}`);
+    return undefined;
+  }
+}
+
+async function buildPlayerBirthdatesTable(playerIndexJson, rosterTables, existingSnapshot) {
+  const playerIndexTable = table(playerIndexJson);
+  const playerIndexRows = tableRowsByHeader(playerIndexTable);
+  const birthById = new Map();
+  const sourceById = new Map();
+  const existingTable = existingSnapshot?.tables?.playerBirthdates;
+
+  if (existingTable?.headers && existingTable?.rows) {
+    for (const row of tableRowsByHeader(existingTable)) {
+      const playerId = String(row.PLAYER_ID ?? "").trim();
+      const birthDate = normalizeBirthDate(row.BIRTH_DATE);
+      if (!playerId || !birthDate) continue;
+      birthById.set(playerId, birthDate);
+      sourceById.set(playerId, {
+        sourceName: String(row.SOURCE_NAME ?? "NBA.com player profile"),
+        sourceUrl: String(row.SOURCE_URL ?? ""),
+        sourceDetail: String(row.SOURCE_DETAIL ?? `PlayerID ${playerId}`)
+      });
+    }
+  }
+
+  for (const [teamId, rosterTable] of Object.entries(rosterTables)) {
+    for (const row of tableRowsByHeader(rosterTable)) {
+      const playerId = String(row.PLAYER_ID ?? "").trim();
+      const birthDate = normalizeBirthDate(row.BIRTH_DATE);
+      if (!playerId || !birthDate) continue;
+      birthById.set(playerId, birthDate);
+      sourceById.set(playerId, {
+        sourceName: "NBA Stats commonteamroster",
+        sourceUrl: withParams("https://stats.nba.com/stats/commonteamroster", { LeagueID: "00", Season: season, TeamID: teamId }),
+        sourceDetail: `TeamID ${teamId}`
+      });
+    }
+  }
+
+  for (const row of playerIndexRows) {
+    const playerId = String(row.PERSON_ID ?? "").trim();
+    if (!playerId || birthById.has(playerId)) continue;
+    const result = await fetchOptionalPlayerProfileBirthdate(playerId, playerProfileSlug(row));
+    if (!result) continue;
+    birthById.set(playerId, result.birthDate);
+    sourceById.set(playerId, {
+      sourceName: result.sourceUrl.includes("gleague.nba.com") ? "NBA G League player profile" : "NBA.com player profile",
+      sourceUrl: result.sourceUrl,
+      sourceDetail: `PlayerID ${playerId}`
+    });
+  }
+
+  return {
+    headers: ["PLAYER_ID", "PLAYER_NAME", "BIRTH_DATE", "SOURCE_NAME", "SOURCE_URL", "SOURCE_DETAIL"],
+    rows: playerIndexRows
+      .flatMap((row) => {
+        const playerId = String(row.PERSON_ID ?? "").trim();
+        const birthDate = birthById.get(playerId);
+        const source = sourceById.get(playerId);
+        return birthDate && source
+          ? [[playerId, playerIndexName(row), birthDate, source.sourceName, source.sourceUrl, source.sourceDetail]]
+          : [];
+      })
+      .sort((left, right) => String(left[1]).localeCompare(String(right[1])) || String(left[0]).localeCompare(String(right[0])))
+  };
+}
+
 function snapshotTableToJson(existingSnapshot, tableName) {
   const snapshotTable = existingSnapshot?.tables?.[tableName];
   if (!snapshotTable?.headers || !snapshotTable?.rows) {
@@ -808,6 +990,7 @@ async function main() {
   }
   const rosterTables = Object.fromEntries(Object.entries(rosters).map(([teamId, json]) => [teamId, snapshotOrResponseTable(json)]));
   const loadedRosterCount = Object.values(rosterTables).filter((rosterTable) => rosterTable.rows.length > 0).length;
+  const playerBirthdates = await buildPlayerBirthdatesTable(playerIndex, rosterTables, existingSnapshot);
 
   const shotCharts = {};
   if (includePlayoffShots) {
@@ -878,6 +1061,7 @@ async function main() {
         "Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables; Basketball Reference per-game Pos and GS supply primary player positions and games started.",
         "The publicReferenceGames metadata pins the currently displayed NBA Finals games to public NBA.com, Basketball Reference, and ESPN game pages.",
         "When NBA Stats leaves selected player bio fields blank, explicit Basketball Reference fallback rows are stored in the playerBioOverrides table.",
+        "Player birth dates are stored as ISO dates from NBA Stats commonteamroster and NBA.com/G League profile pages so displayed age can be recalculated daily.",
         "ShotClock derived metrics are calculated locally from official box score totals.",
         "Tracking-only metrics are unavailable unless a licensed tracking source is connected."
       ],
@@ -900,6 +1084,8 @@ async function main() {
         playerAdvancedPlayoffsUrl,
         playerBioStatsRegularUrl,
         playerIndexUrl,
+        nbaPlayerProfileTemplate: "https://www.nba.com/player/{PLAYER_ID}/{PLAYER_SLUG}",
+        nbaGLeaguePlayerProfileTemplate: "https://gleague.nba.com/player/{PLAYER_ID}/{PLAYER_SLUG}",
         teamStatsRegularUrl,
         teamStatsPlayoffsUrl,
         teamAdvancedRegularUrl,
@@ -921,6 +1107,7 @@ async function main() {
         basketballReferencePrimaryPositionMatches,
         regularSeasonPlayerBioStats: table(playerBioStatsRegular).rows.length,
         playerIndex: table(playerIndex).rows.length,
+        playerBirthdates: playerBirthdates.rows.length,
         externalPlayerBioOverrides: externalPlayerBioOverrides.length,
         regularSeasonTeamStats: table(teamStatsRegular).rows.length,
         playoffTeamStats: table(teamStatsPlayoffs).rows.length,
@@ -958,6 +1145,7 @@ async function main() {
           override.note
         ])
       },
+      playerBirthdates,
       teamStatsRegular: table(teamStatsRegular),
       teamStatsPlayoffs: table(teamStatsPlayoffs),
       teamAdvancedRegular: table(teamAdvancedRegular),
@@ -988,6 +1176,7 @@ async function main() {
   const missingBioStatsIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerBioStatsRegularTable, "PLAYER_ID");
   const missingPlayerIndexIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerIndexTable, "PERSON_ID");
   const missingPlayerAdvancedIds = missingIds(playerStatsRegularTable, "PLAYER_ID", playerAdvancedRegularTable, "PLAYER_ID");
+  const missingPlayerBirthdateIds = missingIds(playerIndexTable, "PERSON_ID", playerBirthdates, "PLAYER_ID");
   const missingTeamAdvancedIds = missingIds(teamStatsRegularTable, "TEAM_ID", teamAdvancedRegularTable, "TEAM_ID");
   assertCoverage(
     !includeBasketballReferenceCrosscheck || basketballReferencePlayerAdvancedRows.length > 0,
@@ -1020,6 +1209,10 @@ async function main() {
   assertCoverage(
     missingPlayerAdvancedIds.length === 0,
     `Player advanced stats are missing ${missingPlayerAdvancedIds.length} regular-season player IDs: ${missingPlayerAdvancedIds.slice(0, 10).join(", ")}.`
+  );
+  assertCoverage(
+    missingPlayerBirthdateIds.length === 0,
+    `Player birth dates are missing ${missingPlayerBirthdateIds.length} player-index IDs: ${missingPlayerBirthdateIds.slice(0, 10).join(", ")}.`
   );
   assertCoverage(
     missingTeamAdvancedIds.length === 0,

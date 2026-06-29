@@ -159,6 +159,7 @@ const basketballReferenceTeamAdvancedCrosscheckTable = table("basketballReferenc
 const playerBioStatsTable = table("playerBioStatsRegular");
 const playerIndexTable = table("playerIndex");
 const playerBioOverridesTable = table("playerBioOverrides");
+const playerBirthdatesTable = table("playerBirthdates");
 const playoffPlayerTable = table("playerStatsPlayoffs");
 const teamGameLogsRegularTable = table("teamGameLogsRegular");
 const teamGameLogsPlayoffsTable = table("teamGameLogsPlayoffs");
@@ -219,6 +220,11 @@ const playerIndexById = new Map(playerIndexTable.rows.map((row) => [String(numbe
 const playerBioOverrideByIdAndField = new Map(
   playerBioOverridesTable.rows.map((row) => [`${stringValue(playerBioOverridesTable, row, "PLAYER_ID")}:${stringValue(playerBioOverridesTable, row, "FIELD")}`, row])
 );
+export const officialPlayerBirthDateById = new Map(
+  playerBirthdatesTable.rows
+    .map((row) => [stringValue(playerBirthdatesTable, row, "PLAYER_ID"), optionalStringValue(playerBirthdatesTable, row, "BIRTH_DATE")] as const)
+    .filter((entry): entry is readonly [string, string] => Boolean(entry[0] && entry[1]))
+);
 
 function playerBioOverrideNumber(playerId: string, field: string): number | undefined {
   const row = playerBioOverrideByIdAndField.get(`${playerId}:${field}`);
@@ -245,7 +251,8 @@ function playerBio(playerId: string) {
     draftPick: parseDraftValue(indexRow ? value(playerIndexTable, indexRow, "DRAFT_NUMBER") : bioRow ? value(playerBioStatsTable, bioRow, "DRAFT_NUMBER") : undefined),
     college: (indexRow ? stringValue(playerIndexTable, indexRow, "COLLEGE").trim() : "") || (bioRow ? stringValue(playerBioStatsTable, bioRow, "COLLEGE").trim() : "") || undefined,
     country: (indexRow ? stringValue(playerIndexTable, indexRow, "COUNTRY").trim() : "") || (bioRow ? stringValue(playerBioStatsTable, bioRow, "COUNTRY").trim() : "") || undefined,
-    rosterStatus: indexRow ? String(value(playerIndexTable, indexRow, "ROSTER_STATUS") ?? "") : undefined
+    rosterStatus: indexRow ? String(value(playerIndexTable, indexRow, "ROSTER_STATUS") ?? "") : undefined,
+    birthDate: officialPlayerBirthDateById.get(playerId)
   };
 }
 
@@ -263,6 +270,7 @@ export const officialPlayers: Player[] = playerTable.rows.map((row) => {
     height: bio.height,
     weight: bio.weight,
     age: numberValue(playerTable, row, "AGE"),
+    birthDate: bio.birthDate,
     draftYear: bio.draftYear,
     draftRound: bio.draftRound,
     draftPick: bio.draftPick,

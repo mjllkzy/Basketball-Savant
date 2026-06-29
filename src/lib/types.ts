@@ -22,6 +22,7 @@ export type Player = {
   height: string;
   weight: number;
   age: number;
+  birthDate?: string;
   draftYear: number;
   draftRound: number;
   draftPick: number;

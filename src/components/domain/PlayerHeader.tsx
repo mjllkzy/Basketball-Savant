@@ -1,8 +1,9 @@
 import type { Player, Team } from "@/lib/types";
 import { PlayerHeadshot } from "@/components/domain/PlayerHeadshot";
+import { displayAgeFromBirthDate } from "@/lib/playerAge";
 import { formatPlayerHeight } from "@/lib/playerHeight";
 
-type PlayerFactSource = Pick<Player, "age" | "college" | "country" | "draftYear" | "draftPick" | "handedness">;
+type PlayerFactSource = Pick<Player, "age" | "birthDate" | "college" | "country" | "draftYear" | "draftPick" | "handedness">;
 
 function cleanBioValue(value?: string) {
   const trimmed = value?.trim();
@@ -12,12 +13,13 @@ function cleanBioValue(value?: string) {
 export function playerHeaderFacts(player: PlayerFactSource) {
   const college = cleanBioValue(player.college);
   const country = cleanBioValue(player.country);
+  const age = displayAgeFromBirthDate(player.birthDate, player.age);
   const draftFact = player.draftYear
     ? `Draft: ${player.draftYear}${player.draftPick ? ` · Pick ${player.draftPick}` : ""}`
     : "Undrafted";
 
   return [
-    Number.isFinite(player.age) && player.age > 0 ? `Age ${player.age}` : undefined,
+    age !== "N/A" ? `Age ${age}` : undefined,
     college ? `College: ${college}` : country ? `Country: ${country}` : "Bio background pending",
     draftFact,
     college && country ? `Country: ${country}` : undefined,

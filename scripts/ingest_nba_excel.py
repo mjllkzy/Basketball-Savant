@@ -855,6 +855,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
             "players_by_name": {},
             "players_by_name_team": {},
             "games_started_by_id": {},
+            "player_birthdates_by_id": {},
         }
 
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
@@ -867,7 +868,13 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
     player_game_log_rows_regular = table_rows(snapshot, "playerGameLogsRegular")
     player_game_log_rows_playoffs = table_rows(snapshot, "playerGameLogsPlayoffs")
     basketball_reference_rows = table_rows(snapshot, "basketballReferencePlayerAdvancedCrosscheck")
+    player_birthdate_rows = table_rows(snapshot, "playerBirthdates")
     bio_by_id = {str(row.get("PLAYER_ID")): row for row in player_bio_rows if row.get("PLAYER_ID") is not None}
+    player_birthdates_by_id = {
+        str(row.get("PLAYER_ID")): text_value(row.get("BIRTH_DATE")).strip()
+        for row in player_birthdate_rows
+        if row.get("PLAYER_ID") is not None and text_value(row.get("BIRTH_DATE")).strip()
+    }
     primary_position_by_id = {}
     games_started_by_id = {}
     for row in basketball_reference_rows:
@@ -1026,6 +1033,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
             "height_inches": float_or_none(bio.get("PLAYER_HEIGHT_INCHES")),
             "weight": int_or_none(row.get("WEIGHT") or bio.get("PLAYER_WEIGHT")),
             "age": int_or_none(bio.get("AGE")),
+            "birth_date": player_birthdates_by_id.get(person_id),
             "college": text_value(row.get("COLLEGE") or bio.get("COLLEGE")).strip() or None,
             "country": text_value(row.get("COUNTRY") or bio.get("COUNTRY")).strip() or None,
             "jersey_number": text_value(row.get("JERSEY_NUMBER")).strip() or None,
@@ -1050,6 +1058,7 @@ def load_official_reference(snapshot_path: Path) -> dict[str, Any]:
         "players_by_name": players_by_name,
         "players_by_name_team": players_by_name_team,
         "games_started_by_id": games_started_by_id,
+        "player_birthdates_by_id": player_birthdates_by_id,
     }
 
 
@@ -1110,6 +1119,7 @@ def build_runtime_fallbacks(
                 "height": reference.get("height"),
                 "weight": reference.get("weight"),
                 "age": reference.get("age"),
+                "birth_date": reference.get("birth_date"),
                 "games": int_or_none(summary_numeric(summary, "General - Traditional", "gp")),
                 "games_started": int_or_none(games_started_by_id.get(player_id)),
                 "minutes": summary_numeric(summary, "General - Traditional", "min"),
@@ -1271,6 +1281,7 @@ def write_postgres_outputs(
                 "height_inches": reference.get("height_inches"),
                 "weight": reference.get("weight"),
                 "age": reference.get("age"),
+                "birth_date": reference.get("birth_date"),
                 "college": reference.get("college"),
                 "country": reference.get("country"),
                 "jersey_number": reference.get("jersey_number"),
@@ -1437,13 +1448,13 @@ def write_postgres_outputs(
                     INSERT INTO players (
                       player_slug, nba_player_id, app_player_id, player_name, normalized_player_name,
                       primary_team_id, primary_team_abbreviation, position, height, height_inches, weight,
-                      age, college, country, jersey_number, draft_year, draft_round, draft_pick,
+                      age, birth_date, college, country, jersey_number, draft_year, draft_round, draft_pick,
                       roster_status, headshot_url, active, updated_at
                     )
                     VALUES (
                       %(player_slug)s, %(nba_player_id)s, %(app_player_id)s, %(player_name)s, %(normalized_player_name)s,
                       %(primary_team_id)s, %(primary_team_abbreviation)s, %(position)s, %(height)s, %(height_inches)s,
-                      %(weight)s, %(age)s, %(college)s, %(country)s, %(jersey_number)s, %(draft_year)s,
+                      %(weight)s, %(age)s, %(birth_date)s, %(college)s, %(country)s, %(jersey_number)s, %(draft_year)s,
                       %(draft_round)s, %(draft_pick)s, %(roster_status)s, %(headshot_url)s, true, now()
                     )
                     ON CONFLICT (player_slug) DO UPDATE SET
@@ -1458,6 +1469,7 @@ def write_postgres_outputs(
                       height_inches = EXCLUDED.height_inches,
                       weight = EXCLUDED.weight,
                       age = EXCLUDED.age,
+                      birth_date = EXCLUDED.birth_date,
                       college = EXCLUDED.college,
                       country = EXCLUDED.country,
                       jersey_number = EXCLUDED.jersey_number,
