@@ -665,11 +665,12 @@ export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParam
     const months = [...new Set(result.rows.map((row) => row.month).filter((value): value is string => Boolean(value)))]
       .sort()
       .map((value) => ({ value, label: monthLabel(value) }));
+    const fallbackOptions = conferences.length && divisions.length && months.length ? null : await fallback();
     return {
       seasonTypes: seasonTypeOptions,
-      conferences: conferences.length ? conferences : (await fallback()).conferences,
-      divisions,
-      months,
+      conferences: conferences.length ? conferences : fallbackOptions?.conferences ?? [],
+      divisions: divisions.length ? divisions : fallbackOptions?.divisions ?? [],
+      months: months.length ? months : fallbackOptions?.months ?? [],
     };
   } catch {
     return fallback();

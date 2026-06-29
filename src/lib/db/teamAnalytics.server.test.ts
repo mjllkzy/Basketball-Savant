@@ -54,6 +54,7 @@ describe("database-backed team analytics", () => {
 
     expect(filters.months.map((option) => option.label)).toEqual(expect.arrayContaining(["Apr 2026", "May 2026", "Jun 2026"]));
     expect(filters.divisions.map((option) => option.value)).toContain("Atlantic");
+    expect(filters.divisions.map((option) => option.value)).toContain("Southeast");
     expect(result.source).toBe("json");
     expect(result.rows.length).toBeGreaterThan(0);
     expect(result.rows.every((row) => row.games > 0)).toBe(true);
