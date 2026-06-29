@@ -72,6 +72,92 @@ KEYWORD_IMPORTANCE = (
     (r"\b(draft|lottery|rookie)\b", 8),
 )
 
+EVENT_DEDUPE_CATEGORIES = {"Trade", "Transaction", "Free Agency", "Roster", "League"}
+
+TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
+    r"\b(?:has|have|had)\s+agreed\s+to\b",
+    r"\bagrees?\s+to\b",
+    r"\bofficial(?:ly)?\b",
+    r"\bannounced?\b",
+    r"\bcompleted\b",
+    r"\bfinalized\b",
+    r"\bis\s+joining\b",
+    r"\breceiv(?:e|ed|es|ing)\s+qualifying\s+offers?\b",
+    r"\btender(?:ed|s|ing)?\s+qualifying\s+offers?\b",
+    r"\b(?:has|have|is|are|was|were)?\s*(?:traded|acquired|sent|signed|re-signed|waived)\b",
+)
+
+TRUSTED_SOURCE_SPECULATION_PATTERNS = (
+    r"\brumou?rs?\b",
+    r"\bmonitoring\b",
+    r"\binterest(?:ed)?\b",
+    r"\bdiscussion(?:s)?\b",
+    r"\bdiscuss(?:ing|ed)?\b",
+    r"\btalk(?:s|ing|ed)?\b",
+    r"\blink(?:ed|ing)?\b",
+    r"\bpossible\b",
+    r"\bcould\b",
+    r"\bmay\b",
+    r"\bmight\b",
+    r"\bwould\b",
+    r"\bexpected\b",
+    r"\bexplor(?:e|ed|ing)\b",
+)
+
+TRUSTED_SOURCE_NEGATED_OFFICIAL_PATTERNS = (
+    r"\b(?:not|hasn[’']?t|haven[’']?t|won[’']?t|without)\s+(?:agreed|traded|trading|acquired|sent|signed|re-signed|waived|announced|completed|finalized)\b",
+    r"\bno\s+(?:trade|deal|agreement|signing|announcement)\b",
+)
+
+NEWS_EVENT_STOP_WORDS = {
+    "about",
+    "after",
+    "agree",
+    "agreed",
+    "agrees",
+    "also",
+    "around",
+    "back",
+    "basketball",
+    "bring",
+    "brings",
+    "build",
+    "builds",
+    "buzz",
+    "deal",
+    "deals",
+    "from",
+    "future",
+    "heat",
+    "html",
+    "into",
+    "latest",
+    "league",
+    "more",
+    "news",
+    "notes",
+    "official",
+    "pick",
+    "picks",
+    "report",
+    "reported",
+    "reportedly",
+    "reports",
+    "round",
+    "rumor",
+    "rumors",
+    "source",
+    "sources",
+    "that",
+    "their",
+    "this",
+    "trade",
+    "traded",
+    "trading",
+    "transaction",
+    "with",
+}
+
 
 @dataclass(frozen=True)
 class TrustedRumorSource:
@@ -353,6 +439,8 @@ def classify_category(article: dict[str, Any]) -> str:
     category_blob = " ".join([
         clean_text(article.get("category")),
         primary_name,
+        clean_text(article.get("slug") or article.get("name")),
+        clean_text(article.get("permalink")),
         title,
     ]).lower()
 
@@ -366,7 +454,7 @@ def classify_category(article: dict[str, Any]) -> str:
         return "Free Agency"
     if "draft" in category_blob:
         return "Draft"
-    if "trade" in category_blob or "acquire" in title or "deal" in title:
+    if re.search(r"\b(trade|traded|trading|acquire|acquired|sends?|sent|dealt)\b", category_blob):
         return "Trade"
     if "coach" in category_blob:
         return "Coaching"
@@ -386,10 +474,10 @@ def classify_rss_category(title: str, categories: list[str], summary: str) -> st
         return "Draft Rumor"
     if "free agency" in category_blob or "free agent" in category_blob or "free-agent" in category_blob:
         return "Free Agency"
+    if re.search(r"\b(trade|traded|trading|acquire|acquired|sends?|sent|dealt)\b", category_blob):
+        return "Trade"
     if "transaction" in category_blob or "sign" in category_blob or "waive" in category_blob or "exhibit 10" in category_blob:
         return "Transaction"
-    if "trade" in category_blob or "acquire" in category_blob:
-        return "Trade"
     if "coach" in category_blob:
         return "Coaching"
     if "roster" in category_blob:
@@ -410,6 +498,28 @@ def classify_reporting_status(article: dict[str, Any], *, category: str) -> str:
     if category in {"Rumor", "Draft Rumor"} or "rumor" in category_blob:
         return "Rumor"
     return "Official"
+
+
+def classify_trusted_source_reporting_status(title: str, summary: str, categories: list[str]) -> str:
+    status_blob = " ".join([title, summary, *categories]).lower()
+    has_official_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_OFFICIAL_PATTERNS)
+    has_speculation_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_SPECULATION_PATTERNS)
+    has_negated_official_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_NEGATED_OFFICIAL_PATTERNS)
+    has_explicit_rumor_label = bool(re.search(r"\brumou?rs?\b", " ".join([title, *categories]).lower()))
+    title_text = clean_text(title)
+
+    if (
+        re.match(r"^.+?\s+trading\s+.+?\s+to\s+.+$", title_text, flags=re.IGNORECASE)
+        and not re.search(r"\b(?:not|won[’']?t|will\s+not)\s+trading\b", title_text, flags=re.IGNORECASE)
+    ):
+        return "Official"
+    if has_negated_official_signal:
+        return "Rumor"
+    if has_official_signal and not has_explicit_rumor_label:
+        return "Official"
+    if has_official_signal and not has_speculation_signal:
+        return "Official"
+    return "Rumor"
 
 
 def article_to_news_item(article: dict[str, Any]) -> NewsItem | None:
@@ -494,7 +604,8 @@ def rss_item_to_news_item(item: ET.Element, source: TrustedRumorSource) -> NewsI
     summary = summarize_description(description or content)
     categories = [clean_text(category.text) for category in item.findall("category") if clean_text(category.text)]
     category = classify_rss_category(raw_title, categories, summary)
-    title = summarize_title(raw_title, summary=summary, category=category, reporting_status="Rumor")
+    reporting_status = classify_trusted_source_reporting_status(raw_title, summary, categories)
+    title = summarize_title(raw_title, summary=summary, category=category, reporting_status=reporting_status)
 
     if not raw_title or not raw_source_url or not raw_published_at or not summary:
         return None
@@ -502,12 +613,14 @@ def rss_item_to_news_item(item: ET.Element, source: TrustedRumorSource) -> NewsI
     published_at = parse_rss_datetime(raw_published_at)
     if category not in ALLOWED_CATEGORIES:
         raise RuntimeError(f"Unsupported rumor category {category!r} for {source_url}")
+    if reporting_status not in ALLOWED_REPORTING_STATUSES:
+        raise RuntimeError(f"Unsupported reporting status {reporting_status!r} for {source_url}")
 
     return NewsItem(
         id=external_item_id(source, source_url, title),
         title=title,
         category=category,
-        reportingStatus="Rumor",
+        reportingStatus=reporting_status,
         publishedAt=published_at,
         sourceName=source.name,
         sourceUrl=source_url,
@@ -587,14 +700,84 @@ def within_retention_window(item: dict[str, str], *, reference_time: datetime, r
     return parse_iso_datetime(item["publishedAt"]) >= cutoff
 
 
+def news_event_text(item: dict[str, str]) -> str:
+    return " ".join([
+        item.get("title", ""),
+        item.get("summary", ""),
+        item.get("category", ""),
+    ]).lower()
+
+
+def normalize_event_token(token: str) -> str:
+    normalized = token.replace("’", "'")
+    normalized = re.sub(r"[^a-z0-9']+", "", normalized.lower()).strip("'")
+    if len(normalized) > 4 and normalized.endswith("s"):
+        normalized = normalized[:-1]
+    return normalized
+
+
+def news_event_tokens(item: dict[str, str]) -> set[str]:
+    tokens: set[str] = set()
+    for raw_token in re.findall(r"[a-z0-9][a-z0-9'’.-]*", news_event_text(item)):
+        token = normalize_event_token(raw_token)
+        if len(token) < 3 or token in NEWS_EVENT_STOP_WORDS:
+            continue
+        tokens.add(token)
+    return tokens
+
+
+def has_transaction_event_language(item: dict[str, str]) -> bool:
+    return bool(re.search(
+        r"\b(trade|traded|trading|deal|dealt|send|sends|sent|acquire|acquired|sign|signed|re-sign|re-signed|extension|waive|waived|agree|agreed)\b",
+        news_event_text(item),
+    ))
+
+
+def semantically_same_news_event(left: dict[str, str], right: dict[str, str]) -> bool:
+    if left.get("sourceUrl") and left.get("sourceUrl") == right.get("sourceUrl"):
+        return True
+    if left.get("category") not in EVENT_DEDUPE_CATEGORIES or right.get("category") not in EVENT_DEDUPE_CATEGORIES:
+        return False
+    if not has_transaction_event_language(left) or not has_transaction_event_language(right):
+        return False
+
+    left_tokens = news_event_tokens(left)
+    right_tokens = news_event_tokens(right)
+    overlap = left_tokens & right_tokens
+    return len(overlap) >= 4
+
+
+def source_priority(item: dict[str, str]) -> int:
+    source_name = item.get("sourceName", "").lower()
+    if source_name == "nba.com":
+        return 2
+    if any(source.name.lower() == source_name for source in TRUSTED_RUMOR_SOURCES):
+        return 1
+    return 0
+
+
+def news_dedupe_priority(item: dict[str, str]) -> tuple[int, int, int, datetime]:
+    status_priority = 2 if item.get("reportingStatus") == "Official" else 1
+    return (
+        status_priority,
+        source_priority(item),
+        news_importance_score(item),
+        parse_iso_datetime(item["publishedAt"]),
+    )
+
+
 def dedupe_news_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
     deduped: list[dict[str, str]] = []
-    seen: set[str] = set()
     for item in items:
-        key = f"{item['sourceUrl']}::{item['title']}"
-        if key in seen:
+        duplicate_index = next(
+            (index for index, existing in enumerate(deduped) if semantically_same_news_event(item, existing)),
+            None,
+        )
+        if duplicate_index is not None:
+            existing = deduped[duplicate_index]
+            if news_dedupe_priority(item) > news_dedupe_priority(existing):
+                deduped[duplicate_index] = item
             continue
-        seen.add(key)
         deduped.append(item)
     return deduped
 
@@ -628,9 +811,10 @@ def select_display_news_items(
     reference_time: datetime | None = None,
 ) -> list[dict[str, str]]:
     reference_time = reference_time or datetime.now(timezone.utc)
+    items = dedupe_news_items([*official_items, *rumor_items])
     selected = [
-        *display_news_by_status(official_items, "Official", limit=official_limit, retention_days=retention_days, reference_time=reference_time),
-        *display_news_by_status(rumor_items, "Rumor", limit=rumor_limit, retention_days=retention_days, reference_time=reference_time),
+        *display_news_by_status(items, "Official", limit=official_limit, retention_days=retention_days, reference_time=reference_time),
+        *display_news_by_status(items, "Rumor", limit=rumor_limit, retention_days=retention_days, reference_time=reference_time),
     ]
     selected.sort(key=lambda item: parse_iso_datetime(item["publishedAt"]), reverse=True)
     return selected

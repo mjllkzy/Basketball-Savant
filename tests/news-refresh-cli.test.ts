@@ -115,6 +115,72 @@ describe("basketball news refresh", () => {
     }));
   });
 
+  runIfPython("classifies completed trusted-source trades as Official status", () => {
+    const script = [
+      "import importlib.util, json, pathlib, sys",
+      "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
+      "module = importlib.util.module_from_spec(spec)",
+      "sys.modules[spec.name] = module",
+      "spec.loader.exec_module(module)",
+      "feed = '''<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\"><channel><item><title>Hornets Trading Miles Bridges To Suns</title><link>https://www.hoopsrumors.com/2026/06/hornets-trading-miles-bridges-to-suns.html</link><pubDate>Sun, 28 Jun 2026 18:00:23 +0000</pubDate><category>Transactions</category><description><![CDATA[The Hornets and Suns have agreed to a trade. The 2029 first-round pick headed to Phoenix.]]></description></item></channel></rss>'''",
+      "source = module.TRUSTED_RUMOR_SOURCES[0]",
+      "root = module.ET.fromstring(feed)",
+      "item = module.rss_item_to_news_item(root.find('./channel/item'), source)",
+      "print(json.dumps(item.to_json()))"
+    ].join("\n");
+
+    const result = spawnSync(pythonCommand!, ["-c", script], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+
+    expect(result.status).toBe(0);
+    const item = JSON.parse(result.stdout) as { category: string; reportingStatus: string; title: string };
+    expect(item).toEqual(expect.objectContaining({
+      category: "Trade",
+      reportingStatus: "Official",
+      title: "Miles Bridges-to-Suns Trade Is Official"
+    }));
+  });
+
+  runIfPython("prefers NBA.com official coverage over a matching trusted-source duplicate", () => {
+    const script = [
+      "import importlib.util, json, pathlib, sys",
+      "from datetime import datetime, timezone",
+      "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
+      "module = importlib.util.module_from_spec(spec)",
+      "sys.modules[spec.name] = module",
+      "spec.loader.exec_module(module)",
+      "now = datetime(2026, 6, 28, 20, 0, tzinfo=timezone.utc)",
+      "feed = '''<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\"><channel><item><title>Hornets Trading Miles Bridges To Suns</title><link>https://www.hoopsrumors.com/2026/06/hornets-trading-miles-bridges-to-suns.html</link><pubDate>Sun, 28 Jun 2026 18:00:23 +0000</pubDate><category>Transactions</category><description><![CDATA[The Hornets and Suns have agreed to a trade. The 2029 first-round pick headed to Phoenix.]]></description></item></channel></rss>'''",
+      "source = module.TRUSTED_RUMOR_SOURCES[0]",
+      "root = module.ET.fromstring(feed)",
+      "duplicate = module.rss_item_to_news_item(root.find('./channel/item'), source).to_json()",
+      "official = {'id':'miles-bridges-trade-hornets-suns','title':'Miles Bridges-to-Suns Trade Brings Back Grayson Allen','category':'Trade','reportingStatus':'Official','publishedAt':'2026-06-28T17:58:08.000Z','sourceName':'NBA.com','sourceUrl':'https://www.nba.com/news/miles-bridges-trade-hornets-suns','summary':\"Hornets reportedly deal Miles Bridges and picks to Suns for Grayson Allen, Royce O'Neale and a future first round pick.\"}",
+      "selected = module.select_display_news_items([official], [duplicate], official_limit=10, rumor_limit=10, retention_days=3, reference_time=now)",
+      "print(json.dumps({'duplicate': duplicate, 'selected': selected}))"
+    ].join("\n");
+
+    const result = spawnSync(pythonCommand!, ["-c", script], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+
+    expect(result.status).toBe(0);
+    const parsed = JSON.parse(result.stdout) as {
+      duplicate: { id: string; reportingStatus: string };
+      selected: Array<{ id: string; sourceName: string; reportingStatus: string }>;
+    };
+    expect(parsed.duplicate.reportingStatus).toBe("Official");
+    expect(parsed.selected).toHaveLength(1);
+    expect(parsed.selected[0]).toEqual(expect.objectContaining({
+      id: "miles-bridges-trade-hornets-suns",
+      sourceName: "NBA.com",
+      reportingStatus: "Official"
+    }));
+    expect(parsed.selected.some((item) => item.id === parsed.duplicate.id)).toBe(false);
+  });
+
   runIfPython("cleans imported headlines and summaries before writing news cards", () => {
     const script = [
       "import importlib.util, json, pathlib, sys",
