@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { SmartSearchInput } from "@/components/ui/SmartSearchInput";
 
 type Option = {
   label: string;
@@ -12,6 +13,7 @@ type DivisionOption = Option & {
 };
 
 type TeamFilterFormProps = {
+  q?: string;
   season: string;
   seasonType: string;
   conference?: string;
@@ -24,7 +26,10 @@ type TeamFilterFormProps = {
   months: Option[];
 };
 
+const teamSearchResultTypes = ["team"] as const;
+
 export function TeamFilterForm({
+  q,
   season,
   seasonType,
   conference,
@@ -61,7 +66,15 @@ export function TeamFilterForm({
 
   return (
     <form className="grid gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm" method="get" action="/teams">
-      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 md:grid-cols-3">
+        <SmartSearchInput
+          name="q"
+          defaultValue={q}
+          placeholder="Search team"
+          resultTypes={teamSearchResultTypes}
+          noMatchesText="No matching teams"
+          labelClassName="min-h-10 px-3 py-0"
+        />
         <select name="season" defaultValue={season} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
           {seasons.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
@@ -80,7 +93,7 @@ export function TeamFilterForm({
           <option value="">{allPeriodLabel}</option>
           {months.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
-        <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Apply</button>
+        <button className="min-h-10 rounded bg-ink px-3 py-2 text-sm font-black text-white md:col-span-3">Apply</button>
       </div>
     </form>
   );

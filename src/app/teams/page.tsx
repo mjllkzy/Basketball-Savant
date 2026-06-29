@@ -68,6 +68,7 @@ function teamHref(slug: string, seasonType: string, season: string) {
 
 export default async function TeamsPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
+  const q = singleParam(resolvedSearchParams, "q")?.trim() || undefined;
   const season = parseSeason(singleParam(resolvedSearchParams, "season"));
   const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
   const filterOptions = await loadTeamSeasonSummaryFilters({ season, seasonType });
@@ -75,7 +76,7 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
   const availableDivisions = divisionsForConference(filterOptions.divisions, conference);
   const division = selectedOption(singleParam(resolvedSearchParams, "division"), availableDivisions);
   const month = selectedOption(singleParam(resolvedSearchParams, "month"), filterOptions.months);
-  const result = await listTeamSeasonSummaries({ season, seasonType, conference, division, month });
+  const result = await listTeamSeasonSummaries({ q, season, seasonType, conference, division, month });
   const selectedMonthLabel = filterOptions.months.find((option) => option.value === month)?.label;
   const rows = result.rows.map((row) => ({
     team: `${row.team.city} ${row.team.name}`,
@@ -107,6 +108,7 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
           : `Official ${season} ${seasonType.toLowerCase()} team records, ratings, pace, shooting, ball movement, and rebounding context.`}
       />
       <TeamFilterForm
+        q={q}
         season={season}
         seasonType={seasonType}
         conference={conference}
@@ -119,7 +121,7 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
         months={filterOptions.months}
       />
       <div data-data-source={result.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
-        Showing <strong className="text-ink">{rows.length}</strong> {season} {seasonType.toLowerCase()} teams{selectedMonthLabel ? <> for <strong className="text-ink">{selectedMonthLabel}</strong></> : null}.
+        Showing <strong className="text-ink">{rows.length}</strong> {season} {seasonType.toLowerCase()} teams{q ? <> matching <strong className="text-ink">{q}</strong></> : null}{selectedMonthLabel ? <> for <strong className="text-ink">{selectedMonthLabel}</strong></> : null}.
       </div>
       <div data-data-source={result.source}>
         <StatTable

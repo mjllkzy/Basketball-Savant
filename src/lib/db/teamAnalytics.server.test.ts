@@ -48,6 +48,18 @@ describe("database-backed team analytics", () => {
     expect(monthly.rows.every((row) => row.pace > 50 && row.pace < 130)).toBe(true);
   }, 15_000);
 
+  it("filters generated team summaries by team search text", async () => {
+    const [byName, byAbbreviation, noMatch] = await Promise.all([
+      listTeamSeasonSummaries({ q: "hawks" }),
+      listTeamSeasonSummaries({ q: "ATL" }),
+      listTeamSeasonSummaries({ q: "not a real team" }),
+    ]);
+
+    expect(byName.rows.map((row) => `${row.team.city} ${row.team.name}`)).toEqual(["Atlanta Hawks"]);
+    expect(byAbbreviation.rows.map((row) => row.team.abbreviation)).toEqual(["ATL"]);
+    expect(noMatch.rows).toHaveLength(0);
+  }, 15_000);
+
   it("aggregates generated playoff team summaries without a selected month", async () => {
     const filters = await loadTeamSeasonSummaryFilters({ seasonType: "Playoffs" });
     const result = await listTeamSeasonSummaries({ seasonType: "Playoffs" });

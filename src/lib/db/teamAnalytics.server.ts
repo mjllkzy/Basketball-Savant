@@ -95,6 +95,7 @@ type TeamGameSummaryDbRow = {
 };
 
 type TeamSummaryParams = {
+  q?: string;
   season?: string;
   seasonType?: SeasonType;
   conference?: "East" | "West";
@@ -165,8 +166,10 @@ function selectedSeason(params: Pick<TeamSummaryParams, "season">) {
 }
 
 function filterTeamAggregateRows(rows: TeamSeasonAggregate[], params: TeamSummaryParams) {
+  const query = params.q?.trim().toLowerCase();
   return rows.filter((row) =>
-    (!params.season || row.season === parseSeason(params.season))
+    (!query || `${row.team.city} ${row.team.name} ${row.team.abbreviation}`.toLowerCase().includes(query))
+    && (!params.season || row.season === parseSeason(params.season))
     && (!params.conference || row.team.conference === params.conference)
     && (!params.division || row.team.division === params.division)
   );
@@ -404,6 +407,7 @@ async function teamGameJsonFallback(params: TeamSummaryParams): Promise<TeamSumm
     const team = teamsById.get(line.teamId);
     const opponentLine = teamLineByGameAndTeam.get(`${line.gameId}:${line.opponentTeamId}`);
     if (!game || !team || !opponentLine || game.season !== season || game.seasonType !== seasonType) return [];
+    if (params.q && !`${team.city} ${team.name} ${team.abbreviation}`.toLowerCase().includes(params.q.trim().toLowerCase())) return [];
     if (month && !game.date.startsWith(month)) return [];
     if (params.conference && team.conference !== params.conference) return [];
     if (params.division && team.division !== params.division) return [];
@@ -450,6 +454,10 @@ async function listTeamGameSummaries(params: TeamSummaryParams): Promise<TeamSum
   if (params.division) {
     values.push(params.division);
     filters.push(`t.division = $${values.length}`);
+  }
+  if (params.q?.trim()) {
+    values.push(`%${params.q.trim()}%`);
+    filters.push(`(trim(t.city || ' ' || t.name) ILIKE $${values.length} OR t.abbreviation ILIKE $${values.length})`);
   }
   try {
     const result = await queryDatabase<TeamGameSummaryDbRow>(`
@@ -572,6 +580,10 @@ export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): P
   if (params.division) {
     values.push(params.division);
     filters.push(`t.division = $${values.length}`);
+  }
+  if (params.q?.trim()) {
+    values.push(`%${params.q.trim()}%`);
+    filters.push(`(trim(t.city || ' ' || t.name) ILIKE $${values.length} OR t.abbreviation ILIKE $${values.length})`);
   }
   try {
     const result = await queryDatabase<TeamSummaryDbRow>(`
