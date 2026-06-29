@@ -38,6 +38,8 @@ describe("player contract import CLI", () => {
     expect(optionScript).toContain("salary-pl");
     expect(optionScript).toContain("salary-tm");
     expect(dealScript).toContain("SPOTRAC_CONTRACTS_URL");
+    expect(dealScript).toContain("SALARYSWISH_BASE_URL");
+    expect(dealScript).toContain("SALARYSWISH_NAME_ALIASES");
     expect(dealScript).toContain("player_contract_deals_2025_2031.json");
     expect(packageJson).toContain("contracts:sync-options");
     expect(packageJson).toContain("contracts:sync-deals");
@@ -71,6 +73,9 @@ describe("player contract import CLI", () => {
       },
     });
     expect(dealPayload.metadata.row_count).toBe(530);
+    expect(dealPayload.metadata.with_deals).toBe(530);
+    expect(dealPayload.metadata.salaryswish_matched).toBeGreaterThan(500);
+    expect(dealPayload.contracts.every((row: { deals: unknown[] }) => row.deals.length > 0)).toBe(true);
     expect(dealPayload.contracts.find((row: { player_name: string }) => row.player_name === "Austin Reaves")).toMatchObject({
       deals: expect.arrayContaining([
         expect.objectContaining({
@@ -83,7 +88,26 @@ describe("player contract import CLI", () => {
           start_year: 2026,
           end_year: 2029,
           years: 4,
-          total: 184800000,
+          total: 185000000,
+        }),
+      ]),
+    });
+    expect(dealPayload.contracts.find((row: { player_name: string }) => row.player_name === "Nic Claxton")).toMatchObject({
+      salaryswish_url: "https://www.salaryswish.com/players/nicolas-claxton",
+      deals: expect.arrayContaining([
+        expect.objectContaining({
+          start_year: 2024,
+          end_year: 2027,
+          total: 100000000,
+        }),
+      ]),
+    });
+    expect(dealPayload.contracts.find((row: { player_name: string }) => row.player_name === "Ron Holland")).toMatchObject({
+      salaryswish_url: "https://www.salaryswish.com/players/ron-holland-ii",
+      deals: expect.arrayContaining([
+        expect.objectContaining({
+          start_year: 2024,
+          end_year: 2027,
         }),
       ]),
     });

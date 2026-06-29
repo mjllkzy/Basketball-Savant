@@ -22,7 +22,21 @@ DEFAULT_CONTRACTS = ROOT / "data" / "raw" / "player_contracts_2025_2031.json"
 DEFAULT_OUTPUT = ROOT / "data" / "raw" / "player_contract_deals_2025_2031.json"
 SPOTRAC_CONTRACTS_URL = "https://www.spotrac.com/nba/contracts"
 SPOTRAC_SEARCH_URL = "https://www.spotrac.com/search?q={query}"
+SALARYSWISH_BASE_URL = "https://www.salaryswish.com"
+SALARYSWISH_SEARCH_URL = "https://www.salaryswish.com/search?s={query}"
 USER_AGENT = "Mozilla/5.0 (compatible; ShotClockContractSync/1.0)"
+SALARYSWISH_NAME_ALIASES = {
+    "nic claxton": "Nicolas Claxton",
+    "alex sarr": "Alexandre Sarr",
+    "ron holland": "Ron Holland II",
+    "ronald holland": "Ron Holland II",
+    "cam christie": "Cameron Christie",
+    "cameron payne": "Cam Payne",
+    "nikola djurisic": "Nikola Đurišić",
+    "yang hansen": "Hansen Yang",
+    "tre scott": "Trevon Scott",
+    "adama alpha bal": "Adama Bal",
+}
 
 
 def clean_text(value: str) -> str:
@@ -38,20 +52,168 @@ def normalize_name(value: str) -> str:
     return " ".join(tokens)
 
 
-def money_to_int(value: str | None) -> int | None:
+def money_to_int(value: str | int | float | None) -> int | None:
     if not value:
         return None
-    cleaned = re.sub(r"[^0-9.]", "", value)
-    if not cleaned:
+    if isinstance(value, (int, float)):
+        return int(round(value))
+    match = re.search(r"\$?\s*([0-9]+(?:,[0-9]{3})*(?:\.\d+)?|[0-9]+(?:\.\d+)?)\s*([mbk])?", value, re.IGNORECASE)
+    if not match:
         return None
-    parsed = float(cleaned)
-    return int(round(parsed))
+    parsed = float(match.group(1).replace(",", ""))
+    multiplier = {"m": 1_000_000, "b": 1_000_000_000, "k": 1_000}.get((match.group(2) or "").lower(), 1)
+    return int(round(parsed * multiplier))
+
+
+def year_from_season(value: str) -> int | None:
+    match = re.search(r"\b(20\d{2})-\d{2}\b", value)
+    return int(match.group(1)) if match else None
+
+
+def salaryswish_slug(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value)
+    ascii_text = "".join(char for char in normalized if not unicodedata.combining(char))
+    ascii_text = ascii_text.replace("'", "").replace("’", "").replace(".", "")
+    tokens = re.sub(r"[^a-z0-9]+", " ", ascii_text.lower()).strip().split()
+    return "-".join(tokens)
 
 
 def fetch_url(url: str) -> tuple[str, str]:
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, timeout=25) as response:
         return response.geturl(), response.read().decode("utf-8", "ignore")
+
+
+def salaryswish_candidate_paths(player_name: str, player_slug: str | None) -> list[str]:
+    candidates: list[str] = []
+    aliased_name = SALARYSWISH_NAME_ALIASES.get(normalize_name(player_name))
+    for slug in [player_slug, salaryswish_slug(player_name), salaryswish_slug(aliased_name or "")]:
+        if not slug:
+            continue
+        normalized_slug = salaryswish_slug(slug.replace("-", " "))
+        candidates.append(f"/players/{normalized_slug}")
+        candidates.append(f"/players/{normalized_slug.replace('-jr', 'jr').replace('-sr', 'sr').replace('-iii', 'iii')}")
+        candidates.append(f"/players/{normalized_slug.replace('-alexander', 'alexander').replace('-walker', 'walker')}")
+    unique: list[str] = []
+    for path in candidates:
+        if path not in unique:
+            unique.append(path)
+    return unique
+
+
+def is_salaryswish_player_page(html: str) -> bool:
+    return "contract and salary details" in html.lower() and "sw_playerContract" in html
+
+
+def fetch_salaryswish_player_page(player_name: str, team_abbreviation: str, player_slug: str | None) -> tuple[str | None, str | None]:
+    for path in salaryswish_candidate_paths(player_name, player_slug):
+        url = urllib.parse.urljoin(SALARYSWISH_BASE_URL, path)
+        try:
+            final_url, html = fetch_url(url)
+            if is_salaryswish_player_page(html):
+                return final_url, html
+        except urllib.error.HTTPError as exc:
+            if exc.code != 404:
+                raise
+
+    search_name = SALARYSWISH_NAME_ALIASES.get(normalize_name(player_name), player_name)
+    final_url, html = fetch_url(SALARYSWISH_SEARCH_URL.format(query=urllib.parse.quote(search_name)))
+    canonical_match = re.search(r'<link href="(https://www\.salaryswish\.com/players/[^"]+)" rel="canonical"', html)
+    if canonical_match and is_salaryswish_player_page(html):
+        return canonical_match.group(1), html
+
+    target_name = normalize_name(search_name)
+    candidates: list[tuple[int, str]] = []
+    for tr in re.findall(r"<tr[^>]*>([\s\S]*?)</tr>", html):
+        link_match = re.search(r'<a href="(/players/[^"]+)">([^<]+)</a>', tr)
+        if not link_match:
+            continue
+        candidate_name = normalize_name(clean_text(link_match.group(2)))
+        if candidate_name != target_name:
+            continue
+        team_match = re.search(r'<td class="center team">[\s\S]*?</a>\s*([A-Z]{2,3})\s*</td>', tr)
+        score = 2 if team_match and team_match.group(1) == team_abbreviation else 1
+        candidates.append((score, urllib.parse.urljoin(SALARYSWISH_BASE_URL, link_match.group(1))))
+    if not candidates:
+        return None, None
+    candidates.sort(reverse=True)
+    final_url, html = fetch_url(candidates[0][1])
+    return (final_url, html) if is_salaryswish_player_page(html) else (None, None)
+
+
+def parse_salaryswish_meta(wrapper: str) -> dict[str, str]:
+    meta_match = re.search(r'<div class="sw_playerContract__meta rel">([\s\S]*?)</div><div class="sw_playerContract__description">', wrapper)
+    if not meta_match:
+        return {}
+    meta_html = re.sub(r'<span class="q[\s\S]*?</span>', "", meta_match.group(1))
+    meta: dict[str, str] = {}
+    for match in re.finditer(r'<span class="(?:sw|cf)_playerContract__meta_title">([\s\S]*?)</span>\s*:\s*([\s\S]*?)</div>', meta_html):
+        key = clean_text(match.group(1)).strip()
+        value = clean_text(match.group(2)).strip()
+        if key and value:
+            meta[key] = value
+    return meta
+
+
+def parse_salaryswish_table_years(wrapper: str) -> list[int]:
+    body_match = re.search(r"<tbody>([\s\S]*?)</tbody>", wrapper)
+    if not body_match:
+        return []
+    years: list[int] = []
+    for row in re.findall(r"<tr[^>]*>([\s\S]*?)</tr>", body_match.group(1)):
+        cells = re.findall(r"<td[^>]*>([\s\S]*?)</td>", row)
+        if not cells:
+            continue
+        year = year_from_season(clean_text(cells[0]))
+        if year:
+            years.append(year)
+    return years
+
+
+def parse_salaryswish_deals(html: str, url: str) -> list[dict[str, Any]]:
+    wrappers = re.findall(r'<div class="sw_playerContract__wrapper">([\s\S]*?)(?=<div class="sw_playerContract__wrapper">|<div class="freeStar|<h4>|\Z)', html)
+    deals: list[dict[str, Any]] = []
+    for wrapper in wrappers:
+        title_match = re.search(r'<h6 class="sw_playerContract__title">([\s\S]*?)</h6>', wrapper)
+        years = parse_salaryswish_table_years(wrapper)
+        if not title_match or not years:
+            continue
+        meta = parse_salaryswish_meta(wrapper)
+        total = money_to_int(meta.get("Value"))
+        deal_years = len(set(years))
+        if not total or not deal_years:
+            continue
+        label = clean_text(title_match.group(1)).title()
+        if "maximum contract" in wrapper.lower() and "maximum" not in label.lower():
+            label = f"{label} Maximum Contract"
+        deals.append({
+            "source": "SalarySwish",
+            "source_url": url,
+            "label": label,
+            "start_year": min(years),
+            "end_year": max(years),
+            "years": deal_years,
+            "total": total,
+            "average_annual_value": money_to_int(meta.get("AAV")) or round(total / deal_years),
+            "guaranteed_at_sign": money_to_int(meta.get("Guaranteed")),
+            "total_guaranteed": money_to_int(meta.get("Guaranteed")),
+            "free_agent": meta.get("Expiry Status"),
+            "signed_using": meta.get("Signing Method"),
+            "pending": "UNCONFIRMED" in wrapper.upper(),
+        })
+    unique: dict[tuple[int, int, int | None], dict[str, Any]] = {}
+    for deal in deals:
+        unique[(deal["start_year"], deal["end_year"], deal["total"])] = deal
+    return sorted(unique.values(), key=lambda item: (item["start_year"], item["end_year"]), reverse=True)
+
+
+def merge_deals(primary: list[dict[str, Any]], fallback: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    merged: dict[tuple[int, int, int | None], dict[str, Any]] = {}
+    for deal in fallback:
+        merged[(deal["start_year"], deal["end_year"], deal["total"])] = deal
+    for deal in primary:
+        merged[(deal["start_year"], deal["end_year"], deal["total"])] = deal
+    return sorted(merged.values(), key=lambda item: (item["start_year"], item["end_year"]), reverse=True)
 
 
 def top_contract_urls() -> dict[tuple[str, str], str]:
@@ -162,27 +324,40 @@ def sync_contract_deals(source: Path, output: Path, limit: int | None, sleep_sec
 
     top_urls = top_contract_urls()
     rows: list[dict[str, Any]] = []
-    stats = {"searched": 0, "matched": 0, "with_deals": 0, "errors": 0}
+    stats = {"salaryswish_matched": 0, "spotrac_searched": 0, "spotrac_matched": 0, "with_deals": 0, "errors": 0}
     selected = contracts[:limit] if limit else contracts
     for index, row in enumerate(selected, start=1):
         name = str(row.get("matched_player_name") or row.get("player_name") or "")
         team = str(row.get("team_abbreviation") or "")
+        player_slug = row.get("matched_player_slug")
         url = top_urls.get((normalize_name(name), team))
+        salaryswish_url = None
         error = None
         deals: list[dict[str, Any]] = []
         try:
-            if not url:
-                stats["searched"] += 1
-                url = search_player_url(name, team)
-                if sleep_seconds:
-                    time.sleep(sleep_seconds)
-            if url:
-                final_url, html = fetch_url(url)
-                url = final_url
-                deals = parse_contract_deals(html, url)
-                stats["matched"] += 1
-                if deals:
-                    stats["with_deals"] += 1
+            salaryswish_url, salaryswish_html = fetch_salaryswish_player_page(name, team, str(player_slug) if player_slug else None)
+            salaryswish_deals = parse_salaryswish_deals(salaryswish_html, salaryswish_url) if salaryswish_url and salaryswish_html else []
+            if salaryswish_deals:
+                stats["salaryswish_matched"] += 1
+
+            if salaryswish_deals:
+                spotrac_deals = []
+            else:
+                if not url:
+                    stats["spotrac_searched"] += 1
+                    url = search_player_url(name, team)
+                    if sleep_seconds:
+                        time.sleep(sleep_seconds)
+                if url:
+                    final_url, html = fetch_url(url)
+                    url = final_url
+                    spotrac_deals = parse_contract_deals(html, url)
+                    stats["spotrac_matched"] += 1
+                else:
+                    spotrac_deals = []
+            deals = merge_deals(salaryswish_deals, spotrac_deals)
+            if deals:
+                stats["with_deals"] += 1
         except (urllib.error.URLError, TimeoutError, RuntimeError, ValueError) as exc:
             stats["errors"] += 1
             error = str(exc)
@@ -192,6 +367,7 @@ def sync_contract_deals(source: Path, output: Path, limit: int | None, sleep_sec
             "matched_player_slug": row.get("matched_player_slug"),
             "matched_player_name": row.get("matched_player_name"),
             "team_abbreviation": team,
+            "salaryswish_url": salaryswish_url,
             "spotrac_url": url,
             "deals": deals,
             "needs_followup": not bool(deals),
@@ -204,7 +380,7 @@ def sync_contract_deals(source: Path, output: Path, limit: int | None, sleep_sec
     output.parent.mkdir(parents=True, exist_ok=True)
     result = {
         "metadata": {
-            "source": "Spotrac public player contract pages",
+            "source": "SalarySwish public player contract pages with Spotrac fallback",
             "source_contracts_file": str(source.relative_to(ROOT)),
             "source_contracts_sha256": source_hash(source),
             "generated_at": datetime.now(timezone.utc).isoformat(),
