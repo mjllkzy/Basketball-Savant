@@ -36,6 +36,7 @@ export function TeamFilterForm({
   const [selectedDivision, setSelectedDivision] = useState(division ?? "");
   useEffect(() => setSelectedConference(conference ?? ""), [conference]);
   useEffect(() => setSelectedDivision(division ?? ""), [division]);
+  const allPeriodLabel = seasonType === "Playoffs" ? "All playoffs" : "Full season";
 
   const visibleDivisions = useMemo(
     () => selectedConference
@@ -69,7 +70,7 @@ export function TeamFilterForm({
           {visibleDivisions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
         <select name="month" defaultValue={month ?? ""} className="rounded border border-slate-300 px-3 py-2 text-sm">
-          <option value="">Full season</option>
+          <option value="">{allPeriodLabel}</option>
           {months.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
         <button className="rounded bg-ink px-3 py-2 text-sm font-black text-white">Apply</button>

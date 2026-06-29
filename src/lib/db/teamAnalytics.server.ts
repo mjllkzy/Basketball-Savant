@@ -372,16 +372,18 @@ function aggregateTeamGameRows(
   return sortTeamRows([...accumulator.values()].map(finalizeAccumulator));
 }
 
-async function monthlyJsonFallback(params: TeamSummaryParams): Promise<TeamSummaryResult> {
+async function teamGameJsonFallback(params: TeamSummaryParams): Promise<TeamSummaryResult> {
   const month = normalizeMonth(params.month);
-  if (!month) return { source: "json", rows: [] };
+  if (params.month && !month) return { source: "json", rows: [] };
   const seasonType = selectedSeasonType(params);
   const { teams, metadata } = await loadRuntimeFallbacks();
   if (metadata.season_type !== seasonType && !officialGames.some((game) => game.seasonType === seasonType)) {
     return { source: "json", rows: [] };
   }
+  const seasonTeams = teams.filter((row) => row.season_type === seasonType);
+  const teamRows = seasonTeams.length ? seasonTeams : teams;
   const teamsById = new Map(
-    teams.map((row) => [
+    teamRows.map((row) => [
       row.team_id,
       mapTeamSummary({ ...row, id: row.team_id }).team
     ])
@@ -392,7 +394,8 @@ async function monthlyJsonFallback(params: TeamSummaryParams): Promise<TeamSumma
     const game = gameById.get(line.gameId);
     const team = teamsById.get(line.teamId);
     const opponentLine = teamLineByGameAndTeam.get(`${line.gameId}:${line.opponentTeamId}`);
-    if (!game || !team || !opponentLine || game.seasonType !== seasonType || !game.date.startsWith(month)) return [];
+    if (!game || !team || !opponentLine || game.seasonType !== seasonType) return [];
+    if (month && !game.date.startsWith(month)) return [];
     if (params.conference && team.conference !== params.conference) return [];
     if (params.division && team.division !== params.division) return [];
     return [{ team, season: game.season, line, opponentLine }];
@@ -401,14 +404,15 @@ async function monthlyJsonFallback(params: TeamSummaryParams): Promise<TeamSumma
 }
 
 async function jsonFallback(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
-  if (params.month) return monthlyJsonFallback(params);
+  if (params.month) return teamGameJsonFallback(params);
   const seasonType = selectedSeasonType(params);
   const { teams } = await loadRuntimeFallbacks();
+  const summaryRows = teams.filter((row) => row.season_type === seasonType);
+  if (!summaryRows.length && seasonType === "Playoffs") return teamGameJsonFallback(params);
   return {
     source: "json",
     rows: filterTeamAggregateRows(
-      teams
-        .filter((row) => row.season_type === seasonType)
+      summaryRows
         .map((row) => mapTeamSummary({
           ...row,
           id: row.team_id,
@@ -418,12 +422,16 @@ async function jsonFallback(params: TeamSummaryParams = {}): Promise<TeamSummary
   };
 }
 
-async function listMonthlyTeamSummaries(params: TeamSummaryParams): Promise<TeamSummaryResult> {
+async function listTeamGameSummaries(params: TeamSummaryParams): Promise<TeamSummaryResult> {
   const month = normalizeMonth(params.month);
-  if (!month) return jsonFallback(params);
+  if (params.month && !month) return jsonFallback(params);
   const seasonType = selectedSeasonType(params);
-  const values: unknown[] = [month, seasonType];
-  const filters = ["to_char(g.game_date, 'YYYY-MM') = $1", "g.season_type = $2"];
+  const values: unknown[] = [seasonType];
+  const filters = ["g.season_type = $1"];
+  if (month) {
+    values.push(month);
+    filters.push(`to_char(g.game_date, 'YYYY-MM') = $${values.length}`);
+  }
   if (params.conference) {
     values.push(params.conference);
     filters.push(`t.conference = $${values.length}`);
@@ -480,7 +488,7 @@ async function listMonthlyTeamSummaries(params: TeamSummaryParams): Promise<Team
       WHERE ${filters.join(" AND ")}
       ORDER BY t.city, t.name, g.game_date
     `, values);
-    if (!result?.rows.length) return monthlyJsonFallback(params);
+    if (!result?.rows.length) return teamGameJsonFallback(params);
     const rows = result.rows.map((row) => {
       const line: TeamGameStat = {
         id: `${row.game_id}-${row.id}`,
@@ -532,13 +540,13 @@ async function listMonthlyTeamSummaries(params: TeamSummaryParams): Promise<Team
     });
     return { rows: aggregateTeamGameRows(rows), source: "postgres" };
   } catch {
-    return monthlyJsonFallback(params);
+    return teamGameJsonFallback(params);
   }
 }
 
 export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
-  if (params.month) return listMonthlyTeamSummaries(params);
   const seasonType = selectedSeasonType(params);
+  if (params.month || seasonType === "Playoffs") return listTeamGameSummaries(params);
   const values: unknown[] = [];
   const filters: string[] = [`s.season_type = $${values.length + 1}`];
   values.push(seasonType);
@@ -617,8 +625,9 @@ export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParam
   const seasonType = selectedSeasonType(params);
   const fallback = async (): Promise<TeamSummaryFilterOptions> => {
     const { teams } = await loadRuntimeFallbacks();
-    const rows = teams
-      .filter((row) => row.season_type === seasonType)
+    const seasonTeams = teams.filter((row) => row.season_type === seasonType);
+    const teamRows = seasonTeams.length ? seasonTeams : teams;
+    const rows = teamRows
       .map((row) => mapTeamSummary({ ...row, id: row.team_id }).team);
     return {
       seasonTypes: seasonTypeOptions,

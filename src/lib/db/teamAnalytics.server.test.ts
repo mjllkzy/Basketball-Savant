@@ -47,4 +47,19 @@ describe("database-backed team analytics", () => {
     expect(monthly.rows.every((row) => row.officialEfgPct !== null && row.officialEfgPct > 0 && row.officialEfgPct < 1)).toBe(true);
     expect(monthly.rows.every((row) => row.pace > 50 && row.pace < 130)).toBe(true);
   }, 15_000);
+
+  it("aggregates generated playoff team summaries without a selected month", async () => {
+    const filters = await loadTeamSeasonSummaryFilters({ seasonType: "Playoffs" });
+    const result = await listTeamSeasonSummaries({ seasonType: "Playoffs" });
+
+    expect(filters.months.map((option) => option.label)).toEqual(expect.arrayContaining(["Apr 2026", "May 2026", "Jun 2026"]));
+    expect(filters.divisions.map((option) => option.value)).toContain("Atlantic");
+    expect(result.source).toBe("json");
+    expect(result.rows.length).toBeGreaterThan(0);
+    expect(result.rows.every((row) => row.games > 0)).toBe(true);
+    expect(result.rows.every((row) => row.wins + row.losses === row.games)).toBe(true);
+    expect(result.rows.every((row) => row.officialTsPct !== null && row.officialTsPct > 0 && row.officialTsPct < 1)).toBe(true);
+    expect(result.rows.every((row) => row.officialEfgPct !== null && row.officialEfgPct > 0 && row.officialEfgPct < 1)).toBe(true);
+    expect(result.rows.every((row) => row.pace > 50 && row.pace < 130)).toBe(true);
+  }, 15_000);
 });
