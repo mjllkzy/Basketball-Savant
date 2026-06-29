@@ -19,6 +19,7 @@ EXPECTED_ROWS = 530
 EXPECTED_SEASONS = ("2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31")
 NAME_TRANSLATION = str.maketrans({"ё": "e", "Ё": "e", "ë": "e", "Ë": "e", "’": "'", "‘": "'"})
 NAME_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+OPTION_DETAIL_FIELDS = ("options_by_season", "guarantee_status_by_season")
 
 
 def database_url() -> str | None:
@@ -96,7 +97,39 @@ def load_source(source_path: Path) -> dict[str, Any]:
                 raise RuntimeError(f"Contract row {row.get('source_rank')} has invalid salary for {season}.")
         if guaranteed is not None and (not isinstance(guaranteed, int) or guaranteed < 0):
             raise RuntimeError(f"Contract row {row.get('source_rank')} has invalid guaranteed amount.")
+        for field_name in OPTION_DETAIL_FIELDS:
+            detail = row.get(field_name, {})
+            if detail is None:
+                continue
+            if not isinstance(detail, dict):
+                raise RuntimeError(f"Contract row {row.get('source_rank')} has invalid {field_name}.")
+            for season, label in detail.items():
+                if season not in EXPECTED_SEASONS:
+                    raise RuntimeError(f"Contract row {row.get('source_rank')} contains unsupported {field_name} season {season}.")
+                if not isinstance(label, str) or not label.strip():
+                    raise RuntimeError(f"Contract row {row.get('source_rank')} has invalid {field_name} value for {season}.")
+        source_urls = row.get("source_urls", [])
+        if source_urls is not None and (not isinstance(source_urls, list) or not all(isinstance(url, str) and url.strip() for url in source_urls)):
+            raise RuntimeError(f"Contract row {row.get('source_rank')} has invalid source_urls.")
+        if row.get("contract_notes") is not None and not isinstance(row.get("contract_notes"), str):
+            raise RuntimeError(f"Contract row {row.get('source_rank')} has invalid contract_notes.")
+        if row.get("needs_followup") is not None and not isinstance(row.get("needs_followup"), bool):
+            raise RuntimeError(f"Contract row {row.get('source_rank')} has invalid needs_followup.")
     return payload
+
+
+def object_field(row: dict[str, Any], field_name: str) -> dict[str, str]:
+    value = row.get(field_name)
+    if not isinstance(value, dict):
+        return {}
+    return {str(key): str(label) for key, label in value.items() if str(label).strip()}
+
+
+def list_field(row: dict[str, Any], field_name: str) -> list[str]:
+    value = row.get(field_name)
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if str(item).strip()]
 
 
 def load_generated_player_lookup() -> dict[str, dict[str, Any]]:
@@ -235,6 +268,11 @@ def write_postgres(source_path: Path, connection_string: str) -> dict[str, Any]:
                     "team_id": team_lookup.get(team_abbreviation),
                     "guaranteed_amount": row.get("guaranteed"),
                     "salary_by_season": Jsonb(row["salaries"]),
+                    "options_by_season": Jsonb(object_field(row, "options_by_season")),
+                    "guarantee_status_by_season": Jsonb(object_field(row, "guarantee_status_by_season")),
+                    "contract_notes": row.get("contract_notes"),
+                    "source_urls": Jsonb(list_field(row, "source_urls")),
+                    "needs_followup": bool(row.get("needs_followup", False)),
                     "matched_by": matched_by,
                     "match_notes": match_notes,
                 })
@@ -269,13 +307,15 @@ def write_postgres(source_path: Path, connection_string: str) -> dict[str, Any]:
                 """
                 INSERT INTO player_contracts (
                   source_key, source_rank, player_slug, source_player_name, normalized_player_name,
-                  team_abbreviation, team_id, guaranteed_amount, salary_by_season, matched_by, match_notes,
-                  updated_at
+                  team_abbreviation, team_id, guaranteed_amount, salary_by_season, options_by_season,
+                  guarantee_status_by_season, contract_notes, source_urls, needs_followup, matched_by,
+                  match_notes, updated_at
                 )
                 VALUES (
                   %(source_key)s, %(source_rank)s, %(player_slug)s, %(source_player_name)s, %(normalized_player_name)s,
-                  %(team_abbreviation)s, %(team_id)s, %(guaranteed_amount)s, %(salary_by_season)s, %(matched_by)s,
-                  %(match_notes)s, now()
+                  %(team_abbreviation)s, %(team_id)s, %(guaranteed_amount)s, %(salary_by_season)s, %(options_by_season)s,
+                  %(guarantee_status_by_season)s, %(contract_notes)s, %(source_urls)s, %(needs_followup)s,
+                  %(matched_by)s, %(match_notes)s, now()
                 )
                 """,
                 contract_rows,

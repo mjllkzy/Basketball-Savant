@@ -17,6 +17,7 @@ const runIfPython = pythonCommand ? it : it.skip;
 describe("player contract import CLI", () => {
   it("defines normalized contract tables and production refresh import", () => {
     const migration = readFileSync("db/migrations/008_player_contracts.sql", "utf8");
+    const detailMigration = readFileSync("db/migrations/009_player_contract_details.sql", "utf8");
     const script = readFileSync("scripts/import_player_contracts.py", "utf8");
     const workflow = readFileSync(".github/workflows/data-refresh.yml", "utf8");
     const backup = readFileSync(".github/workflows/postgres-backup.yml", "utf8");
@@ -25,8 +26,12 @@ describe("player contract import CLI", () => {
     expect(migration).toContain("CREATE TABLE IF NOT EXISTS player_contracts");
     expect(migration).toContain("CREATE TABLE IF NOT EXISTS player_contract_salaries");
     expect(migration).toContain("CREATE OR REPLACE VIEW current_player_contracts");
+    expect(detailMigration).toContain("options_by_season");
+    expect(detailMigration).toContain("needs_followup");
     expect(script).toContain("--write-postgres");
     expect(script).toContain("player_contract_salaries");
+    expect(script).toContain("options_by_season");
+    expect(script).toContain("guarantee_status_by_season");
     expect(workflow).toContain("scripts/import_player_contracts.py --write-postgres");
     expect(backup).toContain("player_contract_salaries");
   });

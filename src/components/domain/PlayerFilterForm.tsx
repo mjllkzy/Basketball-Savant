@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SmartSearchInput } from "@/components/ui/SmartSearchInput";
 import { defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
+import type { PlayerStatView } from "@/lib/playerStatViews";
 
 type Option = {
   label: string;
@@ -13,7 +14,7 @@ type PlayerFilterFormProps = {
   q?: string;
   teamId?: string;
   position?: string;
-  statView: "standard" | "advanced";
+  statView: PlayerStatView;
   season: string;
   seasonType: string;
   minMinutes: number;
@@ -40,6 +41,7 @@ export function PlayerFilterForm({
   teamOptions,
   positionOptions
 }: PlayerFilterFormProps) {
+  const [view, setView] = useState<PlayerStatView>(statView);
   const [minutes, setMinutes] = useState(minMinutes);
   const [games, setGames] = useState(minGames);
 
@@ -68,14 +70,16 @@ export function PlayerFilterForm({
           <option value="">All positions</option>
           {positionOptions.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
-        <select name="view" defaultValue={statView} aria-label="Stat view" className="rounded border border-slate-300 px-3 py-2 text-sm">
+        <select name="view" value={view} onChange={(event) => setView(event.target.value as PlayerStatView)} aria-label="Stat view" className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="standard">Standard Stats</option>
           <option value="advanced">Advanced Stats</option>
+          <option value="contracts">Contracts</option>
         </select>
         <button className="min-h-10 rounded bg-ink px-3 py-2 text-sm font-black text-white md:col-span-3">Apply</button>
       </div>
 
-      <div className="grid gap-3 rounded border border-slate-200 bg-slate-50 p-3 md:grid-cols-2">
+      {view !== "contracts" ? (
+        <div className="grid gap-3 rounded border border-slate-200 bg-slate-50 p-3 md:grid-cols-2">
         <label className="grid gap-2">
           <span className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
             Minimum Total Minutes
@@ -111,7 +115,8 @@ export function PlayerFilterForm({
           />
           <span className="text-xs text-slate-500">Default baseline: {defaultMinGames} games</span>
         </label>
-      </div>
+        </div>
+      ) : null}
     </form>
   );
 }

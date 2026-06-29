@@ -15,6 +15,8 @@ export type StatTableColumn = {
   minWidth?: string;
   truncate?: boolean;
   sortOrder?: string[];
+  sortValueKey?: string;
+  valueClassNameKey?: string;
   hrefKey?: string;
   imageKey?: string;
   imageAltKey?: string;
@@ -135,7 +137,9 @@ export function StatTable({
     return rows.slice().sort((a, b) => {
       for (const sort of sorting) {
         const column = columns.find((item) => item.key === sort.id);
-        const compared = compareStatTableValuesForSort(a[sort.id], b[sort.id], sort.desc ? "desc" : "asc", column?.sortOrder);
+        const leftValue = column?.sortValueKey ? a[column.sortValueKey] : a[sort.id];
+        const rightValue = column?.sortValueKey ? b[column.sortValueKey] : b[sort.id];
+        const compared = compareStatTableValuesForSort(leftValue, rightValue, sort.desc ? "desc" : "asc", column?.sortOrder);
         if (compared !== 0) return compared;
       }
       return 0;
@@ -147,7 +151,10 @@ export function StatTable({
         accessorKey: column.key,
         header: column.label,
         sortingFn: (rowA: Row<StatTableRow>, rowB: Row<StatTableRow>, columnId: string) =>
-          compareStatTableValues(rowA.getValue(columnId), rowB.getValue(columnId)),
+          compareStatTableValues(
+            column.sortValueKey ? rowA.original[column.sortValueKey] : rowA.getValue(columnId),
+            column.sortValueKey ? rowB.original[column.sortValueKey] : rowB.getValue(columnId),
+          ),
         cell: (info: { getValue: () => unknown; row: { original: StatTableRow } }) => {
           const value = info.getValue();
           const formatted = value === null || value === undefined ? "N/A" : String(value);
@@ -155,6 +162,9 @@ export function StatTable({
           const imageUrl = column.imageKey ? info.row.original[column.imageKey] : undefined;
           const imageAlt = column.imageAltKey ? info.row.original[column.imageAltKey] : undefined;
           const imageFallback = column.imageFallbackKey ? info.row.original[column.imageFallbackKey] : undefined;
+          const valueClassName = column.valueClassNameKey && typeof info.row.original[column.valueClassNameKey] === "string"
+            ? String(info.row.original[column.valueClassNameKey])
+            : "";
           const content = (
             <span className={imageUrl ? `inline-flex min-h-7 max-w-full items-center gap-2 ${column.truncate ? "min-w-0" : ""}` : column.truncate ? "block truncate" : undefined}>
               {imageUrl ? (
@@ -164,7 +174,7 @@ export function StatTable({
                   fallback={imageFallback ? String(imageFallback) : ""}
                 />
               ) : null}
-              <span className={column.truncate ? "min-w-0 truncate" : undefined}>{formatted}</span>
+              <span className={[column.truncate ? "min-w-0 truncate" : "", valueClassName].filter(Boolean).join(" ") || undefined}>{formatted}</span>
             </span>
           );
           return href ? <Link href={String(href)} className={`font-bold text-signal hover:underline ${column.truncate ? "block truncate" : ""}`}>{content}</Link> : content;
