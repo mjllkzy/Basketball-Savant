@@ -19,8 +19,10 @@ describe("player contract import CLI", () => {
     const migration = readFileSync("db/migrations/008_player_contracts.sql", "utf8");
     const detailMigration = readFileSync("db/migrations/009_player_contract_details.sql", "utf8");
     const script = readFileSync("scripts/import_player_contracts.py", "utf8");
+    const optionScript = readFileSync("scripts/sync_player_contract_options.py", "utf8");
     const workflow = readFileSync(".github/workflows/data-refresh.yml", "utf8");
     const backup = readFileSync(".github/workflows/postgres-backup.yml", "utf8");
+    const packageJson = readFileSync("package.json", "utf8");
 
     expect(migration).toContain("CREATE TABLE IF NOT EXISTS player_contract_sources");
     expect(migration).toContain("CREATE TABLE IF NOT EXISTS player_contracts");
@@ -32,6 +34,9 @@ describe("player contract import CLI", () => {
     expect(script).toContain("player_contract_salaries");
     expect(script).toContain("options_by_season");
     expect(script).toContain("guarantee_status_by_season");
+    expect(optionScript).toContain("salary-pl");
+    expect(optionScript).toContain("salary-tm");
+    expect(packageJson).toContain("contracts:sync-options");
     expect(workflow).toContain("scripts/import_player_contracts.py --write-postgres");
     expect(backup).toContain("player_contract_salaries");
   });
@@ -55,11 +60,30 @@ describe("player contract import CLI", () => {
       team_abbreviation: "GSW",
       matched_player_slug: "stephen-curry",
     });
+    expect(payload.contracts.find((row: { player_name: string; team_abbreviation: string }) => row.player_name === "Austin Reaves" && row.team_abbreviation === "LAL")).toMatchObject({
+      options_by_season: {
+        "2026-27": "Player Option",
+      },
+    });
   });
 
   runIfPython("is valid Python", () => {
     const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
     const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/import_player_contracts.py"], {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        PYTHONPYCACHEPREFIX: pycacheDirectory,
+      },
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+  });
+
+  runIfPython("contract option sync script is valid Python", () => {
+    const pycacheDirectory = mkdtempSync(join(tmpdir(), "shotclock-pycache-"));
+    const result = spawnSync(pythonCommand!, ["-m", "py_compile", "scripts/sync_player_contract_options.py"], {
       cwd: process.cwd(),
       env: {
         ...process.env,

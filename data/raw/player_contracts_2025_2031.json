@@ -14,7 +14,15 @@
     "row_count": 530,
     "matched_rows_against_generated_players": 506,
     "unmatched_rows_against_generated_players": 24,
-    "preserves_duplicate_source_rows": true
+    "preserves_duplicate_source_rows": true,
+    "option_source": {
+      "source_label": "Basketball Reference contracts color key",
+      "source_url": "https://www.basketball-reference.com/contracts/players.html",
+      "class_labels": {
+        "salary-pl": "Player Option",
+        "salary-tm": "Team Option"
+      }
+    }
   },
   "contracts": [
     {
@@ -43,7 +51,10 @@
         "2027-28": 62748000,
         "2028-29": 67396000
       },
-      "guaranteed": 176072526
+      "guaranteed": 176072526,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 3,
@@ -57,7 +68,10 @@
         "2026-27": 59033114,
         "2027-28": 62841702
       },
-      "guaranteed": 114257640
+      "guaranteed": 114257640,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 4,
@@ -71,7 +85,10 @@
         "2026-27": 43902439,
         "2027-28": 46097561
       },
-      "guaranteed": 98611048
+      "guaranteed": 98611048,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 5,
@@ -87,7 +104,10 @@
         "2028-29": 67116798,
         "2029-30": 71446914
       },
-      "guaranteed": 242486496
+      "guaranteed": 242486496,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      }
     },
     {
       "source_rank": 6,
@@ -101,7 +121,10 @@
         "2026-27": 58456566,
         "2027-28": 62786682
       },
-      "guaranteed": 112583016
+      "guaranteed": 112583016,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 7,
@@ -115,7 +138,10 @@
         "2026-27": 58456566,
         "2027-28": 62786682
       },
-      "guaranteed": 112583016
+      "guaranteed": 112583016,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 8,
@@ -159,7 +185,10 @@
         "2028-29": 64065952,
         "2029-30": 69191228
       },
-      "guaranteed": 235302136
+      "guaranteed": 235302136,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      }
     },
     {
       "source_rank": 11,
@@ -173,7 +202,10 @@
         "2026-27": 57078728,
         "2027-28": 61015192
       },
-      "guaranteed": 110220992
+      "guaranteed": 110220992,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 12,
@@ -185,7 +217,10 @@
       "salaries": {
         "2025-26": 52627153
       },
-      "guaranteed": 52627153
+      "guaranteed": 52627153,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 13,
@@ -199,7 +234,10 @@
         "2026-27": 54126380,
         "2027-28": 56586670
       },
-      "guaranteed": 105792470
+      "guaranteed": 105792470,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 14,
@@ -225,7 +263,10 @@
         "2025-26": 47499660,
         "2026-27": 48967380
       },
-      "guaranteed": 47499660
+      "guaranteed": 47499660,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 16,
@@ -301,7 +342,10 @@
         "2026-27": 50105628,
         "2027-28": 53817156
       },
-      "guaranteed": 96499728
+      "guaranteed": 96499728,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 21,
@@ -328,7 +372,10 @@
         "2027-28": 53784000,
         "2028-29": 57768000
       },
-      "guaranteed": 149583660
+      "guaranteed": 149583660,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 23,
@@ -401,7 +448,10 @@
         "2027-28": 45431034,
         "2028-29": 48362068
       },
-      "guaranteed": 127500000
+      "guaranteed": 127500000,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 28,
@@ -456,7 +506,10 @@
         "2025-26": 39182693,
         "2026-27": 42317307
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 32,
@@ -505,7 +558,10 @@
         "2029-30": 70765800,
         "2030-31": 75646200
       },
-      "guaranteed": 276795400
+      "guaranteed": 276795400,
+      "options_by_season": {
+        "2030-31": "Player Option"
+      }
     },
     {
       "source_rank": 35,
@@ -532,7 +588,10 @@
         "2026-27": 40000000,
         "2027-28": 41904762
       },
-      "guaranteed": 78095238
+      "guaranteed": 78095238,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 37,
@@ -593,7 +652,10 @@
         "2027-28": 53784000,
         "2028-29": 57768000
       },
-      "guaranteed": 140680620
+      "guaranteed": 140680620,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 41,
@@ -622,7 +684,10 @@
         "2026-27": 39491282,
         "2027-28": 42416562
       },
-      "guaranteed": 76057284
+      "guaranteed": 76057284,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 43,
@@ -638,7 +703,10 @@
         "2028-29": 52000000,
         "2029-30": 53500000
       },
-      "guaranteed": 186500000
+      "guaranteed": 186500000,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      }
     },
     {
       "source_rank": 44,
@@ -654,7 +722,10 @@
         "2028-29": 26800000,
         "2029-30": 26700000
       },
-      "guaranteed": 123800000
+      "guaranteed": 123800000,
+      "options_by_season": {
+        "2029-30": "Team Option"
+      }
     },
     {
       "source_rank": 45,
@@ -668,7 +739,10 @@
         "2026-27": 36500000,
         "2027-28": 38000000
       },
-      "guaranteed": 71500000
+      "guaranteed": 71500000,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 46,
@@ -683,7 +757,10 @@
         "2027-28": 40535041,
         "2028-29": 43330561
       },
-      "guaranteed": 113218563
+      "guaranteed": 113218563,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 47,
@@ -699,7 +776,10 @@
         "2028-29": 39036697,
         "2029-30": 39036697
       },
-      "guaranteed": 145963303
+      "guaranteed": 145963303,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      }
     },
     {
       "source_rank": 48,
@@ -713,7 +793,10 @@
         "2026-27": 36251166,
         "2027-28": 36000000
       },
-      "guaranteed": 69835665
+      "guaranteed": 69835665,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 49,
@@ -725,7 +808,10 @@
       "salaries": {
         "2025-26": 33296296
       },
-      "guaranteed": 33296296
+      "guaranteed": 33296296,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 50,
@@ -754,7 +840,10 @@
         "2026-27": 34800000,
         "2027-28": 37200000
       },
-      "guaranteed": 67200000
+      "guaranteed": 67200000,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 52,
@@ -768,7 +857,10 @@
         "2026-27": 34206898,
         "2027-28": 36413790
       },
-      "guaranteed": 66206899
+      "guaranteed": 66206899,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 53,
@@ -808,7 +900,10 @@
         "2026-27": 33333334,
         "2027-28": 35802468
       },
-      "guaranteed": 64197532
+      "guaranteed": 64197532,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 56,
@@ -822,7 +917,10 @@
         "2026-27": 32785071,
         "2027-28": 30751504
       },
-      "guaranteed": 63586174
+      "guaranteed": 63586174,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 57,
@@ -876,7 +974,10 @@
         "2025-26": 28500000,
         "2026-27": 28500000
       },
-      "guaranteed": 28500000
+      "guaranteed": 28500000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 61,
@@ -889,7 +990,10 @@
         "2025-26": 28223215,
         "2026-27": 30169644
       },
-      "guaranteed": 28223215
+      "guaranteed": 28223215,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 62,
@@ -904,7 +1008,10 @@
         "2027-28": 32596000,
         "2028-29": 34844000
       },
-      "guaranteed": 91044000
+      "guaranteed": 91044000,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 63,
@@ -980,7 +1087,10 @@
       "salaries": {
         "2025-26": 26580000
       },
-      "guaranteed": 26580000
+      "guaranteed": 26580000,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 69,
@@ -993,7 +1103,10 @@
         "2025-26": 25892857,
         "2026-27": 27678571
       },
-      "guaranteed": 25892857
+      "guaranteed": 25892857,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 70,
@@ -1006,7 +1119,10 @@
         "2025-26": 33654814,
         "2026-27": 8104000
       },
-      "guaranteed": 25550814
+      "guaranteed": 25550814,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 71,
@@ -1035,7 +1151,10 @@
         "2027-28": 27850077,
         "2028-29": 29115990
       },
-      "guaranteed": 79752492
+      "guaranteed": 79752492,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 73,
@@ -1091,7 +1210,10 @@
         "2025-26": 25000000,
         "2026-27": 25000000
       },
-      "guaranteed": 25000000
+      "guaranteed": 25000000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 77,
@@ -1107,7 +1229,10 @@
         "2028-29": 38839285,
         "2029-30": 41517856
       },
-      "guaranteed": 133382144
+      "guaranteed": 133382144,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      }
     },
     {
       "source_rank": 78,
@@ -1148,7 +1273,10 @@
         "2025-26": 23799569,
         "2026-27": 24300000
       },
-      "guaranteed": 23799569
+      "guaranteed": 23799569,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 81,
@@ -1176,7 +1304,11 @@
         "2027-28": 36350680,
         "2028-29": 39043323
       },
-      "guaranteed": 92850172
+      "guaranteed": 92850172,
+      "options_by_season": {
+        "2025-26": "Player Option",
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 83,
@@ -1192,7 +1324,10 @@
         "2028-29": 22516603,
         "2029-30": 22516603
       },
-      "guaranteed": 112583015
+      "guaranteed": 112583015,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 84,
@@ -1218,7 +1353,10 @@
         "2025-26": 21621500,
         "2026-27": 21621500
       },
-      "guaranteed": 43243000
+      "guaranteed": 43243000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 86,
@@ -1234,7 +1372,10 @@
         "2028-29": 26724138,
         "2029-30": 28448276
       },
-      "guaranteed": 96551724
+      "guaranteed": 96551724,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      }
     },
     {
       "source_rank": 87,
@@ -1315,7 +1456,10 @@
         "2028-29": 29484000,
         "2029-30": 27300000
       },
-      "guaranteed": 95784000
+      "guaranteed": 95784000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 93,
@@ -1329,7 +1473,10 @@
         "2026-27": 20923760,
         "2027-28": 22375280
       },
-      "guaranteed": 40396000
+      "guaranteed": 40396000,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 94,
@@ -1345,7 +1492,10 @@
         "2028-29": 19383010,
         "2029-30": 19383010
       },
-      "guaranteed": 96915050
+      "guaranteed": 96915050,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 95,
@@ -1409,7 +1559,10 @@
         "2026-27": 20190035,
         "2027-28": 21582451
       },
-      "guaranteed": 38987654
+      "guaranteed": 38987654,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 100,
@@ -1423,7 +1576,10 @@
         "2026-27": 17007043,
         "2027-28": 17007043
       },
-      "guaranteed": 35492959
+      "guaranteed": 35492959,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 101,
@@ -1448,7 +1604,10 @@
         "2025-26": 18222222,
         "2026-27": 18222222
       },
-      "guaranteed": 18222222
+      "guaranteed": 18222222,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 103,
@@ -1504,7 +1663,10 @@
         "2027-28": 18000000,
         "2028-29": 18000000
       },
-      "guaranteed": 54000000
+      "guaranteed": 54000000,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 107,
@@ -1543,7 +1705,10 @@
         "2026-27": 18125000,
         "2027-28": 19375000
       },
-      "guaranteed": 35000000
+      "guaranteed": 35000000,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 110,
@@ -1583,7 +1748,10 @@
         "2025-26": 16020000,
         "2026-27": 16020000
       },
-      "guaranteed": 16020000
+      "guaranteed": 16020000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 113,
@@ -1627,7 +1795,11 @@
         "2029-30": 51460000,
         "2030-31": 54780000
       },
-      "guaranteed": 201254769
+      "guaranteed": 201254769,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2030-31": "Player Option"
+      }
     },
     {
       "source_rank": 116,
@@ -1642,7 +1814,10 @@
         "2027-28": 15161800,
         "2028-29": 15919890
       },
-      "guaranteed": 44727310
+      "guaranteed": 44727310,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 117,
@@ -1685,7 +1860,10 @@
         "2026-27": 15000000,
         "2027-28": 15000000
       },
-      "guaranteed": 30000000
+      "guaranteed": 30000000,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 120,
@@ -1698,7 +1876,10 @@
         "2025-26": 19920855,
         "2026-27": 5390700
       },
-      "guaranteed": 14786855
+      "guaranteed": 14786855,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 121,
@@ -1800,7 +1981,10 @@
         "2028-29": 22516603,
         "2029-30": 22516603
       },
-      "guaranteed": 27502800
+      "guaranteed": 27502800,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 128,
@@ -1829,7 +2013,10 @@
         "2027-28": 13050000,
         "2028-29": 13050000
       },
-      "guaranteed": 41000000
+      "guaranteed": 41000000,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 130,
@@ -1845,7 +2032,10 @@
         "2028-29": 22526964,
         "2029-30": 24195628
       },
-      "guaranteed": 72221624
+      "guaranteed": 72221624,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      }
     },
     {
       "source_rank": 131,
@@ -1858,7 +2048,10 @@
         "2025-26": 13937574,
         "2026-27": 14898786
       },
-      "guaranteed": 13937574
+      "guaranteed": 13937574,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 132,
@@ -1873,7 +2066,11 @@
         "2027-28": 15208680,
         "2028-29": 19178146
       },
-      "guaranteed": 28343400
+      "guaranteed": 28343400,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 133,
@@ -1890,7 +2087,10 @@
         "2029-30": 51460000,
         "2030-31": 54780000
       },
-      "guaranteed": 254431368
+      "guaranteed": 254431368,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 134,
@@ -1930,7 +2130,10 @@
         "2026-27": 14521414,
         "2027-28": 15597074
       },
-      "guaranteed": 27967168
+      "guaranteed": 27967168,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 137,
@@ -1955,7 +2158,11 @@
         "2025-26": 13376880,
         "2026-27": 16868246
       },
-      "guaranteed": 30245126
+      "guaranteed": 30245126,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 139,
@@ -1981,7 +2188,11 @@
         "2026-27": 13826040,
         "2027-28": 17434637
       },
-      "guaranteed": 27023760
+      "guaranteed": 27023760,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 141,
@@ -2020,7 +2231,10 @@
         "2027-28": 13335000,
         "2028-29": 13335000
       },
-      "guaranteed": 39370000
+      "guaranteed": 39370000,
+      "options_by_season": {
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 144,
@@ -2048,7 +2262,11 @@
         "2027-28": 13607760,
         "2028-29": 17172994
       },
-      "guaranteed": 25359360
+      "guaranteed": 25359360,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 146,
@@ -2062,7 +2280,10 @@
         "2026-27": 11323006,
         "2027-28": 11323006
       },
-      "guaranteed": 23685344
+      "guaranteed": 23685344,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 147,
@@ -2079,7 +2300,10 @@
         "2029-30": 25534883,
         "2030-31": 27426355
       },
-      "guaranteed": 134350392
+      "guaranteed": 134350392,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 148,
@@ -2105,7 +2329,11 @@
         "2025-26": 11968800,
         "2026-27": 15104626
       },
-      "guaranteed": 27073426
+      "guaranteed": 27073426,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 150,
@@ -2119,7 +2347,11 @@
         "2026-27": 12370680,
         "2027-28": 15611798
       },
-      "guaranteed": 24178920
+      "guaranteed": 24178920,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 151,
@@ -2160,7 +2392,10 @@
         "2026-27": 12428571,
         "2027-28": 13285714
       },
-      "guaranteed": 24000000
+      "guaranteed": 24000000,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 154,
@@ -2172,7 +2407,10 @@
       "salaries": {
         "2025-26": 11550000
       },
-      "guaranteed": 11550000
+      "guaranteed": 11550000,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 155,
@@ -2201,7 +2439,10 @@
         "2029-30": 29931033,
         "2030-31": 31862067
       },
-      "guaranteed": 151144093
+      "guaranteed": 151144093,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 157,
@@ -2216,7 +2457,11 @@
         "2027-28": 12219720,
         "2028-29": 15445727
       },
-      "guaranteed": 22772760
+      "guaranteed": 22772760,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 158,
@@ -2246,7 +2491,10 @@
         "2027-28": 9900000,
         "2028-29": 9350000
       },
-      "guaranteed": 24000000
+      "guaranteed": 24000000,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 160,
@@ -2298,7 +2546,10 @@
         "2027-28": 19550160,
         "2028-29": 20998320
       },
-      "guaranteed": 48502160
+      "guaranteed": 48502160,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 164,
@@ -2323,7 +2574,11 @@
         "2025-26": 10748040,
         "2026-27": 13585523
       },
-      "guaranteed": 24333563
+      "guaranteed": 24333563,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 166,
@@ -2349,7 +2604,11 @@
         "2026-27": 11108880,
         "2027-28": 14041625
       },
-      "guaranteed": 21712440
+      "guaranteed": 21712440,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 168,
@@ -2377,7 +2636,10 @@
         "2027-28": 11800000,
         "2028-29": 11800000
       },
-      "guaranteed": 33000000
+      "guaranteed": 33000000,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 170,
@@ -2403,7 +2665,10 @@
       "salaries": {
         "2025-26": 10107163
       },
-      "guaranteed": 10107163
+      "guaranteed": 10107163,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 172,
@@ -2418,7 +2683,10 @@
         "2027-28": 8345797,
         "2028-29": 8345797
       },
-      "guaranteed": 27672900
+      "guaranteed": 27672900,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 173,
@@ -2448,7 +2716,11 @@
         "2027-28": 11017560,
         "2028-29": 13937214
       },
-      "guaranteed": 20532240
+      "guaranteed": 20532240,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 175,
@@ -2486,7 +2758,11 @@
         "2025-26": 9690600,
         "2026-27": 12258609
       },
-      "guaranteed": 21949209
+      "guaranteed": 21949209,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 178,
@@ -2500,7 +2776,10 @@
         "2026-27": 10001493,
         "2027-28": 9371351
       },
-      "guaranteed": 19595537
+      "guaranteed": 19595537,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 179,
@@ -2514,7 +2793,11 @@
         "2026-27": 10015920,
         "2027-28": 12670139
       },
-      "guaranteed": 19576440
+      "guaranteed": 19576440,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 180,
@@ -2527,7 +2810,10 @@
         "2025-26": 10739683,
         "2026-27": 3815861
       },
-      "guaranteed": 10739683
+      "guaranteed": 10739683,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 181,
@@ -2541,7 +2827,10 @@
         "2026-27": 9658536,
         "2027-28": 10097560
       },
-      "guaranteed": 18878048
+      "guaranteed": 18878048,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 182,
@@ -2565,7 +2854,10 @@
       "salaries": {
         "2025-26": 9187573
       },
-      "guaranteed": 9187573
+      "guaranteed": 9187573,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 184,
@@ -2580,7 +2872,11 @@
         "2027-28": 9976560,
         "2028-29": 12640302
       },
-      "guaranteed": 18592920
+      "guaranteed": 18592920,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 185,
@@ -2620,7 +2916,10 @@
         "2026-27": 9220050,
         "2027-28": 9659100
       },
-      "guaranteed": 18001050
+      "guaranteed": 18001050,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 188,
@@ -2633,7 +2932,11 @@
         "2025-26": 8775000,
         "2026-27": 11117925
       },
-      "guaranteed": 19892925
+      "guaranteed": 19892925,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 189,
@@ -2646,7 +2949,10 @@
         "2025-26": 8750000,
         "2026-27": 9187500
       },
-      "guaranteed": 8750000
+      "guaranteed": 8750000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 190,
@@ -2672,7 +2978,11 @@
         "2026-27": 9069600,
         "2027-28": 11491183
       },
-      "guaranteed": 17726880
+      "guaranteed": 17726880,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 192,
@@ -2701,7 +3011,10 @@
         "2026-27": 7774648,
         "2027-28": 7774648
       },
-      "guaranteed": 16225352
+      "guaranteed": 16225352,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 194,
@@ -2717,7 +3030,10 @@
         "2028-29": 23303571,
         "2029-30": 24910713
       },
-      "guaranteed": 98399983
+      "guaranteed": 98399983,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 195,
@@ -2729,7 +3045,10 @@
       "salaries": {
         "2025-26": 8382150
       },
-      "guaranteed": 8382150
+      "guaranteed": 8382150,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 196,
@@ -2769,7 +3088,11 @@
         "2027-28": 9061680,
         "2028-29": 11490211
       },
-      "guaranteed": 16887240
+      "guaranteed": 16887240,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 199,
@@ -2795,7 +3118,10 @@
         "2026-27": 7466667,
         "2027-28": 7466667
       },
-      "guaranteed": 15644445
+      "guaranteed": 15644445,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 201,
@@ -2808,7 +3134,10 @@
         "2025-26": 33654814,
         "2026-27": 8104000
       },
-      "guaranteed": 8104000
+      "guaranteed": 8104000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 202,
@@ -2822,7 +3151,10 @@
         "2026-27": 8000000,
         "2027-28": 8000000
       },
-      "guaranteed": 16000000
+      "guaranteed": 16000000,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 203,
@@ -2836,7 +3168,10 @@
         "2026-27": 8000000,
         "2027-28": 8000000
       },
-      "guaranteed": 16000000
+      "guaranteed": 16000000,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 204,
@@ -2849,7 +3184,10 @@
         "2025-26": 8000000,
         "2026-27": 8000000
       },
-      "guaranteed": 8000000
+      "guaranteed": 8000000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 205,
@@ -2862,7 +3200,11 @@
         "2025-26": 7970280,
         "2026-27": 10106316
       },
-      "guaranteed": 18076596
+      "guaranteed": 18076596,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 206,
@@ -2876,7 +3218,11 @@
         "2026-27": 8237880,
         "2027-28": 10445633
       },
-      "guaranteed": 16101120
+      "guaranteed": 16101120,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 207,
@@ -2890,7 +3236,10 @@
         "2026-27": 8285714,
         "2027-28": 8857143
       },
-      "guaranteed": 16000000
+      "guaranteed": 16000000,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 208,
@@ -2906,7 +3255,10 @@
         "2028-29": 25000000,
         "2029-30": 25000000
       },
-      "guaranteed": 107707709
+      "guaranteed": 107707709,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 209,
@@ -2935,7 +3287,11 @@
         "2027-28": 8271960,
         "2028-29": 10505389
       },
-      "guaranteed": 15416280
+      "guaranteed": 15416280,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 211,
@@ -2960,7 +3316,11 @@
         "2025-26": 7275600,
         "2026-27": 9240012
       },
-      "guaranteed": 16515612
+      "guaranteed": 16515612,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 213,
@@ -2988,7 +3348,11 @@
         "2026-27": 7519920,
         "2027-28": 9550298
       },
-      "guaranteed": 14698320
+      "guaranteed": 14698320,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 215,
@@ -3001,7 +3365,10 @@
         "2025-26": 7163000,
         "2026-27": 7163000
       },
-      "guaranteed": 7163000
+      "guaranteed": 7163000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 216,
@@ -3013,7 +3380,10 @@
       "salaries": {
         "2025-26": 7874853
       },
-      "guaranteed": 7096231
+      "guaranteed": 7096231,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 217,
@@ -3040,7 +3410,11 @@
         "2027-28": 7578240,
         "2028-29": 9639522
       },
-      "guaranteed": 14122920
+      "guaranteed": 14122920,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 219,
@@ -3052,7 +3426,10 @@
       "salaries": {
         "2025-26": 7680524
       },
-      "guaranteed": 6809524
+      "guaranteed": 6809524,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 220,
@@ -3078,7 +3455,10 @@
       "salaries": {
         "2025-26": 6670882
       },
-      "guaranteed": 6670882
+      "guaranteed": 6670882,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 222,
@@ -3091,7 +3471,11 @@
         "2025-26": 6665520,
         "2026-27": 8478542
       },
-      "guaranteed": 15144062
+      "guaranteed": 15144062,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 223,
@@ -3120,7 +3504,10 @@
         "2029-30": 51460000,
         "2030-31": 54780000
       },
-      "guaranteed": 247280997
+      "guaranteed": 247280997,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 225,
@@ -3134,7 +3521,11 @@
         "2026-27": 6889320,
         "2027-28": 8763216
       },
-      "guaranteed": 13465440
+      "guaranteed": 13465440,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 226,
@@ -3146,7 +3537,10 @@
       "salaries": {
         "2025-26": 6483144
       },
-      "guaranteed": 6483144
+      "guaranteed": 6483144,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 227,
@@ -3158,7 +3552,10 @@
       "salaries": {
         "2025-26": 6383525
       },
-      "guaranteed": 6383525
+      "guaranteed": 6383525,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 228,
@@ -3173,7 +3570,11 @@
         "2027-28": 6966000,
         "2028-29": 8874684
       },
-      "guaranteed": 12982080
+      "guaranteed": 12982080,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 229,
@@ -3185,7 +3586,10 @@
       "salaries": {
         "2025-26": 6276531
       },
-      "guaranteed": 6276531
+      "guaranteed": 6276531,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 230,
@@ -3198,7 +3602,10 @@
         "2025-26": 6250000,
         "2026-27": 6250000
       },
-      "guaranteed": 6250000
+      "guaranteed": 6250000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 231,
@@ -3211,7 +3618,10 @@
         "2025-26": 6250000,
         "2026-27": 6250000
       },
-      "guaranteed": 6250000
+      "guaranteed": 6250000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 232,
@@ -3237,7 +3647,11 @@
         "2025-26": 6127080,
         "2026-27": 7805900
       },
-      "guaranteed": 13932980
+      "guaranteed": 13932980,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 234,
@@ -3264,7 +3678,11 @@
         "2026-27": 6332760,
         "2027-28": 8067937
       },
-      "guaranteed": 12377760
+      "guaranteed": 12377760,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 236,
@@ -3279,7 +3697,11 @@
         "2027-28": 6617160,
         "2028-29": 8436880
       },
-      "guaranteed": 12332760
+      "guaranteed": 12332760,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 237,
@@ -3293,7 +3715,10 @@
         "2026-27": 6000000,
         "2027-28": 6000000
       },
-      "guaranteed": 12000000
+      "guaranteed": 12000000,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 238,
@@ -3331,7 +3756,11 @@
         "2025-26": 5820240,
         "2026-27": 7420806
       },
-      "guaranteed": 13241046
+      "guaranteed": 13241046,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 241,
@@ -3345,7 +3774,11 @@
         "2026-27": 6015600,
         "2027-28": 7669890
       },
-      "guaranteed": 11758080
+      "guaranteed": 11758080,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 242,
@@ -3360,7 +3793,11 @@
         "2027-28": 6286920,
         "2028-29": 8342743
       },
-      "guaranteed": 11716200
+      "guaranteed": 11716200,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 243,
@@ -3373,7 +3810,10 @@
         "2025-26": 5685000,
         "2026-27": 5969250
       },
-      "guaranteed": 11654250
+      "guaranteed": 11654250,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 244,
@@ -3386,7 +3826,10 @@
         "2025-26": 5685000,
         "2026-27": 5969250
       },
-      "guaranteed": 5685000
+      "guaranteed": 5685000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 245,
@@ -3398,7 +3841,10 @@
       "salaries": {
         "2025-26": 5675766
       },
-      "guaranteed": 5675766
+      "guaranteed": 5675766,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 246,
@@ -3424,7 +3870,10 @@
         "2025-26": 5601600,
         "2026-27": 5881680
       },
-      "guaranteed": 5601600
+      "guaranteed": 5601600,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 248,
@@ -3437,7 +3886,11 @@
         "2025-26": 5529720,
         "2026-27": 7337939
       },
-      "guaranteed": 5529720
+      "guaranteed": 5529720,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 249,
@@ -3463,7 +3916,11 @@
         "2026-27": 5715360,
         "2027-28": 7584283
       },
-      "guaranteed": 11170920
+      "guaranteed": 11170920,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 251,
@@ -3478,7 +3935,11 @@
         "2027-28": 5972760,
         "2028-29": 8230464
       },
-      "guaranteed": 11130720
+      "guaranteed": 11130720,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 252,
@@ -3503,7 +3964,10 @@
       "salaries": {
         "2025-26": 5426400
       },
-      "guaranteed": 5426400
+      "guaranteed": 5426400,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 254,
@@ -3515,7 +3979,10 @@
       "salaries": {
         "2025-26": 5399118
       },
-      "guaranteed": 5399118
+      "guaranteed": 5399118,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 255,
@@ -3531,7 +3998,10 @@
         "2028-29": 19383010,
         "2029-30": 19383010
       },
-      "guaranteed": 5354000
+      "guaranteed": 5354000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 256,
@@ -3557,7 +4027,11 @@
         "2025-26": 5253360,
         "2026-27": 7239131
       },
-      "guaranteed": 12492491
+      "guaranteed": 12492491,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 258,
@@ -3571,7 +4045,11 @@
         "2026-27": 5429760,
         "2027-28": 7482210
       },
-      "guaranteed": 10612680
+      "guaranteed": 10612680,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 259,
@@ -3586,7 +4064,11 @@
         "2027-28": 5673840,
         "2028-29": 8107918
       },
-      "guaranteed": 10574040
+      "guaranteed": 10574040,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 260,
@@ -3599,7 +4081,10 @@
         "2025-26": 5134000,
         "2026-27": 5390700
       },
-      "guaranteed": 10524700
+      "guaranteed": 10524700,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 261,
@@ -3612,7 +4097,10 @@
         "2025-26": 19920855,
         "2026-27": 5390700
       },
-      "guaranteed": 5134000
+      "guaranteed": 5134000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 262,
@@ -3624,7 +4112,10 @@
       "salaries": {
         "2025-26": 5000000
       },
-      "guaranteed": 5000000
+      "guaranteed": 5000000,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 263,
@@ -3661,7 +4152,11 @@
         "2025-26": 4990560,
         "2026-27": 7131511
       },
-      "guaranteed": 12122071
+      "guaranteed": 12122071,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 266,
@@ -3673,7 +4168,10 @@
       "salaries": {
         "2025-26": 4962033
       },
-      "guaranteed": 4962033
+      "guaranteed": 4962033,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 267,
@@ -3687,7 +4185,11 @@
         "2026-27": 5158080,
         "2027-28": 7370897
       },
-      "guaranteed": 10081800
+      "guaranteed": 10081800,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 268,
@@ -3704,7 +4206,10 @@
         "2029-30": 26724137,
         "2030-31": 28448274
       },
-      "guaranteed": 129921797
+      "guaranteed": 129921797,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 269,
@@ -3719,7 +4224,11 @@
         "2027-28": 5390640,
         "2028-29": 7983539
       },
-      "guaranteed": 10045680
+      "guaranteed": 10045680,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 270,
@@ -3731,7 +4240,10 @@
       "salaries": {
         "2025-26": 4878938
       },
-      "guaranteed": 4878938
+      "guaranteed": 4878938,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 271,
@@ -3744,7 +4256,11 @@
         "2025-26": 4741320,
         "2026-27": 7021895
       },
-      "guaranteed": 11763215
+      "guaranteed": 11763215,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 272,
@@ -3758,7 +4274,11 @@
         "2026-27": 4900560,
         "2027-28": 7257730
       },
-      "guaranteed": 9578160
+      "guaranteed": 9578160,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 273,
@@ -3773,7 +4293,11 @@
         "2027-28": 5120400,
         "2028-29": 7849573
       },
-      "guaranteed": 9542760
+      "guaranteed": 9542760,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 274,
@@ -3785,7 +4309,10 @@
       "salaries": {
         "2025-26": 5480297
       },
-      "guaranteed": 4503720
+      "guaranteed": 4503720,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 275,
@@ -3798,7 +4325,10 @@
         "2025-26": 4500000,
         "2026-27": 4500000
       },
-      "guaranteed": 4500000
+      "guaranteed": 4500000,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 276,
@@ -3814,7 +4344,10 @@
         "2028-29": 15096000,
         "2029-30": 16200000
       },
-      "guaranteed": 66845417
+      "guaranteed": 66845417,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 277,
@@ -3828,7 +4361,11 @@
         "2026-27": 4654920,
         "2027-28": 7135992
       },
-      "guaranteed": 9098280
+      "guaranteed": 9098280,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 278,
@@ -3843,7 +4380,11 @@
         "2027-28": 4864920,
         "2028-29": 7462788
       },
-      "guaranteed": 9065880
+      "guaranteed": 9065880,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 279,
@@ -3855,7 +4396,10 @@
       "salaries": {
         "2025-26": 4356476
       },
-      "guaranteed": 4356476
+      "guaranteed": 4356476,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 280,
@@ -3881,7 +4425,11 @@
         "2025-26": 4278960,
         "2026-27": 6563925
       },
-      "guaranteed": 10842885
+      "guaranteed": 10842885,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 282,
@@ -3895,7 +4443,11 @@
         "2026-27": 4422600,
         "2027-28": 6784268
       },
-      "guaranteed": 8643960
+      "guaranteed": 8643960,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 283,
@@ -3910,7 +4462,11 @@
         "2027-28": 4621200,
         "2028-29": 7098163
       },
-      "guaranteed": 8612280
+      "guaranteed": 8612280,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 284,
@@ -3936,7 +4492,11 @@
         "2026-27": 4201080,
         "2027-28": 6452860
       },
-      "guaranteed": 8211240
+      "guaranteed": 8211240,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 286,
@@ -3950,7 +4510,10 @@
         "2026-27": 4000000,
         "2027-28": 4000000
       },
-      "guaranteed": 8000000
+      "guaranteed": 8000000,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      }
     },
     {
       "source_rank": 287,
@@ -3962,7 +4525,10 @@
       "salaries": {
         "2025-26": 4000000
       },
-      "guaranteed": 4000000
+      "guaranteed": 4000000,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 288,
@@ -3977,7 +4543,11 @@
         "2027-28": 4390320,
         "2028-29": 6752312
       },
-      "guaranteed": 8181840
+      "guaranteed": 8181840,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 289,
@@ -3990,7 +4560,11 @@
         "2025-26": 3861600,
         "2026-27": 5939141
       },
-      "guaranteed": 9800741
+      "guaranteed": 9800741,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 290,
@@ -4005,7 +4579,11 @@
         "2027-28": 4193040,
         "2028-29": 6457282
       },
-      "guaranteed": 7813560
+      "guaranteed": 7813560,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 291,
@@ -4018,7 +4596,10 @@
         "2025-26": 3809524,
         "2026-27": 4000000
       },
-      "guaranteed": 3809524
+      "guaranteed": 3809524,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 292,
@@ -4032,7 +4613,11 @@
         "2026-27": 3991200,
         "2027-28": 6138466
       },
-      "guaranteed": 7800720
+      "guaranteed": 7800720,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 293,
@@ -4059,7 +4644,10 @@
         "2025-26": 3697105,
         "2026-27": 3881960
       },
-      "guaranteed": 3697105
+      "guaranteed": 3697105,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 295,
@@ -4072,7 +4660,11 @@
         "2025-26": 3687960,
         "2026-27": 5679459
       },
-      "guaranteed": 9367419
+      "guaranteed": 9367419,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 296,
@@ -4086,7 +4678,10 @@
         "2026-27": 3850000,
         "2027-28": 4025000
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 297,
@@ -4101,7 +4696,11 @@
         "2027-28": 4024440,
         "2028-29": 6205687
       },
-      "guaranteed": 7500480
+      "guaranteed": 7500480,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 298,
@@ -4115,7 +4714,11 @@
         "2026-27": 3811800,
         "2027-28": 5870172
       },
-      "guaranteed": 7449960
+      "guaranteed": 7449960,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 299,
@@ -4128,7 +4731,10 @@
         "2025-26": 3634153,
         "2026-27": 3815861
       },
-      "guaranteed": 7450014
+      "guaranteed": 7450014,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 300,
@@ -4141,7 +4747,11 @@
         "2025-26": 3539760,
         "2026-27": 5458310
       },
-      "guaranteed": 8998070
+      "guaranteed": 8998070,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 301,
@@ -4156,7 +4766,11 @@
         "2027-28": 3864000,
         "2028-29": 6155352
       },
-      "guaranteed": 7200840
+      "guaranteed": 7200840,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 302,
@@ -4170,7 +4784,11 @@
         "2026-27": 3658560,
         "2027-28": 5641500
       },
-      "guaranteed": 7151040
+      "guaranteed": 7151040,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 303,
@@ -4195,7 +4813,10 @@
         "2025-26": 3415000,
         "2026-27": 3415000
       },
-      "guaranteed": 3415000
+      "guaranteed": 3415000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 305,
@@ -4208,7 +4829,11 @@
         "2025-26": 3398640,
         "2026-27": 5414034
       },
-      "guaranteed": 8812674
+      "guaranteed": 8812674,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 306,
@@ -4223,7 +4848,11 @@
         "2027-28": 3709320,
         "2028-29": 6101832
       },
-      "guaranteed": 6912840
+      "guaranteed": 6912840,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 307,
@@ -4237,7 +4866,11 @@
         "2026-27": 3512760,
         "2027-28": 5595827
       },
-      "guaranteed": 6865800
+      "guaranteed": 6865800,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 308,
@@ -4249,7 +4882,10 @@
       "salaries": {
         "2025-26": 5643732
       },
-      "guaranteed": 3347458
+      "guaranteed": 3347458,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 309,
@@ -4262,7 +4898,10 @@
         "2025-26": 3303774,
         "2026-27": 3815861
       },
-      "guaranteed": 3303774
+      "guaranteed": 3303774,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 310,
@@ -4274,7 +4913,10 @@
       "salaries": {
         "2025-26": 3262560
       },
-      "guaranteed": 3262560
+      "guaranteed": 3262560,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 311,
@@ -4289,7 +4931,11 @@
         "2027-28": 3560880,
         "2028-29": 6042814
       },
-      "guaranteed": 6636960
+      "guaranteed": 6636960,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 312,
@@ -4303,7 +4949,11 @@
         "2026-27": 3372120,
         "2027-28": 5547138
       },
-      "guaranteed": 6590880
+      "guaranteed": 6590880,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 313,
@@ -4316,7 +4966,11 @@
         "2025-26": 3132000,
         "2026-27": 5315004
       },
-      "guaranteed": 8447004
+      "guaranteed": 8447004,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 314,
@@ -4331,7 +4985,11 @@
         "2027-28": 3418800,
         "2028-29": 5979481
       },
-      "guaranteed": 6371520
+      "guaranteed": 6371520,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 315,
@@ -4360,7 +5018,11 @@
         "2026-27": 3237120,
         "2027-28": 5493394
       },
-      "guaranteed": 6327600
+      "guaranteed": 6327600,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 317,
@@ -4373,7 +5035,10 @@
         "2025-26": 3080921,
         "2026-27": 3451779
       },
-      "guaranteed": 3080921
+      "guaranteed": 3080921,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 318,
@@ -4387,7 +5052,10 @@
         "2026-27": 3000000,
         "2027-28": 3000000
       },
-      "guaranteed": 3000000
+      "guaranteed": 3000000,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 319,
@@ -4401,7 +5069,10 @@
         "2026-27": 2850000,
         "2027-28": 2850000
       },
-      "guaranteed": 3000000
+      "guaranteed": 3000000,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 320,
@@ -4414,7 +5085,10 @@
         "2025-26": 3000000,
         "2026-27": 3000000
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 321,
@@ -4429,7 +5103,11 @@
         "2027-28": 3282000,
         "2028-29": 5910882
       },
-      "guaranteed": 6115680
+      "guaranteed": 6115680,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 322,
@@ -4443,7 +5121,11 @@
         "2026-27": 3108000,
         "2027-28": 5435892
       },
-      "guaranteed": 6074760
+      "guaranteed": 6074760,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 323,
@@ -4455,7 +5137,10 @@
       "salaries": {
         "2025-26": 3204816
       },
-      "guaranteed": 3204816
+      "guaranteed": 3204816,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 324,
@@ -4468,7 +5153,11 @@
         "2025-26": 2886720,
         "2026-27": 5198983
       },
-      "guaranteed": 8085703
+      "guaranteed": 8085703,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 325,
@@ -4483,7 +5172,11 @@
         "2027-28": 3172920,
         "2028-29": 5720776
       },
-      "guaranteed": 5913120
+      "guaranteed": 5913120,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 326,
@@ -4497,7 +5190,11 @@
         "2026-27": 2983680,
         "2027-28": 5373608
       },
-      "guaranteed": 5831280
+      "guaranteed": 5831280,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 327,
@@ -4512,7 +5209,11 @@
         "2027-28": 3081840,
         "2028-29": 5559640
       },
-      "guaranteed": 5742720
+      "guaranteed": 5742720,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 328,
@@ -4525,7 +5226,11 @@
         "2025-26": 2790720,
         "2026-27": 5031669
       },
-      "guaranteed": 7822389
+      "guaranteed": 7822389,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 329,
@@ -4540,7 +5245,11 @@
         "2027-28": 3062640,
         "2028-29": 5528065
       },
-      "guaranteed": 5707440
+      "guaranteed": 5707440,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 330,
@@ -4555,7 +5264,11 @@
         "2027-28": 3040320,
         "2028-29": 5487778
       },
-      "guaranteed": 5666040
+      "guaranteed": 5666040,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 331,
@@ -4582,7 +5295,11 @@
         "2027-28": 3018480,
         "2028-29": 5448356
       },
-      "guaranteed": 5624760
+      "guaranteed": 5624760,
+      "options_by_season": {
+        "2027-28": "Team Option",
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 333,
@@ -4594,7 +5311,10 @@
       "salaries": {
         "2025-26": 2710680
       },
-      "guaranteed": 2710680
+      "guaranteed": 2710680,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 334,
@@ -4607,7 +5327,11 @@
         "2025-26": 2693760,
         "2026-27": 4862237
       },
-      "guaranteed": 7555997
+      "guaranteed": 7555997,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 335,
@@ -4620,7 +5344,11 @@
         "2025-26": 2674200,
         "2026-27": 4826931
       },
-      "guaranteed": 7501131
+      "guaranteed": 7501131,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 336,
@@ -4634,7 +5362,11 @@
         "2026-27": 2801640,
         "2027-28": 5054159
       },
-      "guaranteed": 5475720
+      "guaranteed": 5475720,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 337,
@@ -4648,7 +5380,11 @@
         "2026-27": 2784240,
         "2027-28": 5025553
       },
-      "guaranteed": 5442000
+      "guaranteed": 5442000,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 338,
@@ -4661,7 +5397,11 @@
         "2025-26": 2654880,
         "2026-27": 4792059
       },
-      "guaranteed": 2654880
+      "guaranteed": 2654880,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 339,
@@ -4675,7 +5415,11 @@
         "2026-27": 2763960,
         "2027-28": 4988948
       },
-      "guaranteed": 5402160
+      "guaranteed": 5402160,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 340,
@@ -4689,7 +5433,11 @@
         "2026-27": 2744040,
         "2027-28": 4952993
       },
-      "guaranteed": 5363040
+      "guaranteed": 5363040,
+      "options_by_season": {
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 341,
@@ -4716,7 +5464,10 @@
         "2027-28": 2616754,
         "2028-29": 2830685
       },
-      "guaranteed": 7565833
+      "guaranteed": 7565833,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 343,
@@ -4729,7 +5480,10 @@
         "2025-26": 2461463,
         "2026-27": 2801346
       },
-      "guaranteed": 5262809
+      "guaranteed": 5262809,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 344,
@@ -4755,7 +5509,10 @@
         "2025-26": 2461463,
         "2026-27": 2801346
       },
-      "guaranteed": 2461463
+      "guaranteed": 2461463,
+      "options_by_season": {
+        "2026-27": "Player Option"
+      }
     },
     {
       "source_rank": 346,
@@ -4768,7 +5525,10 @@
         "2025-26": 2461463,
         "2026-27": 2801346
       },
-      "guaranteed": 2461463
+      "guaranteed": 2461463,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 347,
@@ -4782,7 +5542,10 @@
         "2026-27": 2584539,
         "2027-28": 2934742
       },
-      "guaranteed": 2378870
+      "guaranteed": 2378870,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 348,
@@ -4795,7 +5558,10 @@
         "2025-26": 2378870,
         "2026-27": 2584539
       },
-      "guaranteed": 2378870
+      "guaranteed": 2378870,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 349,
@@ -4809,7 +5575,10 @@
         "2026-27": 2667944,
         "2027-28": 3005085
       },
-      "guaranteed": 5017522
+      "guaranteed": 5017522,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 350,
@@ -4821,7 +5590,10 @@
       "salaries": {
         "2025-26": 2349578
       },
-      "guaranteed": 2349578
+      "guaranteed": 2349578,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 351,
@@ -4861,7 +5633,10 @@
         "2026-27": 2667944,
         "2027-28": 3005085
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 354,
@@ -4874,7 +5649,10 @@
         "2025-26": 2349578,
         "2026-27": 2667944
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 355,
@@ -4914,7 +5692,10 @@
       "salaries": {
         "2025-26": 2301587
       },
-      "guaranteed": 2301587
+      "guaranteed": 2301587,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 358,
@@ -4929,7 +5710,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 4707364
+      "guaranteed": 4707364,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 359,
@@ -4944,7 +5728,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 4707364
+      "guaranteed": 4707364,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 360,
@@ -5088,7 +5875,10 @@
       "salaries": {
         "2025-26": 5643732
       },
-      "guaranteed": 2296274
+      "guaranteed": 2296274,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 372,
@@ -5414,7 +6204,10 @@
       "salaries": {
         "2025-26": 2270735
       },
-      "guaranteed": 2270735
+      "guaranteed": 2270735,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 399,
@@ -5482,7 +6275,11 @@
         "2027-28": 5000000,
         "2028-29": 5370370
       },
-      "guaranteed": 11851307
+      "guaranteed": 11851307,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2028-29": "Player Option"
+      }
     },
     {
       "source_rank": 404,
@@ -5495,7 +6292,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": 4627882
+      "guaranteed": 4627882,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 405,
@@ -5508,7 +6308,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": 4627882
+      "guaranteed": 4627882,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 406,
@@ -5520,7 +6323,10 @@
       "salaries": {
         "2025-26": 2353647
       },
-      "guaranteed": 2221677
+      "guaranteed": 2221677,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 407,
@@ -5533,7 +6339,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": 2221677
+      "guaranteed": 2221677,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 408,
@@ -5546,7 +6355,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": 2221677
+      "guaranteed": 2221677,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 409,
@@ -5559,7 +6371,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": 2221677
+      "guaranteed": 2221677,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 410,
@@ -5583,7 +6398,10 @@
       "salaries": {
         "2025-26": 2221677
       },
-      "guaranteed": 2221677
+      "guaranteed": 2221677,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 412,
@@ -5596,7 +6414,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": 200000
+      "guaranteed": 200000,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 413,
@@ -5609,7 +6430,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 414,
@@ -5622,7 +6446,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 415,
@@ -5635,7 +6462,10 @@
         "2025-26": 2221677,
         "2026-27": 2406205
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 416,
@@ -5675,7 +6505,10 @@
         "2026-27": 2296271,
         "2027-28": 2486995
       },
-      "guaranteed": 4488168
+      "guaranteed": 4488168,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 419,
@@ -5699,7 +6532,10 @@
       "salaries": {
         "2025-26": 2191897
       },
-      "guaranteed": 2191897
+      "guaranteed": 2191897,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 421,
@@ -5725,7 +6561,10 @@
         "2026-27": 2411090,
         "2027-28": 2616754
       },
-      "guaranteed": 4459584
+      "guaranteed": 4459584,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 423,
@@ -5762,7 +6601,10 @@
         "2025-26": 1955377,
         "2026-27": 2296271
       },
-      "guaranteed": 4251648
+      "guaranteed": 4251648,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 426,
@@ -5775,7 +6617,10 @@
         "2025-26": 1955377,
         "2026-27": 2296271
       },
-      "guaranteed": 4251648
+      "guaranteed": 4251648,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 427,
@@ -5788,7 +6633,10 @@
         "2025-26": 1955377,
         "2026-27": 2296271
       },
-      "guaranteed": 4251648
+      "guaranteed": 4251648,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 428,
@@ -5802,7 +6650,10 @@
         "2026-27": 2296271,
         "2027-28": 2486995
       },
-      "guaranteed": 4251648
+      "guaranteed": 4251648,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 429,
@@ -5815,7 +6666,10 @@
         "2025-26": 1955377,
         "2026-27": 2296271
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 430,
@@ -5829,7 +6683,10 @@
         "2026-27": 2296271,
         "2027-28": 2486995
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 431,
@@ -5841,7 +6698,10 @@
       "salaries": {
         "2025-26": 1955377
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 432,
@@ -5865,7 +6725,10 @@
       "salaries": {
         "2025-26": 1955377
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 434,
@@ -5879,7 +6742,10 @@
         "2026-27": 2296271,
         "2027-28": 2486995
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 435,
@@ -5893,7 +6759,10 @@
         "2026-27": 2296271,
         "2027-28": 2486995
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 436,
@@ -5907,7 +6776,10 @@
         "2026-27": 2296271,
         "2027-28": 2486995
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 437,
@@ -5919,7 +6791,10 @@
       "salaries": {
         "2025-26": 1955377
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 438,
@@ -5943,7 +6818,10 @@
       "salaries": {
         "2025-26": 1955377
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 440,
@@ -5955,7 +6833,10 @@
       "salaries": {
         "2025-26": 1955377
       },
-      "guaranteed": 1955377
+      "guaranteed": 1955377,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 441,
@@ -5982,7 +6863,10 @@
         "2026-27": 2296271,
         "2027-28": 2486995
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 443,
@@ -6007,7 +6891,10 @@
         "2025-26": 1527805,
         "2026-27": 2801346
       },
-      "guaranteed": 1527805
+      "guaranteed": 1527805,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 445,
@@ -6022,7 +6909,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 3523787
+      "guaranteed": 3523787,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 446,
@@ -6035,7 +6925,10 @@
         "2025-26": 10739683,
         "2026-27": 3815861
       },
-      "guaranteed": 10739683
+      "guaranteed": 10739683,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 447,
@@ -6050,7 +6943,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 5949688
+      "guaranteed": 5949688,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 448,
@@ -6064,7 +6960,10 @@
         "2026-27": 2150917,
         "2027-28": 2525901
       },
-      "guaranteed": 3423787
+      "guaranteed": 3423787,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 449,
@@ -6079,7 +6978,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 3423787
+      "guaranteed": 3423787,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 450,
@@ -6094,7 +6996,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 3423787
+      "guaranteed": 3423787,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 451,
@@ -6109,7 +7014,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 3423787
+      "guaranteed": 3423787,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 452,
@@ -6123,7 +7031,10 @@
         "2026-27": 2150917,
         "2027-28": 2525901
       },
-      "guaranteed": 3423787
+      "guaranteed": 3423787,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 453,
@@ -6138,7 +7049,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 3423787
+      "guaranteed": 3423787,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 454,
@@ -6153,7 +7067,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 3423787
+      "guaranteed": 3423787,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 455,
@@ -6180,7 +7097,10 @@
         "2027-28": 2525901,
         "2028-29": 2735698
       },
-      "guaranteed": 1272870
+      "guaranteed": 1272870,
+      "options_by_season": {
+        "2028-29": "Team Option"
+      }
     },
     {
       "source_rank": 457,
@@ -6206,7 +7126,12 @@
         "2026-27": 1002360,
         "2027-28": 1002360
       },
-      "guaranteed": 3007080
+      "guaranteed": 3007080,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 459,
@@ -6230,7 +7155,10 @@
       "salaries": {
         "2025-26": 7680524
       },
-      "guaranteed": 871000
+      "guaranteed": 871000,
+      "options_by_season": {
+        "2025-26": "Player Option"
+      }
     },
     {
       "source_rank": 461,
@@ -6254,7 +7182,10 @@
       "salaries": {
         "2025-26": 5480297
       },
-      "guaranteed": 976577
+      "guaranteed": 976577,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 463,
@@ -6291,7 +7222,10 @@
       "salaries": {
         "2025-26": 7874853
       },
-      "guaranteed": 778622
+      "guaranteed": 778622,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 466,
@@ -6317,7 +7251,10 @@
         "2026-27": 2584539,
         "2027-28": 2934742
       },
-      "guaranteed": 3309137
+      "guaranteed": 3309137,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 468,
@@ -6420,7 +7357,12 @@
         "2026-27": 666667,
         "2027-28": 666667
       },
-      "guaranteed": 2000001
+      "guaranteed": 2000001,
+      "options_by_season": {
+        "2025-26": "Team Option",
+        "2026-27": "Team Option",
+        "2027-28": "Team Option"
+      }
     },
     {
       "source_rank": 476,
@@ -6470,7 +7412,10 @@
         "2025-26": 475497,
         "2026-27": 2150917
       },
-      "guaranteed": 475497
+      "guaranteed": 475497,
+      "options_by_season": {
+        "2026-27": "Team Option"
+      }
     },
     {
       "source_rank": 480,
@@ -6597,7 +7542,10 @@
       "salaries": {
         "2025-26": 3204816
       },
-      "guaranteed": 3204816
+      "guaranteed": 3204816,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 490,
@@ -6609,7 +7557,10 @@
       "salaries": {
         "2025-26": 3204816
       },
-      "guaranteed": 3204816
+      "guaranteed": 3204816,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 491,
@@ -6633,7 +7584,10 @@
       "salaries": {
         "2025-26": 5480297
       },
-      "guaranteed": 976577
+      "guaranteed": 976577,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 493,
@@ -6837,7 +7791,10 @@
       "salaries": {
         "2025-26": 5480297
       },
-      "guaranteed": 131970
+      "guaranteed": 131970,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 510,
@@ -6849,7 +7806,10 @@
       "salaries": {
         "2025-26": 2353647
       },
-      "guaranteed": 131970
+      "guaranteed": 131970,
+      "options_by_season": {
+        "2025-26": "Team Option"
+      }
     },
     {
       "source_rank": 511,

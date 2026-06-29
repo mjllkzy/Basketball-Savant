@@ -45,6 +45,7 @@ jobs:
         run: |
           python -m py_compile scripts/ingest_nba_excel.py
           python -m py_compile scripts/import_player_contracts.py
+          python -m py_compile scripts/sync_player_contract_options.py
 
       - name: Test
         run: pnpm test
