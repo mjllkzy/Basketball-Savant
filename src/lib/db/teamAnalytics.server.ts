@@ -1,5 +1,6 @@
 import type { Game, Lineup, SeasonType, Shot, Team, TeamGameStat, TeamSeasonAggregate } from "@/lib/types";
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
+import { buildUpcomingTeamSummaries } from "@/lib/data/currentRoster";
 import { officialGames, officialTeamGameStats } from "@/lib/data/official";
 import { listGameAnalytics, type GameListItem } from "./gameAnalytics.server";
 import { listPlayerDirectory, type PlayerDirectoryRow } from "./playerDirectory.server";
@@ -7,7 +8,7 @@ import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
-import { DEFAULT_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
+import { DEFAULT_SEASON, UPCOMING_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/teamAnalytics.server.ts can only be imported on the server.");
@@ -422,6 +423,12 @@ async function jsonFallback(params: TeamSummaryParams = {}): Promise<TeamSummary
   const seasonType = selectedSeasonType(params);
   const { teams } = await loadRuntimeFallbacks();
   const summaryRows = teams.filter((row) => row.season === season && row.season_type === seasonType);
+  if (!summaryRows.length && season === UPCOMING_SEASON && seasonType === DEFAULT_SEASON_TYPE) {
+    return {
+      source: "json",
+      rows: filterTeamAggregateRows(buildUpcomingTeamSummaries(teams, season), params),
+    };
+  }
   if (!summaryRows.length && seasonType === "Playoffs") return teamGameJsonFallback(params);
   return {
     source: "json",

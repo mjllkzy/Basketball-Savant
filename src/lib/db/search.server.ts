@@ -1,4 +1,5 @@
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
+import { currentTeamAbbreviationForPlayerSlug } from "@/lib/data/currentRoster";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -40,7 +41,7 @@ async function fallbackSearch(query: string, limit: number, types?: readonly Sit
       id: player.player_slug,
       label: player.player_name,
       href: `/players/${player.player_slug}`,
-      meta: `${player.team_abbreviation ?? "NBA"} · ${player.position ?? "N/A"}`,
+      meta: `${currentTeamAbbreviationForPlayerSlug(player.player_slug, player.team_abbreviation)} · ${player.position ?? "N/A"}`,
     })) : [];
   const teamRows = typeSet.has("team") ? teams
     .filter((team) => `${team.city} ${team.name} ${team.abbreviation}`.toLowerCase().includes(normalized))
@@ -104,7 +105,15 @@ export async function searchSite(query: string, limit = 8, types?: readonly Site
       ORDER BY priority, label
       LIMIT $3
     `, [normalized, pattern, safeLimit]);
-    if (result) return result.rows.map(({ type, id, label, href, meta }) => ({ type, id, label, href, meta }));
+    if (result) {
+      return result.rows.map(({ type, id, label, href, meta }) => ({
+        type,
+        id,
+        label,
+        href,
+        meta: type === "player" ? `${currentTeamAbbreviationForPlayerSlug(id, meta.split(" · ")[0])} · ${meta.split(" · ").slice(1).join(" · ") || "N/A"}` : meta,
+      }));
+    }
   } catch {
     // The generated masterfile index remains available during DB outages.
   }

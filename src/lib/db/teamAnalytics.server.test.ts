@@ -84,6 +84,9 @@ describe("database-backed team analytics", () => {
 
     expect(filters.seasons.map((option) => option.value)).toContain("2026-27");
     expect(result.source).toBe("json");
-    expect(result.rows).toHaveLength(0);
+    expect(result.rows).toHaveLength(30);
+    expect(result.rows.every((row) => row.season === "2026-27")).toBe(true);
+    expect(result.rows.every((row) => row.games === 0 && row.wins === 0 && row.losses === 0)).toBe(true);
+    expect(result.rows.every((row) => row.offRating === null && row.defRating === null && row.netRating === null)).toBe(true);
   }, 15_000);
 });

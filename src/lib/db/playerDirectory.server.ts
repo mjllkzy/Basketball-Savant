@@ -1,9 +1,10 @@
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
+import { buildUpcomingRosterRows } from "@/lib/data/currentRoster";
 import { officialBasketballReferenceGamesStartedByPlayerId, officialPlayerBirthDateById } from "@/lib/data/official";
 import { decimalAgeFromBirthDate, normalizeBirthDate } from "@/lib/playerAge";
 import type { SeasonType } from "@/lib/types";
 import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
-import { DEFAULT_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
+import { DEFAULT_SEASON, UPCOMING_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -261,7 +262,7 @@ function compareFallbackValues(left: number | string | null, right: number | str
 }
 
 async function jsonFallback(params: PlayerDirectoryParams): Promise<PlayerDirectoryResult> {
-  const { players, metadata } = await loadRuntimeFallbacks();
+  const { players, teams, metadata } = await loadRuntimeFallbacks();
   const page = params.all ? 1 : Math.max(1, params.page ?? 1);
   const requestedPageSize = params.all ? 1000 : params.pageSize ?? 20;
   const pageSize = Math.min(1000, Math.max(1, requestedPageSize));
@@ -272,7 +273,11 @@ async function jsonFallback(params: PlayerDirectoryParams): Promise<PlayerDirect
   const sortKey = fallbackSortValues[params.sort ?? "name"] ? params.sort ?? "name" : "name";
   const order = params.order ?? (sortKey === "name" ? "asc" : "desc");
   const sortValue = fallbackSortValues[sortKey];
-  const sourceRows = metadata.season === season && metadata.season_type === seasonType ? players : [];
+  const sourceRows = metadata.season === season && metadata.season_type === seasonType
+    ? players
+    : season === UPCOMING_SEASON && seasonType === DEFAULT_SEASON_TYPE
+      ? buildUpcomingRosterRows(players, teams)
+      : [];
   const filtered = sourceRows
     .filter((row) => !query || `${row.player_name} ${row.team_abbreviation ?? ""} ${row.position ?? ""}`.toLowerCase().includes(query))
     .filter((row) => !params.teamId || row.team_id === params.teamId || row.team_abbreviation === params.teamId)
@@ -298,6 +303,9 @@ async function jsonFallback(params: PlayerDirectoryParams): Promise<PlayerDirect
 export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): Promise<PlayerDirectoryResult> {
   const season = parseSeason(params.season);
   const seasonType = parseSeasonType(params.seasonType);
+  if (season === UPCOMING_SEASON && seasonType === DEFAULT_SEASON_TYPE) {
+    return jsonFallback(params);
+  }
   const page = params.all ? 1 : Math.max(1, params.page ?? 1);
   const requestedPageSize = params.all ? 1000 : params.pageSize ?? 20;
   const pageSize = Math.min(1000, Math.max(1, requestedPageSize));
@@ -442,7 +450,11 @@ export async function loadPlayerDirectoryFilters(seasonType: SeasonType = DEFAUL
   }
 
   const { players, teams, metadata } = await loadRuntimeFallbacks();
-  const sourcePlayers = metadata.season === selectedSeason && metadata.season_type === seasonType ? players : [];
+  const sourcePlayers = metadata.season === selectedSeason && metadata.season_type === seasonType
+    ? players
+    : selectedSeason === UPCOMING_SEASON && seasonType === DEFAULT_SEASON_TYPE
+      ? buildUpcomingRosterRows(players, teams)
+      : [];
   return {
     seasons: mergeSeasonOptions([metadata.season]),
     seasonTypes: seasonTypeOptions,
