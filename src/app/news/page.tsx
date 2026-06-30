@@ -6,7 +6,7 @@ import {
   NEWS_RETENTION_DAYS,
   filterNewsFeed,
   formatNewsDate,
-  getBiggestOfficialNewsLead,
+  getBiggestNewsLead,
   newsFeedCount,
   newsFeedFilters,
   normalizeNewsFilter,
@@ -37,7 +37,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
   const activeFilter = normalizeNewsFilter(singleParam(resolvedSearchParams, "filter"));
   const newsWindow = { withinDays: NEWS_RETENTION_DAYS };
   const filteredNews = filterNewsFeed(activeFilter, newsWindow);
-  const featured = getBiggestOfficialNewsLead(newsWindow);
+  const featured = getBiggestNewsLead(activeFilter, newsWindow);
   const remaining = filteredNews.filter((item) => item.id !== featured?.id);
 
   return (

@@ -127,6 +127,21 @@ export function getBiggestOfficialNewsLead(options: NewsWindowOptions = {}) {
   return selectBiggestOfficialNewsLead(newsFeed, options);
 }
 
+export function selectBiggestNewsLead(items: NewsItem[], filter: NewsFeedFilter = "all", options: NewsWindowOptions = {}) {
+  return [...items]
+    .filter((item) => {
+      if (!isNewsWithinWindow(item, options)) return false;
+      if (filter === "official") return item.reportingStatus === "Official";
+      if (filter === "rumors") return item.reportingStatus === "Rumor";
+      return true;
+    })
+    .sort((a, b) => newsImportanceScore(b) - newsImportanceScore(a) || newsTimestamp(b) - newsTimestamp(a))[0];
+}
+
+export function getBiggestNewsLead(filter: NewsFeedFilter = "all", options: NewsWindowOptions = {}) {
+  return selectBiggestNewsLead(newsFeed, filter, options);
+}
+
 export function formatNewsDate(value: string) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",

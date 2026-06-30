@@ -8,6 +8,7 @@ import {
   normalizeNewsFilter,
   newsImportanceScore,
   reportingStatusTone,
+  selectBiggestNewsLead,
   selectBiggestOfficialNewsLead,
   type NewsItem,
 } from "./news";
@@ -105,6 +106,49 @@ describe("news feed", () => {
     expect(lead?.id).toBe("official-trade");
     expect(lead?.reportingStatus).toBe("Official");
     expect(newsImportanceScore(lead!)).toBeGreaterThan(newsImportanceScore(items[1]));
+  });
+
+  it("selects the biggest lead from the active news filter", () => {
+    const items: NewsItem[] = [
+      {
+        id: "official-signing",
+        title: "Bucks sign veteran guard to one-year deal",
+        category: "Free Agency",
+        reportingStatus: "Official",
+        publishedAt: "2026-06-28T11:00:00.000Z",
+        sourceName: "NBA.com",
+        sourceUrl: "https://www.nba.com/news/bucks-sign-veteran-guard",
+        summary: "Milwaukee completed a depth signing on a short contract.",
+      },
+      {
+        id: "rumor-star-trade",
+        title: "Warriors star trade rumor heats up before free agency",
+        category: "Trade",
+        reportingStatus: "Rumor",
+        publishedAt: "2026-06-28T10:00:00.000Z",
+        sourceName: "Hoops Rumors",
+        sourceUrl: "https://www.hoopsrumors.com/2026/06/warriors-star-trade.html",
+        summary: "Rival executives are monitoring a potential blockbuster trade path.",
+      },
+      {
+        id: "stale-rumor",
+        title: "Older All-Star trade rumor resurfaces",
+        category: "Trade",
+        reportingStatus: "Rumor",
+        publishedAt: "2026-06-20T10:00:00.000Z",
+        sourceName: "Hoops Rumors",
+        sourceUrl: "https://www.hoopsrumors.com/2026/06/older-trade.html",
+        summary: "This older rumor should be outside the rolling window.",
+      },
+    ];
+    const window = {
+      referenceDate: "2026-06-28T12:00:00.000Z",
+      withinDays: NEWS_RETENTION_DAYS,
+    };
+
+    expect(selectBiggestNewsLead(items, "official", window)?.id).toBe("official-signing");
+    expect(selectBiggestNewsLead(items, "rumors", window)?.id).toBe("rumor-star-trade");
+    expect(selectBiggestNewsLead(items, "all", window)?.id).toBe("rumor-star-trade");
   });
 
   it("formats dates for fan-facing cards", () => {
