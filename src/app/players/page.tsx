@@ -8,14 +8,12 @@ import {
   contractSeasons,
   contractDealSummary,
   contractSalarySortValue,
-  contractSummarySortValue,
   freeAgencyStatusForSeason,
   listPlayerContracts,
   selectActiveContractDeal,
   summarizeTotalRemainingContract,
   summarizeContractSalaries,
   type ContractSeason,
-  type ContractSummary,
 } from "@/lib/db/playerContracts.server";
 import { listPlayerDirectory, loadPlayerDirectoryFilters } from "@/lib/db/playerDirectory.server";
 import { formatMetric } from "@/lib/metrics/format";
@@ -28,15 +26,17 @@ import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "
 
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
-const contractSortMetrics = ["selected_salary", "original_contract", "current_contract", "guaranteed", "player", "team", "position", ...contractSeasons.map((season) => `salary_${season.replace("-", "_")}`)];
+const contractSummarySortMetrics = ["original_years", "remaining_years", "original_total", "remaining_total", "original_aav", "current_aav", "original_contract", "current_contract"];
+const contractSortMetrics = ["selected_salary", ...contractSummarySortMetrics, "guaranteed", "player", "team", "position", ...contractSeasons.map((season) => `salary_${season.replace("-", "_")}`)];
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
 const entityColumnWidth = "290px";
 const secondaryColumnWidth = "86px";
-const contractSummaryColumnWidth = "168px";
+const contractSummaryColumnWidth = "112px";
+const contractMoneyColumnWidth = "124px";
 const contractSalaryColumnWidth = "126px";
 const standardTableMinWidth = "1752px";
 const advancedTableMinWidth = "1838px";
-const contractTableMinWidth = "1670px";
+const contractTableMinWidth = "2006px";
 const pastContractSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastContractSalaryCellClassName = "bg-slate-100/60 text-slate-500";
 const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
@@ -124,23 +124,55 @@ function contractColumnsForSeason(selectedSeason: ContractSeason): StatTableColu
     identityColumn("team", "Team", secondaryColumnWidth, "Profile"),
     identityColumn("pos", "Pos", secondaryColumnWidth, "Profile", primaryPositionOrder),
     {
-      key: "original_contract",
-      label: "Original Deal",
+      key: "original_years",
+      label: "Orig Yrs",
       group: "Contract Summary",
       align: "center",
       width: contractSummaryColumnWidth,
-      sortValueKey: "original_contractSort",
-      subValueKey: "original_contractSub",
+      sortValueKey: "original_yearsSort",
     },
     {
-      key: "current_contract",
-      label: "Remaining",
+      key: "remaining_years",
+      label: "Time Left",
       group: "Contract Summary",
       align: "center",
       width: contractSummaryColumnWidth,
-      sortValueKey: "current_contractSort",
-      subValueKey: "current_contractSub",
-      valueClassNameKey: "current_contractClass",
+      sortValueKey: "remaining_yearsSort",
+      subValueKey: "remaining_yearsSub",
+      subValueClassName: "text-rose-700",
+      valueClassNameKey: "remaining_yearsClass",
+    },
+    {
+      key: "original_total",
+      label: "Orig Total",
+      group: "Contract Summary",
+      align: "center",
+      width: contractMoneyColumnWidth,
+      sortValueKey: "original_totalSort",
+    },
+    {
+      key: "remaining_total",
+      label: "Money Left",
+      group: "Contract Summary",
+      align: "center",
+      width: contractMoneyColumnWidth,
+      sortValueKey: "remaining_totalSort",
+    },
+    {
+      key: "original_aav",
+      label: "Orig AAV",
+      group: "Contract Summary",
+      align: "center",
+      width: contractMoneyColumnWidth,
+      sortValueKey: "original_aavSort",
+    },
+    {
+      key: "current_aav",
+      label: "Current AAV",
+      group: "Contract Summary",
+      align: "center",
+      width: contractMoneyColumnWidth,
+      sortValueKey: "current_aavSort",
     },
     ...contractSeasons.map((contractSeason) => contractSalaryColumn(contractSeason, selectedSeason)),
     {
@@ -188,18 +220,9 @@ function formatMoney(amount: number | null | undefined, missingLabel = "--") {
   return `$${amount.toLocaleString("en-US")}`;
 }
 
-function formatContractSummary(summary: ContractSummary | null) {
-  if (!summary) {
-    return {
-      main: "--",
-      sub: "No data",
-    };
-  }
-  const yearsLabel = summary.years === 1 ? "1 yr" : `${summary.years} yrs`;
-  return {
-    main: `${formatMoney(summary.averageAnnualValue)} AAV · ${yearsLabel}`,
-    sub: `${formatMoney(summary.total)} total`,
-  };
+function formatContractYears(years: number | null | undefined, missingLabel = "--") {
+  if (years === null || years === undefined) return missingLabel;
+  return years === 1 ? "1 yr" : `${years} yrs`;
 }
 
 function optionKind(label: string | null | undefined) {
@@ -304,21 +327,26 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         const originalContract = contractDealSummary(activeDeal) ?? summarizeContractSalaries(row.salaryBySeason);
         const currentContract = summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, contractSeason);
         const freeAgencyStatus = currentContract ? null : freeAgencyStatusForSeason(row.contractDeals, contractSeason);
-        const originalContractDisplay = formatContractSummary(originalContract);
-        const currentContractDisplay = freeAgencyStatus ? { main: freeAgencyStatus, sub: "0 yrs left" } : formatContractSummary(currentContract);
         const base = {
           player: row.playerName,
           href: row.playerSlug ? playerHref(row.playerSlug, seasonType, season) : undefined,
           team: row.teamAbbreviation,
           teamAccent: teamPrimaryColorByAbbreviation.get(row.teamAbbreviation) ?? "#0f766e",
           pos: row.position ?? "N/A",
-          original_contract: originalContractDisplay.main,
-          original_contractSub: originalContractDisplay.sub,
-          original_contractSort: contractSummarySortValue(originalContract),
-          current_contract: currentContractDisplay.main,
-          current_contractSub: currentContractDisplay.sub,
-          current_contractSort: contractSummarySortValue(currentContract),
-          current_contractClass: freeAgencyStatus ? "text-rose-700" : "",
+          original_years: formatContractYears(originalContract?.years),
+          original_yearsSort: originalContract?.years ?? null,
+          remaining_years: currentContract ? formatContractYears(currentContract.years) : freeAgencyStatus ? "0 yrs" : "--",
+          remaining_yearsSub: freeAgencyStatus ?? "",
+          remaining_yearsSort: currentContract?.years ?? (freeAgencyStatus ? 0 : null),
+          remaining_yearsClass: freeAgencyStatus ? "text-rose-700" : "",
+          original_total: formatMoney(originalContract?.total),
+          original_totalSort: originalContract?.total ?? null,
+          remaining_total: currentContract ? formatMoney(currentContract.total) : freeAgencyStatus ? "$0" : "--",
+          remaining_totalSort: currentContract?.total ?? (freeAgencyStatus ? 0 : null),
+          original_aav: formatMoney(originalContract?.averageAnnualValue),
+          original_aavSort: originalContract?.averageAnnualValue ?? null,
+          current_aav: currentContract ? formatMoney(currentContract.averageAnnualValue) : freeAgencyStatus ? "$0" : "--",
+          current_aavSort: currentContract?.averageAnnualValue ?? (freeAgencyStatus ? 0 : null),
           guaranteed: formatMoney(row.guaranteedAmount, "Unavailable"),
           guaranteedSort: row.guaranteedAmount,
           guaranteedClass: row.needsFollowup ? "font-black text-slate-600" : "",

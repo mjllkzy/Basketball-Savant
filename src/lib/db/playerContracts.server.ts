@@ -470,11 +470,20 @@ function hasContractSeasonContext(row: PlayerContractRow, season: ContractSeason
 }
 
 function sortValue(row: PlayerContractRow, sort: string, season: ContractSeason): number | string | null {
+  const originalSummary = contractDealSummary(selectActiveContractDeal(row.contractDeals, season)) ?? summarizeContractSalaries(row.salaryBySeason);
+  const remainingSummary = summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, season);
+  const freeAgencyStatus = remainingSummary ? null : freeAgencyStatusForSeason(row.contractDeals, season);
   if (sort === "player") return row.playerName;
   if (sort === "team") return row.teamAbbreviation;
   if (sort === "position") return row.position ?? "";
-  if (sort === "original_contract") return contractSummarySortValue(contractDealSummary(selectActiveContractDeal(row.contractDeals, season)) ?? summarizeContractSalaries(row.salaryBySeason));
-  if (sort === "current_contract") return contractSummarySortValue(summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, season));
+  if (sort === "original_contract") return contractSummarySortValue(originalSummary);
+  if (sort === "current_contract") return contractSummarySortValue(remainingSummary);
+  if (sort === "original_years") return originalSummary?.years ?? null;
+  if (sort === "remaining_years") return remainingSummary?.years ?? (freeAgencyStatus ? 0 : null);
+  if (sort === "original_total") return originalSummary?.total ?? null;
+  if (sort === "remaining_total") return remainingSummary?.total ?? (freeAgencyStatus ? 0 : null);
+  if (sort === "original_aav") return originalSummary?.averageAnnualValue ?? null;
+  if (sort === "current_aav") return remainingSummary?.averageAnnualValue ?? (freeAgencyStatus ? 0 : null);
   if (sort === "guaranteed") return row.guaranteedAmount;
   if (sort.startsWith("salary_")) {
     const key = sort.replace("salary_", "").replace("_", "-") as ContractSeason;
