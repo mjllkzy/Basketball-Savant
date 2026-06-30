@@ -35,6 +35,8 @@ const contractSalaryColumnWidth = "126px";
 const standardTableMinWidth = "1752px";
 const advancedTableMinWidth = "1838px";
 const contractTableMinWidth = "1670px";
+const pastContractSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
+const pastContractSalaryCellClassName = "bg-slate-100/60 text-slate-500";
 const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
 
 export const metadata: Metadata = {
@@ -94,8 +96,13 @@ function contractSalaryKey(season: ContractSeason) {
   return `salary_${season.replace("-", "_")}`;
 }
 
-function contractSalaryColumn(season: ContractSeason): StatTableColumn {
+function contractSeasonStartYear(season: ContractSeason) {
+  return Number(season.slice(0, 4));
+}
+
+function contractSalaryColumn(season: ContractSeason, selectedSeason: ContractSeason): StatTableColumn {
   const key = contractSalaryKey(season);
+  const isPastSeason = contractSeasonStartYear(season) < contractSeasonStartYear(selectedSeason);
   return {
     key,
     label: season,
@@ -104,42 +111,46 @@ function contractSalaryColumn(season: ContractSeason): StatTableColumn {
     width: contractSalaryColumnWidth,
     sortValueKey: `${key}Sort`,
     valueClassNameKey: `${key}Class`,
+    headerClassName: isPastSeason ? pastContractSalaryHeaderClassName : undefined,
+    cellClassName: isPastSeason ? pastContractSalaryCellClassName : undefined,
   };
 }
 
-const contractColumns: StatTableColumn[] = [
-  { key: "player", label: "Player", group: "Profile", hrefKey: "href", width: entityColumnWidth, truncate: true },
-  identityColumn("team", "Team", secondaryColumnWidth, "Profile"),
-  identityColumn("pos", "Pos", secondaryColumnWidth, "Profile", primaryPositionOrder),
-  {
-    key: "original_contract",
-    label: "Original Deal",
-    group: "Contract Summary",
-    align: "center",
-    width: contractSummaryColumnWidth,
-    sortValueKey: "original_contractSort",
-    subValueKey: "original_contractSub",
-  },
-  {
-    key: "current_contract",
-    label: "Remaining",
-    group: "Contract Summary",
-    align: "center",
-    width: contractSummaryColumnWidth,
-    sortValueKey: "current_contractSort",
-    subValueKey: "current_contractSub",
-  },
-  ...contractSeasons.map(contractSalaryColumn),
-  {
-    key: "guaranteed",
-    label: "Guaranteed",
-    group: "Guaranteed Money",
-    align: "center",
-    width: "150px",
-    sortValueKey: "guaranteedSort",
-    valueClassNameKey: "guaranteedClass",
-  },
-];
+function contractColumnsForSeason(selectedSeason: ContractSeason): StatTableColumn[] {
+  return [
+    { key: "player", label: "Player", group: "Profile", hrefKey: "href", width: entityColumnWidth, truncate: true },
+    identityColumn("team", "Team", secondaryColumnWidth, "Profile"),
+    identityColumn("pos", "Pos", secondaryColumnWidth, "Profile", primaryPositionOrder),
+    {
+      key: "original_contract",
+      label: "Original Deal",
+      group: "Contract Summary",
+      align: "center",
+      width: contractSummaryColumnWidth,
+      sortValueKey: "original_contractSort",
+      subValueKey: "original_contractSub",
+    },
+    {
+      key: "current_contract",
+      label: "Remaining",
+      group: "Contract Summary",
+      align: "center",
+      width: contractSummaryColumnWidth,
+      sortValueKey: "current_contractSort",
+      subValueKey: "current_contractSub",
+    },
+    ...contractSeasons.map((contractSeason) => contractSalaryColumn(contractSeason, selectedSeason)),
+    {
+      key: "guaranteed",
+      label: "Guaranteed",
+      group: "Guaranteed Money",
+      align: "center",
+      width: "150px",
+      sortValueKey: "guaranteedSort",
+      valueClassNameKey: "guaranteedClass",
+    },
+  ];
+}
 
 function playersHref(searchParams: RouteSearchParams, showAll: boolean) {
   const params = new URLSearchParams();
@@ -351,7 +362,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         pie: formatMetric("pie", row.pie)
       }));
   const resultMeta = isContractView ? contractResult!.meta : playerResult!.meta;
-  const columns = isContractView ? contractColumns : statView === "advanced" ? advancedColumns : standardColumns;
+  const columns = isContractView ? contractColumnsForSeason(season as ContractSeason) : statView === "advanced" ? advancedColumns : standardColumns;
   const tableMinWidth = isContractView ? contractTableMinWidth : statView === "advanced" ? advancedTableMinWidth : standardTableMinWidth;
 
   return (

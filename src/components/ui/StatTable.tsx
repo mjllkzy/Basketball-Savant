@@ -20,6 +20,8 @@ export type StatTableColumn = {
   subValueClassName?: string;
   noteValueKey?: string;
   noteValueClassName?: string;
+  headerClassName?: string;
+  cellClassName?: string;
   valueClassNameKey?: string;
   hrefKey?: string;
   imageKey?: string;
@@ -238,10 +240,11 @@ export function StatTable({
               {headerGroup.headers.map((header, index) => {
                 const align = alignmentClasses(columns[index]?.align);
                 const groupBoundary = groupBoundaryClasses(columns, index);
+                const headerClassName = columns[index]?.headerClassName ?? "";
                 return (
                   <th
                     key={header.id}
-                    className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 align-middle ${dense ? "py-2" : "py-3"} font-black ${align.header} ${groupBoundary}`}
+                    className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 align-middle ${dense ? "py-2" : "py-3"} font-black ${align.header} ${groupBoundary} ${headerClassName}`}
                   >
                     <button type="button" onClick={header.column.getToggleSortingHandler()} className={`relative inline-flex w-full items-center gap-1 ${align.button}`}>
                       <span className="truncate">{flexRender(header.column.columnDef.header, header.getContext())}</span>
@@ -263,10 +266,11 @@ export function StatTable({
                 const accentStyle = rowAccentColorKey && (rowAccentColumnKey ?? columns[0]?.key) === column?.key
                   ? rowAccentStyle(row.original[rowAccentColorKey])
                   : undefined;
+                const cellClassName = column?.cellClassName ?? "";
                 const stackedCell = Boolean(column?.subValueKey || column?.noteValueKey);
                 const verticalPadding = stackedCell ? "py-1" : dense ? "py-2" : "py-3";
                 return (
-                  <td key={cell.id} style={accentStyle} className={`${stackedCell ? "h-20 overflow-visible whitespace-normal" : "h-14 overflow-hidden whitespace-nowrap"} px-3 align-middle ${verticalPadding} ${align.cell} ${groupBoundary}`}>
+                  <td key={cell.id} style={accentStyle} className={`${stackedCell ? "h-20 overflow-visible whitespace-normal" : "h-14 overflow-hidden whitespace-nowrap"} px-3 align-middle ${verticalPadding} ${align.cell} ${groupBoundary} ${cellClassName}`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 );
