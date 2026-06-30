@@ -143,6 +143,57 @@ describe("basketball news refresh", () => {
     }));
   });
 
+  runIfPython("promotes NBA.com rumor-category posts to Official when a deal is decided", () => {
+    const script = [
+      "import importlib.util, json, pathlib, sys",
+      "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
+      "module = importlib.util.module_from_spec(spec)",
+      "sys.modules[spec.name] = module",
+      "spec.loader.exec_module(module)",
+      "articles = [",
+      "  {'status':'publish','slug':'kevin-huerter-pistons-deal','title':'Reports: Kevin Huerter plans to re-sign with Pistons','permalink':'https://www.nba.com/news/kevin-huerter-pistons-deal','date':'2026-06-29T23:30:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':\"NBA.com, citing ESPN's Shams Charania and The Athletic, reports Kevin Huerter plans to return to Detroit on a three-year, $27 million deal.\"},",
+      "  {'status':'publish','slug':'landry-shamet-knicks-deal','title':'Reports: Landry Shamet, Knicks agree to 4-year deal','permalink':'https://www.nba.com/news/landry-shamet-knicks-deal','date':'2026-06-29T21:41:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':\"NBA.com, citing ESPN's Shams Charania and The Athletic, reports Landry Shamet intends to return to the Knicks on a four-year, $24 million deal.\"},",
+      "  {'status':'publish','slug':'thomas-bryant-cavs-deal','title':'Report: Cavs agree to 1-year deal with Thomas Bryant','permalink':'https://www.nba.com/news/thomas-bryant-cavs-deal','date':'2026-06-29T20:59:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':\"NBA.com, citing ESPN's Shams Charania, reports veteran center Thomas Bryant intends to return to Cleveland on a one-year contract.\"},",
+      "  {'status':'publish','slug':'thunder-exercise-dort-option','title':'Thunder exercise team option for Luguentz Dort','permalink':'https://www.nba.com/news/thunder-exercise-dort-option','date':'2026-06-30T02:59:54Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':'Oklahoma City exercised a team option for swingman Luguentz Dort.'},",
+      "  {'status':'publish','slug':'bucks-ford-hire','title':'Bucks plan to hire T.J. Ford','permalink':'https://www.nba.com/news/bucks-ford-hire','date':'2026-06-30T03:18:57Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':'The Bucks plan to hire former NBA point guard T.J. Ford as part of Taylor Jenkins coaching staff.'},",
+      "]",
+      "items = [module.article_to_news_item(article).to_json() for article in articles]",
+      "print(json.dumps(items))"
+    ].join("\n");
+
+    const result = spawnSync(pythonCommand!, ["-c", script], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+
+    expect(result.status).toBe(0);
+    const items = JSON.parse(result.stdout) as Array<{ reportingStatus: string; title: string }>;
+    expect(items).toHaveLength(5);
+    expect(items.every((item) => item.reportingStatus === "Official")).toBe(true);
+  });
+
+  runIfPython("keeps undecided transaction chatter as Rumor status", () => {
+    const script = [
+      "import importlib.util, json, pathlib, sys",
+      "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
+      "module = importlib.util.module_from_spec(spec)",
+      "sys.modules[spec.name] = module",
+      "spec.loader.exec_module(module)",
+      "article = {'status':'publish','slug':'jaylen-brown-trade-rumors','title':'Report: Celtics shopping Jaylen Brown','permalink':'https://www.nba.com/news/jaylen-brown-trade-rumors','date':'2026-06-29T18:30:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':'Several teams are monitoring whether Boston could discuss a Jaylen Brown trade, but no deal has been agreed to.'}",
+      "item = module.article_to_news_item(article)",
+      "print(json.dumps(item.to_json()))"
+    ].join("\n");
+
+    const result = spawnSync(pythonCommand!, ["-c", script], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+
+    expect(result.status).toBe(0);
+    const item = JSON.parse(result.stdout) as { reportingStatus: string };
+    expect(item.reportingStatus).toBe("Rumor");
+  });
+
   runIfPython("prefers NBA.com official coverage over a matching trusted-source duplicate", () => {
     const script = [
       "import importlib.util, json, pathlib, sys",

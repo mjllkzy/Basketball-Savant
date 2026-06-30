@@ -1,112 +1,152 @@
 [
   {
-    "id": "kevin-huerter-pistons-free-agency-2026",
-    "title": "Reports: Kevin Huerter plans to re-sign with Pistons",
+    "id": "hoops-rumors-free-agent-rumors-wade-watkins-kleber-bonga",
+    "title": "Free Agent: Wade, Watkins, Kleber, Bonga",
     "category": "Free Agency",
     "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-29T23:30:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/reports-swingman-kevin-huerter-plans-to-re-sign-with-pistons",
-    "summary": "NBA.com, citing ESPN's Shams Charania and The Athletic, reports Kevin Huerter plans to return to Detroit on a three-year, $27 million deal."
+    "publishedAt": "2026-06-30T05:18:37.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/free-agent-rumors-wade-watkins-kleber-bonga.html",
+    "summary": "Dean Wade is expected to have a long list of suitors if he reaches the open market at 5:00 pm CT..."
   },
   {
-    "id": "spurs-julian-champagnie-free-agency-2026",
-    "title": "Spurs sign Julian Champagnie to new 3-year deal",
+    "id": "hoops-rumors-trade-rumors-kawhi-brown-hield-ad-murphy-more",
+    "title": "Trade: Kawhi, Brown, Hield, AD, Murphy",
+    "category": "Trade",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-30T04:22:51.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/trade-rumors-kawhi-brown-hield-ad-murphy-more.html",
+    "summary": "Rumors about the possibility of the Clippers and Raptors completing a Kawhi Leonard trade continued to percolate throughout the day..."
+  },
+  {
+    "id": "hoops-rumors-qo-decisions-post-hukporti-spurs-barnhizer-celtics",
+    "title": "QO Decisions: Post, Hukporti, Spurs, Barnhizer, Celtics",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-30T03:06:29.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/qo-decisions-post-hukporti-spurs-barnhizer-celtics.html",
+    "summary": "The Warriors tendered qualifying offers ahead of Monday’s deadline to big man Quinten Post and guards Nico Mannion and Taran Armstrong."
+  },
+  {
+    "id": "thunder-exercise-team-option-for-defensive-ace-luguentz-dort",
+    "title": "Thunder exercise team option for defensive ace Luguentz Dort",
     "category": "Free Agency",
     "reportingStatus": "Official",
-    "publishedAt": "2026-06-29T22:54:00Z",
+    "publishedAt": "2026-06-30T02:59:54Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/spurs-julian-champagnie-free-agency-2026",
-    "summary": "San Antonio announced a new multiyear contract for Julian Champagnie after declining his team option and negotiating a fresh deal."
+    "sourceUrl": "https://www.nba.com/news/thunder-exercise-team-option-for-defensive-ace-luguentz-dort",
+    "summary": "Oklahoma City exercised a team option for swingman Luguentz Dort, keeping the defensive stalwart on the Thunder."
+  },
+  {
+    "id": "hoops-rumors-siegels-latest-beal-jovic-murray-holiday-randle-wade",
+    "title": "Siegel’s Latest: Beal, Jovic, Murray, Holiday, Randle, Wade",
+    "category": "League",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-30T02:43:34.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/siegels-latest-beal-jovic-murray-holiday-randle-wade.html",
+    "summary": "The Heat and veteran guard Bradley Beal have mutual interest after the two-time All-Star opted out of his $5.62MM player option to become an unrestricted..."
+  },
+  {
+    "id": "hoops-rumors-lakers-smith-kings-hayes-have-team-options-declined",
+    "title": "Lakers’ Smith, Kings’ Hayes Have Team Options Declined",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-30T01:48:08.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/lakers-smith-kings-hayes-have-team-options-declined.html",
+    "summary": "The Lakers have opted against exercising Nick Smith Jr.‘s team option for the 2026/27 season..."
+  },
+  {
+    "id": "hoops-rumors-wizards-decline-option-on-jamir-watkins-make-him-rfa",
+    "title": "Wizards Decline Option On Jamir Watkins, Make Him RFA",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-30T01:25:29.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/wizards-decline-option-on-jamir-watkins-make-him-rfa.html",
+    "summary": "The Wizards have declined their $2,150,917 option on 2025 second-round pick Jamir Watkins, reports Keith Smith of Spotrac ."
+  },
+  {
+    "id": "hoops-rumors-jalen-duren-to-meet-with-kings-to-seek-sign-and-trade",
+    "title": "Jalen Duren To Meet With Kings, Lakers",
+    "category": "Trade",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-30T01:11:40.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/jalen-duren-to-meet-with-kings-to-seek-sign-and-trade.html",
+    "summary": "The Pistons aren’t looking to trade Duren, confirms Omari Sankofa II of The Detroit Free Press..."
+  },
+  {
+    "id": "hoops-rumors-deanthony-melton-declines-player-option-becomes-free-agent",
+    "title": "De’Anthony Melton Declines Player Option, Becomes Free Agent",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-30T01:00:18.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/deanthony-melton-declines-player-option-becomes-free-agent.html",
+    "summary": "Warriors guard De’Anthony Melton is now an unrestricted free agent after declining his $3,451,779 player option for 2026/27, a."
+  },
+  {
+    "id": "harrison-barnes-will-re-sign-with-san-antonio",
+    "title": "Harrison Barnes will re-sign with San Antonio",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-30T00:54:34Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/harrison-barnes-will-re-sign-with-san-antonio",
+    "summary": "Reports emerge Monday that Harrison Barnes intends to re-sign with San Antonio on a one-year deal for $8 million."
+  },
+  {
+    "id": "hoops-rumors-free-agent-rumors-kessler-powell-blazers-simmons-suns-payton",
+    "title": "Free Agent: Kessler, Powell, Blazers, Simmons, Suns, Payton",
+    "category": "Free Agency",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-30T00:42:33.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/free-agent-rumors-kessler-powell-blazers-simmons-suns-payton.html",
+    "summary": "Center Walker Kessler will meet with multiple teams when free agency opens evening, reports Tony Jones of The Athletic ."
+  },
+  {
+    "id": "hoops-rumors-qo-decisions-dieng-agbaji-wilson-johnson-castleton-cisse",
+    "title": "QO Decisions: Dieng, Agbaji, Wilson, Johnson, Castleton, Cisse",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-29T23:47:09.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/qo-decisions-dieng-agbaji-wilson-johnson-castleton-cisse.html",
+    "summary": "The Bucks have opted to forgo a qualifying offer for forward Ousmane Dieng, reports Michael Scotto of HoopsHype ."
+  },
+  {
+    "id": "hoops-rumors-raptors-decline-team-option-on-jonathan-mogbo",
+    "title": "Raptors Decline Team Option On Jonathan Mogbo",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-29T23:46:39.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/06/raptors-decline-team-option-on-jonathan-mogbo.html",
+    "summary": "The Raptors have declined their 2026/27 team option on forward/center Jonathan Mogbo."
   },
   {
     "id": "blazers-grizzlies-ja-morant-trade",
-    "title": "Reports: Blazers add Ja Morant in trade with Grizzlies",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-29T22:04:00Z",
+    "title": "Trail Blazers add Ja Morant in trade with Grizzlies",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-29T20:49:42Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/blazers-grizzlies-ja-morant-trade",
-    "summary": "NBA.com, citing ESPN, reports Portland is acquiring Ja Morant from Memphis for Jerami Grant and Kris Murray."
-  },
-  {
-    "id": "landry-shamet-knicks-free-agency-2026",
-    "title": "Reports: Landry Shamet, Knicks agree to 4-year deal",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-29T21:41:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/landry-shamet-knicks-free-agency-2026",
-    "summary": "NBA.com, citing ESPN's Shams Charania and The Athletic, reports Landry Shamet intends to return to the Knicks on a four-year, $24 million deal."
-  },
-  {
-    "id": "cavaliers-thomas-bryant-free-agency-2026",
-    "title": "Report: Cavs agree to 1-year deal with Thomas Bryant",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-29T20:59:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/cavaliers-thomas-bryant-free-agency-2026",
-    "summary": "NBA.com, citing ESPN's Shams Charania, reports veteran center Thomas Bryant intends to return to Cleveland on a one-year contract."
-  },
-  {
-    "id": "hawks-kings-devin-carter-trade",
-    "title": "Reports: Hawks add Devin Carter in trade with Kings",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-29T20:03:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/hawks-kings-devin-carter-trade",
-    "summary": "NBA.com, citing ESPN and Jake Fischer, reports Atlanta is acquiring Devin Carter and a future second-round pick from Sacramento."
-  },
-  {
-    "id": "andrew-wiggins-free-agency-2026",
-    "title": "Reports: Andrew Wiggins, Heat agree to extension",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-29T17:55:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/andrew-wiggins-free-agency-2026",
-    "summary": "NBA.com, citing multiple reports, says Andrew Wiggins plans to opt in for 2026-27 and sign a two-year extension with Miami."
+    "summary": "The former All-Star guard is headed to Portland in exchange for Jerami Grant and Kris Murray."
   },
   {
     "id": "miles-bridges-trade-hornets-suns",
-    "title": "Reports: Hornets send Miles Bridges to Suns for Grayson Allen",
+    "title": "Miles Bridges-to-Suns Trade Brings Back Grayson Allen",
     "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-29T13:09:00Z",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-06-28T17:58:08Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/miles-bridges-trade-hornets-suns",
-    "summary": "NBA.com, citing multiple reports, says Charlotte is sending Miles Bridges and picks to Phoenix for Grayson Allen, Royce O'Neale and a future first-round pick."
-  },
-  {
-    "id": "celtics-sign-ron-harper-jr-to-extension",
-    "title": "Reports: Celtics re-sign Ron Harper Jr. to long-term extension",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-27T18:45:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/celtics-sign-ron-harper-jr-to-extension",
-    "summary": "NBA.com, citing ESPN's Shams Charania, reports Boston is bringing back Ron Harper Jr. on a three-year, $9 million contract."
-  },
-  {
-    "id": "hornets-coby-white-free-agency-2026",
-    "title": "Report: Hornets, Coby White agree to 3-year deal",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-25T16:53:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/hornets-coby-white-free-agency-2026",
-    "summary": "NBA.com, citing ESPN's Shams Charania, reports Charlotte and guard Coby White have agreed to a three-year, $74 million deal."
-  },
-  {
-    "id": "grizzlies-pistons-isaiah-stewart-trade-2026-nba-draft",
-    "title": "Reports: Grizzlies trade for Isaiah Stewart, sending picks to Pistons",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-25T01:35:00Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/grizzlies-pistons-isaiah-stewart-trade-2026-nba-draft",
-    "summary": "NBA.com, citing ESPN and Jake Fischer, reports Memphis is acquiring Isaiah Stewart from Detroit for three future second-round picks."
+    "summary": "Hornets reportedly deal Miles Bridges and picks to Suns for Grayson Allen, Royce O'Neale and a future first round pick."
   }
 ]

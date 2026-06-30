@@ -76,12 +76,23 @@ EVENT_DEDUPE_CATEGORIES = {"Trade", "Transaction", "Free Agency", "Roster", "Lea
 
 TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
     r"\b(?:has|have|had)\s+agreed\s+to\b",
+    r"\bagreed\s+to\b",
     r"\bagrees?\s+to\b",
+    r"\bplans?\s+to\s+(?:sign|re-sign|return|join|hire|opt\s+in|exercise|decline)\b",
+    r"\bintends?\s+to\s+(?:sign|re-sign|return|join|hire|opt\s+in|exercise|decline)\b",
+    r"\bis\s+bringing\s+back\b",
+    r"\b(?:plans?|intends?)\s+to\s+return\s+to\b",
     r"\bofficial(?:ly)?\b",
     r"\bannounced?\b",
     r"\bcompleted\b",
     r"\bfinalized\b",
     r"\bis\s+joining\b",
+    r"\bopt(?:s|ed|ing)?\s+in\b",
+    r"\b(?:decline|declined|declines|declining)\s+(?:his|her|the|their|a|an)?\s*(?:player|team)?\s*option\b",
+    r"\bexercis(?:e|ed|es|ing)\s+(?:his|her|the|their|a|an)?\s*(?:player|team)?\s*option\b",
+    r"\bopt(?:ed|s|ing)?\s+against\s+exercising\b.*\boption\b",
+    r"\bopt(?:ed|s|ing)?\s+to\s+forgo\b.*\bqualifying\s+offer\b",
+    r"\b(?:pick|picked|picks|picking)\s+up\s+(?:his|her|the|their|a|an)?\s*(?:player|team)?\s*option\b",
     r"\breceiv(?:e|ed|es|ing)\s+qualifying\s+offers?\b",
     r"\btender(?:ed|s|ing)?\s+qualifying\s+offers?\b",
     r"\b(?:has|have|is|are|was|were)?\s*(?:traded|acquired|sent|signed|re-signed|waived)\b",
@@ -494,7 +505,17 @@ def classify_reporting_status(article: dict[str, Any], *, category: str) -> str:
         clean_text((article.get("categoryPrimary") or {}).get("name") if isinstance(article.get("categoryPrimary"), dict) else ""),
         title,
     ]).lower()
+    status_blob = " ".join([
+        clean_text(article.get("title")),
+        clean_text(article.get("excerpt")),
+        clean_text(article.get("category")),
+        clean_text((article.get("categoryPrimary") or {}).get("name") if isinstance(article.get("categoryPrimary"), dict) else ""),
+    ]).lower()
+    has_official_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_OFFICIAL_PATTERNS)
+    has_negated_official_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_NEGATED_OFFICIAL_PATTERNS)
 
+    if has_official_signal and not has_negated_official_signal:
+        return "Official"
     if category in {"Rumor", "Draft Rumor"} or "rumor" in category_blob:
         return "Rumor"
     return "Official"
