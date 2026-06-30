@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   contractDealSummary,
   contractSummarySortValue,
+  freeAgencyStatusForSeason,
   selectActiveContractDeal,
   selectNextContractDeal,
   summarizeContractSalaries,
@@ -185,5 +186,38 @@ describe("player contract summaries", () => {
       total: 198_937_574,
       averageAnnualValue: 39_787_514.8,
     });
+  });
+
+  it("labels players without remaining years as free agents for the selected season", () => {
+    const unrestrictedDeal: ContractDeal = {
+      source: "SalarySwish",
+      sourceUrl: null,
+      label: "Veteran Contract",
+      startYear: 2024,
+      endYear: 2025,
+      years: 2,
+      total: 40_000_000,
+      averageAnnualValue: 20_000_000,
+      guaranteedAtSign: 40_000_000,
+      totalGuaranteed: 40_000_000,
+      freeAgent: "2026 / UFA",
+      signedUsing: "Bird Rights",
+      pending: false,
+    };
+    const restrictedDeal: ContractDeal = {
+      ...unrestrictedDeal,
+      freeAgent: "RFA",
+    };
+    const activeDeal: ContractDeal = {
+      ...unrestrictedDeal,
+      startYear: 2026,
+      endYear: 2027,
+      freeAgent: "2028 / UFA",
+    };
+
+    expect(summarizeTotalRemainingContract({}, [unrestrictedDeal], "2026-27")).toBeNull();
+    expect(freeAgencyStatusForSeason([unrestrictedDeal], "2026-27")).toBe("Unrestricted FA");
+    expect(freeAgencyStatusForSeason([restrictedDeal], "2026-27")).toBe("Restricted FA");
+    expect(freeAgencyStatusForSeason([activeDeal, unrestrictedDeal], "2026-27")).toBeNull();
   });
 });

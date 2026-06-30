@@ -34,6 +34,8 @@ export type ContractSummary = {
   averageAnnualValue: number;
 };
 
+export type FreeAgencyStatus = "Unrestricted FA" | "Restricted FA" | "Free Agent";
+
 export type ContractDeal = {
   source: string;
   sourceUrl: string | null;
@@ -345,6 +347,26 @@ export function selectNextContractDeal(deals: ContractDeal[], season: ContractSe
   return nextDeals[0] ?? null;
 }
 
+function normalizedFreeAgencyStatus(value: string | null | undefined): FreeAgencyStatus | null {
+  const normalized = value?.toUpperCase() ?? "";
+  if (!normalized) return null;
+  if (/\bRFA\b/.test(normalized) || normalized.includes("RESTRICTED")) return "Restricted FA";
+  if (/\bUFA\b/.test(normalized) || normalized.includes("UNRESTRICTED")) return "Unrestricted FA";
+  if (/\bFA\b/.test(normalized) || normalized.includes("FREE AGENT")) return "Free Agent";
+  return null;
+}
+
+export function freeAgencyStatusForSeason(deals: ContractDeal[], season: ContractSeason): FreeAgencyStatus | null {
+  const year = seasonStartYear(season);
+  if (selectActiveContractDeal(deals, season)) return null;
+
+  const expiredDeals = deals
+    .filter((deal) => deal.endYear < year)
+    .sort((left, right) => right.endYear - left.endYear || right.startYear - left.startYear);
+
+  return normalizedFreeAgencyStatus(expiredDeals[0]?.freeAgent);
+}
+
 export function selectRemainingContractDeals(deals: ContractDeal[], season: ContractSeason) {
   const year = seasonStartYear(season);
   const remainingDeals: ContractDeal[] = [];
@@ -425,6 +447,12 @@ export function summarizeTotalRemainingContract(salaries: Partial<Record<Contrac
   };
 }
 
+function hasContractSeasonContext(row: PlayerContractRow, season: ContractSeason) {
+  return selectedSeasonSalary(row, season) !== null ||
+    summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, season) !== null ||
+    freeAgencyStatusForSeason(row.contractDeals, season) !== null;
+}
+
 function sortValue(row: PlayerContractRow, sort: string, season: ContractSeason): number | string | null {
   if (sort === "player") return row.playerName;
   if (sort === "team") return row.teamAbbreviation;
@@ -459,7 +487,7 @@ function filterAndPageContracts(rows: PlayerContractRow[], params: PlayerContrac
   const order = params.order ?? (sort === "player" || sort === "team" || sort === "position" ? "asc" : "desc");
 
   const filtered = rows
-    .filter((row) => selectedSeasonSalary(row, selectedSeason) !== null)
+    .filter((row) => hasContractSeasonContext(row, selectedSeason))
     .filter((row) => !query || `${row.playerName} ${row.teamAbbreviation} ${row.position ?? ""}`.toLowerCase().includes(query))
     .filter((row) => !params.teamId || row.teamId === params.teamId || row.teamAbbreviation === params.teamId)
     .filter((row) => positionMatches(row.position, params.position))

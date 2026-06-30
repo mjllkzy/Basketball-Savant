@@ -8,6 +8,7 @@ import {
   contractSeasons,
   contractDealSummary,
   contractSummarySortValue,
+  freeAgencyStatusForSeason,
   listPlayerContracts,
   selectActiveContractDeal,
   summarizeTotalRemainingContract,
@@ -138,6 +139,7 @@ function contractColumnsForSeason(selectedSeason: ContractSeason): StatTableColu
       width: contractSummaryColumnWidth,
       sortValueKey: "current_contractSort",
       subValueKey: "current_contractSub",
+      valueClassNameKey: "current_contractClass",
     },
     ...contractSeasons.map((contractSeason) => contractSalaryColumn(contractSeason, selectedSeason)),
     {
@@ -300,8 +302,9 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         const activeDeal = selectActiveContractDeal(row.contractDeals, contractSeason);
         const originalContract = contractDealSummary(activeDeal) ?? summarizeContractSalaries(row.salaryBySeason);
         const currentContract = summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, contractSeason);
+        const freeAgencyStatus = currentContract ? null : freeAgencyStatusForSeason(row.contractDeals, contractSeason);
         const originalContractDisplay = formatContractSummary(originalContract);
-        const currentContractDisplay = formatContractSummary(currentContract);
+        const currentContractDisplay = freeAgencyStatus ? { main: freeAgencyStatus, sub: "0 yrs left" } : formatContractSummary(currentContract);
         const base = {
           player: row.playerName,
           href: row.playerSlug ? playerHref(row.playerSlug, seasonType, season) : undefined,
@@ -314,6 +317,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
           current_contract: currentContractDisplay.main,
           current_contractSub: currentContractDisplay.sub,
           current_contractSort: contractSummarySortValue(currentContract),
+          current_contractClass: freeAgencyStatus ? "text-rose-700" : "",
           guaranteed: formatMoney(row.guaranteedAmount, "Unavailable"),
           guaranteedSort: row.guaranteedAmount,
           guaranteedClass: row.needsFollowup ? "font-black text-slate-600" : "",
@@ -391,7 +395,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
       <div data-data-source={resultMeta.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
         {isContractView ? (
           <>
-            Showing <strong className="text-ink">{resultMeta.total}</strong> contract rows with {season} salary data.
+            Showing <strong className="text-ink">{resultMeta.total}</strong> contract/free-agent rows for {season}.
           </>
         ) : (
           <>
