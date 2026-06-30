@@ -10,12 +10,10 @@ import {
   contractSummarySortValue,
   listPlayerContracts,
   selectActiveContractDeal,
-  selectNextContractDeal,
   summarizeRemainingContract,
   summarizeContractSalaries,
   type ContractSeason,
   type ContractSummary,
-  type ContractDeal,
 } from "@/lib/db/playerContracts.server";
 import { listPlayerDirectory, loadPlayerDirectoryFilters } from "@/lib/db/playerDirectory.server";
 import { formatMetric } from "@/lib/metrics/format";
@@ -121,7 +119,6 @@ const contractColumns: StatTableColumn[] = [
     width: contractSummaryColumnWidth,
     sortValueKey: "original_contractSort",
     subValueKey: "original_contractSub",
-    noteValueKey: "original_contractNote",
   },
   {
     key: "current_contract",
@@ -131,7 +128,6 @@ const contractColumns: StatTableColumn[] = [
     width: contractSummaryColumnWidth,
     sortValueKey: "current_contractSort",
     subValueKey: "current_contractSub",
-    noteValueKey: "current_contractNote",
   },
   ...contractSeasons.map(contractSalaryColumn),
   {
@@ -190,12 +186,6 @@ function formatContractSummary(summary: ContractSummary | null) {
     main: `${formatMoney(summary.averageAnnualValue)} AAV · ${yearsLabel}`,
     sub: `${formatMoney(summary.total)} total`,
   };
-}
-
-function formatNextDealNote(deal: ContractDeal | null) {
-  if (!deal?.total || !deal.years) return "";
-  const yearsLabel = deal.years === 1 ? "1 yr" : `${deal.years} yrs`;
-  return `Next ${deal.startYear}: ${formatMoney(deal.total)} / ${yearsLabel}`;
 }
 
 function optionKind(label: string | null | undefined) {
@@ -297,12 +287,10 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
     ? contractResult!.rows.map((row) => {
         const contractSeason = season as ContractSeason;
         const activeDeal = selectActiveContractDeal(row.contractDeals, contractSeason);
-        const nextDeal = selectNextContractDeal(row.contractDeals, contractSeason);
         const originalContract = contractDealSummary(activeDeal) ?? summarizeContractSalaries(row.salaryBySeason);
         const currentContract = summarizeRemainingContract(row.salaryBySeason, activeDeal, contractSeason);
         const originalContractDisplay = formatContractSummary(originalContract);
         const currentContractDisplay = formatContractSummary(currentContract);
-        const nextDealNote = formatNextDealNote(nextDeal);
         const base = {
           player: row.playerName,
           href: row.playerSlug ? playerHref(row.playerSlug, seasonType, season) : undefined,
@@ -311,11 +299,9 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
           pos: row.position ?? "N/A",
           original_contract: originalContractDisplay.main,
           original_contractSub: originalContractDisplay.sub,
-          original_contractNote: activeDeal ? activeDeal.label.replace(/\s*\((?:CURRENT|UPCOMING EXTENSION)\)\s*/gi, "").trim() : "Salary schedule",
           original_contractSort: contractSummarySortValue(originalContract),
           current_contract: currentContractDisplay.main,
           current_contractSub: currentContractDisplay.sub,
-          current_contractNote: nextDealNote,
           current_contractSort: contractSummarySortValue(currentContract),
           guaranteed: formatMoney(row.guaranteedAmount, "Unavailable"),
           guaranteedSort: row.guaranteedAmount,
