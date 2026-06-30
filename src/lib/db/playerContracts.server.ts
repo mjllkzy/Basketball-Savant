@@ -322,6 +322,15 @@ export function contractSummarySortValue(summary: ContractSummary | null) {
   return summary.years * 1_000_000_000_000 + summary.total;
 }
 
+function previousSalaryBeforeSeason(salaries: Partial<Record<ContractSeason, number>>, season: ContractSeason) {
+  const seasonIndex = contractSeasons.indexOf(season);
+  for (let index = seasonIndex - 1; index >= 0; index -= 1) {
+    const amount = salaries[contractSeasons[index]];
+    if (typeof amount === "number" && Number.isFinite(amount)) return amount;
+  }
+  return 0;
+}
+
 export function contractDealSummary(deal: ContractDeal | null): ContractSummary | null {
   if (!deal?.total || !deal.years) return null;
   return {
@@ -365,6 +374,13 @@ export function freeAgencyStatusForSeason(deals: ContractDeal[], season: Contrac
     .sort((left, right) => right.endYear - left.endYear || right.startYear - left.startYear);
 
   return normalizedFreeAgencyStatus(expiredDeals[0]?.freeAgent);
+}
+
+export function contractSalarySortValue(row: PlayerContractRow, season: ContractSeason) {
+  const salary = selectedSeasonSalary(row, season);
+  if (salary !== null) return salary;
+  if (!freeAgencyStatusForSeason(row.contractDeals, season)) return null;
+  return -1_000_000_000_000 + previousSalaryBeforeSeason(row.salaryBySeason, season);
 }
 
 export function selectRemainingContractDeals(deals: ContractDeal[], season: ContractSeason) {
@@ -462,9 +478,9 @@ function sortValue(row: PlayerContractRow, sort: string, season: ContractSeason)
   if (sort === "guaranteed") return row.guaranteedAmount;
   if (sort.startsWith("salary_")) {
     const key = sort.replace("salary_", "").replace("_", "-") as ContractSeason;
-    return row.salaryBySeason[key] ?? null;
+    return contractSalarySortValue(row, key);
   }
-  return selectedSeasonSalary(row, season) ?? row.guaranteedAmount;
+  return contractSalarySortValue(row, season) ?? row.guaranteedAmount;
 }
 
 function compareValues(left: number | string | null, right: number | string | null, order: "asc" | "desc") {

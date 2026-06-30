@@ -7,6 +7,7 @@ import { officialTeams } from "@/lib/data/official";
 import {
   contractSeasons,
   contractDealSummary,
+  contractSalarySortValue,
   contractSummarySortValue,
   freeAgencyStatusForSeason,
   listPlayerContracts,
@@ -328,7 +329,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
           const detail = displayContractDetail(contractSeason, row.optionsBySeason[contractSeason], row.guaranteeStatusBySeason[contractSeason]);
           const code = optionCode(detail);
           contractRow[key] = amount === undefined ? "--" : `${formatMoney(amount)}${code ? ` ${code}` : ""}`;
-          contractRow[`${key}Sort`] = amount ?? null;
+          contractRow[`${key}Sort`] = contractSalarySortValue(row, contractSeason);
           contractRow[`${key}Class`] = optionClassName(detail);
           return contractRow;
         }, base);

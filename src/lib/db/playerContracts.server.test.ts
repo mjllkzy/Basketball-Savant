@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   contractDealSummary,
+  contractSalarySortValue,
   contractSummarySortValue,
   freeAgencyStatusForSeason,
   selectActiveContractDeal,
@@ -9,6 +10,7 @@ import {
   summarizeRemainingContract,
   summarizeTotalRemainingContract,
   type ContractDeal,
+  type PlayerContractRow,
 } from "./playerContracts.server";
 
 describe("player contract summaries", () => {
@@ -219,5 +221,46 @@ describe("player contract summaries", () => {
     expect(freeAgencyStatusForSeason([unrestrictedDeal], "2026-27")).toBe("Unrestricted FA");
     expect(freeAgencyStatusForSeason([restrictedDeal], "2026-27")).toBe("Restricted FA");
     expect(freeAgencyStatusForSeason([activeDeal, unrestrictedDeal], "2026-27")).toBeNull();
+  });
+
+  it("sorts free agents below real salaries using prior-year salary as a tie-breaker", () => {
+    const expiredDeal: ContractDeal = {
+      source: "SalarySwish",
+      sourceUrl: null,
+      label: "Veteran Contract",
+      startYear: 2024,
+      endYear: 2025,
+      years: 2,
+      total: 40_000_000,
+      averageAnnualValue: 20_000_000,
+      guaranteedAtSign: 40_000_000,
+      totalGuaranteed: 40_000_000,
+      freeAgent: "UFA",
+      signedUsing: "Bird Rights",
+      pending: false,
+    };
+    const baseRow: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "player",
+      playerName: "Player",
+      teamId: "TST",
+      teamAbbreviation: "TST",
+      position: "G",
+      salaryBySeason: {},
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: null,
+      needsFollowup: false,
+      contractDeals: [expiredDeal],
+    };
+    const cheapFreeAgent = { ...baseRow, playerName: "Cheap FA", salaryBySeason: { "2025-26": 2_000_000 } };
+    const expensiveFreeAgent = { ...baseRow, playerName: "Expensive FA", salaryBySeason: { "2025-26": 20_000_000 } };
+    const signedPlayer = { ...baseRow, playerName: "Signed Player", salaryBySeason: { "2026-27": 1_000_000 }, contractDeals: [] };
+
+    const sorted = [signedPlayer, expensiveFreeAgent, cheapFreeAgent].sort((left, right) =>
+      contractSalarySortValue(left, "2026-27")! - contractSalarySortValue(right, "2026-27")!,
+    );
+
+    expect(sorted.map((row) => row.playerName)).toEqual(["Cheap FA", "Expensive FA", "Signed Player"]);
   });
 });
