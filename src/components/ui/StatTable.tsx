@@ -177,7 +177,7 @@ export function StatTable({
             <span className="inline-flex max-w-full flex-col items-center justify-center gap-0.5 leading-tight">
               <span className={["font-black", valueClassName].filter(Boolean).join(" ") || undefined}>{formatted}</span>
               {subFormatted ? <span className={`text-[11px] font-bold normal-case tracking-normal text-slate-500 ${column.subValueClassName ?? ""}`.trim()}>{subFormatted}</span> : null}
-              {noteFormatted ? <span className={`max-w-full truncate text-[10px] font-black uppercase tracking-[0.08em] text-signal ${column.noteValueClassName ?? ""}`.trim()}>{noteFormatted}</span> : null}
+              {noteFormatted ? <span className={`max-w-full whitespace-normal break-words text-center text-[10px] font-black uppercase leading-tight tracking-[0.08em] text-signal ${column.noteValueClassName ?? ""}`.trim()}>{noteFormatted}</span> : null}
             </span>
           ) : (
             <span className={imageUrl ? `inline-flex min-h-7 max-w-full items-center gap-2 ${column.truncate ? "min-w-0" : ""}` : column.truncate ? "block truncate" : undefined}>
@@ -263,8 +263,9 @@ export function StatTable({
                 const accentStyle = rowAccentColorKey && (rowAccentColumnKey ?? columns[0]?.key) === column?.key
                   ? rowAccentStyle(row.original[rowAccentColorKey])
                   : undefined;
+                const stackedCell = Boolean(column?.subValueKey || column?.noteValueKey);
                 return (
-                  <td key={cell.id} style={accentStyle} className={`h-14 overflow-hidden whitespace-nowrap px-3 align-middle ${dense ? "py-2" : "py-3"} ${align.cell} ${groupBoundary}`}>
+                  <td key={cell.id} style={accentStyle} className={`${stackedCell ? "h-20 overflow-visible whitespace-normal" : "h-14 overflow-hidden whitespace-nowrap"} px-3 align-middle ${dense ? "py-2" : "py-3"} ${align.cell} ${groupBoundary}`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 );

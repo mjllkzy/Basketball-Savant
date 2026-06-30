@@ -32,7 +32,7 @@ const contractSortMetrics = ["selected_salary", "original_contract", "current_co
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
 const entityColumnWidth = "290px";
 const secondaryColumnWidth = "86px";
-const contractSummaryColumnWidth = "150px";
+const contractSummaryColumnWidth = "168px";
 const contractSalaryColumnWidth = "126px";
 const standardTableMinWidth = "1752px";
 const advancedTableMinWidth = "1838px";
@@ -187,8 +187,8 @@ function formatContractSummary(summary: ContractSummary | null) {
   }
   const yearsLabel = summary.years === 1 ? "1 yr" : `${summary.years} yrs`;
   return {
-    main: `${formatMoney(summary.averageAnnualValue)} AAV`,
-    sub: `${formatMoney(summary.total)} / ${yearsLabel}`,
+    main: `${formatMoney(summary.averageAnnualValue)} AAV · ${yearsLabel}`,
+    sub: `${formatMoney(summary.total)} total`,
   };
 }
 
