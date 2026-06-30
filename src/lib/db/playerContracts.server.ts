@@ -345,6 +345,24 @@ export function selectNextContractDeal(deals: ContractDeal[], season: ContractSe
   return nextDeals[0] ?? null;
 }
 
+export function selectRemainingContractDeals(deals: ContractDeal[], season: ContractSeason) {
+  const year = seasonStartYear(season);
+  const remainingDeals: ContractDeal[] = [];
+  const activeDeal = selectActiveContractDeal(deals, season);
+
+  if (activeDeal) {
+    remainingDeals.push(activeDeal);
+  }
+
+  const futureDeals = deals
+    .filter((deal) => deal.startYear > year)
+    .sort((left, right) => left.startYear - right.startYear || left.endYear - right.endYear);
+
+  remainingDeals.push(...futureDeals);
+
+  return remainingDeals.sort((left, right) => left.startYear - right.startYear || left.endYear - right.endYear);
+}
+
 export function summarizeRemainingContract(salaries: Partial<Record<ContractSeason, number>>, deal: ContractDeal | null, season: ContractSeason) {
   if (!deal) return summarizeContractSalaries(salaries, season);
   const currentYear = Math.max(seasonStartYear(season), deal.startYear);
@@ -365,12 +383,54 @@ export function summarizeRemainingContract(salaries: Partial<Record<ContractSeas
   };
 }
 
+function summarizeContractWindow(salaries: Partial<Record<ContractSeason, number>>, deal: ContractDeal, startYear: number, endYear: number) {
+  const years = Math.max(0, endYear - startYear + 1);
+  if (years === 0) return null;
+
+  const fromSeason = seasonFromStartYear(startYear);
+  const throughSeason = seasonFromStartYear(endYear);
+  const salarySummary = fromSeason ? summarizeContractSalaries(salaries, fromSeason, throughSeason) : null;
+  const expectedTotal = deal.averageAnnualValue ? deal.averageAnnualValue * years : deal.total && deal.years ? (deal.total / deal.years) * years : null;
+  if (salarySummary && salarySummary.years === years && (!expectedTotal || salarySummary.total >= expectedTotal * 0.6)) {
+    return salarySummary;
+  }
+  if (!expectedTotal) return salarySummary;
+  return {
+    years,
+    total: Math.round(expectedTotal),
+    averageAnnualValue: Math.round(expectedTotal / years),
+  };
+}
+
+export function summarizeTotalRemainingContract(salaries: Partial<Record<ContractSeason, number>>, deals: ContractDeal[], season: ContractSeason) {
+  const remainingDeals = selectRemainingContractDeals(deals, season);
+  if (remainingDeals.length === 0) return summarizeContractSalaries(salaries, season);
+
+  const dealSummaries = remainingDeals
+    .map((deal, index) => {
+      const nextDeal = remainingDeals[index + 1];
+      const startYear = Math.max(seasonStartYear(season), deal.startYear);
+      const endYear = nextDeal && nextDeal.startYear <= deal.endYear ? nextDeal.startYear - 1 : deal.endYear;
+      return summarizeContractWindow(salaries, deal, startYear, endYear);
+    })
+    .filter((summary): summary is ContractSummary => summary !== null);
+
+  if (dealSummaries.length === 0) return summarizeContractSalaries(salaries, season);
+  const total = dealSummaries.reduce((sum, summary) => sum + summary.total, 0);
+  const years = dealSummaries.reduce((sum, summary) => sum + summary.years, 0);
+  return {
+    years,
+    total,
+    averageAnnualValue: total / years,
+  };
+}
+
 function sortValue(row: PlayerContractRow, sort: string, season: ContractSeason): number | string | null {
   if (sort === "player") return row.playerName;
   if (sort === "team") return row.teamAbbreviation;
   if (sort === "position") return row.position ?? "";
   if (sort === "original_contract") return contractSummarySortValue(contractDealSummary(selectActiveContractDeal(row.contractDeals, season)) ?? summarizeContractSalaries(row.salaryBySeason));
-  if (sort === "current_contract") return contractSummarySortValue(summarizeRemainingContract(row.salaryBySeason, selectActiveContractDeal(row.contractDeals, season), season));
+  if (sort === "current_contract") return contractSummarySortValue(summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, season));
   if (sort === "guaranteed") return row.guaranteedAmount;
   if (sort.startsWith("salary_")) {
     const key = sort.replace("salary_", "").replace("_", "-") as ContractSeason;

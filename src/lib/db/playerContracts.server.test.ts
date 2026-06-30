@@ -6,6 +6,7 @@ import {
   selectNextContractDeal,
   summarizeContractSalaries,
   summarizeRemainingContract,
+  summarizeTotalRemainingContract,
   type ContractDeal,
 } from "./playerContracts.server";
 
@@ -92,6 +93,97 @@ describe("player contract summaries", () => {
       years: 4,
       total: 184_800_000,
       averageAnnualValue: 46_200_000,
+    });
+  });
+
+  it("rolls signed future extensions into the remaining contract summary", () => {
+    const activeDeal: ContractDeal = {
+      source: "SalarySwish",
+      sourceUrl: null,
+      label: "Veteran Extension Maximum Contract",
+      startYear: 2022,
+      endYear: 2025,
+      years: 4,
+      total: 215_353_662,
+      averageAnnualValue: 53_838_416,
+      guaranteedAtSign: 215_353_662,
+      totalGuaranteed: 215_353_662,
+      freeAgent: "UFA",
+      signedUsing: "Bird Exception",
+      pending: false,
+    };
+    const futureExtension: ContractDeal = {
+      source: "SalarySwish",
+      sourceUrl: null,
+      label: "Veteran Extension",
+      startYear: 2026,
+      endYear: 2026,
+      years: 1,
+      total: 62_587_158,
+      averageAnnualValue: 62_587_158,
+      guaranteedAtSign: 62_587_158,
+      totalGuaranteed: 62_587_158,
+      freeAgent: "UFA",
+      signedUsing: "Bird Exception",
+      pending: false,
+    };
+    const salaries = {
+      "2025-26": 59_606_817,
+      "2026-27": 62_587_158,
+    };
+
+    expect(summarizeRemainingContract(salaries, activeDeal, "2025-26")).toEqual({
+      years: 1,
+      total: 59_606_817,
+      averageAnnualValue: 59_606_817,
+    });
+    expect(summarizeTotalRemainingContract(salaries, [futureExtension, activeDeal], "2025-26")).toEqual({
+      years: 2,
+      total: 122_193_975,
+      averageAnnualValue: 61_096_987.5,
+    });
+  });
+
+  it("truncates the current deal before a same-year future extension starts", () => {
+    const activeDeal: ContractDeal = {
+      source: "SalarySwish",
+      sourceUrl: null,
+      label: "Veteran Contract",
+      startYear: 2023,
+      endYear: 2026,
+      years: 4,
+      total: 53_827_872,
+      averageAnnualValue: 13_456_968,
+      guaranteedAtSign: 53_827_872,
+      totalGuaranteed: 53_827_872,
+      freeAgent: "UFA",
+      signedUsing: "Early Bird Rights",
+      pending: false,
+    };
+    const futureExtension: ContractDeal = {
+      source: "SalarySwish",
+      sourceUrl: null,
+      label: "Veteran Extension Maximum Contract",
+      startYear: 2026,
+      endYear: 2029,
+      years: 4,
+      total: 185_000_000,
+      averageAnnualValue: 46_250_000,
+      guaranteedAtSign: 185_000_000,
+      totalGuaranteed: 185_000_000,
+      freeAgent: "UFA",
+      signedUsing: "Bird Rights",
+      pending: false,
+    };
+    const salaries = {
+      "2025-26": 13_937_574,
+      "2026-27": 14_898_786,
+    };
+
+    expect(summarizeTotalRemainingContract(salaries, [futureExtension, activeDeal], "2025-26")).toEqual({
+      years: 5,
+      total: 198_937_574,
+      averageAnnualValue: 39_787_514.8,
     });
   });
 });

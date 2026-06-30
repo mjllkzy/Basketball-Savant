@@ -10,7 +10,7 @@ import {
   contractSummarySortValue,
   listPlayerContracts,
   selectActiveContractDeal,
-  summarizeRemainingContract,
+  summarizeTotalRemainingContract,
   summarizeContractSalaries,
   type ContractSeason,
   type ContractSummary,
@@ -288,7 +288,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         const contractSeason = season as ContractSeason;
         const activeDeal = selectActiveContractDeal(row.contractDeals, contractSeason);
         const originalContract = contractDealSummary(activeDeal) ?? summarizeContractSalaries(row.salaryBySeason);
-        const currentContract = summarizeRemainingContract(row.salaryBySeason, activeDeal, contractSeason);
+        const currentContract = summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, contractSeason);
         const originalContractDisplay = formatContractSummary(originalContract);
         const currentContractDisplay = formatContractSummary(currentContract);
         const base = {
