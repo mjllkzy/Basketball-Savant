@@ -1,182 +1,142 @@
 [
   {
-    "id": "hoops-rumors-kelly-oubre-jr-to-meet-with-pacers-lakers-more",
-    "title": "Kelly Oubre Jr. To Meet With Pacers, Lakers",
-    "category": "League",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T23:15:38.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/kelly-oubre-jr-to-meet-with-pacers-lakers-more.html",
-    "summary": "Kelly Oubre Jr. will meet with the Pacers, Lakers, Trail Blazers, and Sixers, among other teams, as he contemplates his next move..."
-  },
-  {
-    "id": "hoops-rumors-clippers-raptors-finalizing-kawhi-leonard-trade",
-    "title": "Clippers To Trade Kawhi Leonard To Raptors",
+    "id": "kawhi-leonard-returns-to-raptors-reported-trade",
+    "title": "Kawhi Leonard returns to Raptors in reported Clippers trade",
     "category": "Trade",
     "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T23:01:18.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/clippers-raptors-finalizing-kawhi-leonard-trade.html",
-    "summary": "The Clippers and Raptors have an agreement in place. is receiving the following draft assets in the deal: The Raptors’ 2031 first-round pick (unprotected)."
+    "publishedAt": "2026-07-01T07:48:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/4-takeaways-kawhi-leonard-returns-to-toronto-in-reported-trade-with-clippers",
+    "summary": "NBA.com analyzes the ESPN-reported deal sending Kawhi Leonard back to Toronto for Brandon Ingram, Gradey Dick and a package of draft picks."
   },
   {
-    "id": "hoops-rumors-nba-cup-final-to-be-held-at-hinkle-fieldhouse-in-indianapolis",
-    "title": "NBA Cup Final To Be Held At Hinkle Fieldhouse In Indianapolis",
+    "id": "zach-collins-bulls-two-year-extension",
+    "title": "Zach Collins reportedly agrees to 2-year Bulls extension",
+    "category": "Free Agency",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-01T07:29:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/report-zach-collins-agrees-to-2-year-extension-with-bulls",
+    "summary": "NBA.com cites ESPN reporting that Zach Collins will stay in Chicago on a two-year, $17 million extension through 2027-28."
+  },
+  {
+    "id": "dean-wade-76ers-four-year-deal",
+    "title": "Dean Wade reportedly agrees to 4-year deal with 76ers",
+    "category": "Free Agency",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-01T07:02:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/dean-wade-76ers-deal",
+    "summary": "NBA.com cites ESPN and Associated Press reporting that Dean Wade is leaving Cleveland for a four-year, $39 million agreement with Philadelphia."
+  },
+  {
+    "id": "emirates-nba-cup-2026-groups-announced",
+    "title": "Emirates NBA Cup 2026 groups announced",
     "category": "League",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T22:56:53.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/nba-cup-final-to-be-held-at-hinkle-fieldhouse-in-indianapolis.html",
-    "summary": "The final of next season’s NBA Cup will be held at Hinkle Fieldhouse — Butler’s arena — in Indianapolis."
-  },
-  {
-    "id": "hoops-rumors-bucks-agree-to-three-year-deal-with-ousmane-dieng",
-    "title": "Bucks Agree To Three-Year Deal With Ousmane Dieng",
-    "category": "Transaction",
     "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T22:36:45.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/bucks-agree-to-three-year-deal-with-ousmane-dieng.html",
-    "summary": "The Bucks and forward Ousmane Dieng have agreed on a three-year, $17.5MM contract, Shams Charania of ESPN reports ."
+    "publishedAt": "2026-07-01T06:34:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/emirates-nba-cup-2026-groups-announced",
+    "summary": "The NBA announced all six groups for the 2026 Emirates NBA Cup, with group play opening Oct. 30 and the championship set for Dec. 11 at Hinkle Fieldhouse."
   },
   {
-    "id": "hoops-rumors-deandre-jordan-to-re-sign-with-pelicans",
-    "title": "DeAndre Jordan To Re-Sign With Pelicans",
-    "category": "Transaction",
+    "id": "luke-kennard-suns-two-year-deal",
+    "title": "Luke Kennard reportedly set to sign with Suns",
+    "category": "Free Agency",
     "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T22:26:12.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/deandre-jordan-to-re-sign-with-pelicans.html",
-    "summary": "The Pelicans are bringing back big man DeAndre Jordan, NBA insider Chris Haynes reports ."
+    "publishedAt": "2026-07-01T06:29:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/luke-kennard-suns-deal",
+    "summary": "NBA.com cites ESPN reporting that Luke Kennard agreed to a two-year, $13 million deal with Phoenix, including a second-year player option."
   },
   {
-    "id": "hoops-rumors-bulls-to-guarantee-leonard-miller-waive-kam-jones",
-    "title": "Bulls To Guarantee Leonard Miller, Waive Kam Jones",
-    "category": "Transaction",
+    "id": "keon-ellis-nets-two-year-deal",
+    "title": "Keon Ellis reportedly agrees to 2-year Nets deal",
+    "category": "Free Agency",
     "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T22:18:10.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/bulls-to-guarantee-leonard-miller-waive-kam-jones.html",
-    "summary": "The Bulls are fully guaranteeing the $2.41MM contract of Leonard Miller for next season, Michael Scotto reports for HoopsHype ."
+    "publishedAt": "2026-07-01T05:40:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/reports-keon-ellis-nets-deal",
+    "summary": "NBA.com cites ESPN and The Athletic reporting that Keon Ellis is joining Brooklyn on a two-year, $18 million agreement with a mutual option."
   },
   {
-    "id": "hoops-rumors-nba-extremely-encouraged-by-bids-for-european-franchises",
-    "title": "NBA ‘Extremely Encouraged’ By Bids For European Franchises",
+    "id": "ousmane-dieng-bucks-three-year-deal",
+    "title": "Ousmane Dieng reportedly re-ups with Bucks",
+    "category": "Free Agency",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-01T04:50:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/reports-ousmane-dieng-re-sign-bucks",
+    "summary": "NBA.com cites ESPN reporting that Ousmane Dieng agreed to a three-year, $17.5 million deal to remain with Milwaukee."
+  },
+  {
+    "id": "tim-hardaway-jr-heat-one-year-deal",
+    "title": "Tim Hardaway Jr. reportedly agrees to Heat deal",
+    "category": "Free Agency",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-01T04:15:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/tim-hardaway-jr-miami-heat",
+    "summary": "NBA.com cites ESPN, NBA on Prime and The Athletic reporting that Tim Hardaway Jr. will join Miami on a one-year, $6.5 million deal."
+  },
+  {
+    "id": "kristaps-porzingis-warriors-two-year-deal",
+    "title": "Kristaps Porziņģis re-signs with Warriors",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-01T04:00:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/reports-kristaps-porzingis-opts-to-remain-with-warriors-on-2-year-contract",
+    "summary": "Golden State announced Kristaps Porziņģis will remain with the Warriors on a two-year contract reportedly worth $40 million."
+  },
+  {
+    "id": "nba-salary-cap-2026-27-season",
+    "title": "NBA sets 2026-27 salary cap at $164.961 million",
     "category": "League",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-01T02:05:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/nba-salary-cap-2026-27-season",
+    "summary": "The NBA announced a $164.961 million salary cap, $200.428 million tax level and $221.686 million second apron for the 2026-27 season."
+  },
+  {
+    "id": "lebron-james-lakers-plans-to-play-elsewhere",
+    "title": "LeBron James reportedly tells Lakers he will play elsewhere",
+    "category": "Free Agency",
     "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T22:00:18.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/nba-extremely-encouraged-by-bids-for-european-franchises.html",
-    "summary": "NBA deputy commissioner Mark Tatum said he’s “extremely encouraged” by the bidding process for franchises in the new European league."
-  },
-  {
-    "id": "hoops-rumors-lebron-james-to-weigh-offers-from-all-interested-teams",
-    "title": "LeBron James To Weigh Offers From All Interested Teams?",
-    "category": "League",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T21:49:41.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/lebron-james-to-weigh-offers-from-all-interested-teams.html",
-    "summary": "Star forward LeBron James has asked his agent, Rich Paul, to let any interested teams know that he’s open to hearing what they can offer so he can decide..."
-  },
-  {
-    "id": "kings-precious-achiuwa-reportedly-agree-to-2-year-deal",
-    "title": "Kings, Precious Achiuwa agree to 2-year deal",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T21:34:44Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/kings-precious-achiuwa-reportedly-agree-to-2-year-deal",
-    "summary": "Veteran forward stays put in Sacramento on a reported 2-year deal."
-  },
-  {
-    "id": "hoops-rumors-wizards-not-interested-in-dealing-anthony-davis",
-    "title": "Wizards Not Interested In Dealing Anthony Davis",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T21:23:48.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/06/wizards-not-interested-in-dealing-anthony-davis.html",
-    "summary": "Anthony Davis‘ name has popped up in trade rumors, especially involving Golden State..."
-  },
-  {
-    "id": "lebron-james-lakers-legacy-closes",
-    "title": "LeBron James closes a historic chapter with the Lakers",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T20:26:07Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/lebron-james-lakers-legacy-closes",
-    "summary": "From a 2020 NBA title to countless milestones, LeBron's Lakers legacy ranks among the greatest ever."
-  },
-  {
-    "id": "free-agency-jock-landale-2026",
-    "title": "Hawks, Jock Landale agree to deal",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T18:39:56Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/free-agency-jock-landale-2026",
-    "summary": "Atlanta keeps its reserve big man in the mix on a reported 1-year deal."
-  },
-  {
-    "id": "2026-free-agency-options-and-qualifying-offers",
-    "title": "2026 Free Agency: Options and qualifying offers",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T16:53:45Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-free-agency-options-and-qualifying-offers",
-    "summary": "See the official contract decisions made by players and teams as free agency tips off."
-  },
-  {
-    "id": "lebron-james-free-agency-2026",
-    "title": "LeBron James will play for team other than Lakers in 2026-27",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T16:20:44Z",
+    "publishedAt": "2026-06-30T22:56:00.000Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/lebron-james-free-agency-2026",
-    "summary": "The NBA's all-time leading scorer has reportedly informed the Lakers that he plans to play elsewhere for his 24th NBA season."
-  },
-  {
-    "id": "2026-nba-offseason-roundup",
-    "title": "Live Updates: NBA Free Agency 2026 tips off",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T14:45:14Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-nba-offseason-roundup",
-    "summary": "Follow along with NBA.com's live blog as the 2026 free agent period begins tonight."
-  },
-  {
-    "id": "harrison-barnes-will-re-sign-with-san-antonio",
-    "title": "Harrison Barnes will re-sign with San Antonio",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T00:54:34Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/harrison-barnes-will-re-sign-with-san-antonio",
-    "summary": "Reports emerge Monday that Harrison Barnes intends to re-sign with San Antonio on a one-year deal for $8 million."
+    "summary": "NBA.com cites multiple reports, including ESPN, that Rich Paul told the Lakers LeBron James plans to continue his career with another team in 2026-27."
   },
   {
     "id": "blazers-grizzlies-ja-morant-trade",
     "title": "Trail Blazers add Ja Morant in trade with Grizzlies",
-    "category": "Free Agency",
+    "category": "Trade",
     "reportingStatus": "Official",
-    "publishedAt": "2026-06-29T20:49:42Z",
+    "publishedAt": "2026-06-29T20:49:42.000Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/blazers-grizzlies-ja-morant-trade",
-    "summary": "The former All-Star guard is headed to Portland in exchange for Jerami Grant and Kris Murray."
+    "summary": "Portland acquired Ja Morant from Memphis in exchange for Jerami Grant and Kris Murray."
   },
   {
     "id": "miles-bridges-trade-hornets-suns",
-    "title": "Miles Bridges-to-Suns Trade Brings Back Grayson Allen",
+    "title": "Hornets send Miles Bridges to Suns for Grayson Allen",
     "category": "Trade",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-28T17:58:08Z",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-28T17:58:08.000Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/miles-bridges-trade-hornets-suns",
-    "summary": "Hornets reportedly deal Miles Bridges and picks to Suns for Grayson Allen, Royce O'Neale and a future first round pick."
+    "summary": "NBA.com cites multiple reports that Charlotte is sending Miles Bridges and picks to Phoenix for Grayson Allen, Royce O'Neale and a future first-round pick."
+  },
+  {
+    "id": "giannis-antetokounmpo-heat-bucks-blockbuster",
+    "title": "Heat reportedly acquire Giannis Antetokounmpo from Bucks",
+    "category": "Trade",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-06-25T05:37:00.000Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/reports-heat-acquire-giannis-antetokounmpo-in-blockbuster-deal",
+    "summary": "NBA.com cites ESPN reporting that Miami is acquiring Giannis Antetokounmpo and Bobby Portis from Milwaukee for Tyler Herro, Kel'el Ware, Jaime Jaquez Jr., Kasparas Jakučionis and draft capital."
   }
 ]
