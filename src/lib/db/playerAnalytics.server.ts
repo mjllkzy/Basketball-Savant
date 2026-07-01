@@ -1,5 +1,6 @@
 import type { Game, MetricValue, Player, PlayerGameStat, PlayerSeasonAggregate, SeasonType, Team } from "@/lib/types";
 import { playerSimilaritySummary, similarPlayers } from "@/lib/comparison";
+import { buildUpcomingRosterRows } from "@/lib/data/currentRoster";
 import { loadRuntimeFallbacks } from "@/lib/data/runtimeFallbacks.server";
 import { officialPlayerBirthDateById } from "@/lib/data/official";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
@@ -7,7 +8,7 @@ import { percentileRank, trueShootingPercentage } from "@/lib/metrics/formulas";
 import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
 import { decimalAgeFromBirthDate, normalizeBirthDate } from "@/lib/playerAge";
 import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
-import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
+import { DEFAULT_SEASON, UPCOMING_SEASON, parseSeason } from "@/lib/seasons";
 import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 
@@ -337,9 +338,14 @@ function mapComparisonRow(row: ComparisonDbRow): ComparisonPlayer {
 }
 
 async function jsonPlayerOptions(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerOption[]> {
-  const { players, metadata } = await loadRuntimeFallbacks();
-  if (metadata.season !== parseSeason(season) || metadata.season_type !== seasonType) return [];
-  return players.map((player) => ({
+  const { players, teams, metadata } = await loadRuntimeFallbacks();
+  const selectedSeason = parseSeason(season);
+  const sourcePlayers = metadata.season === selectedSeason && metadata.season_type === seasonType
+    ? players
+    : selectedSeason === UPCOMING_SEASON && seasonType === DEFAULT_SEASON_TYPE
+      ? buildUpcomingRosterRows(players, teams)
+      : [];
+  return sourcePlayers.map((player) => ({
     slug: player.player_slug,
     name: player.player_name,
     teamAbbreviation: player.team_abbreviation ?? "NBA",
@@ -350,13 +356,17 @@ async function jsonPlayerOptions(seasonType: SeasonType = DEFAULT_SEASON_TYPE, s
 async function jsonComparisonPlayers(slugs?: string[], seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<ComparisonPlayer[]> {
   const { players, teams, metadata } = await loadRuntimeFallbacks();
   const selectedSeason = parseSeason(season);
-  if (metadata.season !== selectedSeason || metadata.season_type !== seasonType) return [];
+  const sourcePlayers = metadata.season === selectedSeason && metadata.season_type === seasonType
+    ? players
+    : selectedSeason === UPCOMING_SEASON && seasonType === DEFAULT_SEASON_TYPE
+      ? buildUpcomingRosterRows(players, teams)
+      : [];
   const selected = slugs ? new Set(slugs) : null;
-  const tsValues = players.flatMap((player) => player.ts_pct === null ? [] : [player.ts_pct]);
-  const usageValues = players.flatMap((player) => player.usage_rate === null ? [] : [player.usage_rate]);
-  const pieValues = players.flatMap((player) => player.pie === null ? [] : [player.pie]);
+  const tsValues = sourcePlayers.flatMap((player) => player.ts_pct === null ? [] : [player.ts_pct]);
+  const usageValues = sourcePlayers.flatMap((player) => player.usage_rate === null ? [] : [player.usage_rate]);
+  const pieValues = sourcePlayers.flatMap((player) => player.pie === null ? [] : [player.pie]);
   const teamsById = new Map(teams.map((team) => [team.team_id, team]));
-  const rows = players.flatMap((player): ComparisonDbRow[] => {
+  const rows = sourcePlayers.flatMap((player): ComparisonDbRow[] => {
     if (selected && !selected.has(player.player_slug)) return [];
     const teamAbbreviation = player.team_abbreviation ?? "NBA";
     const teamId = player.team_id ?? teamIdByAbbreviation[teamAbbreviation] ?? teamAbbreviation;
@@ -388,7 +398,7 @@ async function jsonComparisonPlayers(slugs?: string[], seasonType: SeasonType = 
       division: team?.division ?? null,
       primary_color: team?.primary_color ?? null,
       secondary_color: team?.secondary_color ?? null,
-      season: metadata.season,
+      season: selectedSeason,
       games: player.games,
       minutes: player.minutes,
       pts: player.pts,
