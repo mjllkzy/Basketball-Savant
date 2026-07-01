@@ -51,7 +51,7 @@ describe("player contract import CLI", () => {
     const payload = JSON.parse(readFileSync("data/raw/player_contracts_2025_2031.json", "utf8"));
     const dealPayload = JSON.parse(readFileSync("data/raw/player_contract_deals_2025_2031.json", "utf8"));
 
-    expect(payload.metadata.row_count).toBe(530);
+    expect(payload.metadata.row_count).toBeGreaterThanOrEqual(530);
     expect(payload.metadata.season_columns).toEqual([
       "2025-26",
       "2026-27",
@@ -60,7 +60,7 @@ describe("player contract import CLI", () => {
       "2029-30",
       "2030-31",
     ]);
-    expect(payload.contracts).toHaveLength(530);
+    expect(payload.contracts).toHaveLength(payload.metadata.row_count);
     expect(payload.contracts[0]).toMatchObject({
       source_rank: 1,
       player_name: "Stephen Curry",
@@ -69,11 +69,16 @@ describe("player contract import CLI", () => {
     });
     expect(payload.contracts.find((row: { player_name: string; team_abbreviation: string }) => row.player_name === "Austin Reaves" && row.team_abbreviation === "LAL")).toMatchObject({
       options_by_season: {
-        "2026-27": "Player Option",
+        "2029-30": "Player Option",
       },
+      needs_followup: true,
     });
-    expect(dealPayload.metadata.row_count).toBe(530);
-    expect(dealPayload.metadata.with_deals).toBe(530);
+    expect(payload.contracts.find((row: { player_name: string; team_abbreviation: string }) => row.player_name === "Dean Wade" && row.team_abbreviation === "PHI")).toMatchObject({
+      needs_followup: true,
+      contract_notes: expect.stringContaining("$39 million"),
+    });
+    expect(dealPayload.metadata.row_count).toBe(payload.metadata.row_count);
+    expect(dealPayload.metadata.with_deals).toBe(payload.metadata.row_count);
     expect(dealPayload.metadata.salaryswish_matched).toBeGreaterThan(500);
     expect(dealPayload.contracts.every((row: { deals: unknown[] }) => row.deals.length > 0)).toBe(true);
     expect(dealPayload.contracts.find((row: { player_name: string }) => row.player_name === "Austin Reaves")).toMatchObject({
@@ -167,7 +172,7 @@ describe("player contract import CLI", () => {
     expect(result.status).toBe(0);
     const payload = JSON.parse(result.stdout);
     expect(payload.status).toBe("validated");
-    expect(payload.rows).toBe(530);
+    expect(payload.rows).toBeGreaterThanOrEqual(530);
     expect(payload.matched_rows_against_generated_players).toBeGreaterThan(500);
   });
 

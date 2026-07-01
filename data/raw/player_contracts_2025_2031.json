@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "source_key": "player-salary-contracts-2026-06-29",
+    "source_key": "player-salary-contracts-2026-07-01",
     "source_label": "User-provided NBA player salary contract table",
-    "received_date": "2026-06-29",
+    "received_date": "2026-07-01",
     "season_columns": [
       "2025-26",
       "2026-27",
@@ -11,8 +11,8 @@
       "2029-30",
       "2030-31"
     ],
-    "row_count": 530,
-    "matched_rows_against_generated_players": 506,
+    "row_count": 532,
+    "matched_rows_against_generated_players": 508,
     "unmatched_rows_against_generated_players": 24,
     "preserves_duplicate_source_rows": true,
     "option_source": {
@@ -22,6 +22,16 @@
         "salary-pl": "Player Option",
         "salary-tm": "Team Option"
       }
+    },
+    "latest_contract_audit": {
+      "audit_date": "2026-07-01",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026",
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "updated_player_count": 37,
+      "needs_followup_count": 32,
+      "notes": "Added reported 2026 free-agency agreements and marked rows for follow-up where annual salary, guarantee, or option details remain unavailable."
     }
   },
   "contracts": [
@@ -357,7 +367,15 @@
       "salaries": {
         "2025-26": 46394100
       },
-      "guaranteed": 46394100
+      "guaranteed": null,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      },
+      "contract_notes": "Reported four-year, approximately $212 million agreement with Washington, including a player option in year 4. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.espn.com/nba/story/_/id/49145221/sources-trae-young-sign-4-year-212m-deal-wizards"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 22,
@@ -932,7 +950,15 @@
       "salaries": {
         "2025-26": 30731707
       },
-      "guaranteed": 30731707
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      },
+      "contract_notes": "Warriors announced re-signing; reported two-year, $40 million contract with a player option in year 2. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/reports-kristaps-porzingis-opts-to-remain-with-warriors-on-2-year-contract"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 58,
@@ -945,7 +971,12 @@
         "2025-26": 30666666,
         "2026-27": 21000000
       },
-      "guaranteed": 51666666
+      "guaranteed": 51666666,
+      "contract_notes": "Agreed to a one-year, $21 million extension for 2026-27; trade kicker reported. Season salary is public; later runs should confirm final executed terms.",
+      "source_urls": [
+        "https://www.nba.com/news/hawks-resign-cj-mccollum"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 59,
@@ -971,13 +1002,14 @@
       "matched_player_name": "Isaiah Hartenstein",
       "team_abbreviation": "OKC",
       "salaries": {
-        "2025-26": 28500000,
-        "2026-27": 28500000
+        "2025-26": 28500000
       },
-      "guaranteed": 28500000,
-      "options_by_season": {
-        "2026-27": "Team Option"
-      }
+      "guaranteed": null,
+      "contract_notes": "Reported three-year, $75 million agreement with Oklahoma City, plus 15% trade kicker and a mutual rework option. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/thunder-sign-isaiah-hartenstein-through-2028-29-season"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 61,
@@ -990,10 +1022,15 @@
         "2025-26": 28223215,
         "2026-27": 30169644
       },
-      "guaranteed": 28223215,
+      "guaranteed": null,
       "options_by_season": {
-        "2026-27": "Player Option"
-      }
+        "2028-29": "Player Option"
+      },
+      "contract_notes": "Reported opt-in for 2026-27 plus agreement through 2028-29; ESPN framed it as three years/$64 million with a player option in the third season. Extension-year salaries and guarantees need follow-up.",
+      "source_urls": [
+        "https://www.nba.com/news/andrew-wiggins-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 62,
@@ -1507,7 +1544,12 @@
       "salaries": {
         "2025-26": 19375000
       },
-      "guaranteed": 19375000
+      "guaranteed": null,
+      "contract_notes": "Reported two-year, $22 million agreement to return to Utah; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/jusuf-nurkic-set-for-return-to-jazz-on-new-2-year-contract"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 96,
@@ -1517,9 +1559,15 @@
       "matched_player_name": "Harrison Barnes",
       "team_abbreviation": "SAS",
       "salaries": {
-        "2025-26": 19000000
+        "2025-26": 19000000,
+        "2026-27": 8000000
       },
-      "guaranteed": 19000000
+      "guaranteed": null,
+      "contract_notes": "Reported one-year, $8 million agreement to return to San Antonio for 2026-27.",
+      "source_urls": [
+        "https://www.nba.com/news/harrison-barnes-will-re-sign-with-san-antonio"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 97,
@@ -1648,7 +1696,13 @@
       "salaries": {
         "2025-26": 18080496
       },
-      "guaranteed": 18080496
+      "guaranteed": null,
+      "contract_notes": "Reported two-year, $17 million extension with Chicago; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/report-zach-collins-agrees-to-2-year-extension-with-bulls",
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 106,
@@ -1678,7 +1732,13 @@
       "salaries": {
         "2025-26": 17991071
       },
-      "guaranteed": 17991071
+      "guaranteed": null,
+      "contract_notes": "Reported three-year, $27 million agreement with Detroit; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026",
+        "https://www.espn.com/nba/story/_/id/49219769/sources-pistons-kevin-huerter-return-3-year-27m-deal"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 108,
@@ -1743,15 +1803,16 @@
       "normalized_player_name": "bogdan bogdanovic",
       "matched_player_slug": "bogdan-bogdanovic",
       "matched_player_name": "Bogdan Bogdanović",
-      "team_abbreviation": "LAC",
+      "team_abbreviation": "HOU",
       "salaries": {
-        "2025-26": 16020000,
-        "2026-27": 16020000
+        "2025-26": 16020000
       },
-      "guaranteed": 16020000,
-      "options_by_season": {
-        "2026-27": "Team Option"
-      }
+      "guaranteed": null,
+      "contract_notes": "Reported one-year agreement with Houston; contract value, salary, and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 113,
@@ -2045,13 +2106,17 @@
       "matched_player_name": "Austin Reaves",
       "team_abbreviation": "LAL",
       "salaries": {
-        "2025-26": 13937574,
-        "2026-27": 14898786
+        "2025-26": 13937574
       },
-      "guaranteed": 13937574,
+      "guaranteed": 185000000,
       "options_by_season": {
-        "2026-27": "Player Option"
-      }
+        "2029-30": "Player Option"
+      },
+      "contract_notes": "Reported four-year, $185 million maximum agreement with the Lakers, including a 2029-30 player option. Annual salary breakdown remains unavailable.",
+      "source_urls": [
+        "https://www.espn.com/nba/story/_/id/49166079/sources-lakers-reaves-intends-sign-4-year-185m-extension"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 132,
@@ -2174,7 +2239,12 @@
       "salaries": {
         "2025-26": 13285713
       },
-      "guaranteed": 13285713
+      "guaranteed": null,
+      "contract_notes": "Reported three-year, $44 million extension with Portland through 2028-29; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/robert-williams-iii-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 140,
@@ -2216,7 +2286,13 @@
       "salaries": {
         "2025-26": 12888889
       },
-      "guaranteed": 12888889
+      "guaranteed": null,
+      "contract_notes": "Reported three-year, $74 million agreement with Charlotte; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026",
+        "https://www.espn.com/nba/story/_/id/49176539/sources-coby-white-re-sign-hornets-3-year-74m-deal"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 143,
@@ -2515,11 +2591,19 @@
       "normalized_player_name": "luke kennard",
       "matched_player_slug": "luke-kennard",
       "matched_player_name": "Luke Kennard",
-      "team_abbreviation": "LAL",
+      "team_abbreviation": "PHO",
       "salaries": {
         "2025-26": 11000000
       },
-      "guaranteed": 11000000
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      },
+      "contract_notes": "Reported two-year, $13 million agreement with Phoenix, including a player option in year 2. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/luke-kennard-suns-deal"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 162,
@@ -3073,7 +3157,12 @@
       "salaries": {
         "2025-26": 8307692
       },
-      "guaranteed": 8307692
+      "guaranteed": null,
+      "contract_notes": "Reported one-year agreement to return to Miami; contract value, salary, and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 198,
@@ -3303,7 +3392,15 @@
       "salaries": {
         "2025-26": 7518518
       },
-      "guaranteed": 7518518
+      "guaranteed": null,
+      "options_by_season": {
+        "2030-31": "Player Option"
+      },
+      "contract_notes": "Reported five-year, $112 million agreement with Minnesota, including a player option in year 5. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.espn.com/nba/story/_/id/49150075/dosunmu-gets-5-year-112m-deal-timberwolves"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 212,
@@ -3455,10 +3552,15 @@
       "salaries": {
         "2025-26": 6670882
       },
-      "guaranteed": 6670882,
+      "guaranteed": null,
       "options_by_season": {
-        "2025-26": "Team Option"
-      }
+        "2028-29": "Team Option"
+      },
+      "contract_notes": "Reported three-year, $17.5 million agreement with Milwaukee, including a team option in year 3. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/reports-ousmane-dieng-re-sign-bucks"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 222,
@@ -3483,11 +3585,17 @@
       "normalized_player_name": "dean wade",
       "matched_player_slug": "dean-wade",
       "matched_player_name": "Dean Wade",
-      "team_abbreviation": "CLE",
+      "team_abbreviation": "PHI",
       "salaries": {
         "2025-26": 6623456
       },
-      "guaranteed": null
+      "guaranteed": null,
+      "contract_notes": "Reported four-year, $39 million agreement with Philadelphia; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup",
+        "https://www.espn.com/nba/story/_/id/49232503/sources-sixers-land-dean-wade-four-year-39m-deal"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 224,
@@ -3586,10 +3694,12 @@
       "salaries": {
         "2025-26": 6276531
       },
-      "guaranteed": 6276531,
-      "options_by_season": {
-        "2025-26": "Team Option"
-      }
+      "guaranteed": 38000000,
+      "contract_notes": "Reported three-year, $38 million fully guaranteed agreement with Phoenix; season-by-season salary unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/mark-williams-return-to-suns"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 230,
@@ -3598,14 +3708,13 @@
       "matched_player_slug": "day-ron-sharpe",
       "matched_player_name": "Day'Ron Sharpe",
       "team_abbreviation": "BRK",
-      "salaries": {
-        "2025-26": 6250000,
-        "2026-27": 6250000
-      },
-      "guaranteed": 6250000,
-      "options_by_season": {
-        "2026-27": "Team Option"
-      }
+      "salaries": {},
+      "guaranteed": null,
+      "contract_notes": "Reported two-year, $20 million agreement with Brooklyn; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/dayron-sharpe-josh-minott-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 231,
@@ -4322,13 +4431,14 @@
       "matched_player_name": "Jose Alvarado",
       "team_abbreviation": "NYK",
       "salaries": {
-        "2025-26": 4500000,
-        "2026-27": 4500000
+        "2025-26": 4500000
       },
-      "guaranteed": 4500000,
-      "options_by_season": {
-        "2026-27": "Player Option"
-      }
+      "guaranteed": null,
+      "contract_notes": "Reported declined 2026-27 player option and agreed to a new three-year, $14-plus million deal with New York. Annual salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.espn.com/nba/story/_/id/49190706/jose-alvarado-returning-new-york-knicks-new-3-year-deal"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 276,
@@ -5082,13 +5192,14 @@
       "matched_player_name": "Julian Champagnie",
       "team_abbreviation": "SAS",
       "salaries": {
-        "2025-26": 3000000,
-        "2026-27": 3000000
+        "2025-26": 3000000
       },
       "guaranteed": null,
-      "options_by_season": {
-        "2026-27": "Team Option"
-      }
+      "contract_notes": "Spurs announced a multiyear extension; reports list three years/$45 million through 2028-29. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/spurs-julian-champagnie-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 321,
@@ -5555,13 +5666,17 @@
       "matched_player_name": "Josh Minott",
       "team_abbreviation": "BRK",
       "salaries": {
-        "2025-26": 2378870,
-        "2026-27": 2584539
+        "2025-26": 2378870
       },
-      "guaranteed": 2378870,
+      "guaranteed": null,
       "options_by_season": {
-        "2026-27": "Team Option"
-      }
+        "2027-28": "Team Option"
+      },
+      "contract_notes": "Reported two-year, $9 million agreement with Brooklyn, including a team option in year 2; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/dayron-sharpe-josh-minott-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 349,
@@ -5590,10 +5705,15 @@
       "salaries": {
         "2025-26": 2349578
       },
-      "guaranteed": 2349578,
+      "guaranteed": null,
       "options_by_season": {
-        "2025-26": "Team Option"
-      }
+        "2028-29": "Player Option"
+      },
+      "contract_notes": "Reported three-year, $19 million agreement with Phoenix, including a player option in year 3. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/suns-resign-collin-gillespie-jordan-goodwin"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 351,
@@ -5688,14 +5808,16 @@
       "normalized_player_name": "keon ellis",
       "matched_player_slug": "keon-ellis",
       "matched_player_name": "Keon Ellis",
-      "team_abbreviation": "CLE",
+      "team_abbreviation": "BRK",
       "salaries": {
         "2025-26": 2301587
       },
-      "guaranteed": 2301587,
-      "options_by_season": {
-        "2025-26": "Team Option"
-      }
+      "guaranteed": 18000000,
+      "contract_notes": "Reported two-year, $18 million guaranteed agreement with Brooklyn with a mutual opt-in clause in year 2; season-by-season salary unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 358,
@@ -5916,7 +6038,12 @@
       "salaries": {
         "2025-26": 2296274
       },
-      "guaranteed": 2296274
+      "guaranteed": null,
+      "contract_notes": "Reported four-year, $48 million agreement with Phoenix; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/suns-resign-collin-gillespie-jordan-goodwin"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 375,
@@ -5952,7 +6079,12 @@
       "salaries": {
         "2025-26": 2296274
       },
-      "guaranteed": 2296274
+      "guaranteed": null,
+      "contract_notes": "Reported four-year, $24 million agreement to return to New York; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/landry-shamet-knicks-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 378,
@@ -6102,11 +6234,17 @@
       "normalized_player_name": "tim hardaway",
       "matched_player_slug": "tim-hardaway-jr",
       "matched_player_name": "Tim Hardaway Jr.",
-      "team_abbreviation": "DEN",
+      "team_abbreviation": "MIA",
       "salaries": {
-        "2025-26": 2296274
+        "2025-26": 2296274,
+        "2026-27": 6500000
       },
-      "guaranteed": 2296274
+      "guaranteed": null,
+      "contract_notes": "Reported one-year, $6.5 million agreement with Miami for 2026-27.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 391,
@@ -6142,7 +6280,12 @@
       "salaries": {
         "2025-26": 2296274
       },
-      "guaranteed": 2296274
+      "guaranteed": null,
+      "contract_notes": "Reported one-year agreement to return to Cleveland; contract value, salary, and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/cavaliers-thomas-bryant-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 394,
@@ -6176,9 +6319,15 @@
       "matched_player_name": "Jock Landale",
       "team_abbreviation": "ATL",
       "salaries": {
-        "2025-26": 2296274
+        "2025-26": 2296274,
+        "2026-27": 14000000
       },
-      "guaranteed": 2296274
+      "guaranteed": null,
+      "contract_notes": "Reported one-year, $14 million agreement with Atlanta for 2026-27.",
+      "source_urls": [
+        "https://www.nba.com/news/free-agency-jock-landale-2026"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 397,
@@ -6244,7 +6393,12 @@
       "salaries": {
         "2025-26": 2269880
       },
-      "guaranteed": 2269880
+      "guaranteed": null,
+      "contract_notes": "Reported one-year agreement to return to New Orleans; contract value, salary, and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 402,
@@ -6547,7 +6701,12 @@
       "salaries": {
         "2025-26": 2111516
       },
-      "guaranteed": 2111516
+      "guaranteed": null,
+      "contract_notes": "Reported two-year, $11.5 million agreement to return to Sacramento; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/kings-precious-achiuwa-reportedly-agree-to-2-year-deal"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 422,
@@ -7082,7 +7241,12 @@
       "salaries": {
         "2025-26": 1272870
       },
-      "guaranteed": 1272870
+      "guaranteed": 10000000,
+      "contract_notes": "Reported multiyear agreement with New York; Spotrac lists four years/$10 million guaranteed. Season-by-season salary unavailable.",
+      "source_urls": [
+        "https://www.spotrac.com/nba/player/_/id/99263/mohamed-diawara"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 456,
@@ -7399,7 +7563,12 @@
         "2025-26": 490128,
         "2026-27": 2150917
       },
-      "guaranteed": 2641045
+      "guaranteed": 2641045,
+      "contract_notes": "Reported agreement to return to Boston; public terms unavailable, so existing salary rows are retained pending follow-up.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 479,
@@ -7409,13 +7578,14 @@
       "matched_player_name": "Kobe Sanders",
       "team_abbreviation": "LAC",
       "salaries": {
-        "2025-26": 475497,
-        "2026-27": 2150917
+        "2025-26": 475497
       },
-      "guaranteed": 475497,
-      "options_by_season": {
-        "2026-27": "Team Option"
-      }
+      "guaranteed": null,
+      "contract_notes": "Reported four-year, $11.2 million agreement to return to the LA Clippers; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 480,
@@ -8050,6 +8220,38 @@
         "2025-26": 129503
       },
       "guaranteed": 174503
+    },
+    {
+      "source_rank": 531,
+      "player_name": "Ron Harper Jr.",
+      "normalized_player_name": "ron harper jr",
+      "matched_player_slug": "ron-harper-jr",
+      "matched_player_name": "Ron Harper Jr.",
+      "team_abbreviation": "BOS",
+      "salaries": {},
+      "guaranteed": null,
+      "contract_notes": "Reported three-year, $9 million agreement with Boston after team option decline; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/celtics-sign-ron-harper-jr-to-extension"
+      ],
+      "needs_followup": true
+    },
+    {
+      "source_rank": 532,
+      "player_name": "Branden Carlson",
+      "normalized_player_name": "branden carlson",
+      "matched_player_slug": "branden-carlson",
+      "matched_player_name": "Branden Carlson",
+      "team_abbreviation": "POR",
+      "salaries": {
+        "2026-27": 2500000
+      },
+      "guaranteed": null,
+      "contract_notes": "Reported one-year, $2.5 million agreement with Portland for 2026-27.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": false
     }
   ]
 }

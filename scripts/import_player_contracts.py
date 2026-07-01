@@ -15,7 +15,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = ROOT / "data" / "raw" / "player_contracts_2025_2031.json"
-EXPECTED_ROWS = 530
+MIN_EXPECTED_ROWS = 530
 EXPECTED_SEASONS = ("2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31")
 NAME_TRANSLATION = str.maketrans({"ё": "e", "Ё": "e", "ë": "e", "Ë": "e", "’": "'", "‘": "'"})
 NAME_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
@@ -71,14 +71,14 @@ def load_source(source_path: Path) -> dict[str, Any]:
         raise RuntimeError("Contract source must contain metadata and contracts.")
     if int(metadata.get("row_count") or 0) != len(contracts):
         raise RuntimeError("Contract source metadata row_count does not match contracts length.")
-    if len(contracts) != EXPECTED_ROWS:
-        raise RuntimeError(f"Contract source has {len(contracts)} rows; expected {EXPECTED_ROWS}.")
+    if len(contracts) < MIN_EXPECTED_ROWS:
+        raise RuntimeError(f"Contract source has {len(contracts)} rows; expected at least {MIN_EXPECTED_ROWS}.")
     seasons = tuple(metadata.get("season_columns") or ())
     if seasons != EXPECTED_SEASONS:
         raise RuntimeError(f"Contract source seasons are {seasons}; expected {EXPECTED_SEASONS}.")
     ranks = [int(row.get("source_rank") or 0) for row in contracts if isinstance(row, dict)]
-    if ranks != list(range(1, EXPECTED_ROWS + 1)):
-        raise RuntimeError("Contract source ranks must be contiguous from 1 through 530.")
+    if ranks != list(range(1, len(contracts) + 1)):
+        raise RuntimeError(f"Contract source ranks must be contiguous from 1 through {len(contracts)}.")
     for row in contracts:
         if not isinstance(row, dict):
             raise RuntimeError("Contract rows must be objects.")
@@ -88,7 +88,7 @@ def load_source(source_path: Path) -> dict[str, Any]:
         if not isinstance(salaries, dict):
             raise RuntimeError(f"Contract row {row.get('source_rank')} is missing salaries.")
         guaranteed = row.get("guaranteed")
-        if not salaries and guaranteed is None:
+        if not salaries and guaranteed is None and not row.get("needs_followup"):
             raise RuntimeError(f"Contract row {row.get('source_rank')} has neither salary nor guaranteed amount.")
         for season, amount in salaries.items():
             if season not in EXPECTED_SEASONS:
