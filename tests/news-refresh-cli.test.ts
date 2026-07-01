@@ -154,6 +154,7 @@ describe("basketball news refresh", () => {
       "  {'status':'publish','slug':'kevin-huerter-pistons-deal','title':'Reports: Kevin Huerter plans to re-sign with Pistons','permalink':'https://www.nba.com/news/kevin-huerter-pistons-deal','date':'2026-06-29T23:30:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':\"NBA.com, citing ESPN's Shams Charania and The Athletic, reports Kevin Huerter plans to return to Detroit on a three-year, $27 million deal.\"},",
       "  {'status':'publish','slug':'landry-shamet-knicks-deal','title':'Reports: Landry Shamet, Knicks agree to 4-year deal','permalink':'https://www.nba.com/news/landry-shamet-knicks-deal','date':'2026-06-29T21:41:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':\"NBA.com, citing ESPN's Shams Charania and The Athletic, reports Landry Shamet intends to return to the Knicks on a four-year, $24 million deal.\"},",
       "  {'status':'publish','slug':'thomas-bryant-cavs-deal','title':'Report: Cavs agree to 1-year deal with Thomas Bryant','permalink':'https://www.nba.com/news/thomas-bryant-cavs-deal','date':'2026-06-29T20:59:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':\"NBA.com, citing ESPN's Shams Charania, reports veteran center Thomas Bryant intends to return to Cleveland on a one-year contract.\"},",
+      "  {'status':'publish','slug':'kawhi-leonard-raptors-clippers-trade','title':'Kawhi Leonard returns to Raptors in reported Clippers trade','permalink':'https://www.nba.com/news/kawhi-leonard-raptors-clippers-trade','date':'2026-07-01T17:30:00Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':'NBA.com analyzes the ESPN-reported deal sending Kawhi Leonard back to Toronto for Brandon Ingram, Gradey Dick and a package of draft picks.'},",
       "  {'status':'publish','slug':'thunder-exercise-dort-option','title':'Thunder exercise team option for Luguentz Dort','permalink':'https://www.nba.com/news/thunder-exercise-dort-option','date':'2026-06-30T02:59:54Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':'Oklahoma City exercised a team option for swingman Luguentz Dort.'},",
       "  {'status':'publish','slug':'bucks-ford-hire','title':'Bucks plan to hire T.J. Ford','permalink':'https://www.nba.com/news/bucks-ford-hire','date':'2026-06-30T03:18:57Z','categoryPrimary':{'name':'NBA Rumors'},'excerpt':'The Bucks plan to hire former NBA point guard T.J. Ford as part of Taylor Jenkins coaching staff.'},",
       "]",
@@ -167,9 +168,13 @@ describe("basketball news refresh", () => {
     });
 
     expect(result.status).toBe(0);
-    const items = JSON.parse(result.stdout) as Array<{ reportingStatus: string; title: string }>;
-    expect(items).toHaveLength(5);
+    const items = JSON.parse(result.stdout) as Array<{ category: string; reportingStatus: string; title: string }>;
+    expect(items).toHaveLength(6);
     expect(items.every((item) => item.reportingStatus === "Official")).toBe(true);
+    expect(items.find((item) => item.title.includes("Kawhi Leonard"))).toEqual(expect.objectContaining({
+      category: "Trade",
+      reportingStatus: "Official"
+    }));
   });
 
   runIfPython("keeps undecided transaction chatter as Rumor status", () => {

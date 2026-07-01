@@ -75,6 +75,9 @@ KEYWORD_IMPORTANCE = (
 EVENT_DEDUPE_CATEGORIES = {"Trade", "Transaction", "Free Agency", "Roster", "League"}
 
 TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
+    r"\breported(?:ly)?\s+(?:[a-z0-9'’.-]+\s+){0,4}(?:trade|deal|agreement|signing|extension|contract)\b",
+    r"\breported\s+deal\s+(?:sending|sends|bringing|brings|returning|returns)\b",
+    r"\b(?:deal|trade)\s+(?:sending|sends|bringing|brings|returning|returns)\b",
     r"\b(?:has|have|had)\s+agreed\s+to\b",
     r"\bagreed\s+to\b",
     r"\bagrees?\s+to\b",
@@ -86,6 +89,7 @@ TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
     r"\bannounced?\b",
     r"\bcompleted\b",
     r"\bfinalized\b",
+    r"\b(?:is|are|was|were|will\s+be)\s+(?:headed|heading|joining|returning|leaving|staying)\s+(?:to|with|for)\b",
     r"\bis\s+joining\b",
     r"\bopt(?:s|ed|ing)?\s+in\b",
     r"\b(?:decline|declined|declines|declining)\s+(?:his|her|the|their|a|an)?\s*(?:player|team)?\s*option\b",
@@ -102,6 +106,9 @@ TRUSTED_SOURCE_SPECULATION_PATTERNS = (
     r"\brumou?rs?\b",
     r"\bmonitoring\b",
     r"\binterest(?:ed)?\b",
+    r"\bshopping\b",
+    r"\bshopped\b",
+    r"\btrade\s+block\b",
     r"\bdiscussion(?:s)?\b",
     r"\bdiscuss(?:ing|ed)?\b",
     r"\btalk(?:s|ing|ed)?\b",
@@ -457,22 +464,22 @@ def classify_category(article: dict[str, Any]) -> str:
 
     if "injur" in category_blob or " acl " in f" {category_blob} ":
         return "Injury"
-    if "rumor" in category_blob and "draft" in category_blob:
-        return "Draft Rumor"
-    if "rumor" in category_blob:
-        return "Rumor"
     if "free agency" in category_blob or "free-agent" in category_blob:
         return "Free Agency"
-    if "draft" in category_blob:
-        return "Draft"
     if re.search(r"\b(trade|traded|trading|acquire|acquired|sends?|sent|dealt)\b", category_blob):
         return "Trade"
     if "coach" in category_blob:
         return "Coaching"
-    if "sign" in title or "extension" in title or "waive" in title:
+    if re.search(r"\b(sign|signed|signing|re-sign|re-signed|extension|contract|waive|waived|deal)\b", title):
         return "Transaction"
     if "roster" in category_blob:
         return "Roster"
+    if "rumor" in category_blob and "draft" in category_blob:
+        return "Draft Rumor"
+    if "draft" in category_blob:
+        return "Draft"
+    if "rumor" in category_blob:
+        return "Rumor"
     return "League"
 
 
