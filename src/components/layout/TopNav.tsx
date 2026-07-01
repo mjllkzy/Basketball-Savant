@@ -72,7 +72,7 @@ export function TopNav() {
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-3 px-3 py-3 sm:px-5 lg:px-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <ShotClockMark className="h-10 w-10 shrink-0 shadow-sm" idPrefix="shotclock-topnav-mark" />
+            <ShotClockMark className="h-10 w-10 shrink-0" idPrefix="shotclock-topnav-mark" />
             <div>
               <div className={`text-base font-black uppercase tracking-[0.18em] ${overContent ? "text-white drop-shadow-sm" : "text-ink"}`}>ShotClock</div>
               <div className={`text-xs font-medium ${overContent ? "text-slate-200" : "text-slate-500"}`}>Advanced Basketball Analytics</div>

@@ -11,7 +11,7 @@ type ShotClockMarkProps = {
 export function ShotClockMark({ className = "", style, title }: ShotClockMarkProps) {
   return (
     <span
-      className={`relative inline-flex items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-black/10 ${className}`}
+      className={`relative inline-flex items-center justify-center ${className}`}
       role={title ? "img" : undefined}
       aria-label={title}
       aria-hidden={title ? undefined : true}
@@ -22,8 +22,8 @@ export function ShotClockMark({ className = "", style, title }: ShotClockMarkPro
         alt=""
         width={1024}
         height={1024}
-        sizes="80px"
-        className="h-[88%] w-[88%] object-contain"
+        sizes="96px"
+        className="h-full w-full object-contain"
       />
     </span>
   );

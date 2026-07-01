@@ -25,7 +25,7 @@ export default function HomePage() {
         <Image src="/brand/shotclock-hero.png" alt="" fill priority className="object-cover opacity-60" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,24,32,0.18),rgba(16,24,32,0.9))]" />
         <div className="relative z-10 mx-auto flex min-h-[520px] max-w-5xl flex-col items-center justify-center px-6 py-16 text-center">
-          <ShotClockMark className="mb-5 h-20 w-20 shadow-card" idPrefix="shotclock-hero-mark" />
+          <ShotClockMark className="mb-5 h-20 w-20" idPrefix="shotclock-hero-mark" />
           <p className="mb-3 text-xs font-black uppercase tracking-[0.28em] text-teal-200">Advanced Basketball Analytics</p>
           <h1 className="max-w-4xl text-5xl font-black tracking-normal sm:text-7xl">ShotClock</h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-slate-100 sm:text-lg">
