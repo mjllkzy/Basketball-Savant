@@ -78,6 +78,7 @@ TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
     r"\breported(?:ly)?\s+(?:[a-z0-9'’.-]+\s+){0,4}(?:trade|deal|agreement|signing|extension|contract)\b",
     r"\breported\s+deal\s+(?:sending|sends|bringing|brings|returning|returns)\b",
     r"\b(?:deal|trade)\s+(?:sending|sends|bringing|brings|returning|returns)\b",
+    r"\breach(?:es|ed|ing)?\s+(?:an?\s+)?agreement\b",
     r"\b(?:has|have|had)\s+agreed\s+to\b",
     r"\bagreed\s+to\b",
     r"\bagrees?\s+to\b",
@@ -100,26 +101,6 @@ TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
     r"\breceiv(?:e|ed|es|ing)\s+qualifying\s+offers?\b",
     r"\btender(?:ed|s|ing)?\s+qualifying\s+offers?\b",
     r"\b(?:has|have|is|are|was|were)?\s*(?:traded|acquired|sent|signed|re-signed|waived)\b",
-)
-
-TRUSTED_SOURCE_SPECULATION_PATTERNS = (
-    r"\brumou?rs?\b",
-    r"\bmonitoring\b",
-    r"\binterest(?:ed)?\b",
-    r"\bshopping\b",
-    r"\bshopped\b",
-    r"\btrade\s+block\b",
-    r"\bdiscussion(?:s)?\b",
-    r"\bdiscuss(?:ing|ed)?\b",
-    r"\btalk(?:s|ing|ed)?\b",
-    r"\blink(?:ed|ing)?\b",
-    r"\bpossible\b",
-    r"\bcould\b",
-    r"\bmay\b",
-    r"\bmight\b",
-    r"\bwould\b",
-    r"\bexpected\b",
-    r"\bexplor(?:e|ed|ing)\b",
 )
 
 TRUSTED_SOURCE_NEGATED_OFFICIAL_PATTERNS = (
@@ -531,9 +512,7 @@ def classify_reporting_status(article: dict[str, Any], *, category: str) -> str:
 def classify_trusted_source_reporting_status(title: str, summary: str, categories: list[str]) -> str:
     status_blob = " ".join([title, summary, *categories]).lower()
     has_official_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_OFFICIAL_PATTERNS)
-    has_speculation_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_SPECULATION_PATTERNS)
     has_negated_official_signal = any(re.search(pattern, status_blob) for pattern in TRUSTED_SOURCE_NEGATED_OFFICIAL_PATTERNS)
-    has_explicit_rumor_label = bool(re.search(r"\brumou?rs?\b", " ".join([title, *categories]).lower()))
     title_text = clean_text(title)
 
     if (
@@ -543,9 +522,7 @@ def classify_trusted_source_reporting_status(title: str, summary: str, categorie
         return "Official"
     if has_negated_official_signal:
         return "Rumor"
-    if has_official_signal and not has_explicit_rumor_label:
-        return "Official"
-    if has_official_signal and not has_speculation_signal:
+    if has_official_signal:
         return "Official"
     return "Rumor"
 

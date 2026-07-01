@@ -143,6 +143,34 @@ describe("basketball news refresh", () => {
     }));
   });
 
+  runIfPython("classifies reached-agreement trusted-source trades as Official status", () => {
+    const script = [
+      "import importlib.util, json, pathlib, sys",
+      "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
+      "module = importlib.util.module_from_spec(spec)",
+      "sys.modules[spec.name] = module",
+      "spec.loader.exec_module(module)",
+      "feed = '''<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\"><channel><item><title>Celtics To Trade Jaylen Brown To Sixers For Paul George, Picks</title><link>https://www.hoopsrumors.com/2026/07/celtics-to-trade-jaylen-brown-to-sixers-for-paul-george-picks.html</link><pubDate>Wed, 01 Jul 2026 22:18:22 +0000</pubDate><category>Trade Rumors</category><description><![CDATA[Two Atlantic Division rivals have reached an agreement on a blockbuster trade.]]></description></item></channel></rss>'''",
+      "source = module.TRUSTED_RUMOR_SOURCES[0]",
+      "root = module.ET.fromstring(feed)",
+      "item = module.rss_item_to_news_item(root.find('./channel/item'), source)",
+      "print(json.dumps(item.to_json()))"
+    ].join("\n");
+
+    const result = spawnSync(pythonCommand!, ["-c", script], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+
+    expect(result.status).toBe(0);
+    const item = JSON.parse(result.stdout) as { category: string; reportingStatus: string; title: string };
+    expect(item).toEqual(expect.objectContaining({
+      category: "Trade",
+      reportingStatus: "Official",
+      title: "Celtics To Trade Jaylen Brown To Sixers For Paul George, Picks"
+    }));
+  });
+
   runIfPython("promotes NBA.com rumor-category posts to Official when a deal is decided", () => {
     const script = [
       "import importlib.util, json, pathlib, sys",

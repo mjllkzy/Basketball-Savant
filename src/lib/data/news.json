@@ -13,11 +13,21 @@
     "id": "hoops-rumors-celtics-to-trade-jaylen-brown-to-sixers-for-paul-george-picks",
     "title": "Celtics To Trade Jaylen Brown To Sixers For Paul George, Picks",
     "category": "Trade",
-    "reportingStatus": "Rumor",
+    "reportingStatus": "Official",
     "publishedAt": "2026-07-01T22:18:22.000Z",
     "sourceName": "Hoops Rumors",
     "sourceUrl": "https://www.hoopsrumors.com/2026/07/celtics-to-trade-jaylen-brown-to-sixers-for-paul-george-picks.html",
     "summary": "Two Atlantic Division rivals have reached an agreement on a blockbuster trade."
+  },
+  {
+    "id": "hoops-rumors-wizards-waive-leaky-black",
+    "title": "Wizards Waive Leaky Black",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-01T22:17:19.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/wizards-waive-leaky-black.html",
+    "summary": "The Wizards have waived 6’6″ guard/forward Leaky Black, Michael Scotto reports for HoopsHype ."
   },
   {
     "id": "hoops-rumors-grizzlies-kentavious-caldwell-pope-likely-to-part-ways",
@@ -90,16 +100,6 @@
     "summary": "Meleek Thomas, the 34th pick of the draft, has signed a four-year contract with the Cavaliers, Jeff Goodman of Field of 68 tweets."
   },
   {
-    "id": "hoops-rumors-free-agent-rumors-lebron-harris-drummond-wiseman-warren",
-    "title": "Free Agent: LeBron, Harris, Drummond, Wiseman, Warren",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-01T18:44:24.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/07/free-agent-rumors-lebron-harris-drummond-wiseman-warren.html",
-    "summary": "Until recently, LeBron James was strongly leaning toward returning to the Lakers in free agency."
-  },
-  {
     "id": "deanthony-melton-free-agency-2026",
     "title": "De'Anthony Melton agrees to return to Warriors on 2-year deal",
     "category": "Free Agency",
@@ -128,26 +128,6 @@
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/2026-free-agency-options-and-qualifying-offers",
     "summary": "See the official contract decisions made by players and teams as free agency tips off."
-  },
-  {
-    "id": "lebron-james-free-agency-2026",
-    "title": "LeBron James will play for team other than Lakers in 2026-27",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T16:20:44Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/lebron-james-free-agency-2026",
-    "summary": "The NBA's all-time leading scorer has reportedly informed the Lakers that he plans to play elsewhere for his 24th NBA season."
-  },
-  {
-    "id": "2026-nba-offseason-roundup",
-    "title": "Live updates: Day 2 of NBA Free Agency 2026",
-    "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-06-30T14:45:14Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-nba-offseason-roundup",
-    "summary": "Follow along with NBA.com's live blog as we share news, notes and analysis during the 2026 free agent period."
   },
   {
     "id": "blazers-grizzlies-ja-morant-trade",
