@@ -21,7 +21,7 @@ import { formatPlayerHeight } from "@/lib/playerHeight";
 import { boundedNumber, defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import { parsePlayerStatView } from "@/lib/playerStatViews";
 import { parseSeasonType } from "@/lib/seasonTypes";
-import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
+import { DEFAULT_SEASON, UPCOMING_SEASON, parseSeason } from "@/lib/seasons";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
@@ -214,6 +214,14 @@ function playerHref(slug: string, seasonType: string, season: string) {
   return query ? `/players/${slug}?${query}` : `/players/${slug}`;
 }
 
+function defaultPlayerPageSeason(statView: string) {
+  return statView === "contracts" ? UPCOMING_SEASON : DEFAULT_SEASON;
+}
+
+function parsePlayerPageSeason(value: string | null | undefined, statView: string) {
+  return value ? parseSeason(value) : defaultPlayerPageSeason(statView);
+}
+
 function formatPlayerAge(age: number | null) {
   return age === null ? "N/A" : age.toFixed(1);
 }
@@ -294,7 +302,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const position = singleParam(resolvedSearchParams, "position");
   const statView = parsePlayerStatView(singleParam(resolvedSearchParams, "view"));
   const isContractView = statView === "contracts";
-  const season = parseSeason(singleParam(resolvedSearchParams, "season"));
+  const season = parsePlayerPageSeason(singleParam(resolvedSearchParams, "season"), statView);
   const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
   const sortMetrics = statView === "contracts" ? contractSortMetrics : statView === "advanced" ? advancedSortMetrics : standardSortMetrics;
   const defaultSort = statView === "contracts" ? "selected_salary" : statView === "advanced" ? "pie" : "pts";
