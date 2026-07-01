@@ -40,6 +40,10 @@ const contractTableMinWidth = "2006px";
 const pastContractSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastContractSalaryCellClassName = "bg-slate-100/60 text-slate-500";
 const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
+const salaryCapBySeason: Partial<Record<ContractSeason, number>> = {
+  "2025-26": 154_647_000,
+  "2026-27": 164_961_000,
+};
 
 export const metadata: Metadata = {
   title: "NBA Players",
@@ -105,6 +109,7 @@ function contractSeasonStartYear(season: ContractSeason) {
 function contractSalaryColumn(season: ContractSeason, selectedSeason: ContractSeason): StatTableColumn {
   const key = contractSalaryKey(season);
   const isPastSeason = contractSeasonStartYear(season) < contractSeasonStartYear(selectedSeason);
+  const hasOfficialCap = salaryCapBySeason[season] !== undefined;
   return {
     key,
     label: season,
@@ -112,6 +117,8 @@ function contractSalaryColumn(season: ContractSeason, selectedSeason: ContractSe
     align: "center",
     width: contractSalaryColumnWidth,
     sortValueKey: `${key}Sort`,
+    subValueKey: hasOfficialCap ? `${key}CapPct` : undefined,
+    subValueClassName: "text-slate-500",
     valueClassNameKey: `${key}Class`,
     headerClassName: isPastSeason ? pastContractSalaryHeaderClassName : undefined,
     cellClassName: isPastSeason ? pastContractSalaryCellClassName : undefined,
@@ -218,6 +225,12 @@ function formatMoney(amount: number | null | undefined, missingLabel = "--") {
     return `$${value.toLocaleString("en-US", { minimumFractionDigits: value >= 10 ? 1 : 2, maximumFractionDigits: value >= 10 ? 1 : 2 })}M`;
   }
   return `$${amount.toLocaleString("en-US")}`;
+}
+
+function formatSalaryCapShare(amount: number | null | undefined, season: ContractSeason) {
+  const cap = salaryCapBySeason[season];
+  if (amount === null || amount === undefined || cap === undefined) return "";
+  return `${((amount / cap) * 100).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% cap`;
 }
 
 function formatContractYears(years: number | null | undefined, missingLabel = "--") {
@@ -357,6 +370,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
           const detail = displayContractDetail(contractSeason, row.optionsBySeason[contractSeason], row.guaranteeStatusBySeason[contractSeason]);
           const code = optionCode(detail);
           contractRow[key] = amount === undefined ? "--" : `${formatMoney(amount)}${code ? ` ${code}` : ""}`;
+          contractRow[`${key}CapPct`] = formatSalaryCapShare(amount, contractSeason);
           contractRow[`${key}Sort`] = contractSalarySortValue(row, contractSeason);
           contractRow[`${key}Class`] = optionClassName(detail);
           return contractRow;
