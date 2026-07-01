@@ -19,6 +19,17 @@ const officialNbaTradeTracker = "https://www.nba.com/news/2026-offseason-trade-t
 export const currentRosterTransactions: CurrentRosterTransaction[] = [
   {
     season: UPCOMING_SEASON,
+    playerSlug: "devin-carter",
+    playerName: "Devin Carter",
+    nbaPlayerId: "1642269",
+    fromTeamAbbreviation: "SAC",
+    toTeamAbbreviation: "ATL",
+    sourceLabel: "NBA.com 2026 offseason trade tracker",
+    sourceUrl: officialNbaTradeTracker,
+    officialDate: "2026-06-30",
+  },
+  {
+    season: UPCOMING_SEASON,
     playerSlug: "ja-morant",
     playerName: "Ja Morant",
     nbaPlayerId: "1629630",
