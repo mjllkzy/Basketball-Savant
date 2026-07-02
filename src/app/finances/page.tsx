@@ -16,7 +16,7 @@ import {
   type ContractSeason,
   type PlayerContractRow,
 } from "@/lib/db/playerContracts.server";
-import { UPCOMING_SEASON, baseSeasonOptions, parseSeason } from "@/lib/seasons";
+import { UPCOMING_SEASON, baseSeasonOptions } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor } from "@/lib/teamBranding";
 
@@ -51,8 +51,8 @@ function parseFinanceMode(value: string | null | undefined): FinanceMode {
 }
 
 function parseContractSeason(value: string | null | undefined): ContractSeason {
-  const season = parseSeason(value);
-  return contractSeasons.includes(season as ContractSeason) ? (season as ContractSeason) : defaultFinanceSeason;
+  const season = value?.trim();
+  return season && contractSeasons.includes(season as ContractSeason) ? (season as ContractSeason) : defaultFinanceSeason;
 }
 
 function formatMoney(amount: number | null | undefined, missingLabel = "--") {
