@@ -427,7 +427,8 @@ async function TeamFinanceView({ season }: { season: ContractSeason }) {
 }
 
 async function PlayerFinanceView({ season }: { season: ContractSeason }) {
-  const contractResult = await listPlayerContracts({ season, all: true, pageSize: 1000, sort: "selected_salary", order: "desc" });
+  const selectedSalarySort = contractSalaryKey(season);
+  const contractResult = await listPlayerContracts({ season, all: true, pageSize: 1000, sort: selectedSalarySort, order: "desc" });
   const rows = playerFinanceRows(contractResult.rows, season);
 
   return (
@@ -447,6 +448,7 @@ async function PlayerFinanceView({ season }: { season: ContractSeason }) {
         rows={rows}
         layout="fixed"
         minWidth={playerFinanceMinWidth}
+        initialSorting={[{ id: selectedSalarySort, desc: true }]}
         rowAccentColorKey="teamAccent"
         rowAccentColumnKey="player"
       />

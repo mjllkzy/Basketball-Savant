@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { flexRender, getCoreRowModel, useReactTable, type Row, type SortingState } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { compareStatTableValues, compareStatTableValuesForSort } from "@/lib/tableSorting";
 
 export type StatTableColumn = {
@@ -122,6 +122,7 @@ export function StatTable({
   dense = false,
   layout = "auto",
   minWidth,
+  initialSorting,
   rowAccentColorKey,
   rowAccentColumnKey
 }: {
@@ -130,10 +131,16 @@ export function StatTable({
   dense?: boolean;
   layout?: "auto" | "fixed";
   minWidth?: string;
+  initialSorting?: SortingState;
   rowAccentColorKey?: string;
   rowAccentColumnKey?: string;
 }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>(() => initialSorting ?? []);
+
+  useEffect(() => {
+    setSorting(initialSorting ?? []);
+  }, [initialSorting]);
+
   const hasColumnSizing = columns.some((column) => column.width || column.minWidth);
   const hasColumnGroups = columns.some((column) => column.group);
   const groups = useMemo(() => columnGroups(columns), [columns]);

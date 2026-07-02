@@ -307,7 +307,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const season = parsePlayerPageSeason(singleParam(resolvedSearchParams, "season"), statView);
   const seasonType = parseSeasonType(singleParam(resolvedSearchParams, "seasonType"));
   const sortMetrics = statView === "contracts" ? contractSortMetrics : statView === "advanced" ? advancedSortMetrics : standardSortMetrics;
-  const defaultSort = statView === "contracts" ? "selected_salary" : statView === "advanced" ? "pie" : "pts";
+  const defaultSort = statView === "contracts" ? contractSalaryKey(season as ContractSeason) : statView === "advanced" ? "pie" : "pts";
   const requestedSort = singleParam(resolvedSearchParams, "sort") ?? defaultSort;
   const sort = sortMetrics.includes(requestedSort) ? requestedSort : defaultSort;
   const minMinutes = boundedNumber(numberParam(resolvedSearchParams, "minMinutes"), defaultMinMinutes, 0, maxMinMinutes);
@@ -421,6 +421,13 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const resultMeta = isContractView ? contractResult!.meta : playerResult!.meta;
   const columns = isContractView ? contractColumnsForSeason(season as ContractSeason) : statView === "advanced" ? advancedColumns : standardColumns;
   const tableMinWidth = isContractView ? contractTableMinWidth : statView === "advanced" ? advancedTableMinWidth : standardTableMinWidth;
+  const contractTableSortColumn = isContractView
+    ? sort === "selected_salary"
+      ? contractSalaryKey(season as ContractSeason)
+      : columns.some((column) => column.key === sort)
+        ? sort
+        : undefined
+    : undefined;
 
   return (
     <div className="grid gap-4">
@@ -469,6 +476,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         rows={rows}
         layout="fixed"
         minWidth={tableMinWidth}
+        initialSorting={contractTableSortColumn ? [{ id: contractTableSortColumn, desc: order === "desc" }] : undefined}
         rowAccentColorKey="teamAccent"
         rowAccentColumnKey="player"
       />
