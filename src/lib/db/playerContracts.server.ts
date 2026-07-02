@@ -150,7 +150,17 @@ type PlayerContractDbRow = {
 };
 
 const teamByAbbreviation = nbaTeamByAbbreviation;
+const contractTeamAbbreviationAliases: Record<string, string> = {
+  BRK: "BKN",
+  CHO: "CHA",
+  PHO: "PHX",
+};
 let contractDealLookupPromise: Promise<ContractDealLookup> | null = null;
+
+export function canonicalContractTeamAbbreviation(value: string | null | undefined) {
+  const abbreviation = value?.trim().toUpperCase() ?? "";
+  return contractTeamAbbreviationAliases[abbreviation] ?? abbreviation;
+}
 
 function numeric(value: number | string | null | undefined): number | null {
   if (value === null || value === undefined) return null;
@@ -196,7 +206,7 @@ function normalizedContractName(value: string) {
 }
 
 function dealLookupKey(playerName: string, teamAbbreviation: string) {
-  return `${normalizedContractName(playerName)}|${teamAbbreviation}`;
+  return `${normalizedContractName(playerName)}|${canonicalContractTeamAbbreviation(teamAbbreviation)}`;
 }
 
 function jsonDealToContractDeal(deal: NonNullable<ContractDealJsonRow["deals"]>[number]): ContractDeal | null {
@@ -312,13 +322,14 @@ function dedupeContractRows(rows: PlayerContractRow[]) {
 }
 
 function dbRowToContract(row: PlayerContractDbRow): PlayerContractRow {
-  const team = teamByAbbreviation.get(row.team_abbreviation);
+  const teamAbbreviation = canonicalContractTeamAbbreviation(row.team_abbreviation);
+  const team = teamByAbbreviation.get(teamAbbreviation);
   return {
     sourceRank: numeric(row.source_rank) ?? 0,
     playerSlug: row.player_slug,
     playerName: row.player_name || row.source_player_name,
-    teamId: row.team_id ?? team?.id ?? row.team_abbreviation,
-    teamAbbreviation: row.team_abbreviation,
+    teamId: team?.id ?? row.team_id ?? teamAbbreviation,
+    teamAbbreviation,
     position: row.position,
     salaryBySeason: numberRecord(row.salary_by_season),
     optionsBySeason: stringRecord(row.options_by_season),
@@ -331,13 +342,14 @@ function dbRowToContract(row: PlayerContractDbRow): PlayerContractRow {
 
 function jsonRowToContract(row: ContractJsonRow, playersBySlug: Map<string, RuntimePlayerFallback>): PlayerContractRow {
   const player = row.matched_player_slug ? playersBySlug.get(row.matched_player_slug) : undefined;
-  const team = teamByAbbreviation.get(row.team_abbreviation);
+  const teamAbbreviation = canonicalContractTeamAbbreviation(row.team_abbreviation);
+  const team = teamByAbbreviation.get(teamAbbreviation);
   return {
     sourceRank: row.source_rank,
     playerSlug: row.matched_player_slug ?? null,
     playerName: player?.player_name ?? row.matched_player_name ?? row.player_name,
-    teamId: team?.id ?? row.team_abbreviation,
-    teamAbbreviation: row.team_abbreviation,
+    teamId: team?.id ?? teamAbbreviation,
+    teamAbbreviation,
     position: player?.position ?? null,
     salaryBySeason: numberRecord(row.salaries),
     optionsBySeason: stringRecord(row.options_by_season),

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canonicalContractTeamAbbreviation,
   contractDealSummary,
   hydrateContractAnnualData,
   contractSalarySortValue,
@@ -15,6 +16,13 @@ import {
 } from "./playerContracts.server";
 
 describe("player contract summaries", () => {
+  it("normalizes legacy contract team abbreviations to app team codes", () => {
+    expect(canonicalContractTeamAbbreviation("BRK")).toBe("BKN");
+    expect(canonicalContractTeamAbbreviation("CHO")).toBe("CHA");
+    expect(canonicalContractTeamAbbreviation("PHO")).toBe("PHX");
+    expect(canonicalContractTeamAbbreviation(" lal ")).toBe("LAL");
+  });
+
   it("summarizes full and remaining contract salary schedules", () => {
     const salaries = {
       "2025-26": 10_000_000,
