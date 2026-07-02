@@ -25,6 +25,7 @@ SPOTRAC_SEARCH_URL = "https://www.spotrac.com/search?q={query}"
 SALARYSWISH_BASE_URL = "https://www.salaryswish.com"
 SALARYSWISH_SEARCH_URL = "https://www.salaryswish.com/search?s={query}"
 USER_AGENT = "Mozilla/5.0 (compatible; ShotClockContractSync/1.0)"
+CONTRACT_SEASONS = {f"{year}-{str(year + 1)[-2:]}" for year in range(2025, 2031)}
 SALARYSWISH_NAME_ALIASES = {
     "nic claxton": "Nicolas Claxton",
     "alex sarr": "Alexandre Sarr",
@@ -68,6 +69,21 @@ def money_to_int(value: str | int | float | None) -> int | None:
 def year_from_season(value: str) -> int | None:
     match = re.search(r"\b(20\d{2})-\d{2}\b", value)
     return int(match.group(1)) if match else None
+
+
+def season_from_start_year(year: int) -> str:
+    return f"{year}-{str(year + 1)[-2:]}"
+
+
+def option_label(value: str) -> str | None:
+    normalized = value.lower()
+    if "player" in normalized:
+        return "Player Option"
+    if "team" in normalized or "club" in normalized:
+        return "Team Option"
+    if "mutual" in normalized:
+        return "Mutual Option"
+    return None
 
 
 def salaryswish_slug(value: str) -> str:
@@ -170,12 +186,53 @@ def parse_salaryswish_table_years(wrapper: str) -> list[int]:
     return years
 
 
+def parse_salaryswish_table_rows(wrapper: str) -> dict[str, dict[str, int | str]]:
+    body_match = re.search(r"<tbody>([\s\S]*?)</tbody>", wrapper)
+    if not body_match:
+        return {"salary_by_season": {}, "options_by_season": {}, "guarantee_status_by_season": {}}
+
+    salary_by_season: dict[str, int] = {}
+    options_by_season: dict[str, str] = {}
+    guarantee_status_by_season: dict[str, str] = {}
+    for row in re.findall(r"<tr[^>]*>([\s\S]*?)</tr>", body_match.group(1)):
+        cells = re.findall(r"<td[^>]*>([\s\S]*?)</td>", row)
+        if len(cells) < 4:
+            continue
+        year = year_from_season(clean_text(cells[0]))
+        if not year:
+            continue
+        season = season_from_start_year(year)
+        if season not in CONTRACT_SEASONS:
+            continue
+        cap_hit = money_to_int(clean_text(cells[3]))
+        if cap_hit is not None:
+            salary_by_season[season] = cap_hit
+
+        option = option_label(clean_text(cells[1])) if len(cells) > 1 else None
+        if option:
+            options_by_season[season] = option
+
+        guaranteed = money_to_int(clean_text(cells[5])) if len(cells) > 5 else None
+        if cap_hit and guaranteed is not None:
+            if guaranteed <= 0:
+                guarantee_status_by_season[season] = "Non-guaranteed"
+            elif guaranteed < cap_hit:
+                guarantee_status_by_season[season] = "Partial Guarantee"
+
+    return {
+        "salary_by_season": salary_by_season,
+        "options_by_season": options_by_season,
+        "guarantee_status_by_season": guarantee_status_by_season,
+    }
+
+
 def parse_salaryswish_deals(html: str, url: str) -> list[dict[str, Any]]:
     wrappers = re.findall(r'<div class="sw_playerContract__wrapper">([\s\S]*?)(?=<div class="sw_playerContract__wrapper">|<div class="freeStar|<h4>|\Z)', html)
     deals: list[dict[str, Any]] = []
     for wrapper in wrappers:
         title_match = re.search(r'<h6 class="sw_playerContract__title">([\s\S]*?)</h6>', wrapper)
         years = parse_salaryswish_table_years(wrapper)
+        annual_details = parse_salaryswish_table_rows(wrapper)
         if not title_match or not years:
             continue
         meta = parse_salaryswish_meta(wrapper)
@@ -200,6 +257,7 @@ def parse_salaryswish_deals(html: str, url: str) -> list[dict[str, Any]]:
             "free_agent": meta.get("Expiry Status"),
             "signed_using": meta.get("Signing Method"),
             "pending": "UNCONFIRMED" in wrapper.upper(),
+            **annual_details,
         })
     unique: dict[tuple[int, int, int | None], dict[str, Any]] = {}
     for deal in deals:

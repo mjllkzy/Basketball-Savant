@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   contractDealSummary,
+  hydrateContractAnnualData,
   contractSalarySortValue,
   contractSummarySortValue,
   freeAgencyStatusForSeason,
@@ -97,6 +98,128 @@ describe("player contract summaries", () => {
       total: 184_800_000,
       averageAnnualValue: 46_200_000,
     });
+  });
+
+  it("hydrates missing annual salaries and options from active contract deal schedules", () => {
+    const row: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "player",
+      playerName: "Player",
+      teamId: "TST",
+      teamAbbreviation: "TST",
+      position: "G",
+      salaryBySeason: { "2025-26": 12_000_000 },
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: null,
+      needsFollowup: false,
+      contractDeals: [{
+        source: "SalarySwish",
+        sourceUrl: null,
+        label: "Veteran Extension",
+        startYear: 2026,
+        endYear: 2027,
+        years: 2,
+        total: 40_000_000,
+        averageAnnualValue: 20_000_000,
+        guaranteedAtSign: 40_000_000,
+        totalGuaranteed: 40_000_000,
+        freeAgent: "UFA",
+        signedUsing: "Bird Exception",
+        pending: true,
+        salaryBySeason: {
+          "2026-27": 19_000_000,
+          "2027-28": 21_000_000,
+        },
+        optionsBySeason: {
+          "2027-28": "Player Option",
+        },
+      }],
+    };
+
+    expect(hydrateContractAnnualData(row)).toMatchObject({
+      salaryBySeason: {
+        "2025-26": 12_000_000,
+        "2026-27": 19_000_000,
+        "2027-28": 21_000_000,
+      },
+      optionsBySeason: {
+        "2027-28": "Player Option",
+      },
+    });
+  });
+
+  it("uses deal AAV as a fallback when public annual salary rows are unavailable", () => {
+    const row: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "player",
+      playerName: "Player",
+      teamId: "TST",
+      teamAbbreviation: "TST",
+      position: "G",
+      salaryBySeason: {},
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: null,
+      needsFollowup: true,
+      contractDeals: [{
+        source: "Spotrac",
+        sourceUrl: null,
+        label: "Veteran Contract",
+        startYear: 2026,
+        endYear: 2028,
+        years: 3,
+        total: 27_000_000,
+        averageAnnualValue: 9_000_000,
+        guaranteedAtSign: null,
+        totalGuaranteed: null,
+        freeAgent: "UFA",
+        signedUsing: null,
+        pending: true,
+      }],
+    };
+
+    expect(hydrateContractAnnualData(row).salaryBySeason).toEqual({
+      "2026-27": 9_000_000,
+      "2027-28": 9_000_000,
+      "2028-29": 9_000_000,
+    });
+  });
+
+  it("does not overwrite imported annual salaries with deal-page schedules", () => {
+    const row: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "player",
+      playerName: "Player",
+      teamId: "TST",
+      teamAbbreviation: "TST",
+      position: "G",
+      salaryBySeason: { "2026-27": 18_000_000 },
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: null,
+      needsFollowup: false,
+      contractDeals: [{
+        source: "SalarySwish",
+        sourceUrl: null,
+        label: "Veteran Contract",
+        startYear: 2026,
+        endYear: 2026,
+        years: 1,
+        total: 20_000_000,
+        averageAnnualValue: 20_000_000,
+        guaranteedAtSign: null,
+        totalGuaranteed: null,
+        freeAgent: "UFA",
+        signedUsing: null,
+        pending: false,
+        salaryBySeason: {
+          "2026-27": 20_000_000,
+        },
+      }],
+    };
+
+    expect(hydrateContractAnnualData(row).salaryBySeason["2026-27"]).toBe(18_000_000);
   });
 
   it("rolls signed future extensions into the remaining contract summary", () => {

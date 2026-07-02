@@ -53,6 +53,9 @@ export type ContractDeal = {
   freeAgent: string | null;
   signedUsing: string | null;
   pending: boolean;
+  salaryBySeason?: Partial<Record<ContractSeason, number>>;
+  optionsBySeason?: Partial<Record<ContractSeason, string>>;
+  guaranteeStatusBySeason?: Partial<Record<ContractSeason, string>>;
 };
 
 export type PlayerContractResult = {
@@ -115,6 +118,9 @@ type ContractDealJsonRow = {
     free_agent?: string | null;
     signed_using?: string | null;
     pending?: boolean | null;
+    salary_by_season?: Record<string, number | string> | null;
+    options_by_season?: Record<string, string> | null;
+    guarantee_status_by_season?: Record<string, string> | null;
   }>;
 };
 
@@ -212,6 +218,9 @@ function jsonDealToContractDeal(deal: NonNullable<ContractDealJsonRow["deals"]>[
     freeAgent: deal.free_agent?.trim() || null,
     signedUsing: deal.signed_using?.trim() || null,
     pending: Boolean(deal.pending),
+    salaryBySeason: numberRecord(deal.salary_by_season),
+    optionsBySeason: stringRecord(deal.options_by_season),
+    guaranteeStatusBySeason: stringRecord(deal.guarantee_status_by_season),
   };
 }
 
@@ -412,6 +421,49 @@ export function selectNextContractDeal(deals: ContractDeal[], season: ContractSe
   return nextDeals[0] ?? null;
 }
 
+function dealAverageAnnualAmount(deal: ContractDeal | null) {
+  if (!deal) return null;
+  if (deal.averageAnnualValue && deal.averageAnnualValue > 0) return Math.round(deal.averageAnnualValue);
+  if (deal.total && deal.years) return Math.round(deal.total / deal.years);
+  return null;
+}
+
+export function hydrateContractAnnualData(row: PlayerContractRow): PlayerContractRow {
+  if (row.contractDeals.length === 0) return row;
+
+  const salaryBySeason = { ...row.salaryBySeason };
+  const optionsBySeason = { ...row.optionsBySeason };
+  const guaranteeStatusBySeason = { ...row.guaranteeStatusBySeason };
+
+  for (const season of contractSeasons) {
+    const deal = selectActiveContractDeal(row.contractDeals, season);
+    if (!deal) continue;
+
+    const scheduledSalary = deal.salaryBySeason?.[season];
+    const fallbackSalary = scheduledSalary ?? dealAverageAnnualAmount(deal);
+    if (salaryBySeason[season] === undefined && fallbackSalary !== null) {
+      salaryBySeason[season] = fallbackSalary;
+    }
+
+    const optionLabel = deal.optionsBySeason?.[season];
+    if (optionsBySeason[season] === undefined && optionLabel) {
+      optionsBySeason[season] = optionLabel;
+    }
+
+    const guaranteeLabel = deal.guaranteeStatusBySeason?.[season];
+    if (guaranteeStatusBySeason[season] === undefined && guaranteeLabel) {
+      guaranteeStatusBySeason[season] = guaranteeLabel;
+    }
+  }
+
+  return {
+    ...row,
+    salaryBySeason,
+    optionsBySeason,
+    guaranteeStatusBySeason,
+  };
+}
+
 function normalizedFreeAgencyStatus(value: string | null | undefined): FreeAgencyStatus | null {
   const normalized = value?.toUpperCase() ?? "";
   if (!normalized) return null;
@@ -598,7 +650,10 @@ async function jsonFallback(params: PlayerContractParams): Promise<PlayerContrac
     loadContractDealLookup(),
   ]);
   const payload = JSON.parse(source) as ContractJsonPayload;
-  const rows = dedupeContractRows(attachContractDeals(payload.contracts.map((row) => jsonRowToContract(row, playerLookup(runtime.players))), dealLookup));
+  const rows = dedupeContractRows(
+    attachContractDeals(payload.contracts.map((row) => jsonRowToContract(row, playerLookup(runtime.players))), dealLookup)
+      .map(hydrateContractAnnualData),
+  );
   return filterAndPageContracts(rows, params, "json");
 }
 
@@ -624,7 +679,11 @@ async function listPlayerContractsUncached(params: PlayerContractParams = {}): P
     `);
     if (!result) return jsonFallback(params);
     const dealLookup = await loadContractDealLookup();
-    return filterAndPageContracts(dedupeContractRows(attachContractDeals(result.rows.map(dbRowToContract), dealLookup)), params, "postgres");
+    return filterAndPageContracts(
+      dedupeContractRows(attachContractDeals(result.rows.map(dbRowToContract), dealLookup).map(hydrateContractAnnualData)),
+      params,
+      "postgres",
+    );
   } catch {
     return jsonFallback(params);
   }
