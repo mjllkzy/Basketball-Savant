@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SmartSearchInput } from "@/components/ui/SmartSearchInput";
 import { defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import type { PlayerStatView } from "@/lib/playerStatViews";
+import { UPCOMING_SEASON } from "@/lib/seasons";
 
 type Option = {
   label: string;
@@ -42,8 +43,20 @@ export function PlayerFilterForm({
   positionOptions
 }: PlayerFilterFormProps) {
   const [view, setView] = useState<PlayerStatView>(statView);
+  const [selectedSeason, setSelectedSeason] = useState(season);
   const [minutes, setMinutes] = useState(minMinutes);
   const [games, setGames] = useState(minGames);
+
+  useEffect(() => {
+    setSelectedSeason(season);
+  }, [season]);
+
+  function handleViewChange(nextView: PlayerStatView) {
+    setView(nextView);
+    if (nextView === "contracts" && view !== "contracts") {
+      setSelectedSeason(UPCOMING_SEASON);
+    }
+  }
 
   return (
     <form className="grid gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm" method="get" action="/players">
@@ -56,7 +69,7 @@ export function PlayerFilterForm({
           noMatchesText="No matching players"
           labelClassName="min-h-10 px-3 py-0"
         />
-        <select name="season" defaultValue={season} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
+        <select name="season" value={selectedSeason} onChange={(event) => setSelectedSeason(event.target.value)} aria-label="Season" className="rounded border border-slate-300 px-3 py-2 text-sm">
           {seasons.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
         <select name="seasonType" defaultValue={seasonType} aria-label="Season type" className="rounded border border-slate-300 px-3 py-2 text-sm">
@@ -70,7 +83,7 @@ export function PlayerFilterForm({
           <option value="">All positions</option>
           {positionOptions.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
-        <select name="view" value={view} onChange={(event) => setView(event.target.value as PlayerStatView)} aria-label="Stat view" className="rounded border border-slate-300 px-3 py-2 text-sm">
+        <select name="view" value={view} onChange={(event) => handleViewChange(event.target.value as PlayerStatView)} aria-label="Stat view" className="rounded border border-slate-300 px-3 py-2 text-sm">
           <option value="standard">Standard Stats</option>
           <option value="advanced">Advanced Stats</option>
           <option value="contracts">Contracts</option>
