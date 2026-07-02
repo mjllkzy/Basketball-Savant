@@ -104,46 +104,53 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
   if (mode !== "compare") {
     return (
-      <div className="grid min-h-[calc(100vh-220px)] gap-4">
-        <Link
-          href="/compare?mode=compare"
-          className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_42%)]" />
-          <div className="relative flex h-full w-full flex-col justify-between">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
-              <GitCompare className="h-6 w-6" />
+      <div className="grid gap-5">
+        <PageHeader
+          eyebrow="Compare Desk"
+          title="Compare"
+          description="Separate workspaces for side-by-side player comparisons and role-based player similarity."
+        />
+        <div className="grid min-h-[calc(100vh-280px)] gap-4">
+          <Link
+            href="/compare?mode=compare"
+            className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_42%)]" />
+            <div className="relative flex h-full w-full flex-col justify-between">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
+                <GitCompare className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.16em] text-white/75">Side-by-side</div>
+                <h1 className="mt-2 text-5xl font-black tracking-normal">Compare</h1>
+                <p className="mt-3 max-w-md text-base leading-7 text-white/85">Player vs player edges across scoring, efficiency, creation, defense, and role stats.</p>
+              </div>
+              <div className="inline-flex items-center gap-2 text-sm font-black text-white">
+                Open comparison <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </div>
             </div>
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.16em] text-white/75">Side-by-side</div>
-              <h1 className="mt-2 text-5xl font-black tracking-normal">Compare</h1>
-              <p className="mt-3 max-w-md text-base leading-7 text-white/85">Player vs player edges across scoring, efficiency, creation, defense, and role stats.</p>
-            </div>
-            <div className="inline-flex items-center gap-2 text-sm font-black text-white">
-              Open comparison <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-            </div>
-          </div>
-        </Link>
+          </Link>
 
-        <Link
-          href="/similarity"
-          className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-ink/20 bg-ink p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(244,162,97,0.32),transparent_44%)]" />
-          <div className="relative flex h-full w-full flex-col justify-between">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
-              <Radar className="h-6 w-6" />
+          <Link
+            href="/similarity"
+            className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-ink/20 bg-ink p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(244,162,97,0.32),transparent_44%)]" />
+            <div className="relative flex h-full w-full flex-col justify-between">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
+                <Radar className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.16em] text-white/75">Player matching</div>
+                <h1 className="mt-2 text-5xl font-black tracking-normal">Similarity</h1>
+                <p className="mt-3 max-w-md text-base leading-7 text-white/85">Find player comps using stats, physical profile, position, and role-based similarity scoring.</p>
+              </div>
+              <div className="inline-flex items-center gap-2 text-sm font-black text-white">
+                Open similarity <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </div>
             </div>
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.16em] text-white/75">Player matching</div>
-              <h1 className="mt-2 text-5xl font-black tracking-normal">Similarity</h1>
-              <p className="mt-3 max-w-md text-base leading-7 text-white/85">Find player comps using stats, physical profile, position, and role-based similarity scoring.</p>
-            </div>
-            <div className="inline-flex items-center gap-2 text-sm font-black text-white">
-              Open similarity <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-            </div>
-          </div>
-        </Link>
+          </Link>
+        </div>
       </div>
     );
   }
