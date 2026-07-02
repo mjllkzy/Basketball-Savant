@@ -24,6 +24,7 @@ export type StatTableColumn = {
   cellClassName?: string;
   valueClassNameKey?: string;
   hrefKey?: string;
+  hrefVariant?: "link" | "button";
   imageKey?: string;
   imageAltKey?: string;
   imageFallbackKey?: string;
@@ -200,7 +201,10 @@ export function StatTable({
               <span className={[column.truncate ? "min-w-0 truncate" : "", valueClassName].filter(Boolean).join(" ") || undefined}>{formatted}</span>
             </span>
           );
-          return href ? <Link href={String(href)} className={`font-bold text-signal hover:underline ${column.truncate ? "block truncate" : ""}`}>{content}</Link> : content;
+          const hrefClassName = column.hrefVariant === "button"
+            ? "inline-flex min-h-9 items-center justify-center rounded border border-slate-300 px-3 text-xs font-black uppercase tracking-[0.08em] text-ink transition hover:bg-slate-50"
+            : `font-bold text-signal hover:underline ${column.truncate ? "block truncate" : ""}`;
+          return href ? <Link href={String(href)} className={hrefClassName}>{content}</Link> : content;
         }
       })),
     [columns]

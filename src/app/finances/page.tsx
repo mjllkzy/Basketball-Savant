@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import type { Team } from "@/lib/types";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Landmark, Users } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -30,7 +32,7 @@ const compactColumnWidth = "94px";
 const moneyColumnWidth = "126px";
 const salaryColumnWidth = "126px";
 const playerFinanceMinWidth = "1920px";
-const teamFinanceMinWidth = "1180px";
+const teamFinanceMinWidth = "1320px";
 const pastSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastSalaryCellClassName = "bg-slate-100/60 text-slate-500";
 const teamPrimaryColorByAbbreviation = new Map(nbaTeams.map((team) => [team.abbreviation, team.primaryColor]));
@@ -142,8 +144,10 @@ function selectedSeasonLabel(season: ContractSeason) {
   return season === "2026-27" ? "2026-27" : "2025-26";
 }
 
-function financeHref(mode: Exclude<FinanceMode, "overview">, season: ContractSeason) {
-  return `/finances?mode=${mode}&season=${encodeURIComponent(season)}`;
+function financeHref(mode: Exclude<FinanceMode, "overview">, season: ContractSeason, teamId?: string) {
+  const params = new URLSearchParams({ mode, season });
+  if (teamId) params.set("teamId", teamId);
+  return `/finances?${params.toString()}`;
 }
 
 function identityColumn(key: string, label: string, width = compactColumnWidth, group = "Profile"): StatTableColumn {
@@ -196,6 +200,7 @@ const teamFinanceColumns: StatTableColumn[] = [
     width: entityColumnWidth,
     truncate: true,
   },
+  { key: "breakdown", label: "Breakdown", group: "Team", align: "center", width: "140px", hrefKey: "breakdownHref", hrefVariant: "button", valueClassNameKey: "breakdownClass" },
   identityColumn("conf", "Conf", compactColumnWidth, "Team"),
   identityColumn("division", "Division", "120px", "Team"),
   { key: "contractedPlayers", label: "Players", group: "Roster Money", align: "center", width: compactColumnWidth, sortValueKey: "contractedPlayersSort" },
@@ -266,12 +271,12 @@ function FinanceChooser({ season }: { season: ContractSeason }) {
   );
 }
 
-function FinanceControls({ mode, season }: { mode: Exclude<FinanceMode, "overview">; season: ContractSeason }) {
+function FinanceControls({ mode, season, teamId }: { mode: Exclude<FinanceMode, "overview">; season: ContractSeason; teamId?: string }) {
   return (
     <section className="grid gap-3 rounded border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.08em]">
         <Link
-          href={financeHref("teams", season)}
+          href={financeHref("teams", season, teamId)}
           className={`inline-flex min-h-10 items-center rounded border px-4 ${mode === "teams" ? "border-ink bg-ink text-white" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
         >
           Team Finances
@@ -285,6 +290,7 @@ function FinanceControls({ mode, season }: { mode: Exclude<FinanceMode, "overvie
       </div>
       <form className="grid gap-3 sm:grid-cols-[1fr_220px]" action="/finances">
         <input type="hidden" name="mode" value={mode} />
+        {teamId ? <input type="hidden" name="teamId" value={teamId} /> : null}
         <label className="grid gap-1">
           <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Season</span>
           <select name="season" defaultValue={season} className="min-h-11 rounded border border-slate-300 px-3 text-sm">
@@ -359,24 +365,34 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
   });
 }
 
-function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason): StatTableRow[] {
+function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: ContractSeason) {
+  const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
+  const activeContracts = contracts.filter((row) => typeof row.salaryBySeason[season] === "number");
+  const payroll = activeContracts.reduce((sum, row) => sum + (row.salaryBySeason[season] ?? 0), 0);
+  const guaranteed = contracts.reduce((sum, row) => sum + (row.guaranteedAmount ?? 0), 0);
+  const topContract = activeContracts
+    .slice()
+    .sort((left, right) => (right.salaryBySeason[season] ?? 0) - (left.salaryBySeason[season] ?? 0))[0];
+  const topSalary = topContract?.salaryBySeason[season];
+  const capPosition = formatCapPosition(payroll, season);
+
+  return { contracts, activeContracts, payroll, guaranteed, topContract, topSalary, capPosition };
+}
+
+function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason, selectedTeamId?: string): StatTableRow[] {
   return nbaTeams
     .map((team) => {
-      const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
-      const activeContracts = contracts.filter((row) => typeof row.salaryBySeason[season] === "number");
-      const payroll = activeContracts.reduce((sum, row) => sum + (row.salaryBySeason[season] ?? 0), 0);
-      const guaranteed = contracts.reduce((sum, row) => sum + (row.guaranteedAmount ?? 0), 0);
-      const topContract = activeContracts
-        .slice()
-        .sort((left, right) => (right.salaryBySeason[season] ?? 0) - (left.salaryBySeason[season] ?? 0))[0];
-      const topSalary = topContract?.salaryBySeason[season];
-      const capPosition = formatCapPosition(payroll, season);
+      const { activeContracts, payroll, guaranteed, topContract, topSalary, capPosition } = teamContractsForSeason(rows, team, season);
+      const isSelected = selectedTeamId === team.id;
       return {
         team: `${team.city} ${team.name}`,
         href: `/teams/${team.slug}`,
         logo: nbaTeamLogoUrl(team.id),
         logoAlt: `${team.city} ${team.name} logo`,
         abbr: team.abbreviation,
+        breakdown: isSelected ? "Viewing" : "Show breakdown",
+        breakdownHref: `${financeHref("teams", season, team.id)}#team-breakdown`,
+        breakdownClass: isSelected ? "text-signal" : "",
         conf: team.conference,
         division: team.division,
         teamAccent: teamAccentColor(team),
@@ -398,9 +414,99 @@ function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason): Sta
     .sort((left, right) => Number(right.payrollSort ?? 0) - Number(left.payrollSort ?? 0));
 }
 
-async function TeamFinanceView({ season }: { season: ContractSeason }) {
-  const contractResult = await listPlayerContracts({ season, all: true, pageSize: 1000, sort: "selected_salary", order: "desc" });
-  const rows = teamFinanceRows(contractResult.rows, season);
+const teamBreakdownColumns: StatTableColumn[] = [
+  { key: "season", label: "Season", group: "Cap Situation", align: "center", width: "110px" },
+  { key: "players", label: "Players", group: "Cap Situation", align: "center", width: compactColumnWidth, sortValueKey: "playersSort" },
+  { key: "payroll", label: "Payroll", group: "Cap Situation", align: "center", width: moneyColumnWidth, sortValueKey: "payrollSort", subValueKey: "payrollCapPct" },
+  { key: "capPosition", label: "Cap Position", group: "Cap Situation", align: "center", width: "140px", sortValueKey: "capPositionSort", subValueKey: "capLineSub", subValueClassName: "text-slate-500" },
+  { key: "topSalary", label: "Top Salary", group: "Top Contract", align: "center", width: moneyColumnWidth, sortValueKey: "topSalarySort", subValueKey: "topPlayer", subValueClassName: "text-signal" },
+  { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: moneyColumnWidth, sortValueKey: "guaranteedSort" },
+];
+
+function teamBreakdownRows(rows: PlayerContractRow[], team: Team): StatTableRow[] {
+  return contractSeasons.map((contractSeason) => {
+    const { activeContracts, payroll, guaranteed, topContract, topSalary, capPosition } = teamContractsForSeason(rows, team, contractSeason);
+    return {
+      season: contractSeason,
+      players: activeContracts.length,
+      playersSort: activeContracts.length,
+      payroll: formatMoney(payroll),
+      payrollSort: payroll,
+      payrollCapPct: formatSalaryCapShare(payroll, contractSeason),
+      capPosition: capPosition.value,
+      capPositionSort: capPosition.sort,
+      capLineSub: capPosition.sub ? `${capPosition.sub} cap` : "",
+      topSalary: formatMoney(topSalary),
+      topSalarySort: topSalary ?? null,
+      topPlayer: topContract?.playerName ?? "",
+      guaranteed: guaranteed > 0 ? formatMoney(guaranteed) : "Unavailable",
+      guaranteedSort: guaranteed > 0 ? guaranteed : null,
+    };
+  });
+}
+
+function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: PlayerContractRow[]; season: ContractSeason }) {
+  const selectedSalarySort = contractSalaryKey(season);
+  const teamRows = rows
+    .filter((row) => row.teamAbbreviation === team.abbreviation)
+    .sort((left, right) => (contractSalarySortValue(right, season) ?? Number.NEGATIVE_INFINITY) - (contractSalarySortValue(left, season) ?? Number.NEGATIVE_INFINITY) || left.playerName.localeCompare(right.playerName));
+  const yearlyRows = teamBreakdownRows(rows, team);
+  const playerRows = playerFinanceRows(teamRows, season);
+  const selectedSeasonSummary = teamContractsForSeason(rows, team, season);
+
+  return (
+    <section id="team-breakdown" className="grid scroll-mt-6 gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="inline-grid h-12 w-12 place-items-center">
+            <Image src={nbaTeamLogoUrl(team.id)} alt={`${team.city} ${team.name} logo`} width={48} height={48} className="h-12 w-12 object-contain" unoptimized />
+          </span>
+          <div>
+            <div className="text-xs font-black uppercase tracking-[0.16em] text-signal">Team Breakdown</div>
+            <h2 className="text-2xl font-black tracking-normal text-ink">{team.city} {team.name}</h2>
+            <p className="text-sm text-slate-600">
+              {formatMoney(selectedSeasonSummary.payroll)} tracked {selectedSeasonLabel(season)} payroll across {selectedSeasonSummary.activeContracts.length} rostered players.
+            </p>
+          </div>
+        </div>
+        <Link
+          href={`/players?season=${encodeURIComponent(season)}&seasonType=Regular+Season&teamId=${encodeURIComponent(team.id)}&position=&view=contracts`}
+          className="inline-flex min-h-10 items-center justify-center rounded bg-ink px-4 text-sm font-black text-white hover:bg-slate-800"
+        >
+          Open player contracts
+        </Link>
+      </div>
+      <StatTable
+        dense
+        columns={teamBreakdownColumns}
+        rows={yearlyRows}
+        layout="fixed"
+        minWidth="760px"
+      />
+      <div className="border-t border-slate-200 pt-4">
+        <div className="mb-3">
+          <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} Player Contracts</h3>
+          <p className="text-sm text-slate-600">Team-filtered annual salary, cap share, option status, and guaranteed money.</p>
+        </div>
+        <StatTable
+          columns={playerFinanceColumns(season)}
+          rows={playerRows}
+          layout="fixed"
+          minWidth={playerFinanceMinWidth}
+          initialSorting={[{ id: selectedSalarySort, desc: true }]}
+          rowAccentColorKey="teamAccent"
+          rowAccentColumnKey="player"
+        />
+      </div>
+    </section>
+  );
+}
+
+async function TeamFinanceView({ season, selectedTeamId }: { season: ContractSeason; selectedTeamId?: string }) {
+  const selectedSalarySort = contractSalaryKey(season);
+  const contractResult = await listPlayerContracts({ season, all: true, pageSize: 1000, sort: selectedSalarySort, order: "desc" });
+  const selectedTeam = nbaTeams.find((team) => team.id === selectedTeamId || team.abbreviation === selectedTeamId);
+  const rows = teamFinanceRows(contractResult.rows, season, selectedTeam?.id);
   const totalPayroll = rows.reduce((sum, row) => sum + Number(row.payrollSort ?? 0), 0);
 
   return (
@@ -410,7 +516,7 @@ async function TeamFinanceView({ season }: { season: ContractSeason }) {
         title="Team Finances"
         description={`Committed ${selectedSeasonLabel(season)} salary, cap share, top salary, and guaranteed money by team.`}
       />
-      <FinanceControls mode="teams" season={season} />
+      <FinanceControls mode="teams" season={season} teamId={selectedTeam?.id} />
       <div data-data-source={contractResult.meta.source} className="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
         Showing <strong className="text-ink">{rows.length}</strong> teams with <strong className="text-ink">{formatMoney(totalPayroll)}</strong> in tracked {selectedSeasonLabel(season)} payroll.
       </div>
@@ -422,6 +528,7 @@ async function TeamFinanceView({ season }: { season: ContractSeason }) {
         rowAccentColorKey="teamAccent"
         rowAccentColumnKey="team"
       />
+      {selectedTeam ? <TeamFinanceBreakdown team={selectedTeam} rows={contractResult.rows} season={season} /> : null}
     </div>
   );
 }
@@ -460,8 +567,9 @@ export default async function FinancesPage({ searchParams }: { searchParams: Pro
   const resolvedSearchParams = await searchParams;
   const mode = parseFinanceMode(singleParam(resolvedSearchParams, "mode"));
   const season = parseContractSeason(singleParam(resolvedSearchParams, "season"));
+  const selectedTeamId = singleParam(resolvedSearchParams, "teamId") ?? undefined;
 
-  if (mode === "teams") return <TeamFinanceView season={season} />;
+  if (mode === "teams") return <TeamFinanceView season={season} selectedTeamId={selectedTeamId} />;
   if (mode === "players") return <PlayerFinanceView season={season} />;
   return <FinanceChooser season={season} />;
 }
