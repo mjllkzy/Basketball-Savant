@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Landmark, Users } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn, type StatTableRow } from "@/components/ui/StatTable";
-import { officialTeams } from "@/lib/data/official";
+import { nbaTeams } from "@/lib/data/nbaTeams";
 import {
   contractSeasons,
   contractDealSummary,
@@ -31,7 +31,7 @@ const playerFinanceMinWidth = "1920px";
 const teamFinanceMinWidth = "1180px";
 const pastSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastSalaryCellClassName = "bg-slate-100/60 text-slate-500";
-const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
+const teamPrimaryColorByAbbreviation = new Map(nbaTeams.map((team) => [team.abbreviation, team.primaryColor]));
 const salaryCapBySeason: Partial<Record<ContractSeason, number>> = {
   "2025-26": 154_647_000,
   "2026-27": 164_961_000,
@@ -358,7 +358,7 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
 }
 
 function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason): StatTableRow[] {
-  return officialTeams
+  return nbaTeams
     .map((team) => {
       const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
       const activeContracts = contracts.filter((row) => typeof row.salaryBySeason[season] === "number");

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
-import { officialTeams } from "@/lib/data/official";
+import { nbaTeams } from "@/lib/data/nbaTeams";
 import {
   contractSeasons,
   contractDealSummary,
@@ -39,7 +39,7 @@ const advancedTableMinWidth = "1838px";
 const contractTableMinWidth = "2006px";
 const pastContractSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastContractSalaryCellClassName = "bg-slate-100/60 text-slate-500";
-const teamPrimaryColorByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team.primaryColor]));
+const teamPrimaryColorByAbbreviation = new Map(nbaTeams.map((team) => [team.abbreviation, team.primaryColor]));
 const salaryCapBySeason: Partial<Record<ContractSeason, number>> = {
   "2025-26": 154_647_000,
   "2026-27": 164_961_000,

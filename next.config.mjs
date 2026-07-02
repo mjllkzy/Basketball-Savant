@@ -31,16 +31,38 @@ const contentSecurityPolicy = [
   "manifest-src 'self'",
 ].join("; ");
 
+const lightweightFallbackFiles = [
+  "./src/lib/data/generated/runtime-fallbacks.json",
+  "./data/raw/player_contracts_2025_2031.json",
+  "./data/raw/player_contract_deals_2025_2031.json"
+];
+
+const fullStatsDataFiles = [
+  ...lightweightFallbackFiles,
+  "./src/lib/data/generated/official-snapshot.json",
+  "./src/lib/data/generated/master-player-summaries.json",
+  "./src/lib/data/generated/team-shot-charts/**/*"
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   outputFileTracingIncludes: {
-    "/*": [
-      "./src/lib/data/generated/official-snapshot.json",
-      "./src/lib/data/generated/master-player-summaries.json",
-      "./src/lib/data/generated/team-shot-charts/**/*"
-    ]
+    "/*": lightweightFallbackFiles,
+    "/api/**/*": fullStatsDataFiles,
+    "/api/v1/**/*": fullStatsDataFiles,
+    "/games": fullStatsDataFiles,
+    "/games/[gameId]": fullStatsDataFiles,
+    "/leaderboards": fullStatsDataFiles,
+    "/leaderboards/custom": fullStatsDataFiles,
+    "/players": fullStatsDataFiles,
+    "/players/[playerId]": fullStatsDataFiles,
+    "/search": fullStatsDataFiles,
+    "/similarity": fullStatsDataFiles,
+    "/teams": fullStatsDataFiles,
+    "/teams/[teamId]": fullStatsDataFiles,
+    "/visuals": fullStatsDataFiles
   },
   images: {
     remotePatterns: [
@@ -52,6 +74,12 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/brand/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }
+        ]
+      },
       {
         source: "/:path*",
         headers: [

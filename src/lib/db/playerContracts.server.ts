@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
-import { officialTeams } from "@/lib/data/official";
+import { nbaTeamByAbbreviation } from "@/lib/data/nbaTeams";
 import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { queryDatabase } from "./client.server";
 
@@ -140,7 +140,7 @@ type PlayerContractDbRow = {
   needs_followup: boolean | null;
 };
 
-const teamByAbbreviation = new Map(officialTeams.map((team) => [team.abbreviation, team]));
+const teamByAbbreviation = nbaTeamByAbbreviation;
 let contractDealLookupPromise: Promise<ContractDealLookup> | null = null;
 
 function numeric(value: number | string | null | undefined): number | null {
