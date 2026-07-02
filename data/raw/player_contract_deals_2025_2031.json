@@ -2,24 +2,14 @@
   "metadata": {
     "source": "SalarySwish public player contract pages with Spotrac fallback",
     "source_contracts_file": "data/raw/player_contracts_2025_2031.json",
-    "source_contracts_sha256": "d5b8a108de5c83a04fdd102d413bd242e20b8a38183b87beba20d5b7da85b51f",
-    "generated_at": "2026-07-01T00:00:00+00:00",
-    "row_count": 532,
-    "salaryswish_matched": 530,
+    "source_contracts_sha256": "a9047d925b2e62ad3b9b356c003afd36cb761eec714a9dbf671c671583ebcd8b",
+    "generated_at": "2026-07-02T08:03:57.493903+00:00",
+    "row_count": 533,
+    "salaryswish_matched": 533,
     "spotrac_searched": 0,
     "spotrac_matched": 0,
-    "with_deals": 532,
-    "errors": 0,
-    "latest_contract_audit": {
-      "audit_date": "2026-07-01",
-      "source_urls": [
-        "https://www.nba.com/news/nba-offseason-deals-2026",
-        "https://www.nba.com/news/2026-nba-offseason-roundup"
-      ],
-      "updated_player_count": 37,
-      "needs_followup_count": 32,
-      "notes": "Added reported 2026 free-agency agreements and marked rows for follow-up where annual salary, guarantee, or option details remain unavailable."
-    }
+    "with_deals": 533,
+    "errors": 0
   },
   "contracts": [
     {
@@ -1502,18 +1492,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.espn.com/nba/story/_/id/49145221/sources-trae-young-sign-4-year-212m-deal-wizards",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/trae-young",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2029,
           "years": 4,
           "total": 212000000,
           "average_annual_value": 53000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 212000000,
+          "total_guaranteed": 212000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -1547,7 +1537,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 22,
@@ -1910,7 +1900,7 @@
       "matched_player_name": "Ja Morant",
       "team_abbreviation": "MEM",
       "salaryswish_url": "https://www.salaryswish.com/players/ja-morant",
-      "spotrac_url": "https://www.spotrac.com/nba/player/_/id/31559/ja-morant",
+      "spotrac_url": null,
       "deals": [
         {
           "source": "SalarySwish",
@@ -3191,7 +3181,7 @@
       "matched_player_name": "Jerami Grant",
       "team_abbreviation": "POR",
       "salaryswish_url": "https://www.salaryswish.com/players/jerami-grant",
-      "spotrac_url": "https://www.spotrac.com/nba/player/_/id/15391/jerami-grant",
+      "spotrac_url": null,
       "deals": [
         {
           "source": "SalarySwish",
@@ -3494,18 +3484,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/reports-kristaps-porzingis-opts-to-remain-with-warriors-on-2-year-contract",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/kristaps-porzingis",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2027,
           "years": 2,
           "total": 40000000,
           "average_annual_value": 20000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 40000000,
+          "total_guaranteed": 40000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -3554,7 +3544,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 58,
@@ -3695,18 +3685,18 @@
       "spotrac_url": "https://www.spotrac.com/nba/player/_/id/23644/isaiah-hartenstein",
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/thunder-sign-isaiah-hartenstein-through-2028-29-season",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/isaiah-hartenstein",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 75000000,
           "average_annual_value": 25000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 75000000,
+          "total_guaranteed": 75000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -3785,7 +3775,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 61,
@@ -3800,13 +3790,13 @@
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/andrew-wiggins",
           "label": "Veteran Extension",
-          "start_year": 2026,
+          "start_year": 2027,
           "end_year": 2028,
-          "years": 3,
-          "total": 63999999,
-          "average_annual_value": 21333333,
-          "guaranteed_at_sign": 63999999,
-          "total_guaranteed": 63999999,
+          "years": 2,
+          "total": 34000000,
+          "average_annual_value": 17000000,
+          "guaranteed_at_sign": 34000000,
+          "total_guaranteed": 34000000,
           "free_agent": "UFA",
           "signed_using": "Bird Exception",
           "pending": true
@@ -3820,8 +3810,8 @@
           "years": 4,
           "total": 109000002,
           "average_annual_value": 27250001,
-          "guaranteed_at_sign": 78830358,
-          "total_guaranteed": 78830358,
+          "guaranteed_at_sign": 109000002,
+          "total_guaranteed": 109000002,
           "free_agent": "UFA",
           "signed_using": "Bird Exception",
           "pending": false
@@ -3857,7 +3847,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 62,
@@ -4104,10 +4094,25 @@
       "player_name": "Tobias Harris",
       "matched_player_slug": "tobias-harris",
       "matched_player_name": "Tobias Harris",
-      "team_abbreviation": "DET",
+      "team_abbreviation": "SAS",
       "salaryswish_url": "https://www.salaryswish.com/players/tobias-harris",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/tobias-harris",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 31000000,
+          "average_annual_value": 15500000,
+          "guaranteed_at_sign": 31000000,
+          "total_guaranteed": 31000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/tobias-harris",
@@ -4176,10 +4181,25 @@
       "player_name": "John Collins",
       "matched_player_slug": "john-collins",
       "matched_player_name": "John Collins",
-      "team_abbreviation": "LAC",
+      "team_abbreviation": "DET",
       "salaryswish_url": "https://www.salaryswish.com/players/john-collins",
       "spotrac_url": "https://www.spotrac.com/nba/player/_/id/23614/john-collins",
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/john-collins",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2028,
+          "years": 3,
+          "total": 51000000,
+          "average_annual_value": 17000000,
+          "guaranteed_at_sign": 51000000,
+          "total_guaranteed": 51000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/john-collins",
@@ -5379,7 +5399,7 @@
       "player_name": "Nikola Vučević",
       "matched_player_slug": "nikola-vucevic",
       "matched_player_name": "Nikola Vučević",
-      "team_abbreviation": "BOS",
+      "team_abbreviation": "ORL",
       "salaryswish_url": "https://www.salaryswish.com/players/nikola-vucevic",
       "spotrac_url": null,
       "deals": [
@@ -5550,10 +5570,25 @@
       "player_name": "Norman Powell",
       "matched_player_slug": "norman-powell",
       "matched_player_name": "Norman Powell",
-      "team_abbreviation": "MIA",
+      "team_abbreviation": "CHI",
       "salaryswish_url": "https://www.salaryswish.com/players/norman-powell",
       "spotrac_url": "https://www.spotrac.com/nba/player/_/id/17874/norman-powell",
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/norman-powell",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 45000000,
+          "average_annual_value": 22500000,
+          "guaranteed_at_sign": 45000000,
+          "total_guaranteed": 45000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/norman-powell",
@@ -5806,8 +5841,8 @@
           "years": 2,
           "total": 10975700,
           "average_annual_value": 5487850,
-          "guaranteed_at_sign": 10975700,
-          "total_guaranteed": 10975700,
+          "guaranteed_at_sign": 5354000,
+          "total_guaranteed": 5354000,
           "free_agent": "UFA",
           "signed_using": "MLE",
           "pending": false
@@ -5885,21 +5920,6 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/jusuf-nurkic-set-for-return-to-jazz-on-new-2-year-contract",
-          "label": "Reported Contract",
-          "start_year": 2026,
-          "end_year": 2027,
-          "years": 2,
-          "total": 22000000,
-          "average_annual_value": 11000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
-          "free_agent": "UFA",
-          "signed_using": null,
-          "pending": true
-        },
-        {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/jusuf-nurkic",
           "label": "Veteran Contract",
@@ -5945,7 +5965,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 96,
@@ -5957,18 +5977,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/harrison-barnes-will-re-sign-with-san-antonio",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/harrison-barnes",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2026,
           "years": 1,
           "total": 8000000,
           "average_annual_value": 8000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 8000000,
+          "total_guaranteed": 8000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -6039,10 +6059,25 @@
       "player_name": "Collin Sexton",
       "matched_player_slug": "collin-sexton",
       "matched_player_name": "Collin Sexton",
-      "team_abbreviation": "CHI",
+      "team_abbreviation": "LAL",
       "salaryswish_url": "https://www.salaryswish.com/players/collin-sexton",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/collin-sexton",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 19000000,
+          "average_annual_value": 9500000,
+          "guaranteed_at_sign": 19000000,
+          "total_guaranteed": 19000000,
+          "free_agent": "UFA",
+          "signed_using": "MLE",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/collin-sexton",
@@ -6322,8 +6357,8 @@
           "years": 5,
           "total": 87500000,
           "average_annual_value": 17500000,
-          "guaranteed_at_sign": 64777778,
-          "total_guaranteed": 64777778,
+          "guaranteed_at_sign": 82500000,
+          "total_guaranteed": 82500000,
           "free_agent": "UFA",
           "signed_using": "Bird Exception",
           "pending": false
@@ -6500,18 +6535,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/report-zach-collins-agrees-to-2-year-extension-with-bulls",
-          "label": "Reported Extension",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/zach-collins",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2027,
           "years": 2,
           "total": 17000000,
           "average_annual_value": 8500000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 17000000,
+          "total_guaranteed": 17000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -6560,7 +6595,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 106,
@@ -6614,18 +6649,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.espn.com/nba/story/_/id/49219769/sources-pistons-kevin-huerter-return-3-year-27m-deal",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/kevin-huerter",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 27000000,
           "average_annual_value": 9000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 27000000,
+          "total_guaranteed": 27000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -6659,7 +6694,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 108,
@@ -6914,21 +6949,6 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "label": "Reported Contract - terms unavailable",
-          "start_year": 2026,
-          "end_year": 2026,
-          "years": 1,
-          "total": null,
-          "average_annual_value": null,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
-          "free_agent": "UFA",
-          "signed_using": null,
-          "pending": true
-        },
-        {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/bogdan-bogdanovic",
           "label": "Veteran Extension",
@@ -6974,7 +6994,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 113,
@@ -7388,13 +7408,28 @@
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/marcus-smart",
           "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 13000000,
+          "average_annual_value": 6500000,
+          "guaranteed_at_sign": 13000000,
+          "total_guaranteed": 13000000,
+          "free_agent": "UFA",
+          "signed_using": "Taxpayer-MLE",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/marcus-smart",
+          "label": "Veteran Contract",
           "start_year": 2025,
           "end_year": 2026,
           "years": 2,
           "total": 10524700,
           "average_annual_value": 5262350,
-          "guaranteed_at_sign": 10524700,
-          "total_guaranteed": 10524700,
+          "guaranteed_at_sign": 5134000,
+          "total_guaranteed": 5134000,
           "free_agent": "UFA",
           "signed_using": "Biannual Exception",
           "pending": false
@@ -8162,7 +8197,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 132,
@@ -8509,8 +8544,8 @@
           "years": 4,
           "total": 55174766,
           "average_annual_value": 13793692,
-          "guaranteed_at_sign": 37131520,
-          "total_guaranteed": 37131520,
+          "guaranteed_at_sign": 53999766,
+          "total_guaranteed": 53999766,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -8528,18 +8563,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/robert-williams-iii-free-agency-2026",
-          "label": "Reported Extension",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/robert-williamsiii",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 44000000,
           "average_annual_value": 14666667,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 18580247,
+          "total_guaranteed": 18580247,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -8573,7 +8608,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 140,
@@ -8593,8 +8628,8 @@
           "years": 4,
           "total": 57027436,
           "average_annual_value": 14256859,
-          "guaranteed_at_sign": 25766760,
-          "total_guaranteed": 25766760,
+          "guaranteed_at_sign": 39592800,
+          "total_guaranteed": 39592800,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -8607,10 +8642,25 @@
       "player_name": "Mitchell Robinson",
       "matched_player_slug": "mitchell-robinson",
       "matched_player_name": "Mitchell Robinson",
-      "team_abbreviation": "NYK",
+      "team_abbreviation": "BOS",
       "salaryswish_url": "https://www.salaryswish.com/players/mitchell-robinson",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/mitchell-robinson",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2028,
+          "years": 3,
+          "total": 47400000,
+          "average_annual_value": 15800000,
+          "guaranteed_at_sign": 47400000,
+          "total_guaranteed": 47400000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/mitchell-robinson",
@@ -8654,18 +8704,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.espn.com/nba/story/_/id/49176539/sources-coby-white-re-sign-hornets-3-year-74m-deal",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/coby-white",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 74000000,
           "average_annual_value": 24666667,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 74000000,
+          "total_guaranteed": 74000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -8699,7 +8749,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 143,
@@ -9016,8 +9066,8 @@
           "years": 4,
           "total": 49378426,
           "average_annual_value": 12344607,
-          "guaranteed_at_sign": 34173800,
-          "total_guaranteed": 34173800,
+          "guaranteed_at_sign": 49278426,
+          "total_guaranteed": 49278426,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -9043,8 +9093,8 @@
           "years": 4,
           "total": 51036398,
           "average_annual_value": 12759100,
-          "guaranteed_at_sign": 23053920,
-          "total_guaranteed": 23053920,
+          "guaranteed_at_sign": 35424600,
+          "total_guaranteed": 35424600,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -9647,18 +9697,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/luke-kennard-suns-deal",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/luke-kennard",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2027,
           "years": 2,
           "total": 13000000,
           "average_annual_value": 6500000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 13000000,
+          "total_guaranteed": 13000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "MLE",
           "pending": true
         },
         {
@@ -9722,7 +9772,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 162,
@@ -9843,10 +9893,25 @@
       "player_name": "Mike Conley",
       "matched_player_slug": "mike-conley",
       "matched_player_name": "Mike Conley",
-      "team_abbreviation": "CHO",
+      "team_abbreviation": "BOS",
       "salaryswish_url": "https://www.salaryswish.com/players/mike-conley",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/mike-conley",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 3876528,
+          "average_annual_value": 3876528,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/mike-conley",
@@ -10072,8 +10137,8 @@
           "years": 4,
           "total": 45853024,
           "average_annual_value": 11463256,
-          "guaranteed_at_sign": 20702520,
-          "total_guaranteed": 20702520,
+          "guaranteed_at_sign": 31811400,
+          "total_guaranteed": 31811400,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -10672,8 +10737,8 @@
           "years": 4,
           "total": 40008489,
           "average_annual_value": 10002122,
-          "guaranteed_at_sign": 27749880,
-          "total_guaranteed": 27749880,
+          "guaranteed_at_sign": 40008489,
+          "total_guaranteed": 40008489,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -10816,8 +10881,8 @@
           "years": 4,
           "total": 41351699,
           "average_annual_value": 10337925,
-          "guaranteed_at_sign": 18665640,
-          "total_guaranteed": 18665640,
+          "guaranteed_at_sign": 28681560,
+          "total_guaranteed": 28681560,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -10843,8 +10908,8 @@
           "years": 2,
           "total": 5131675,
           "average_annual_value": 2565838,
-          "guaranteed_at_sign": 1315814,
-          "total_guaranteed": 1315814,
+          "guaranteed_at_sign": 5131675,
+          "total_guaranteed": 5131675,
           "free_agent": "UFA",
           "signed_using": "Minimum Salary Exception",
           "pending": false
@@ -11356,8 +11421,8 @@
           "years": 2,
           "total": 17937500,
           "average_annual_value": 8968750,
-          "guaranteed_at_sign": 8750000,
-          "total_guaranteed": 8750000,
+          "guaranteed_at_sign": 17937500,
+          "total_guaranteed": 17937500,
           "free_agent": "UFA",
           "signed_using": "MLE",
           "pending": false
@@ -11460,10 +11525,25 @@
       "player_name": "Quentin Grimes",
       "matched_player_slug": "quentin-grimes",
       "matched_player_name": "Quentin Grimes",
-      "team_abbreviation": "PHI",
+      "team_abbreviation": "LAL",
       "salaryswish_url": "https://www.salaryswish.com/players/quentin-grimes",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/quentin-grimes",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2029,
+          "years": 4,
+          "total": 60000000,
+          "average_annual_value": 15000000,
+          "guaranteed_at_sign": 60000000,
+          "total_guaranteed": 60000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/quentin-grimes",
@@ -11700,10 +11780,25 @@
       "player_name": "Kelly Oubre Jr.",
       "matched_player_slug": "kelly-oubre-jr",
       "matched_player_name": "Kelly Oubre Jr.",
-      "team_abbreviation": "PHI",
+      "team_abbreviation": "IND",
       "salaryswish_url": "https://www.salaryswish.com/players/kelly-oubrejr",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/kelly-oubrejr",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 17000000,
+          "average_annual_value": 8500000,
+          "guaranteed_at_sign": 17000000,
+          "total_guaranteed": 17000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/kelly-oubrejr",
@@ -11849,18 +11944,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/2026-nba-offseason-roundup",
-          "label": "Reported Contract - terms unavailable",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/simone-fontecchio",
+          "label": "Veteran Contract (Extension)",
           "start_year": 2026,
           "end_year": 2026,
           "years": 1,
-          "total": null,
-          "average_annual_value": null,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "total": 2633762,
+          "average_annual_value": 2633762,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Minimum Salary Exception",
           "pending": true
         },
         {
@@ -11894,7 +11989,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 198,
@@ -12527,18 +12622,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.espn.com/nba/story/_/id/49150075/dosunmu-gets-5-year-112m-deal-timberwolves",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ayo-dosunmu",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2030,
           "years": 5,
           "total": 112000000,
           "average_annual_value": 22400000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 112000000,
+          "total_guaranteed": 112000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -12572,7 +12667,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 212,
@@ -12592,8 +12687,8 @@
           "years": 4,
           "total": 30075132,
           "average_annual_value": 7518783,
-          "guaranteed_at_sign": 20256350,
-          "total_guaranteed": 20256350,
+          "guaranteed_at_sign": 29496362,
+          "total_guaranteed": 29496362,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -12910,6 +13005,21 @@
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/jevon-carter",
+          "label": "Veteran Extension",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 3506659,
+          "average_annual_value": 3506659,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/jevon-carter",
           "label": "Veteran Contract (Rest Of Season)",
           "start_year": 2025,
           "end_year": 2025,
@@ -13082,18 +13192,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/reports-ousmane-dieng-re-sign-bucks",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ousmane-dieng",
+          "label": "Veteran Contract (Extension)",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 17500000,
           "average_annual_value": 5833333,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 17500000,
+          "total_guaranteed": 17500000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -13112,7 +13222,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 222,
@@ -13151,18 +13261,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.espn.com/nba/story/_/id/49232503/sources-sixers-land-dean-wade-four-year-39m-deal",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/dean-wade",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2029,
           "years": 4,
           "total": 39000000,
           "average_annual_value": 9750000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 39000000,
+          "total_guaranteed": 39000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "MLE",
           "pending": true
         },
         {
@@ -13211,7 +13321,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 224,
@@ -13273,8 +13383,8 @@
           "years": 4,
           "total": 28491575,
           "average_annual_value": 7122894,
-          "guaranteed_at_sign": 12839040,
-          "total_guaranteed": 12839040,
+          "guaranteed_at_sign": 19728360,
+          "total_guaranteed": 19728360,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -13373,9 +13483,9 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/mark-williams-return-to-suns",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/mark-williams",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
@@ -13384,7 +13494,7 @@
           "guaranteed_at_sign": 38000000,
           "total_guaranteed": 38000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -13403,7 +13513,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 230,
@@ -13415,18 +13525,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/dayron-sharpe-josh-minott-free-agency-2026",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/dayron-sharpe",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2027,
           "years": 2,
           "total": 20000000,
           "average_annual_value": 10000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 20000000,
+          "total_guaranteed": 20000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -13460,7 +13570,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 231,
@@ -13579,8 +13689,8 @@
           "years": 4,
           "total": 25351580,
           "average_annual_value": 6337895,
-          "guaranteed_at_sign": 17345680,
-          "total_guaranteed": 17345680,
+          "guaranteed_at_sign": 25151580,
+          "total_guaranteed": 25151580,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -13843,8 +13953,8 @@
           "years": 4,
           "total": 24088326,
           "average_annual_value": 6022082,
-          "guaranteed_at_sign": 15741540,
-          "total_guaranteed": 15741540,
+          "guaranteed_at_sign": 23162346,
+          "total_guaranteed": 23162346,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -13870,8 +13980,8 @@
           "years": 4,
           "total": 24897090,
           "average_annual_value": 6224273,
-          "guaranteed_at_sign": 11011600,
-          "total_guaranteed": 11011600,
+          "guaranteed_at_sign": 17027200,
+          "total_guaranteed": 17027200,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -14542,8 +14652,8 @@
           "years": 3,
           "total": 16279200,
           "average_annual_value": 5426400,
-          "guaranteed_at_sign": 10594400,
-          "total_guaranteed": 10594400,
+          "guaranteed_at_sign": 16279200,
+          "total_guaranteed": 16279200,
           "free_agent": "UFA",
           "signed_using": "Early-Bird Exception",
           "pending": false
@@ -14788,8 +14898,8 @@
           "years": 2,
           "total": 10975700,
           "average_annual_value": 5487850,
-          "guaranteed_at_sign": 10975700,
-          "total_guaranteed": 10975700,
+          "guaranteed_at_sign": 5354000,
+          "total_guaranteed": 5354000,
           "free_agent": "UFA",
           "signed_using": "MLE",
           "pending": false
@@ -14989,8 +15099,8 @@
           "years": 4,
           "total": 23030849,
           "average_annual_value": 5757712,
-          "guaranteed_at_sign": 8200893,
-          "total_guaranteed": 8200893,
+          "guaranteed_at_sign": 13630653,
+          "total_guaranteed": 13630653,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -15102,10 +15212,25 @@
       "player_name": "Marcus Smart",
       "matched_player_slug": "marcus-smart",
       "matched_player_name": "Marcus Smart",
-      "team_abbreviation": "LAL",
+      "team_abbreviation": "HOU",
       "salaryswish_url": "https://www.salaryswish.com/players/marcus-smart",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/marcus-smart",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 13000000,
+          "average_annual_value": 6500000,
+          "guaranteed_at_sign": 13000000,
+          "total_guaranteed": 13000000,
+          "free_agent": "UFA",
+          "signed_using": "Taxpayer-MLE",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/marcus-smart",
@@ -15115,8 +15240,8 @@
           "years": 2,
           "total": 10524700,
           "average_annual_value": 5262350,
-          "guaranteed_at_sign": 10524700,
-          "total_guaranteed": 10524700,
+          "guaranteed_at_sign": 5134000,
+          "total_guaranteed": 5134000,
           "free_agent": "UFA",
           "signed_using": "Biannual Exception",
           "pending": false
@@ -15276,10 +15401,25 @@
       "player_name": "Moritz Wagner",
       "matched_player_slug": "moritz-wagner",
       "matched_player_name": "Moritz Wagner",
-      "team_abbreviation": "ORL",
+      "team_abbreviation": "BRK",
       "salaryswish_url": "https://www.salaryswish.com/players/moritz-wagner",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/moritz-wagner",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 19000000,
+          "average_annual_value": 9500000,
+          "guaranteed_at_sign": 19000000,
+          "total_guaranteed": 19000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/moritz-wagner",
@@ -15487,8 +15627,8 @@
           "years": 4,
           "total": 22141696,
           "average_annual_value": 5535424,
-          "guaranteed_at_sign": 9412720,
-          "total_guaranteed": 9412720,
+          "guaranteed_at_sign": 14570800,
+          "total_guaranteed": 14570800,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -15512,8 +15652,8 @@
           "start_year": 2026,
           "end_year": 2030,
           "years": 5,
-          "total": 125000000,
-          "average_annual_value": 25000000,
+          "total": 239193450,
+          "average_annual_value": 47838690,
           "guaranteed_at_sign": 125000000,
           "total_guaranteed": 125000000,
           "free_agent": "UFA",
@@ -15570,10 +15710,25 @@
       "player_name": "Walker Kessler",
       "matched_player_slug": "walker-kessler",
       "matched_player_name": "Walker Kessler",
-      "team_abbreviation": "UTA",
+      "team_abbreviation": "LAL",
       "salaryswish_url": "https://www.salaryswish.com/players/walker-kessler",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/walker-kessler",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2029,
+          "years": 4,
+          "total": 130000000,
+          "average_annual_value": 32500000,
+          "guaranteed_at_sign": 130000000,
+          "total_guaranteed": 130000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/walker-kessler",
@@ -15610,8 +15765,8 @@
           "years": 4,
           "total": 20599055,
           "average_annual_value": 5149764,
-          "guaranteed_at_sign": 13277160,
-          "total_guaranteed": 13277160,
+          "guaranteed_at_sign": 20299055,
+          "total_guaranteed": 20299055,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -15637,8 +15792,8 @@
           "years": 4,
           "total": 21290769,
           "average_annual_value": 5322692,
-          "guaranteed_at_sign": 8742680,
-          "total_guaranteed": 8742680,
+          "guaranteed_at_sign": 13643240,
+          "total_guaranteed": 13643240,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -15740,18 +15895,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.espn.com/nba/story/_/id/49190706/jose-alvarado-returning-new-york-knicks-new-3-year-deal",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/jose-alvarado",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
-          "total": 14000000,
+          "total": 14000001,
           "average_annual_value": 4666667,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 14000001,
+          "total_guaranteed": 14000001,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -15800,7 +15955,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 276,
@@ -15985,8 +16140,8 @@
           "years": 4,
           "total": 18816885,
           "average_annual_value": 4704221,
-          "guaranteed_at_sign": 12052960,
-          "total_guaranteed": 12052960,
+          "guaranteed_at_sign": 18616885,
+          "total_guaranteed": 18616885,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -16012,8 +16167,8 @@
           "years": 4,
           "total": 19448588,
           "average_annual_value": 4862147,
-          "guaranteed_at_sign": 8041720,
-          "total_guaranteed": 8041720,
+          "guaranteed_at_sign": 12464320,
+          "total_guaranteed": 12464320,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -16648,8 +16803,8 @@
           "years": 4,
           "total": 16239818,
           "average_annual_value": 4059955,
-          "guaranteed_at_sign": 10560360,
-          "total_guaranteed": 10560360,
+          "guaranteed_at_sign": 16239818,
+          "total_guaranteed": 16239818,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -16675,8 +16830,8 @@
           "years": 4,
           "total": 15050000,
           "average_annual_value": 3762500,
-          "guaranteed_at_sign": 7175000,
-          "total_guaranteed": 7175000,
+          "guaranteed_at_sign": 11025000,
+          "total_guaranteed": 11025000,
           "free_agent": "UFA",
           "signed_using": "Cap Room",
           "pending": false
@@ -16903,8 +17058,8 @@
           "years": 4,
           "total": 15595310,
           "average_annual_value": 3898828,
-          "guaranteed_at_sign": 10087000,
-          "total_guaranteed": 10087000,
+          "guaranteed_at_sign": 15545310,
+          "total_guaranteed": 15545310,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -16971,10 +17126,25 @@
       "player_name": "Jaxson Hayes",
       "matched_player_slug": "jaxson-hayes",
       "matched_player_name": "Jaxson Hayes",
-      "team_abbreviation": "LAL",
+      "team_abbreviation": "UTA",
       "salaryswish_url": "https://www.salaryswish.com/players/jaxson-hayes",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/jaxson-hayes",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 12000000,
+          "average_annual_value": 6000000,
+          "guaranteed_at_sign": 12000000,
+          "total_guaranteed": 12000000,
+          "free_agent": "UFA",
+          "signed_using": "Taxpayer-MLE",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/jaxson-hayes",
@@ -17212,8 +17382,8 @@
           "years": 4,
           "total": 15654827,
           "average_annual_value": 3913707,
-          "guaranteed_at_sign": 6346240,
-          "total_guaranteed": 6346240,
+          "guaranteed_at_sign": 9859000,
+          "total_guaranteed": 9859000,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -17605,8 +17775,8 @@
           "years": 4,
           "total": 14616287,
           "average_annual_value": 3654072,
-          "guaranteed_at_sign": 5430240,
-          "total_guaranteed": 5430240,
+          "guaranteed_at_sign": 8667360,
+          "total_guaranteed": 8667360,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -17627,14 +17797,29 @@
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/deanthony-melton",
           "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 11000000,
+          "average_annual_value": 5500000,
+          "guaranteed_at_sign": 11000000,
+          "total_guaranteed": 11000000,
+          "free_agent": "UFA",
+          "signed_using": "MLE",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/deanthony-melton",
+          "label": "Veteran Contract",
           "start_year": 2025,
           "end_year": 2026,
           "years": 2,
           "total": 6532700,
           "average_annual_value": 3266350,
-          "guaranteed_at_sign": 6532700,
-          "total_guaranteed": 6532700,
-          "free_agent": "UFA",
+          "guaranteed_at_sign": 3080921,
+          "total_guaranteed": 3080921,
+          "free_agent": "UFA ()",
           "signed_using": "Minimum Salary Exception",
           "pending": false
         },
@@ -17704,8 +17889,8 @@
           "years": 4,
           "total": 12000000,
           "average_annual_value": 3000000,
-          "guaranteed_at_sign": 6000000,
-          "total_guaranteed": 6000000,
+          "guaranteed_at_sign": 9000000,
+          "total_guaranteed": 9000000,
           "free_agent": "RFA",
           "signed_using": "Cap Room",
           "pending": false
@@ -17780,18 +17965,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/spurs-julian-champagnie-free-agency-2026",
-          "label": "Reported Extension",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/julian-champagnie",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 45000000,
           "average_annual_value": 15000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 45000000,
+          "total_guaranteed": 45000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -17825,7 +18010,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 321,
@@ -17872,8 +18057,8 @@
           "years": 4,
           "total": 14336172,
           "average_annual_value": 3584043,
-          "guaranteed_at_sign": 5545050,
-          "total_guaranteed": 5545050,
+          "guaranteed_at_sign": 8653050,
+          "total_guaranteed": 8653050,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -18085,8 +18270,8 @@
           "years": 4,
           "total": 13012968,
           "average_annual_value": 3253242,
-          "guaranteed_at_sign": 4181080,
-          "total_guaranteed": 4181080,
+          "guaranteed_at_sign": 6667480,
+          "total_guaranteed": 6667480,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -18346,8 +18531,8 @@
           "years": 4,
           "total": 12576077,
           "average_annual_value": 3144019,
-          "guaranteed_at_sign": 7513840,
-          "total_guaranteed": 7513840,
+          "guaranteed_at_sign": 12376077,
+          "total_guaranteed": 12376077,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -18400,8 +18585,8 @@
           "years": 4,
           "total": 13076519,
           "average_annual_value": 3269130,
-          "guaranteed_at_sign": 5220720,
-          "total_guaranteed": 5220720,
+          "guaranteed_at_sign": 8022360,
+          "total_guaranteed": 8022360,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -18481,8 +18666,8 @@
           "years": 4,
           "total": 12903788,
           "average_annual_value": 3225947,
-          "guaranteed_at_sign": 4950880,
-          "total_guaranteed": 4950880,
+          "guaranteed_at_sign": 7714840,
+          "total_guaranteed": 7714840,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -18508,8 +18693,8 @@
           "years": 4,
           "total": 12810352,
           "average_annual_value": 3202588,
-          "guaranteed_at_sign": 5113320,
-          "total_guaranteed": 5113320,
+          "guaranteed_at_sign": 7857360,
+          "total_guaranteed": 7857360,
           "free_agent": "RFA",
           "signed_using": "Rookie Exception",
           "pending": false
@@ -18795,10 +18980,25 @@
       "player_name": "Sandro Mamukelashvili",
       "matched_player_slug": "sandro-mamukelashvili",
       "matched_player_name": "Sandro Mamukelashvili",
-      "team_abbreviation": "TOR",
+      "team_abbreviation": "LAL",
       "salaryswish_url": "https://www.salaryswish.com/players/sandro-mamukelashvili",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/sandro-mamukelashvili",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2029,
+          "years": 4,
+          "total": 52000000,
+          "average_annual_value": 13000000,
+          "guaranteed_at_sign": 52000000,
+          "total_guaranteed": 52000000,
+          "free_agent": "UFA",
+          "signed_using": "Bird Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/sandro-mamukelashvili",
@@ -19091,18 +19291,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/dayron-sharpe-josh-minott-free-agency-2026",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/josh-minott",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2027,
           "years": 2,
           "total": 9000000,
           "average_annual_value": 4500000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 4390244,
+          "total_guaranteed": 4390244,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Room-MLE",
           "pending": true
         },
         {
@@ -19136,7 +19336,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 349,
@@ -19265,18 +19465,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/suns-resign-collin-gillespie-jordan-goodwin",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/jordan-goodwin",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 19000000,
           "average_annual_value": 6333333,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 19000000,
+          "total_guaranteed": 19000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -19430,7 +19630,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 351,
@@ -19889,9 +20089,9 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/2026-nba-offseason-roundup",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/keon-ellis",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2027,
           "years": 2,
@@ -19900,7 +20100,7 @@
           "guaranteed_at_sign": 18000000,
           "total_guaranteed": 18000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -19949,7 +20149,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 358,
@@ -21578,18 +21778,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/suns-resign-collin-gillespie-jordan-goodwin",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/collin-gillespie",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2029,
           "years": 4,
           "total": 48000000,
           "average_annual_value": 12000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 48000000,
+          "total_guaranteed": 48000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -21653,7 +21853,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 375,
@@ -21944,18 +22144,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/landry-shamet-knicks-free-agency-2026",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/landry-shamet",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2029,
           "years": 4,
           "total": 24000000,
           "average_annual_value": 6000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 24000000,
+          "total_guaranteed": 24000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -22034,7 +22234,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 378,
@@ -22132,6 +22332,21 @@
       "salaryswish_url": "https://www.salaryswish.com/players/nahshon-bones-hyland",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/nahshon-bones-hyland",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 2854699,
+          "average_annual_value": 2854699,
+          "guaranteed_at_sign": 2854699,
+          "total_guaranteed": 2854699,
+          "free_agent": "UFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/nahshon-bones-hyland",
@@ -23330,18 +23545,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/2026-nba-offseason-roundup",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/tim-hardawayjr",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2026,
           "years": 1,
           "total": 6500000,
           "average_annual_value": 6500000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 6500000,
+          "total_guaranteed": 6500000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "MLE",
           "pending": true
         },
         {
@@ -23507,6 +23722,21 @@
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/marvin-bagleyiii",
           "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 3506659,
+          "average_annual_value": 3506659,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/marvin-bagleyiii",
+          "label": "Veteran Contract",
           "start_year": 2025,
           "end_year": 2025,
           "years": 1,
@@ -23560,21 +23790,6 @@
       "salaryswish_url": "https://www.salaryswish.com/players/thomas-bryant",
       "spotrac_url": null,
       "deals": [
-        {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/cavaliers-thomas-bryant-free-agency-2026",
-          "label": "Reported Contract - terms unavailable",
-          "start_year": 2026,
-          "end_year": 2026,
-          "years": 1,
-          "total": null,
-          "average_annual_value": null,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
-          "free_agent": "UFA",
-          "signed_using": null,
-          "pending": true
-        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/thomas-bryant",
@@ -23666,7 +23881,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 394,
@@ -23852,18 +24067,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/free-agency-jock-landale-2026",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/jock-landale",
+          "label": "Veteran Contract (Extension)",
           "start_year": 2026,
           "end_year": 2026,
           "years": 1,
           "total": 14000000,
           "average_annual_value": 14000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 14000000,
+          "total_guaranteed": 14000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Taxpayer-MLE",
           "pending": true
         },
         {
@@ -24272,18 +24487,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/2026-nba-offseason-roundup",
-          "label": "Reported Contract - terms unavailable",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/deandre-jordan",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2026,
           "years": 1,
-          "total": null,
-          "average_annual_value": null,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "total": 3888538,
+          "average_annual_value": 3888538,
+          "guaranteed_at_sign": 3888538,
+          "total_guaranteed": 3888538,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Minimum Salary Exception",
           "pending": true
         },
         {
@@ -24452,7 +24667,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 402,
@@ -24684,7 +24899,7 @@
           "average_annual_value": 2029935,
           "guaranteed_at_sign": 5713534,
           "total_guaranteed": 5713534,
-          "free_agent": "UFA",
+          "free_agent": "UFA ()",
           "signed_using": "Second Round Rookie Exception",
           "pending": false
         }
@@ -24903,7 +25118,7 @@
           "average_annual_value": 1909826,
           "guaranteed_at_sign": 5233097,
           "total_guaranteed": 5233097,
-          "free_agent": "UFA",
+          "free_agent": "UFA ()",
           "signed_using": "Second Round Rookie Exception",
           "pending": false
         }
@@ -24928,8 +25143,8 @@
           "years": 4,
           "total": 8319739,
           "average_annual_value": 2079935,
-          "guaranteed_at_sign": 5913534,
-          "total_guaranteed": 5913534,
+          "guaranteed_at_sign": 8319739,
+          "total_guaranteed": 8319739,
           "free_agent": "UFA",
           "signed_using": "Second Round Rookie Exception",
           "pending": false
@@ -25352,18 +25567,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/kings-precious-achiuwa-reportedly-agree-to-2-year-deal",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/precious-achiuwa",
+          "label": "Veteran Contract (Extension)",
           "start_year": 2026,
           "end_year": 2027,
           "years": 2,
-          "total": 11500000,
-          "average_annual_value": 5750000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "total": 10500000,
+          "average_annual_value": 5250000,
+          "guaranteed_at_sign": 10500000,
+          "total_guaranteed": 10500000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
         },
         {
@@ -25427,7 +25642,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 422,
@@ -25675,6 +25890,21 @@
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/jonathan-mogbo",
+          "label": "Two-Way Contract",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 678882,
+          "average_annual_value": 678882,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "RFA",
+          "signed_using": "Two-Way",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/jonathan-mogbo",
           "label": "Rookie Contract",
           "start_year": 2024,
           "end_year": 2026,
@@ -25683,7 +25913,7 @@
           "average_annual_value": 2037971,
           "guaranteed_at_sign": 3817642,
           "total_guaranteed": 3817642,
-          "free_agent": "RFA",
+          "free_agent": "UFA ()",
           "signed_using": "Second Round Rookie Exception",
           "pending": false
         }
@@ -25722,10 +25952,25 @@
       "player_name": "Ariel Hukporti",
       "matched_player_slug": "ariel-hukporti",
       "matched_player_name": "Ariel Hukporti",
-      "team_abbreviation": "NYK",
+      "team_abbreviation": "PHI",
       "salaryswish_url": "https://www.salaryswish.com/players/ariel-hukporti",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ariel-hukporti",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 3400000,
+          "average_annual_value": 3400000,
+          "guaranteed_at_sign": 3400000,
+          "total_guaranteed": 3400000,
+          "free_agent": "UFA",
+          "signed_using": "MLE",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/ariel-hukporti",
@@ -25737,7 +25982,7 @@
           "average_annual_value": 1509713,
           "guaranteed_at_sign": 3019426,
           "total_guaranteed": 3019426,
-          "free_agent": "RFA",
+          "free_agent": "UFA ()",
           "signed_using": "Minimum Salary Exception",
           "pending": false
         },
@@ -25836,7 +26081,7 @@
           "average_annual_value": 1340130,
           "guaranteed_at_sign": 1955377,
           "total_guaranteed": 1955377,
-          "free_agent": "RFA",
+          "free_agent": "UFA ()",
           "signed_using": "Minimum Salary Exception",
           "pending": false
         },
@@ -25903,8 +26148,8 @@
           "years": 4,
           "total": 7895796,
           "average_annual_value": 1973949,
-          "guaranteed_at_sign": 4371403,
-          "total_guaranteed": 4371403,
+          "guaranteed_at_sign": 5408801,
+          "total_guaranteed": 5408801,
           "free_agent": "RFA",
           "signed_using": "Second Round Rookie Exception",
           "pending": false
@@ -25930,8 +26175,8 @@
           "years": 4,
           "total": 7895796,
           "average_annual_value": 1973949,
-          "guaranteed_at_sign": 3112530,
-          "total_guaranteed": 3112530,
+          "guaranteed_at_sign": 5408801,
+          "total_guaranteed": 5408801,
           "free_agent": "RFA",
           "signed_using": "Second Round Rookie Exception",
           "pending": false
@@ -26590,8 +26835,8 @@
           "years": 2,
           "total": 5131675,
           "average_annual_value": 2565838,
-          "guaranteed_at_sign": 1315814,
-          "total_guaranteed": 1315814,
+          "guaranteed_at_sign": 5131675,
+          "total_guaranteed": 5131675,
           "free_agent": "UFA",
           "signed_using": "Minimum Salary Exception",
           "pending": false
@@ -26885,21 +27130,6 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.spotrac.com/nba/player/_/id/99263/mohamed-diawara",
-          "label": "Reported Contract",
-          "start_year": 2026,
-          "end_year": 2029,
-          "years": 4,
-          "total": 10000000,
-          "average_annual_value": 2500000,
-          "guaranteed_at_sign": 10000000,
-          "total_guaranteed": 10000000,
-          "free_agent": "UFA",
-          "signed_using": null,
-          "pending": true
-        },
-        {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/mohamed-diawara",
           "label": "Rookie Contract",
@@ -26915,7 +27145,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 456,
@@ -26935,9 +27165,9 @@
           "years": 4,
           "total": 8685386,
           "average_annual_value": 2171347,
-          "guaranteed_at_sign": 2348329,
-          "total_guaranteed": 2348329,
-          "free_agent": "RFA",
+          "guaranteed_at_sign": 2348328,
+          "total_guaranteed": 2348328,
+          "free_agent": "UFA ()",
           "signed_using": "Second Round Rookie Exception",
           "pending": false
         }
@@ -27109,6 +27339,21 @@
       "salaryswish_url": "https://www.salaryswish.com/players/jevon-carter",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/jevon-carter",
+          "label": "Veteran Extension",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 3506659,
+          "average_annual_value": 3506659,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": true
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/jevon-carter",
@@ -27589,6 +27834,21 @@
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/mike-conley",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": 3876528,
+          "average_annual_value": 3876528,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/mike-conley",
           "label": "Veteran Contract (Rest Of Season)",
           "start_year": 2025,
           "end_year": 2025,
@@ -27915,7 +28175,7 @@
           "average_annual_value": 1605225,
           "guaranteed_at_sign": 712637,
           "total_guaranteed": 712637,
-          "free_agent": "UFA",
+          "free_agent": "RFA",
           "signed_using": "Minimum Salary Exception",
           "pending": false
         },
@@ -28556,18 +28816,18 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "label": "Reported Contract - terms unavailable",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/amari-williams",
+          "label": "Two-Way Contract (Extension)",
           "start_year": 2026,
           "end_year": 2026,
           "years": 1,
-          "total": null,
-          "average_annual_value": null,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
-          "free_agent": "UFA",
-          "signed_using": null,
+          "total": 680985,
+          "average_annual_value": 680985,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "RFA",
+          "signed_using": "Two-Way",
           "pending": true
         },
         {
@@ -28581,7 +28841,7 @@
           "average_annual_value": 1320523,
           "guaranteed_at_sign": 490128,
           "total_guaranteed": 490128,
-          "free_agent": "RFA",
+          "free_agent": "UFA ()",
           "signed_using": "Minimum Salary Exception",
           "pending": false
         },
@@ -28601,7 +28861,7 @@
           "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 479,
@@ -28613,34 +28873,19 @@
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/2026-nba-offseason-roundup",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/kobe-sanders",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2029,
           "years": 4,
           "total": 11200000,
           "average_annual_value": 2800000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 5200000,
+          "total_guaranteed": 5200000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
-        },
-        {
-          "source": "SalarySwish",
-          "source_url": "https://www.salaryswish.com/players/kobe-sanders",
-          "label": "Rookie Contract",
-          "start_year": 2025,
-          "end_year": 2026,
-          "years": 2,
-          "total": 2626414,
-          "average_annual_value": 1313207,
-          "guaranteed_at_sign": 475497,
-          "total_guaranteed": 475497,
-          "free_agent": "RFA",
-          "signed_using": "Minimum Salary Exception",
-          "pending": false
         },
         {
           "source": "SalarySwish",
@@ -28656,9 +28901,24 @@
           "free_agent": "RFA",
           "signed_using": "Two-Way",
           "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/kobe-sanders",
+          "label": "Rookie Contract",
+          "start_year": 2025,
+          "end_year": 2026,
+          "years": 2,
+          "total": 2626414,
+          "average_annual_value": 1313207,
+          "guaranteed_at_sign": 475497,
+          "total_guaranteed": 475497,
+          "free_agent": "RFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 480,
@@ -30915,7 +31175,7 @@
           "average_annual_value": 1731408,
           "guaranteed_at_sign": 444658,
           "total_guaranteed": 444658,
-          "free_agent": "UFA",
+          "free_agent": "UFA ()",
           "signed_using": "Minimum Salary Exception",
           "pending": false
         },
@@ -31017,7 +31277,7 @@
           "average_annual_value": 1731408,
           "guaranteed_at_sign": 444658,
           "total_guaranteed": 444658,
-          "free_agent": "UFA",
+          "free_agent": "UFA ()",
           "signed_using": "Minimum Salary Exception",
           "pending": false
         },
@@ -33508,26 +33768,131 @@
       "matched_player_slug": "ron-harper-jr",
       "matched_player_name": "Ron Harper Jr.",
       "team_abbreviation": "BOS",
-      "salaryswish_url": null,
+      "salaryswish_url": "https://www.salaryswish.com/players/ron-harper-jr",
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/celtics-sign-ron-harper-jr-to-extension",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Veteran Extension",
           "start_year": 2026,
           "end_year": 2028,
           "years": 3,
           "total": 9000000,
           "average_annual_value": 3000000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
+          "guaranteed_at_sign": 9000000,
+          "total_guaranteed": 9000000,
           "free_agent": "UFA",
-          "signed_using": null,
+          "signed_using": "Bird Exception",
           "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Veteran Contract (Rest Of Season)",
+          "start_year": 2025,
+          "end_year": 2026,
+          "years": 2,
+          "total": 2707584,
+          "average_annual_value": 1353792,
+          "guaranteed_at_sign": 123045,
+          "total_guaranteed": 123045,
+          "free_agent": "UFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Veteran Contract",
+          "start_year": 2025,
+          "end_year": 2025,
+          "years": 1,
+          "total": 2378870,
+          "average_annual_value": 2378870,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "RFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Two-Way Contract",
+          "start_year": 2025,
+          "end_year": 2025,
+          "years": 1,
+          "total": 636434,
+          "average_annual_value": 636434,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "RFA",
+          "signed_using": "Two-Way",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Two-Way Contract (Rest Of Season)",
+          "start_year": 2024,
+          "end_year": 2025,
+          "years": 2,
+          "total": 1303554,
+          "average_annual_value": 651777,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA ()",
+          "signed_using": "Two-Way",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Exhibit 10",
+          "start_year": 2024,
+          "end_year": 2024,
+          "years": 1,
+          "total": 1157153,
+          "average_annual_value": 1157153,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA ()",
+          "signed_using": "Minimum Salary Exception",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Two-Way Contract",
+          "start_year": 2023,
+          "end_year": 2023,
+          "years": 1,
+          "total": 559782,
+          "average_annual_value": 559782,
+          "guaranteed_at_sign": 279890,
+          "total_guaranteed": 279890,
+          "free_agent": "UFA ()",
+          "signed_using": "Two-Way",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/ron-harper-jr",
+          "label": "Two-Way Contract",
+          "start_year": 2022,
+          "end_year": 2022,
+          "years": 1,
+          "total": 508891,
+          "average_annual_value": 508891,
+          "guaranteed_at_sign": 50000,
+          "total_guaranteed": 50000,
+          "free_agent": "RFA",
+          "signed_using": "Two-Way",
+          "pending": false
         }
       ],
-      "needs_followup": true
+      "needs_followup": false
     },
     {
       "source_rank": 532,
@@ -33535,23 +33900,140 @@
       "matched_player_slug": "branden-carlson",
       "matched_player_name": "Branden Carlson",
       "team_abbreviation": "POR",
-      "salaryswish_url": null,
+      "salaryswish_url": "https://www.salaryswish.com/players/branden-carlson",
       "spotrac_url": null,
       "deals": [
         {
-          "source": "NBA.com/ESPN",
-          "source_url": "https://www.nba.com/news/2026-nba-offseason-roundup",
-          "label": "Reported Contract",
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/branden-carlson",
+          "label": "Veteran Contract",
           "start_year": 2026,
           "end_year": 2026,
           "years": 1,
-          "total": 2500000,
-          "average_annual_value": 2500000,
-          "guaranteed_at_sign": null,
-          "total_guaranteed": null,
-          "free_agent": "UFA",
-          "signed_using": null,
+          "total": 2449421,
+          "average_annual_value": 2449421,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "RFA",
+          "signed_using": "Minimum Salary Exception",
           "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/branden-carlson",
+          "label": "Two-Way Contract",
+          "start_year": 2025,
+          "end_year": 2025,
+          "years": 1,
+          "total": 636434,
+          "average_annual_value": 636434,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA ()",
+          "signed_using": "Two-Way",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/branden-carlson",
+          "label": "Two-Way Contract",
+          "start_year": 2024,
+          "end_year": 2024,
+          "years": 1,
+          "total": 578577,
+          "average_annual_value": 578577,
+          "guaranteed_at_sign": 77500,
+          "total_guaranteed": 77500,
+          "free_agent": "UFA ()",
+          "signed_using": "Two-Way",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/branden-carlson",
+          "label": "Rookie Contract (Rest Of Season)",
+          "start_year": 2024,
+          "end_year": 2024,
+          "years": 1,
+          "total": 990895,
+          "average_annual_value": 990895,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "UFA ()",
+          "signed_using": "Minimum Salary Exception",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/branden-carlson",
+          "label": "10-Day Contract",
+          "start_year": 2024,
+          "end_year": 2024,
+          "years": 1,
+          "total": 66503,
+          "average_annual_value": 66503,
+          "guaranteed_at_sign": 66503,
+          "total_guaranteed": 66503,
+          "free_agent": "UFA",
+          "signed_using": "10-Day (Expires: Jan 31, 2025)",
+          "pending": false
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/branden-carlson",
+          "label": "Two-Way Contract (Rest Of Season)",
+          "start_year": 2024,
+          "end_year": 2024,
+          "years": 1,
+          "total": 222785,
+          "average_annual_value": 222785,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "RFA",
+          "signed_using": "Two-Way",
+          "pending": false
+        }
+      ],
+      "needs_followup": false
+    },
+    {
+      "source_rank": 533,
+      "player_name": "Alijah Martin",
+      "matched_player_slug": "alijah-martin",
+      "matched_player_name": "Alijah Martin",
+      "team_abbreviation": "TOR",
+      "salaryswish_url": "https://www.salaryswish.com/players/alijah-martin",
+      "spotrac_url": null,
+      "deals": [
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/alijah-martin",
+          "label": "Veteran Contract",
+          "start_year": 2026,
+          "end_year": 2027,
+          "years": 2,
+          "total": 4757011,
+          "average_annual_value": 2378506,
+          "guaranteed_at_sign": 0,
+          "total_guaranteed": 0,
+          "free_agent": "RFA",
+          "signed_using": "Minimum Salary Exception",
+          "pending": true
+        },
+        {
+          "source": "SalarySwish",
+          "source_url": "https://www.salaryswish.com/players/alijah-martin",
+          "label": "Two-Way Contract",
+          "start_year": 2025,
+          "end_year": 2025,
+          "years": 1,
+          "total": 636434,
+          "average_annual_value": 636434,
+          "guaranteed_at_sign": 85300,
+          "total_guaranteed": 85300,
+          "free_agent": "RFA",
+          "signed_using": "Two-Way",
+          "pending": false
         }
       ],
       "needs_followup": false

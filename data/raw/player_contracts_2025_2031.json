@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "source_key": "player-salary-contracts-2026-07-01",
+    "source_key": "player-salary-contracts-2026-07-02",
     "source_label": "User-provided NBA player salary contract table",
-    "received_date": "2026-07-01",
+    "received_date": "2026-07-02",
     "season_columns": [
       "2025-26",
       "2026-27",
@@ -11,8 +11,8 @@
       "2029-30",
       "2030-31"
     ],
-    "row_count": 532,
-    "matched_rows_against_generated_players": 508,
+    "row_count": 533,
+    "matched_rows_against_generated_players": 509,
     "unmatched_rows_against_generated_players": 24,
     "preserves_duplicate_source_rows": true,
     "option_source": {
@@ -24,14 +24,16 @@
       }
     },
     "latest_contract_audit": {
-      "audit_date": "2026-07-01",
+      "audit_date": "2026-07-02",
       "source_urls": [
         "https://www.nba.com/news/nba-offseason-deals-2026",
-        "https://www.nba.com/news/2026-nba-offseason-roundup"
+        "https://www.nba.com/news/2026-nba-offseason-roundup",
+        "https://www.espn.com/nba/story/_/id/49236864/sources-nikola-vucevic-reuniting-magic-1-year-deal",
+        "https://www.spotrac.com/nba/free-agents/_/year/2026"
       ],
-      "updated_player_count": 37,
-      "needs_followup_count": 32,
-      "notes": "Added reported 2026 free-agency agreements and marked rows for follow-up where annual salary, guarantee, or option details remain unavailable."
+      "updated_player_count": 20,
+      "needs_followup_count": 48,
+      "notes": "Added and updated July 1-2 reported 2026 free-agency agreements; explicit follow-up remains where annual salary, guarantees, or options are not fully public."
     }
   },
   "contracts": [
@@ -1108,11 +1110,16 @@
       "normalized_player_name": "tobias harris",
       "matched_player_slug": "tobias-harris",
       "matched_player_name": "Tobias Harris",
-      "team_abbreviation": "DET",
+      "team_abbreviation": "SAS",
       "salaries": {
         "2025-26": 26634146
       },
-      "guaranteed": 26634146
+      "guaranteed": null,
+      "contract_notes": "Reported two-year, $31 million agreement with San Antonio; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/tobias-harris-spurs-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 68,
@@ -1120,14 +1127,16 @@
       "normalized_player_name": "john collins",
       "matched_player_slug": "john-collins",
       "matched_player_name": "John Collins",
-      "team_abbreviation": "LAC",
+      "team_abbreviation": "DET",
       "salaries": {
         "2025-26": 26580000
       },
-      "guaranteed": 26580000,
-      "options_by_season": {
-        "2025-26": "Player Option"
-      }
+      "guaranteed": null,
+      "contract_notes": "Reported three-year, $51 million agreement with Detroit; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/john-collins-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 69,
@@ -1420,11 +1429,18 @@
       "normalized_player_name": "nikola vucevic",
       "matched_player_slug": "nikola-vucevic",
       "matched_player_name": "Nikola Vučević",
-      "team_abbreviation": "BOS",
+      "team_abbreviation": "ORL",
       "salaries": {
-        "2025-26": 21481481
+        "2025-26": 21481481,
+        "2026-27": 3900000
       },
-      "guaranteed": 21481481
+      "guaranteed": 3900000,
+      "contract_notes": "Reported one-year, $3.9 million agreement to return to Orlando for 2026-27.",
+      "source_urls": [
+        "https://www.espn.com/nba/story/_/id/49236864/sources-nikola-vucevic-reuniting-magic-1-year-deal",
+        "https://www.nba.com/news/nba-offseason-deals-2026"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 88,
@@ -1458,11 +1474,19 @@
       "normalized_player_name": "norman powell",
       "matched_player_slug": "norman-powell",
       "matched_player_name": "Norman Powell",
-      "team_abbreviation": "MIA",
+      "team_abbreviation": "CHI",
       "salaries": {
         "2025-26": 20482758
       },
-      "guaranteed": 20482758
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      },
+      "contract_notes": "Reported two-year, $45 million agreement with Chicago, including a 2027-28 team option. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/norman-powell-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 91,
@@ -1575,11 +1599,19 @@
       "normalized_player_name": "collin sexton",
       "matched_player_slug": "collin-sexton",
       "matched_player_name": "Collin Sexton",
-      "team_abbreviation": "CHI",
+      "team_abbreviation": "LAL",
       "salaries": {
         "2025-26": 18975000
       },
-      "guaranteed": 18975000
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Player Option"
+      },
+      "contract_notes": "Reported two-year agreement with the Lakers, including a player option. Contract value, annual salary, and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/sandro-mamukelashvili-collin-sexton-quentin-grimes-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 98,
@@ -1903,11 +1935,15 @@
       "team_abbreviation": "ORL",
       "salaries": {
         "2025-26": 15000000,
-        "2026-27": 14500000,
-        "2027-28": 14500000,
-        "2028-29": 15000000
+        "2026-27": 3524115
       },
-      "guaranteed": 44000000
+      "guaranteed": 3524115,
+      "contract_notes": "Orlando officially listed a one-year agreement; Spotrac lists one year, $3,524,115 guaranteed for 2026-27.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026",
+        "https://www.spotrac.com/nba/player/_/id/23601/jonathan-isaac"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 119,
@@ -2270,11 +2306,17 @@
       "normalized_player_name": "mitchell robinson",
       "matched_player_slug": "mitchell-robinson",
       "matched_player_name": "Mitchell Robinson",
-      "team_abbreviation": "NYK",
+      "team_abbreviation": "BOS",
       "salaries": {
         "2025-26": 12954546
       },
-      "guaranteed": 12954546
+      "guaranteed": null,
+      "contract_notes": "Reported three-year, $47 million agreement with Boston; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/mitchell-robinson-celtics-free-agency-2026",
+        "https://www.nba.com/news/nba-offseason-deals-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 142,
@@ -2641,11 +2683,17 @@
       "normalized_player_name": "mike conley",
       "matched_player_slug": "mike-conley",
       "matched_player_name": "Mike Conley",
-      "team_abbreviation": "CHO",
+      "team_abbreviation": "BOS",
       "salaries": {
         "2025-26": 11499872
       },
-      "guaranteed": 10774038
+      "guaranteed": null,
+      "contract_notes": "Reported one-year agreement with Boston; contract value, salary, and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/mike-conley-free-agency-2026",
+        "https://www.nba.com/news/nba-offseason-deals-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 165,
@@ -3044,11 +3092,19 @@
       "normalized_player_name": "quentin grimes",
       "matched_player_slug": "quentin-grimes",
       "matched_player_name": "Quentin Grimes",
-      "team_abbreviation": "PHI",
+      "team_abbreviation": "LAL",
       "salaries": {
         "2025-26": 8741209
       },
-      "guaranteed": 8741209
+      "guaranteed": null,
+      "options_by_season": {
+        "2029-30": "Player Option"
+      },
+      "contract_notes": "Reported four-year, $60 million agreement with the Lakers, including a player option. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/sandro-mamukelashvili-collin-sexton-quentin-grimes-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 191,
@@ -3125,14 +3181,17 @@
       "normalized_player_name": "kelly oubre",
       "matched_player_slug": "kelly-oubre-jr",
       "matched_player_name": "Kelly Oubre Jr.",
-      "team_abbreviation": "PHI",
+      "team_abbreviation": "IND",
       "salaries": {
         "2025-26": 8382150
       },
-      "guaranteed": 8382150,
-      "options_by_season": {
-        "2025-26": "Player Option"
-      }
+      "guaranteed": null,
+      "contract_notes": "Reported two-year, nearly $17 million agreement with Indiana; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/kelly-oubre-jr-pacers-free-agency-2026",
+        "https://www.nba.com/news/2026-nba-offseason-roundup"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 196,
@@ -3932,13 +3991,18 @@
       "matched_player_name": "Al Horford",
       "team_abbreviation": "GSW",
       "salaries": {
-        "2025-26": 5685000,
-        "2026-27": 5969250
+        "2025-26": 5685000
       },
-      "guaranteed": 5685000,
+      "guaranteed": null,
       "options_by_season": {
-        "2026-27": "Player Option"
-      }
+        "2027-28": "Player Option"
+      },
+      "contract_notes": "Reported two-year agreement to return to Golden State; Spotrac lists two years/$13,985,100 pending, but annual salary and guarantees need confirmation.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026",
+        "https://www.spotrac.com/nba/player/_/id/2199/al-horford"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 245,
@@ -4201,15 +4265,20 @@
       "normalized_player_name": "marcus smart",
       "matched_player_slug": "marcus-smart",
       "matched_player_name": "Marcus Smart",
-      "team_abbreviation": "LAL",
+      "team_abbreviation": "HOU",
       "salaries": {
-        "2025-26": 19920855,
-        "2026-27": 5390700
+        "2025-26": 19920855
       },
-      "guaranteed": 5134000,
+      "guaranteed": null,
       "options_by_season": {
-        "2026-27": "Player Option"
-      }
+        "2027-28": "Player Option"
+      },
+      "contract_notes": "Reported two-year, $13 million agreement with Houston, plus a player option. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/marcus-smart-free-agency-2026",
+        "https://www.espn.com/nba/story/_/id/49235334/sources-marcus-smart-agrees-2-year-13m-deal-rockets"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 262,
@@ -4232,11 +4301,19 @@
       "normalized_player_name": "moritz wagner",
       "matched_player_slug": "moritz-wagner",
       "matched_player_name": "Moritz Wagner",
-      "team_abbreviation": "ORL",
+      "team_abbreviation": "BRK",
       "salaries": {
         "2025-26": 5000000
       },
-      "guaranteed": 5000000
+      "guaranteed": 19000000,
+      "options_by_season": {
+        "2027-28": "Mutual Opt-In Clause"
+      },
+      "contract_notes": "Reported two-year, $19 million agreement with Brooklyn, including a mutual opt-in clause. Season-by-season salary breakdown unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/moritz-wagner-nets-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 264,
@@ -4345,14 +4422,16 @@
       "normalized_player_name": "walker kessler",
       "matched_player_slug": "walker-kessler",
       "matched_player_name": "Walker Kessler",
-      "team_abbreviation": "UTA",
+      "team_abbreviation": "LAL",
       "salaries": {
         "2025-26": 4878938
       },
-      "guaranteed": 4878938,
-      "options_by_season": {
-        "2025-26": "Team Option"
-      }
+      "guaranteed": null,
+      "contract_notes": "Reported four-year, $130 million sign-and-trade agreement with the Lakers; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/walker-kessler-trade-los-angeles-lakers"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 271,
@@ -4906,11 +4985,20 @@
       "normalized_player_name": "jaxson hayes",
       "matched_player_slug": "jaxson-hayes",
       "matched_player_name": "Jaxson Hayes",
-      "team_abbreviation": "LAL",
+      "team_abbreviation": "UTA",
       "salaries": {
         "2025-26": 3449323
       },
-      "guaranteed": 3449323
+      "guaranteed": null,
+      "options_by_season": {
+        "2027-28": "Team Option"
+      },
+      "contract_notes": "Reported two-year, $12 million agreement with Utah, including a team option in year 2. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/jaxson-hayes-jazz-free-agency-2026",
+        "https://www.spotrac.com/nba/player/_/id/31565/jaxson-hayes"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 304,
@@ -5142,13 +5230,18 @@
       "matched_player_name": "De'Anthony Melton",
       "team_abbreviation": "GSW",
       "salaries": {
-        "2025-26": 3080921,
-        "2026-27": 3451779
+        "2025-26": 3080921
       },
-      "guaranteed": 3080921,
+      "guaranteed": null,
       "options_by_season": {
-        "2026-27": "Player Option"
-      }
+        "2027-28": "Player Option"
+      },
+      "contract_notes": "Reported two-year, $11 million agreement to return to Golden State, including a player option in the second season. Season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/deanthony-melton-free-agency-2026",
+        "https://www.spotrac.com/nba/player/_/id/27012/deanthony-melton"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 318,
@@ -5615,15 +5708,19 @@
       "normalized_player_name": "sandro mamukelashvili",
       "matched_player_slug": "sandro-mamukelashvili",
       "matched_player_name": "Sandro Mamukelashvili",
-      "team_abbreviation": "TOR",
+      "team_abbreviation": "LAL",
       "salaries": {
-        "2025-26": 2461463,
-        "2026-27": 2801346
+        "2025-26": 2461463
       },
-      "guaranteed": 2461463,
+      "guaranteed": 52000000,
       "options_by_season": {
-        "2026-27": "Player Option"
-      }
+        "2029-30": "Player Option"
+      },
+      "contract_notes": "Reported four-year, $52 million fully guaranteed agreement with the Lakers, including a player option in year 4. Season-by-season salary unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/sandro-mamukelashvili-collin-sexton-quentin-grimes-free-agency-2026"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 346,
@@ -6853,14 +6950,18 @@
       "normalized_player_name": "ariel hukporti",
       "matched_player_slug": "ariel-hukporti",
       "matched_player_name": "Ariel Hukporti",
-      "team_abbreviation": "NYK",
+      "team_abbreviation": "PHI",
       "salaries": {
-        "2025-26": 1955377
+        "2025-26": 1955377,
+        "2026-27": 3400000
       },
-      "guaranteed": 1955377,
-      "options_by_season": {
-        "2025-26": "Team Option"
-      }
+      "guaranteed": 3400000,
+      "contract_notes": "Reported one-year, $3.4 million agreement with Philadelphia for 2026-27.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026",
+        "https://www.spotrac.com/nba/player/_/id/93962/ariel-hukporti"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 432,
@@ -7317,12 +7418,16 @@
       "matched_player_name": "Jevon Carter",
       "team_abbreviation": "ORL",
       "salaries": {
-        "2025-26": 7680524
+        "2025-26": 7680524,
+        "2026-27": 3506659
       },
-      "guaranteed": 871000,
-      "options_by_season": {
-        "2025-26": "Player Option"
-      }
+      "guaranteed": 3506659,
+      "contract_notes": "Orlando officially listed a one-year agreement; Spotrac lists one year, $3,506,659 guaranteed for 2026-27.",
+      "source_urls": [
+        "https://www.nba.com/news/nba-offseason-deals-2026",
+        "https://www.spotrac.com/nba/player/_/id/26998/jevon-carter"
+      ],
+      "needs_followup": false
     },
     {
       "source_rank": 461,
@@ -8252,6 +8357,22 @@
         "https://www.nba.com/news/2026-nba-offseason-roundup"
       ],
       "needs_followup": false
+    },
+    {
+      "source_rank": 533,
+      "player_name": "Alijah Martin",
+      "normalized_player_name": "alijah martin",
+      "matched_player_slug": "alijah-martin",
+      "matched_player_name": "Alijah Martin",
+      "team_abbreviation": "TOR",
+      "salaries": {},
+      "guaranteed": null,
+      "contract_notes": "Reported two-year, $4.8 million agreement to stay with Toronto; season-by-season salary and guarantees unavailable.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup",
+        "https://www.nba.com/news/nba-offseason-deals-2026"
+      ],
+      "needs_followup": true
     }
   ]
 }
