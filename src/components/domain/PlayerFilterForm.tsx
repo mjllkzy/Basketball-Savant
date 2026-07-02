@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { SmartSearchInput } from "@/components/ui/SmartSearchInput";
 import { defaultMinGames, defaultMinMinutes, maxMinGames, maxMinMinutes } from "@/lib/playerFilters";
 import type { PlayerStatView } from "@/lib/playerStatViews";
-import { UPCOMING_SEASON } from "@/lib/seasons";
+import { DEFAULT_SEASON, UPCOMING_SEASON } from "@/lib/seasons";
 
 type Option = {
   label: string;
@@ -53,9 +53,7 @@ export function PlayerFilterForm({
 
   function handleViewChange(nextView: PlayerStatView) {
     setView(nextView);
-    if (nextView === "contracts" && view !== "contracts") {
-      setSelectedSeason(UPCOMING_SEASON);
-    }
+    setSelectedSeason(nextView === "contracts" ? UPCOMING_SEASON : DEFAULT_SEASON);
   }
 
   return (
