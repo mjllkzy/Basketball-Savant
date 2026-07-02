@@ -249,6 +249,59 @@ function attachContractDeals(rows: PlayerContractRow[], lookup: ContractDealLook
   }));
 }
 
+function stableRecordKey(record: Partial<Record<ContractSeason, number | string>>) {
+  return contractSeasons
+    .map((season) => `${season}:${record[season] ?? ""}`)
+    .join("|");
+}
+
+function contractRowDeduplicationKey(row: PlayerContractRow) {
+  return [
+    row.playerSlug ?? normalizedContractName(row.playerName),
+    row.teamId,
+    row.teamAbbreviation,
+    stableRecordKey(row.salaryBySeason),
+    stableRecordKey(row.optionsBySeason),
+    stableRecordKey(row.guaranteeStatusBySeason),
+    row.guaranteedAmount ?? "",
+    row.needsFollowup ? "followup" : "complete",
+  ].join("::");
+}
+
+function contractRowQualityScore(row: PlayerContractRow) {
+  const salaryCount = Object.keys(row.salaryBySeason).length;
+  const optionCount = Object.keys(row.optionsBySeason).length;
+  return (
+    row.contractDeals.length * 100 +
+    salaryCount * 10 +
+    optionCount * 5 +
+    (row.playerSlug ? 3 : 0) +
+    (row.position ? 2 : 0) +
+    (row.teamId && row.teamId !== row.teamAbbreviation ? 1 : 0)
+  );
+}
+
+function dedupeContractRows(rows: PlayerContractRow[]) {
+  const byKey = new Map<string, PlayerContractRow>();
+
+  for (const row of rows) {
+    const key = contractRowDeduplicationKey(row);
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, row);
+      continue;
+    }
+
+    const existingScore = contractRowQualityScore(existing);
+    const candidateScore = contractRowQualityScore(row);
+    if (candidateScore > existingScore || (candidateScore === existingScore && row.sourceRank < existing.sourceRank)) {
+      byKey.set(key, row);
+    }
+  }
+
+  return [...byKey.values()];
+}
+
 function dbRowToContract(row: PlayerContractDbRow): PlayerContractRow {
   const team = teamByAbbreviation.get(row.team_abbreviation);
   return {
@@ -545,7 +598,7 @@ async function jsonFallback(params: PlayerContractParams): Promise<PlayerContrac
     loadContractDealLookup(),
   ]);
   const payload = JSON.parse(source) as ContractJsonPayload;
-  const rows = attachContractDeals(payload.contracts.map((row) => jsonRowToContract(row, playerLookup(runtime.players))), dealLookup);
+  const rows = dedupeContractRows(attachContractDeals(payload.contracts.map((row) => jsonRowToContract(row, playerLookup(runtime.players))), dealLookup));
   return filterAndPageContracts(rows, params, "json");
 }
 
@@ -571,7 +624,7 @@ async function listPlayerContractsUncached(params: PlayerContractParams = {}): P
     `);
     if (!result) return jsonFallback(params);
     const dealLookup = await loadContractDealLookup();
-    return filterAndPageContracts(attachContractDeals(result.rows.map(dbRowToContract), dealLookup), params, "postgres");
+    return filterAndPageContracts(dedupeContractRows(attachContractDeals(result.rows.map(dbRowToContract), dealLookup)), params, "postgres");
   } catch {
     return jsonFallback(params);
   }
