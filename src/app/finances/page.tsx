@@ -365,11 +365,21 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
   });
 }
 
+function guaranteedSalaryForSeason(row: PlayerContractRow, season: ContractSeason) {
+  const amount = row.salaryBySeason[season];
+  if (typeof amount !== "number" || !Number.isFinite(amount)) return 0;
+
+  const detail = displayContractDetail(season, row.optionsBySeason[season], row.guaranteeStatusBySeason[season]);
+  const kind = optionKind(detail);
+  if (kind === "player" || kind === "team" || kind === "mutual" || kind === "guarantee" || kind === "unknown") return 0;
+  return amount;
+}
+
 function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: ContractSeason) {
   const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
   const activeContracts = contracts.filter((row) => typeof row.salaryBySeason[season] === "number");
   const payroll = activeContracts.reduce((sum, row) => sum + (row.salaryBySeason[season] ?? 0), 0);
-  const guaranteed = contracts.reduce((sum, row) => sum + (row.guaranteedAmount ?? 0), 0);
+  const guaranteed = activeContracts.reduce((sum, row) => sum + guaranteedSalaryForSeason(row, season), 0);
   const topContract = activeContracts
     .slice()
     .sort((left, right) => (right.salaryBySeason[season] ?? 0) - (left.salaryBySeason[season] ?? 0))[0];
@@ -407,8 +417,8 @@ function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason, sele
         topSalary: formatMoney(topSalary),
         topSalarySort: topSalary ?? null,
         topPlayer: topContract?.playerName ?? "",
-        guaranteed: guaranteed > 0 ? formatMoney(guaranteed) : "Unavailable",
-        guaranteedSort: guaranteed > 0 ? guaranteed : null,
+        guaranteed: formatMoney(guaranteed),
+        guaranteedSort: guaranteed,
       };
     })
     .sort((left, right) => Number(right.payrollSort ?? 0) - Number(left.payrollSort ?? 0));
@@ -439,8 +449,8 @@ function teamBreakdownRows(rows: PlayerContractRow[], team: Team): StatTableRow[
       topSalary: formatMoney(topSalary),
       topSalarySort: topSalary ?? null,
       topPlayer: topContract?.playerName ?? "",
-      guaranteed: guaranteed > 0 ? formatMoney(guaranteed) : "Unavailable",
-      guaranteedSort: guaranteed > 0 ? guaranteed : null,
+      guaranteed: formatMoney(guaranteed),
+      guaranteedSort: guaranteed,
     };
   });
 }
