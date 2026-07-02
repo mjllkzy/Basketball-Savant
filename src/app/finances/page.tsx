@@ -365,6 +365,14 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
   });
 }
 
+function hasSelectedSeasonSalary(row: PlayerContractRow, season: ContractSeason) {
+  return typeof row.salaryBySeason[season] === "number";
+}
+
+function isSelectedSeasonFreeAgent(row: PlayerContractRow, season: ContractSeason) {
+  return !hasSelectedSeasonSalary(row, season) && Boolean(freeAgencyStatusForSeason(row.contractDeals, season));
+}
+
 function guaranteedSalaryForSeason(row: PlayerContractRow, season: ContractSeason) {
   const amount = row.salaryBySeason[season];
   if (typeof amount !== "number" || !Number.isFinite(amount)) return 0;
@@ -377,7 +385,7 @@ function guaranteedSalaryForSeason(row: PlayerContractRow, season: ContractSeaso
 
 function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: ContractSeason) {
   const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
-  const activeContracts = contracts.filter((row) => typeof row.salaryBySeason[season] === "number");
+  const activeContracts = contracts.filter((row) => hasSelectedSeasonSalary(row, season));
   const payroll = activeContracts.reduce((sum, row) => sum + (row.salaryBySeason[season] ?? 0), 0);
   const guaranteed = activeContracts.reduce((sum, row) => sum + guaranteedSalaryForSeason(row, season), 0);
   const topContract = activeContracts
@@ -460,8 +468,11 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
   const teamRows = rows
     .filter((row) => row.teamAbbreviation === team.abbreviation)
     .sort((left, right) => (contractSalarySortValue(right, season) ?? Number.NEGATIVE_INFINITY) - (contractSalarySortValue(left, season) ?? Number.NEGATIVE_INFINITY) || left.playerName.localeCompare(right.playerName));
+  const rosteredRows = teamRows.filter((row) => hasSelectedSeasonSalary(row, season));
+  const freeAgentRows = teamRows.filter((row) => isSelectedSeasonFreeAgent(row, season));
   const yearlyRows = teamBreakdownRows(rows, team);
-  const playerRows = playerFinanceRows(teamRows, season);
+  const playerRows = playerFinanceRows(rosteredRows, season);
+  const freeAgentPlayerRows = playerFinanceRows(freeAgentRows, season);
   const selectedSeasonSummary = teamContractsForSeason(rows, team, season);
 
   return (
@@ -495,8 +506,8 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
       />
       <div className="border-t border-slate-200 pt-4">
         <div className="mb-3">
-          <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} Player Contracts</h3>
-          <p className="text-sm text-slate-600">Team-filtered annual salary, cap share, option status, and guaranteed money.</p>
+          <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} Rostered Contracts</h3>
+          <p className="text-sm text-slate-600">Players with active {selectedSeasonLabel(season)} salary counting toward tracked team payroll.</p>
         </div>
         <StatTable
           columns={playerFinanceColumns(season)}
@@ -508,6 +519,23 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
           rowAccentColumnKey="player"
         />
       </div>
+      {freeAgentPlayerRows.length > 0 ? (
+        <div className="border-t border-slate-200 pt-4">
+          <div className="mb-3">
+            <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} Free Agents</h3>
+            <p className="text-sm text-slate-600">Expired team-linked contracts separated from rostered payroll so they do not read as active players.</p>
+          </div>
+          <StatTable
+            columns={playerFinanceColumns(season)}
+            rows={freeAgentPlayerRows}
+            layout="fixed"
+            minWidth={playerFinanceMinWidth}
+            initialSorting={[{ id: selectedSalarySort, desc: true }]}
+            rowAccentColorKey="teamAccent"
+            rowAccentColumnKey="player"
+          />
+        </div>
+      ) : null}
     </section>
   );
 }
