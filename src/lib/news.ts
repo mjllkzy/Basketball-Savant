@@ -85,6 +85,8 @@ export function newsImportanceScore(item: NewsItem) {
   const text = `${item.title} ${item.summary}`.toLowerCase();
   let score = categoryImportance[item.category] ?? 35;
   if (item.reportingStatus === "Official") score += 6;
+  if (item.reportingStatus === "Official" && item.category === "Trade") score += 10;
+  if (item.reportingStatus === "Official" && /\bblockbuster trade\b/i.test(text)) score += 10;
   for (const [pattern, weight] of keywordImportance) {
     if (pattern.test(text)) score += weight;
   }

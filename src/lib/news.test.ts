@@ -151,6 +151,39 @@ describe("news feed", () => {
     expect(selectBiggestNewsLead(items, "all", window)?.id).toBe("rumor-star-trade");
   });
 
+  it("prioritizes official blockbuster trades for the all-news lead", () => {
+    const items: NewsItem[] = [
+      {
+        id: "jaylen-brown-trade",
+        title: "Celtics To Trade Jaylen Brown To Sixers For Paul George, Picks",
+        category: "Trade",
+        reportingStatus: "Official",
+        publishedAt: "2026-07-01T22:18:22.000Z",
+        sourceName: "Hoops Rumors",
+        sourceUrl: "https://www.hoopsrumors.com/2026/07/celtics-to-trade-jaylen-brown-to-sixers-for-paul-george-picks.html",
+        summary: "Two Atlantic Division rivals have reached an agreement on a blockbuster trade.",
+      },
+      {
+        id: "ja-morant-trade",
+        title: "Trail Blazers add Ja Morant in trade with Grizzlies",
+        category: "Free Agency",
+        reportingStatus: "Official",
+        publishedAt: "2026-06-29T20:49:42.000Z",
+        sourceName: "NBA.com",
+        sourceUrl: "https://www.nba.com/news/blazers-grizzlies-ja-morant-trade",
+        summary: "The former All-Star guard is headed to Portland in exchange for Jerami Grant and Kris Murray.",
+      },
+    ];
+
+    const lead = selectBiggestNewsLead(items, "all", {
+      referenceDate: "2026-07-01T23:00:00.000Z",
+      withinDays: NEWS_RETENTION_DAYS,
+    });
+
+    expect(lead?.id).toBe("jaylen-brown-trade");
+    expect(newsImportanceScore(items[0])).toBeGreaterThan(newsImportanceScore(items[1]));
+  });
+
   it("formats dates for fan-facing cards", () => {
     expect(formatNewsDate("2026-06-18T17:22:00.000Z")).toBe("Jun 18, 2026");
   });
