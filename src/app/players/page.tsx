@@ -238,7 +238,7 @@ function formatMoney(amount: number | null | undefined, missingLabel = "--") {
 function formatSalaryCapShare(amount: number | null | undefined, season: ContractSeason) {
   const cap = salaryCapBySeason[season];
   if (amount === null || amount === undefined || cap === undefined) return "";
-  return `${((amount / cap) * 100).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% cap`;
+  return `${((amount / cap) * 100).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% of cap`;
 }
 
 function formatContractYears(years: number | null | undefined, missingLabel = "--") {
