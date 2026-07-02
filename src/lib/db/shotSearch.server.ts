@@ -3,6 +3,7 @@ import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import type { SeasonType, Shot } from "@/lib/types";
 import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
+import { memoizeServer } from "@/lib/serverCache";
 import { loadGameAnalyticsByIds, type GameListItem } from "./gameAnalytics.server";
 import { listComparisonPlayerOptions, loadPlayerProfileAnalytics } from "./playerAnalytics.server";
 import { listTeamSeasonSummaries } from "./teamAnalytics.server";
@@ -11,6 +12,8 @@ import { listShotAttempts } from "./shotAttempts.server";
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/shotSearch.server.ts can only be imported on the server.");
 }
+
+const shotSearchCacheTtlMs = 5 * 60 * 1000;
 
 export type ShotSearchFilters = ShotCollectionFilters & {
   playerId?: string;
@@ -38,7 +41,7 @@ export type ShotSearchResult = Omit<FilteredShotCollection, "meta"> & {
   };
 };
 
-export async function loadShotSearchOptions() {
+async function loadShotSearchOptionsUncached() {
   const [players, teams] = await Promise.all([
     listComparisonPlayerOptions(),
     listTeamSeasonSummaries(),
@@ -48,6 +51,15 @@ export async function loadShotSearchOptions() {
     teams: teams.rows.map((row) => row.team),
     source: teams.source,
   };
+}
+
+const loadShotSearchOptionsCached = memoizeServer(loadShotSearchOptionsUncached, {
+  ttlMs: shotSearchCacheTtlMs,
+  maxEntries: 4,
+});
+
+export async function loadShotSearchOptions() {
+  return loadShotSearchOptionsCached();
 }
 
 async function scopedShots(filters: ShotSearchFilters): Promise<{ rows: Shot[]; source: "postgres" | "json" | "unavailable" }> {
@@ -82,7 +94,7 @@ async function scopedShots(filters: ShotSearchFilters): Promise<{ rows: Shot[]; 
   return { rows: [], source: "unavailable" };
 }
 
-export async function searchShotAnalytics(filters: ShotSearchFilters): Promise<ShotSearchResult> {
+async function searchShotAnalyticsUncached(filters: ShotSearchFilters): Promise<ShotSearchResult> {
   const scoped = await scopedShots(filters);
   let sourceRows = scoped.rows;
   if (filters.teamId) sourceRows = sourceRows.filter((shot) => shot.teamId === filters.teamId);
@@ -113,4 +125,13 @@ export async function searchShotAnalytics(filters: ShotSearchFilters): Promise<S
       actualMinusExpected: allFilteredRows.reduce((total, shot) => total + shot.actualMinusExpected, 0),
     },
   };
+}
+
+const searchShotAnalyticsCached = memoizeServer(searchShotAnalyticsUncached, {
+  ttlMs: shotSearchCacheTtlMs,
+  maxEntries: 120,
+});
+
+export async function searchShotAnalytics(filters: ShotSearchFilters): Promise<ShotSearchResult> {
+  return searchShotAnalyticsCached(filters);
 }

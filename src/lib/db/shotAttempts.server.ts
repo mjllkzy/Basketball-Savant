@@ -1,9 +1,12 @@
 import type { SeasonType, Shot } from "@/lib/types";
+import { memoizeServer } from "@/lib/serverCache";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/shotAttempts.server.ts can only be imported on the server.");
 }
+
+const shotAttemptCacheTtlMs = 5 * 60 * 1000;
 
 type ShotAttemptDbRow = {
   shot_id: string;
@@ -101,7 +104,7 @@ function mapShot(row: ShotAttemptDbRow): Shot {
   };
 }
 
-export async function listShotAttempts(scope: ShotAttemptScope): Promise<ShotAttemptResult> {
+async function listShotAttemptsUncached(scope: ShotAttemptScope): Promise<ShotAttemptResult> {
   const filters: string[] = [];
   const values: string[] = [];
   if (scope.teamId) {
@@ -174,4 +177,13 @@ export async function listShotAttempts(scope: ShotAttemptScope): Promise<ShotAtt
   } catch {
     return { rows: [], source: "unavailable" };
   }
+}
+
+const listShotAttemptsCached = memoizeServer(listShotAttemptsUncached, {
+  ttlMs: shotAttemptCacheTtlMs,
+  maxEntries: 160,
+});
+
+export async function listShotAttempts(scope: ShotAttemptScope): Promise<ShotAttemptResult> {
+  return listShotAttemptsCached(scope);
 }

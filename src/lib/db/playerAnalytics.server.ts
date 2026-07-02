@@ -9,12 +9,15 @@ import { calculatePlayerMetric, metricRegistry } from "@/lib/metrics/registry";
 import { decimalAgeFromBirthDate, normalizeBirthDate } from "@/lib/playerAge";
 import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, UPCOMING_SEASON, parseSeason } from "@/lib/seasons";
+import { memoizeServer } from "@/lib/serverCache";
 import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/playerAnalytics.server.ts can only be imported on the server.");
 }
+
+const playerAnalyticsCacheTtlMs = 5 * 60 * 1000;
 
 export type PlayerOption = {
   id?: string;
@@ -433,7 +436,7 @@ async function jsonComparisonPlayers(slugs?: string[], seasonType: SeasonType = 
   });
 }
 
-export async function listComparisonPlayerOptions(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerOption[]> {
+async function listComparisonPlayerOptionsUncached(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerOption[]> {
   const selectedSeason = parseSeason(season);
   try {
     const result = await queryDatabase<PlayerOptionDbRow>(
@@ -465,7 +468,16 @@ export async function listComparisonPlayerOptions(seasonType: SeasonType = DEFAU
   }
 }
 
-export async function loadComparisonPlayers(slugs: string[], seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<ComparisonPlayer[]> {
+const listComparisonPlayerOptionsCached = memoizeServer(listComparisonPlayerOptionsUncached, {
+  ttlMs: playerAnalyticsCacheTtlMs,
+  maxEntries: 20,
+});
+
+export async function listComparisonPlayerOptions(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerOption[]> {
+  return listComparisonPlayerOptionsCached(seasonType, season);
+}
+
+async function loadComparisonPlayersUncached(slugs: string[], seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<ComparisonPlayer[]> {
   const requested = Array.from(new Set(slugs.filter(Boolean))).slice(0, 2);
   if (!requested.length) return [];
   const selectedSeason = parseSeason(season);
@@ -529,6 +541,15 @@ export async function loadComparisonPlayers(slugs: string[], seasonType: SeasonT
   }
 }
 
+const loadComparisonPlayersCached = memoizeServer(loadComparisonPlayersUncached, {
+  ttlMs: playerAnalyticsCacheTtlMs,
+  maxEntries: 80,
+});
+
+export async function loadComparisonPlayers(slugs: string[], seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<ComparisonPlayer[]> {
+  return loadComparisonPlayersCached(slugs, seasonType, season);
+}
+
 async function jsonSimilarityResult(playerSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerSimilarityResult | null> {
   const players = await jsonComparisonPlayers(undefined, seasonType, season);
   const target = players.find((player) => player.player.slug === playerSlug);
@@ -552,7 +573,7 @@ async function jsonSimilarityResult(playerSlug: string, seasonType: SeasonType =
   };
 }
 
-export async function loadAllComparisonPlayers(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<{ rows: ComparisonPlayer[]; source: "postgres" | "json" }> {
+async function loadAllComparisonPlayersUncached(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<{ rows: ComparisonPlayer[]; source: "postgres" | "json" }> {
   const selectedSeason = parseSeason(season);
   try {
     const result = await queryDatabase<ComparisonDbRow>(`
@@ -607,7 +628,16 @@ export async function loadAllComparisonPlayers(seasonType: SeasonType = DEFAULT_
   return { rows: await jsonComparisonPlayers(undefined, seasonType, selectedSeason), source: "json" };
 }
 
-export async function loadPlayerSimilarity(playerSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerSimilarityResult | null> {
+const loadAllComparisonPlayersCached = memoizeServer(loadAllComparisonPlayersUncached, {
+  ttlMs: playerAnalyticsCacheTtlMs,
+  maxEntries: 20,
+});
+
+export async function loadAllComparisonPlayers(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<{ rows: ComparisonPlayer[]; source: "postgres" | "json" }> {
+  return loadAllComparisonPlayersCached(seasonType, season);
+}
+
+async function loadPlayerSimilarityUncached(playerSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerSimilarityResult | null> {
   if (!playerSlug) return null;
   const selectedSeason = parseSeason(season);
   const loaded = await loadAllComparisonPlayers(seasonType, selectedSeason);
@@ -625,6 +655,15 @@ export async function loadPlayerSimilarity(playerSlug: string, seasonType: Seaso
     summary: row.candidateSummary,
   }));
   return { target, matches, source: loaded.source };
+}
+
+const loadPlayerSimilarityCached = memoizeServer(loadPlayerSimilarityUncached, {
+  ttlMs: playerAnalyticsCacheTtlMs,
+  maxEntries: 120,
+});
+
+export async function loadPlayerSimilarity(playerSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerSimilarityResult | null> {
+  return loadPlayerSimilarityCached(playerSlug, seasonType, season);
 }
 
 function profileInputMatches(player: ComparisonPlayer, input: string) {
@@ -709,7 +748,7 @@ function mapProfileGameRow(row: PlayerProfileGameDbRow) {
   return { ...line, game, opponent };
 }
 
-export async function loadPlayerProfileAnalytics(input: string, requestedSeasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON) {
+async function loadPlayerProfileAnalyticsUncached(input: string, requestedSeasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON) {
   const selectedSeason = parseSeason(season);
   const seasonType = parseSeasonType(requestedSeasonType);
   const loaded = await loadAllComparisonPlayers(seasonType, selectedSeason);
@@ -812,4 +851,13 @@ export async function loadPlayerProfileAnalytics(input: string, requestedSeasonT
     const fallback = query.getPlayerProfile(target.player.slug) ?? query.getPlayerProfile(input);
     return fallback ? { ...fallback, source: "json" as const } : undefined;
   }
+}
+
+const loadPlayerProfileAnalyticsCached = memoizeServer(loadPlayerProfileAnalyticsUncached, {
+  ttlMs: playerAnalyticsCacheTtlMs,
+  maxEntries: 160,
+});
+
+export async function loadPlayerProfileAnalytics(input: string, requestedSeasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON) {
+  return loadPlayerProfileAnalyticsCached(input, requestedSeasonType, season);
 }

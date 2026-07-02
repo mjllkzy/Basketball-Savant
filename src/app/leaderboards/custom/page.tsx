@@ -8,6 +8,8 @@ import { formatMetric } from "@/lib/metrics/format";
 import { baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
+export const revalidate = 300;
+
 export default async function CustomLeaderboardPage({ searchParams }: { searchParams: Promise<RouteSearchParams> }) {
   const resolvedSearchParams = await searchParams;
   const entityType = (singleParam(resolvedSearchParams, "entityType") ?? "players") as "players" | "teams" | "lineups";

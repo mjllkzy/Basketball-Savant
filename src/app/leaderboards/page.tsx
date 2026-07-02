@@ -8,6 +8,8 @@ import { formatMetric } from "@/lib/metrics/format";
 import { DEFAULT_SEASON, baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
+export const revalidate = 300;
+
 function leaderboardHref(category: string, metric: string, season: string) {
   const params = new URLSearchParams({ category, metric });
   if (season !== DEFAULT_SEASON) params.set("season", season);

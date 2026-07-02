@@ -1,12 +1,15 @@
 import { calculatePlayerMetric, calculateTeamMetric, getMetric } from "@/lib/metrics/registry";
 import type { Player, Team } from "@/lib/types";
 import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
+import { memoizeServer } from "@/lib/serverCache";
 import { loadAllComparisonPlayers } from "./playerAnalytics.server";
 import { listTeamSeasonSummaries } from "./teamAnalytics.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/customAnalytics.server.ts can only be imported on the server.");
 }
+
+const customAnalyticsCacheTtlMs = 5 * 60 * 1000;
 
 export type CustomLeaderboardEntity = "players" | "teams" | "lineups";
 
@@ -28,7 +31,7 @@ function validatedMetricKeys(metricKeys: string[]) {
   return Array.from(new Set(metricKeys)).slice(0, 20).map((key) => getMetric(key).key);
 }
 
-export async function getCustomLeaderboardAnalytics(
+async function getCustomLeaderboardAnalyticsUncached(
   entityType: CustomLeaderboardEntity,
   requestedMetricKeys: string[],
   season = DEFAULT_SEASON,
@@ -67,4 +70,17 @@ export async function getCustomLeaderboardAnalytics(
       values: Object.fromEntries(metricKeys.map((key) => [key, calculatePlayerMetric(key, aggregate)])),
     })),
   };
+}
+
+const getCustomLeaderboardAnalyticsCached = memoizeServer(getCustomLeaderboardAnalyticsUncached, {
+  ttlMs: customAnalyticsCacheTtlMs,
+  maxEntries: 60,
+});
+
+export async function getCustomLeaderboardAnalytics(
+  entityType: CustomLeaderboardEntity,
+  requestedMetricKeys: string[],
+  season = DEFAULT_SEASON,
+): Promise<CustomLeaderboardResult> {
+  return getCustomLeaderboardAnalyticsCached(entityType, requestedMetricKeys, season);
 }

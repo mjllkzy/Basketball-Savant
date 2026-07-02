@@ -15,6 +15,8 @@ import { loadShotSearchOptions, searchShotAnalytics } from "@/lib/db/shotSearch.
 import { formatMetric } from "@/lib/metrics/format";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Search",
   robots: { index: false, follow: true },

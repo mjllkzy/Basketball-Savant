@@ -20,6 +20,8 @@ import { UPCOMING_SEASON, baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor } from "@/lib/teamBranding";
 
+export const revalidate = 300;
+
 type FinanceMode = "overview" | "teams" | "players";
 
 const defaultFinanceSeason = UPCOMING_SEASON as ContractSeason;

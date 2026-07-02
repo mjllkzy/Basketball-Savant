@@ -1,12 +1,15 @@
 import type { Game, Player, PlayerGameStat, SeasonType, Team, TeamGameStat } from "@/lib/types";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { DEFAULT_SEASON_TYPE, parseSeasonType } from "@/lib/seasonTypes";
+import { memoizeServer } from "@/lib/serverCache";
 import { queryDatabase } from "./client.server";
 import { listShotAttempts } from "./shotAttempts.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/gameAnalytics.server.ts can only be imported on the server.");
 }
+
+const gameAnalyticsCacheTtlMs = 5 * 60 * 1000;
 
 export type GameListParams = {
   page?: number;
@@ -428,7 +431,7 @@ async function jsonGameList(params: GameListParams): Promise<GameListResult> {
   };
 }
 
-export async function listGameAnalytics(params: GameListParams = {}): Promise<GameListResult> {
+async function listGameAnalyticsUncached(params: GameListParams = {}): Promise<GameListResult> {
   const seasonType = parseSeasonType(params.seasonType ?? DEFAULT_SEASON_TYPE);
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
@@ -478,7 +481,16 @@ export async function listGameAnalytics(params: GameListParams = {}): Promise<Ga
   }
 }
 
-export async function loadGameAnalyticsByIds(gameIds: string[]): Promise<Map<string, GameListItem>> {
+const listGameAnalyticsCached = memoizeServer(listGameAnalyticsUncached, {
+  ttlMs: gameAnalyticsCacheTtlMs,
+  maxEntries: 120,
+});
+
+export async function listGameAnalytics(params: GameListParams = {}): Promise<GameListResult> {
+  return listGameAnalyticsCached(params);
+}
+
+async function loadGameAnalyticsByIdsUncached(gameIds: string[]): Promise<Map<string, GameListItem>> {
   const ids = Array.from(new Set(gameIds.filter(Boolean))).slice(0, 200);
   if (!ids.length) return new Map();
 
@@ -514,7 +526,16 @@ export async function loadGameAnalyticsByIds(gameIds: string[]): Promise<Map<str
   }));
 }
 
-export async function getGameAnalytics(gameId: string) {
+const loadGameAnalyticsByIdsCached = memoizeServer(loadGameAnalyticsByIdsUncached, {
+  ttlMs: gameAnalyticsCacheTtlMs,
+  maxEntries: 120,
+});
+
+export async function loadGameAnalyticsByIds(gameIds: string[]): Promise<Map<string, GameListItem>> {
+  return loadGameAnalyticsByIdsCached(gameIds);
+}
+
+async function getGameAnalyticsUncached(gameId: string) {
   try {
     const [gameResult, playerResult, teamResult] = await Promise.all([
       queryDatabase<GameDbRow>(`${gameSelect} WHERE g.game_id = $1 LIMIT 1`, [gameId]),
@@ -577,6 +598,15 @@ export async function getGameAnalytics(gameId: string) {
     const report = query.getGameReport(gameId);
     return report ? { ...report, source: "json" as const } : undefined;
   }
+}
+
+const getGameAnalyticsCached = memoizeServer(getGameAnalyticsUncached, {
+  ttlMs: gameAnalyticsCacheTtlMs,
+  maxEntries: 120,
+});
+
+export async function getGameAnalytics(gameId: string) {
+  return getGameAnalyticsCached(gameId);
 }
 
 export function gameMatchupLabel(item: Pick<GameListItem, "game" | "homeTeam" | "awayTeam">) {

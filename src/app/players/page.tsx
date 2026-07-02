@@ -24,6 +24,8 @@ import { parseSeasonType } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, UPCOMING_SEASON, parseSeason } from "@/lib/seasons";
 import { booleanParam, numberParam, singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
+export const revalidate = 300;
+
 const standardSortMetrics = ["pts", "reb", "ast", "stl", "blk", "tov", "fg_pct", "three_pct", "ft_pct"];
 const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct", "reb_pct", "turnover_rate", "off_rating", "def_rating", "net_rating"];
 const contractSummarySortMetrics = ["original_years", "remaining_years", "original_total", "remaining_total", "original_aav", "current_aav", "original_contract", "current_contract"];

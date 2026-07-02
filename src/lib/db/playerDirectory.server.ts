@@ -5,11 +5,14 @@ import { decimalAgeFromBirthDate, normalizeBirthDate } from "@/lib/playerAge";
 import type { SeasonType } from "@/lib/types";
 import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, UPCOMING_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
+import { memoizeServer } from "@/lib/serverCache";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/playerDirectory.server.ts can only be imported on the server.");
 }
+
+const playerDirectoryCacheTtlMs = 5 * 60 * 1000;
 
 export type PlayerDirectoryRow = {
   playerSlug: string;
@@ -300,7 +303,7 @@ async function jsonFallback(params: PlayerDirectoryParams): Promise<PlayerDirect
   };
 }
 
-export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): Promise<PlayerDirectoryResult> {
+async function listPlayerDirectoryUncached(params: PlayerDirectoryParams = {}): Promise<PlayerDirectoryResult> {
   const season = parseSeason(params.season);
   const seasonType = parseSeasonType(params.seasonType);
   if (season === UPCOMING_SEASON && seasonType === DEFAULT_SEASON_TYPE) {
@@ -410,7 +413,16 @@ export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): P
   }
 }
 
-export async function loadPlayerDirectoryFilters(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerDirectoryFilters> {
+const listPlayerDirectoryCached = memoizeServer(listPlayerDirectoryUncached, {
+  ttlMs: playerDirectoryCacheTtlMs,
+  maxEntries: 200,
+});
+
+export async function listPlayerDirectory(params: PlayerDirectoryParams = {}): Promise<PlayerDirectoryResult> {
+  return listPlayerDirectoryCached(params);
+}
+
+async function loadPlayerDirectoryFiltersUncached(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerDirectoryFilters> {
   const selectedSeason = parseSeason(season);
   try {
     const [seasonResult, teamResult, positionResult] = await Promise.all([
@@ -463,4 +475,13 @@ export async function loadPlayerDirectoryFilters(seasonType: SeasonType = DEFAUL
       .concat(sourcePlayers.length ? [] : ["PG", "SG", "SF", "PF", "C"]),
     source: "json",
   };
+}
+
+const loadPlayerDirectoryFiltersCached = memoizeServer(loadPlayerDirectoryFiltersUncached, {
+  ttlMs: playerDirectoryCacheTtlMs,
+  maxEntries: 40,
+});
+
+export async function loadPlayerDirectoryFilters(seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<PlayerDirectoryFilters> {
+  return loadPlayerDirectoryFiltersCached(seasonType, season);
 }

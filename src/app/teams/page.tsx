@@ -10,6 +10,8 @@ import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl } from "@/lib/teamBranding";
 
+export const revalidate = 300;
+
 const entityColumnWidth = "290px";
 const secondaryColumnWidth = "86px";
 const teamTableMinWidth = "1322px";

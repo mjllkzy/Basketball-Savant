@@ -9,10 +9,13 @@ import { listShotAttempts } from "./shotAttempts.server";
 import { getCachedTeamShotChart } from "@/lib/data/teamShotCache";
 import { DEFAULT_SEASON_TYPE, parseSeasonType, seasonTypeOptions } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, UPCOMING_SEASON, mergeSeasonOptions, parseSeason, type SeasonOption } from "@/lib/seasons";
+import { memoizeServer } from "@/lib/serverCache";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/teamAnalytics.server.ts can only be imported on the server.");
 }
+
+const teamAnalyticsCacheTtlMs = 5 * 60 * 1000;
 
 type TeamSummaryDbRow = {
   id: string;
@@ -570,7 +573,7 @@ async function listTeamGameSummaries(params: TeamSummaryParams): Promise<TeamSum
   }
 }
 
-export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
+async function listTeamSeasonSummariesUncached(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
   const season = selectedSeason(params);
   const seasonType = selectedSeasonType(params);
   if (params.month || seasonType === "Playoffs") return listTeamGameSummaries(params);
@@ -649,13 +652,22 @@ export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): P
   }
 }
 
+const listTeamSeasonSummariesCached = memoizeServer(listTeamSeasonSummariesUncached, {
+  ttlMs: teamAnalyticsCacheTtlMs,
+  maxEntries: 160,
+});
+
+export async function listTeamSeasonSummaries(params: TeamSummaryParams = {}): Promise<TeamSummaryResult> {
+  return listTeamSeasonSummariesCached(params);
+}
+
 function monthOptionsFromGames(games: Game[]) {
   return [...new Set(games.map((game) => game.date.slice(0, 7)).filter((value) => /^\d{4}-\d{2}$/.test(value)))]
     .sort()
     .map((value) => ({ value, label: monthLabel(value) }));
 }
 
-export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParams, "season" | "seasonType"> = {}): Promise<TeamSummaryFilterOptions> {
+async function loadTeamSeasonSummaryFiltersUncached(params: Pick<TeamSummaryParams, "season" | "seasonType"> = {}): Promise<TeamSummaryFilterOptions> {
   const season = selectedSeason(params);
   const seasonType = selectedSeasonType(params);
   const fallback = async (): Promise<TeamSummaryFilterOptions> => {
@@ -724,7 +736,16 @@ export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParam
   }
 }
 
-export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<TeamProfileResult | null> {
+const loadTeamSeasonSummaryFiltersCached = memoizeServer(loadTeamSeasonSummaryFiltersUncached, {
+  ttlMs: teamAnalyticsCacheTtlMs,
+  maxEntries: 40,
+});
+
+export async function loadTeamSeasonSummaryFilters(params: Pick<TeamSummaryParams, "season" | "seasonType"> = {}): Promise<TeamSummaryFilterOptions> {
+  return loadTeamSeasonSummaryFiltersCached(params);
+}
+
+async function loadTeamProfileUncached(idOrSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<TeamProfileResult | null> {
   const selected = parseSeason(season);
   const teamResult = await listTeamSeasonSummaries({ season: selected, seasonType });
   const normalized = idOrSlug.trim().toLowerCase();
@@ -756,4 +777,13 @@ export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType =
       ? "postgres"
       : "json",
   };
+}
+
+const loadTeamProfileCached = memoizeServer(loadTeamProfileUncached, {
+  ttlMs: teamAnalyticsCacheTtlMs,
+  maxEntries: 120,
+});
+
+export async function loadTeamProfile(idOrSlug: string, seasonType: SeasonType = DEFAULT_SEASON_TYPE, season = DEFAULT_SEASON): Promise<TeamProfileResult | null> {
+  return loadTeamProfileCached(idOrSlug, seasonType, season);
 }

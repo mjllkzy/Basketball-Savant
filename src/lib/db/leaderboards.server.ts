@@ -2,11 +2,14 @@ import { getMetric } from "@/lib/metrics/registry";
 import { percentileRank } from "@/lib/metrics/formulas";
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
 import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
+import { memoizeServer } from "@/lib/serverCache";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
   throw new Error("src/lib/db/leaderboards.server.ts can only be imported on the server.");
 }
+
+const leaderboardCacheTtlMs = 5 * 60 * 1000;
 
 export type PlayerLeaderboardRow = {
   rank: number;
@@ -115,7 +118,7 @@ const fallbackMetricValues: Record<string, (row: RuntimePlayerFallback) => numbe
   pie: (row) => row.pie,
 };
 
-export async function listPlayerLeaderboard(metricKey: string, limit = 50, season = DEFAULT_SEASON): Promise<PlayerLeaderboardResult> {
+async function listPlayerLeaderboardUncached(metricKey: string, limit = 50, season = DEFAULT_SEASON): Promise<PlayerLeaderboardResult> {
   const column = metricColumns[metricKey];
   if (!column) return jsonFallback(metricKey, limit, season);
   const selectedSeason = parseSeason(season);
@@ -169,4 +172,13 @@ export async function listPlayerLeaderboard(metricKey: string, limit = 50, seaso
   } catch {
     return jsonFallback(metricKey, safeLimit, selectedSeason);
   }
+}
+
+const listPlayerLeaderboardCached = memoizeServer(listPlayerLeaderboardUncached, {
+  ttlMs: leaderboardCacheTtlMs,
+  maxEntries: 80,
+});
+
+export async function listPlayerLeaderboard(metricKey: string, limit = 50, season = DEFAULT_SEASON): Promise<PlayerLeaderboardResult> {
+  return listPlayerLeaderboardCached(metricKey, limit, season);
 }

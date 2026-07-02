@@ -6,6 +6,8 @@ import { baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { playerSimilaritySummary } from "@/lib/comparison";
 
+export const revalidate = 300;
+
 export async function generateMetadata({ searchParams }: { searchParams: Promise<RouteSearchParams> }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const hasSelection = Boolean(singleParam(resolvedSearchParams, "player"));

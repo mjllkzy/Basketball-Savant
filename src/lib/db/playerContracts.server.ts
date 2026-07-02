@@ -3,6 +3,7 @@ import path from "node:path";
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
 import { nbaTeamByAbbreviation } from "@/lib/data/nbaTeams";
 import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
+import { memoizeServer } from "@/lib/serverCache";
 import { queryDatabase } from "./client.server";
 
 if (typeof window !== "undefined") {
@@ -12,6 +13,8 @@ if (typeof window !== "undefined") {
 export const contractSeasons = ["2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31"] as const;
 
 export type ContractSeason = (typeof contractSeasons)[number];
+
+const playerContractCacheTtlMs = 5 * 60 * 1000;
 
 export type PlayerContractRow = {
   sourceRank: number;
@@ -546,7 +549,7 @@ async function jsonFallback(params: PlayerContractParams): Promise<PlayerContrac
   return filterAndPageContracts(rows, params, "json");
 }
 
-export async function listPlayerContracts(params: PlayerContractParams = {}): Promise<PlayerContractResult> {
+async function listPlayerContractsUncached(params: PlayerContractParams = {}): Promise<PlayerContractResult> {
   try {
     const result = await queryDatabase<PlayerContractDbRow>(`
       SELECT
@@ -572,4 +575,13 @@ export async function listPlayerContracts(params: PlayerContractParams = {}): Pr
   } catch {
     return jsonFallback(params);
   }
+}
+
+const listPlayerContractsCached = memoizeServer(listPlayerContractsUncached, {
+  ttlMs: playerContractCacheTtlMs,
+  maxEntries: 120,
+});
+
+export async function listPlayerContracts(params: PlayerContractParams = {}): Promise<PlayerContractResult> {
+  return listPlayerContractsCached(params);
 }

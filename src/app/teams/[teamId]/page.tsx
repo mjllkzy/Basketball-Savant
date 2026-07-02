@@ -14,6 +14,8 @@ import { parseSeasonType } from "@/lib/seasonTypes";
 import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
+export const revalidate = 300;
+
 function playerHref(slug: string, season: string, seasonType: string) {
   const params = new URLSearchParams();
   if (season !== DEFAULT_SEASON) params.set("season", season);

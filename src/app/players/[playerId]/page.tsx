@@ -20,6 +20,8 @@ import { parseSeasonType } from "@/lib/seasonTypes";
 import { parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
+export const revalidate = 300;
+
 export async function generateMetadata({ params }: { params: Promise<{ playerId: string }> }): Promise<Metadata> {
   const { playerId } = await params;
   const profile = await loadPlayerProfileAnalytics(playerId);

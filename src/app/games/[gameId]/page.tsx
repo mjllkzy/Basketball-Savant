@@ -8,6 +8,8 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { StatTable } from "@/components/ui/StatTable";
 import { getGameAnalytics } from "@/lib/db/gameAnalytics.server";
 
+export const revalidate = 300;
+
 export default async function GamePage({ params }: { params: Promise<{ gameId: string }> }) {
   const { gameId } = await params;
   const report = await getGameAnalytics(gameId);

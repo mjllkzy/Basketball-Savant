@@ -3,6 +3,8 @@ import { StatTable } from "@/components/ui/StatTable";
 import { gameContextLabel, gameMatchupLabel, listGameAnalytics } from "@/lib/db/gameAnalytics.server";
 import { formatShortDate } from "@/lib/date";
 
+export const revalidate = 300;
+
 export default async function GamesPage() {
   const result = await listGameAnalytics({ pageSize: 100 });
   const rows = result.rows.map((item) => {
