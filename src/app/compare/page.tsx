@@ -110,12 +110,12 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           title="Compare"
           description="Separate workspaces for side-by-side player comparisons and role-based player similarity."
         />
-        <div className="grid min-h-[calc(100vh-280px)] gap-4">
+        <div className="grid min-h-[calc(100vh-280px)] gap-4 lg:grid-cols-2">
           <Link
             href="/compare?mode=compare"
-            className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="group relative isolate flex min-h-[420px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_42%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.2),transparent_46%)]" />
             <div className="relative flex h-full w-full flex-col justify-between">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
                 <GitCompare className="h-6 w-6" />
@@ -133,9 +133,9 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
           <Link
             href="/similarity"
-            className="group relative isolate flex min-h-[360px] overflow-hidden rounded border border-ink/20 bg-ink p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="group relative isolate flex min-h-[420px] overflow-hidden rounded border border-ink/20 bg-ink p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(244,162,97,0.32),transparent_44%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(244,162,97,0.3),transparent_44%)]" />
             <div className="relative flex h-full w-full flex-col justify-between">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-white/15">
                 <Radar className="h-6 w-6" />
