@@ -202,7 +202,7 @@ export function StatTable({
             </span>
           );
           const hrefClassName = column.hrefVariant === "button"
-            ? "inline-flex min-h-9 items-center justify-center rounded border border-slate-300 px-3 text-xs font-black uppercase tracking-[0.08em] text-ink transition hover:bg-slate-50"
+            ? "inline-flex min-h-9 w-full max-w-full items-center justify-center overflow-hidden rounded border border-slate-300 px-2 text-[10px] font-black uppercase leading-tight tracking-[0.06em] text-ink transition hover:bg-slate-50"
             : `font-bold text-signal hover:underline ${column.truncate ? "block truncate" : ""}`;
           return href ? <Link href={String(href)} className={hrefClassName}>{content}</Link> : content;
         }
