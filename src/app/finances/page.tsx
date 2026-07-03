@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Landmark, Users } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn, type StatTableRow } from "@/components/ui/StatTable";
+import { tableColumnWidths } from "@/components/ui/tableSizing";
 import { nbaTeams } from "@/lib/data/nbaTeams";
 import {
   contractSeasons,
@@ -27,11 +28,15 @@ export const revalidate = 300;
 type FinanceMode = "overview" | "teams" | "players";
 
 const defaultFinanceSeason = UPCOMING_SEASON as ContractSeason;
-const entityColumnWidth = "290px";
-const compactColumnWidth = "94px";
-const moneyColumnWidth = "126px";
-const salaryColumnWidth = "126px";
-const playerFinanceMinWidth = "1920px";
+const entityColumnWidth = tableColumnWidths.entity;
+const compactColumnWidth = tableColumnWidths.compact;
+const contractSummaryColumnWidth = tableColumnWidths.summary;
+const moneyColumnWidth = tableColumnWidths.money;
+const salaryColumnWidth = tableColumnWidths.salary;
+const actionColumnWidth = tableColumnWidths.action;
+const divisionColumnWidth = tableColumnWidths.division;
+const guaranteedColumnWidth = tableColumnWidths.guaranteed;
+const playerFinanceMinWidth = "2112px";
 const teamFinanceMinWidth = "1320px";
 const pastSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastSalaryCellClassName = "bg-slate-100/60 text-slate-500";
@@ -150,7 +155,7 @@ function financeHref(mode: Exclude<FinanceMode, "overview">, season: ContractSea
   return `/finances?${params.toString()}`;
 }
 
-function identityColumn(key: string, label: string, width = compactColumnWidth, group = "Profile"): StatTableColumn {
+function identityColumn(key: string, label: string, width: string = compactColumnWidth, group = "Profile"): StatTableColumn {
   return { key, label, width, group, align: "center" };
 }
 
@@ -177,14 +182,14 @@ function playerFinanceColumns(selectedSeason: ContractSeason): StatTableColumn[]
     { key: "player", label: "Player", group: "Profile", hrefKey: "href", width: entityColumnWidth, truncate: true },
     identityColumn("team", "Team"),
     identityColumn("pos", "Pos"),
-    { key: "originalYears", label: "Orig Yrs", group: "Contract Summary", align: "center", width: compactColumnWidth, sortValueKey: "originalYearsSort" },
-    { key: "remainingYears", label: "Time Left", group: "Contract Summary", align: "center", width: compactColumnWidth, sortValueKey: "remainingYearsSort", subValueKey: "remainingYearsSub", subValueClassName: "text-rose-700", valueClassNameKey: "remainingYearsClass" },
+    { key: "originalYears", label: "Orig Yrs", group: "Contract Summary", align: "center", width: contractSummaryColumnWidth, sortValueKey: "originalYearsSort" },
+    { key: "remainingYears", label: "Time Left", group: "Contract Summary", align: "center", width: contractSummaryColumnWidth, sortValueKey: "remainingYearsSort", subValueKey: "remainingYearsSub", subValueClassName: "text-rose-700", valueClassNameKey: "remainingYearsClass" },
     { key: "originalTotal", label: "Orig Total", group: "Contract Summary", align: "center", width: moneyColumnWidth, sortValueKey: "originalTotalSort" },
     { key: "remainingTotal", label: "Money Left", group: "Contract Summary", align: "center", width: moneyColumnWidth, sortValueKey: "remainingTotalSort" },
     { key: "originalAav", label: "Orig AAV", group: "Contract Summary", align: "center", width: moneyColumnWidth, sortValueKey: "originalAavSort" },
     { key: "currentAav", label: "Current AAV", group: "Contract Summary", align: "center", width: moneyColumnWidth, sortValueKey: "currentAavSort" },
     ...contractSeasons.map((contractSeason) => contractSalaryColumn(contractSeason, selectedSeason)),
-    { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: "150px", sortValueKey: "guaranteedSort", valueClassNameKey: "guaranteedClass" },
+    { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: guaranteedColumnWidth, sortValueKey: "guaranteedSort", valueClassNameKey: "guaranteedClass" },
   ];
 }
 
@@ -200,12 +205,12 @@ const teamFinanceColumns: StatTableColumn[] = [
     width: entityColumnWidth,
     truncate: true,
   },
-  { key: "breakdown", label: "Breakdown", group: "Team", align: "center", width: "140px", hrefKey: "breakdownHref", hrefVariant: "button", valueClassNameKey: "breakdownClass" },
+  { key: "breakdown", label: "Breakdown", group: "Team", align: "center", width: actionColumnWidth, hrefKey: "breakdownHref", hrefVariant: "button", valueClassNameKey: "breakdownClass" },
   identityColumn("conf", "Conf", compactColumnWidth, "Team"),
-  identityColumn("division", "Division", "120px", "Team"),
+  identityColumn("division", "Division", divisionColumnWidth, "Team"),
   { key: "contractedPlayers", label: "Players", group: "Roster Money", align: "center", width: compactColumnWidth, sortValueKey: "contractedPlayersSort" },
   { key: "payroll", label: "Payroll", group: "Roster Money", align: "center", width: moneyColumnWidth, sortValueKey: "payrollSort", subValueKey: "payrollCapPct" },
-  { key: "capPosition", label: "Cap Position", group: "Roster Money", align: "center", width: "140px", sortValueKey: "capPositionSort", subValueKey: "capLineSub", subValueClassName: "text-slate-500" },
+  { key: "capPosition", label: "Cap Position", group: "Roster Money", align: "center", width: actionColumnWidth, sortValueKey: "capPositionSort", subValueKey: "capLineSub", subValueClassName: "text-slate-500" },
   { key: "topSalary", label: "Top Salary", group: "Top Contract", align: "center", width: moneyColumnWidth, sortValueKey: "topSalarySort", subValueKey: "topPlayer", subValueClassName: "text-signal" },
   { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: moneyColumnWidth, sortValueKey: "guaranteedSort" },
 ];
@@ -433,10 +438,10 @@ function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason, sele
 }
 
 const teamBreakdownColumns: StatTableColumn[] = [
-  { key: "season", label: "Season", group: "Cap Situation", align: "center", width: "110px" },
+  { key: "season", label: "Season", group: "Cap Situation", align: "center", width: contractSummaryColumnWidth },
   { key: "players", label: "Players", group: "Cap Situation", align: "center", width: compactColumnWidth, sortValueKey: "playersSort" },
   { key: "payroll", label: "Payroll", group: "Cap Situation", align: "center", width: moneyColumnWidth, sortValueKey: "payrollSort", subValueKey: "payrollCapPct" },
-  { key: "capPosition", label: "Cap Position", group: "Cap Situation", align: "center", width: "140px", sortValueKey: "capPositionSort", subValueKey: "capLineSub", subValueClassName: "text-slate-500" },
+  { key: "capPosition", label: "Cap Position", group: "Cap Situation", align: "center", width: actionColumnWidth, sortValueKey: "capPositionSort", subValueKey: "capLineSub", subValueClassName: "text-slate-500" },
   { key: "topSalary", label: "Top Salary", group: "Top Contract", align: "center", width: moneyColumnWidth, sortValueKey: "topSalarySort", subValueKey: "topPlayer", subValueClassName: "text-signal" },
   { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: moneyColumnWidth, sortValueKey: "guaranteedSort" },
 ];

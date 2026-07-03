@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
+import { tableColumnWidths } from "@/components/ui/tableSizing";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
 import { nbaTeams } from "@/lib/data/nbaTeams";
 import {
@@ -31,14 +32,15 @@ const advancedSortMetrics = ["pie", "ts_pct", "efg_pct", "usage_rate", "ast_pct"
 const contractSummarySortMetrics = ["original_years", "remaining_years", "original_total", "remaining_total", "original_aav", "current_aav", "original_contract", "current_contract"];
 const contractSortMetrics = ["selected_salary", ...contractSummarySortMetrics, "guaranteed", "player", "team", "position", ...contractSeasons.map((season) => `salary_${season.replace("-", "_")}`)];
 const primaryPositionOrder = ["PG", "SG", "SF", "PF", "C"];
-const entityColumnWidth = "290px";
-const secondaryColumnWidth = "86px";
-const contractSummaryColumnWidth = "112px";
-const contractMoneyColumnWidth = "124px";
-const contractSalaryColumnWidth = "126px";
-const standardTableMinWidth = "1752px";
-const advancedTableMinWidth = "1838px";
-const contractTableMinWidth = "2006px";
+const entityColumnWidth = tableColumnWidths.entity;
+const secondaryColumnWidth = tableColumnWidths.compact;
+const contractSummaryColumnWidth = tableColumnWidths.summary;
+const contractMoneyColumnWidth = tableColumnWidths.money;
+const contractSalaryColumnWidth = tableColumnWidths.salary;
+const contractGuaranteedColumnWidth = tableColumnWidths.guaranteed;
+const standardTableMinWidth = "1888px";
+const advancedTableMinWidth = "1982px";
+const contractTableMinWidth = "2112px";
 const pastContractSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastContractSalaryCellClassName = "bg-slate-100/60 text-slate-500";
 const teamPrimaryColorByAbbreviation = new Map(nbaTeams.map((team) => [team.abbreviation, team.primaryColor]));
@@ -189,7 +191,7 @@ function contractColumnsForSeason(selectedSeason: ContractSeason): StatTableColu
       label: "Guaranteed",
       group: "Guaranteed Money",
       align: "center",
-      width: "150px",
+      width: contractGuaranteedColumnWidth,
       sortValueKey: "guaranteedSort",
       valueClassNameKey: "guaranteedClass",
     },

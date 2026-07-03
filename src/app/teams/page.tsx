@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { TeamFilterForm } from "@/components/domain/TeamFilterForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
+import { tableColumnWidths } from "@/components/ui/tableSizing";
 import { listTeamSeasonSummaries, loadTeamSeasonSummaryFilters } from "@/lib/db/teamAnalytics.server";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
@@ -12,9 +13,9 @@ import { nbaTeamLogoUrl } from "@/lib/teamBranding";
 
 export const revalidate = 300;
 
-const entityColumnWidth = "290px";
-const secondaryColumnWidth = "86px";
-const teamTableMinWidth = "1322px";
+const entityColumnWidth = tableColumnWidths.entity;
+const secondaryColumnWidth = tableColumnWidths.compact;
+const teamTableMinWidth = "1418px";
 
 export const metadata: Metadata = {
   title: "NBA Teams",
