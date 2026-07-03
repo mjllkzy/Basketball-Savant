@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { currentTeamOverrideForPlayerSlug } from "@/lib/data/currentRoster";
-import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
+import { loadRuntimeFallbacks, loadRuntimeRosterProfiles, type RuntimePlayerFallback, type RuntimeRosterProfile } from "@/lib/data/runtimeFallbacks.server";
 import { nbaTeamByAbbreviation } from "@/lib/data/nbaTeams";
 import { DEFAULT_SEASON, UPCOMING_SEASON, parseSeason } from "@/lib/seasons";
 import { memoizeServer } from "@/lib/serverCache";
@@ -201,6 +201,15 @@ function playerLookup(players: RuntimePlayerFallback[]) {
   return new Map(players.map((player) => [player.player_slug, player]));
 }
 
+function rosterProfileLookup(players: RuntimeRosterProfile[]) {
+  const byNameTeam = new Map<string, RuntimeRosterProfile>();
+  for (const player of players) {
+    if (!player.team_abbreviation) continue;
+    byNameTeam.set(dealLookupKey(player.player_name, player.team_abbreviation), player);
+  }
+  return byNameTeam;
+}
+
 function normalizedContractName(value: string) {
   const asciiText = value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
   const tokens = asciiText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
@@ -373,9 +382,29 @@ function jsonRowToContract(row: ContractJsonRow, playersBySlug: Map<string, Runt
   };
 }
 
+function hydrateContractRosterProfile(row: PlayerContractRow, rosterProfilesByNameTeam: Map<string, RuntimeRosterProfile>): PlayerContractRow {
+  if (row.playerSlug && row.position) return row;
+
+  const profile = rosterProfilesByNameTeam.get(dealLookupKey(row.playerName, row.teamAbbreviation));
+  if (!profile) return row;
+
+  const teamAbbreviation = canonicalContractTeamAbbreviation(profile.team_abbreviation) || row.teamAbbreviation;
+  const team = teamByAbbreviation.get(teamAbbreviation);
+  return {
+    ...row,
+    playerSlug: row.playerSlug ?? profile.player_slug,
+    playerName: row.playerName || profile.player_name,
+    teamId: team?.id ?? profile.team_id ?? row.teamId,
+    teamAbbreviation,
+    historicalTeamId: row.historicalTeamId ?? team?.id ?? profile.team_id ?? null,
+    historicalTeamAbbreviation: row.historicalTeamAbbreviation ?? teamAbbreviation,
+    position: row.position ?? profile.position,
+  };
+}
+
 function positionMatches(rowPosition: string | null, requestedPosition?: string) {
   if (!requestedPosition) return true;
-  const positions = requestedPosition === "G" ? ["PG", "SG"] : requestedPosition === "F" ? ["SF", "PF"] : [requestedPosition];
+  const positions = requestedPosition === "G" ? ["PG", "SG", "G"] : requestedPosition === "F" ? ["SF", "PF", "F"] : [requestedPosition];
   return positions.includes(rowPosition ?? "");
 }
 
@@ -733,14 +762,19 @@ function filterAndPageContracts(rows: PlayerContractRow[], params: PlayerContrac
 }
 
 async function jsonFallback(params: PlayerContractParams): Promise<PlayerContractResult> {
-  const [source, runtime, dealLookup] = await Promise.all([
+  const [source, runtime, rosterProfiles, dealLookup] = await Promise.all([
     readFile(path.join(process.cwd(), "data", "raw", "player_contracts_2025_2031.json"), "utf8"),
     loadRuntimeFallbacks(),
+    loadRuntimeRosterProfiles(),
     loadContractDealLookup(),
   ]);
   const payload = JSON.parse(source) as ContractJsonPayload;
+  const rosterProfilesByNameTeam = rosterProfileLookup(rosterProfiles.players);
   const rows = dedupeContractRows(
-    attachContractDeals(payload.contracts.map((row) => jsonRowToContract(row, playerLookup(runtime.players))), dealLookup)
+    attachContractDeals(
+      payload.contracts.map((row) => hydrateContractRosterProfile(jsonRowToContract(row, playerLookup(runtime.players)), rosterProfilesByNameTeam)),
+      dealLookup,
+    )
       .map(hydrateContractAnnualData),
   );
   return filterAndPageContracts(rows, params, "json");
@@ -769,9 +803,15 @@ async function listPlayerContractsUncached(params: PlayerContractParams = {}): P
         ON player.player_slug = contract.player_slug
     `);
     if (!result) return jsonFallback(params);
-    const dealLookup = await loadContractDealLookup();
+    const [dealLookup, rosterProfiles] = await Promise.all([loadContractDealLookup(), loadRuntimeRosterProfiles()]);
+    const rosterProfilesByNameTeam = rosterProfileLookup(rosterProfiles.players);
     return filterAndPageContracts(
-      dedupeContractRows(attachContractDeals(result.rows.map(dbRowToContract), dealLookup).map(hydrateContractAnnualData)),
+      dedupeContractRows(
+        attachContractDeals(
+          result.rows.map(dbRowToContract).map((row) => hydrateContractRosterProfile(row, rosterProfilesByNameTeam)),
+          dealLookup,
+        ).map(hydrateContractAnnualData),
+      ),
       params,
       "postgres",
     );

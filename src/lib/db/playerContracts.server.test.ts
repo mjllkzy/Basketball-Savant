@@ -120,6 +120,27 @@ describe("player contract summaries", () => {
     }
   }, 15_000);
 
+  it("hydrates injured roster players from the official roster fallback", async () => {
+    const originalDatabaseUrl = process.env.DATABASE_URL;
+    await closeDatabasePool();
+    delete process.env.DATABASE_URL;
+
+    try {
+      const result = await listPlayerContracts({ season: "2025-26", teamId: "1610612745", q: "Fred VanVleet", all: true });
+
+      expect(result.rows.find((row) => row.playerName === "Fred VanVleet")).toMatchObject({
+        playerSlug: "fred-vanvleet",
+        teamId: "1610612745",
+        teamAbbreviation: "HOU",
+        position: "G",
+      });
+    } finally {
+      await closeDatabasePool();
+      if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = originalDatabaseUrl;
+    }
+  }, 15_000);
+
   it("switches contract roster context by selected season", () => {
     const offseasonSigningRow: PlayerContractRow = {
       sourceRank: 1,

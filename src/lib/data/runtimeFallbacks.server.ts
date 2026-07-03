@@ -98,7 +98,31 @@ export type RuntimeFallbacks = {
   teams: RuntimeTeamFallback[];
 };
 
+export type RuntimeRosterProfile = {
+  player_slug: string;
+  player_name: string;
+  team_id: string | null;
+  team_abbreviation: string | null;
+  position: string | null;
+  height: string | null;
+  weight: number | null;
+  age: number | null;
+  birth_date: string | null;
+  nba_player_id: string | null;
+};
+
+export type RuntimeRosterProfiles = {
+  metadata: {
+    generated_at: string;
+    source: string;
+    players: number;
+    teams: number;
+  };
+  players: RuntimeRosterProfile[];
+};
+
 let cachedFallbacks: Promise<RuntimeFallbacks> | null = null;
+let cachedRosterProfiles: Promise<RuntimeRosterProfiles> | null = null;
 
 export function loadRuntimeFallbacks() {
   if (!cachedFallbacks) {
@@ -106,4 +130,12 @@ export function loadRuntimeFallbacks() {
     cachedFallbacks = readFile(fallbackPath, "utf8").then((contents) => JSON.parse(contents) as RuntimeFallbacks);
   }
   return cachedFallbacks;
+}
+
+export function loadRuntimeRosterProfiles() {
+  if (!cachedRosterProfiles) {
+    const fallbackPath = path.join(process.cwd(), "src", "lib", "data", "generated", "roster-profiles.json");
+    cachedRosterProfiles = readFile(fallbackPath, "utf8").then((contents) => JSON.parse(contents) as RuntimeRosterProfiles);
+  }
+  return cachedRosterProfiles;
 }

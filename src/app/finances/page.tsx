@@ -392,7 +392,7 @@ function isSelectedSeasonTwoWay(row: PlayerContractRow, season: ContractSeason) 
 }
 
 function isSelectedSeasonNonRoster(row: PlayerContractRow, season: ContractSeason) {
-  return hasSelectedSeasonSalary(row, season) && (!row.position || hasNonRosterContractForSeason(row, season));
+  return hasSelectedSeasonSalary(row, season) && hasNonRosterContractForSeason(row, season);
 }
 
 function isSelectedSeasonStandardRosterCandidate(row: PlayerContractRow, season: ContractSeason) {
