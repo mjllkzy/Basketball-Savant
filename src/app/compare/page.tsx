@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight, GitCompare, Minus, Radar } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PercentileBar } from "@/components/ui/PercentileBar";
+import { tableColumnWidths, tableMinWidth } from "@/components/ui/tableSizing";
 import { comparisonRows, heightToInches, type ComparisonWinner } from "@/lib/comparison";
 import {
   listComparisonPlayerOptions,
@@ -17,6 +18,15 @@ import { formatPlayerHeight } from "@/lib/playerHeight";
 import { DEFAULT_SEASON, baseSeasonOptions, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
+
+const comparisonResultColumns = [
+  { key: "metric", width: tableColumnWidths.entity },
+  { key: "left", width: tableColumnWidths.wideText },
+  { key: "edge", width: tableColumnWidths.compact },
+  { key: "right", width: tableColumnWidths.wideText },
+] as const;
+
+const comparisonResultTableMinWidth = tableMinWidth(comparisonResultColumns);
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<RouteSearchParams> }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
@@ -110,7 +120,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           title="Compare"
           description="Separate workspaces for side-by-side player comparisons and role-based player similarity."
         />
-        <div className="grid min-h-[calc(100vh-280px)] gap-4 md:grid-cols-2">
+        <div className="grid min-h-[calc(100vh-280px)] gap-4 sm:grid-cols-2">
           <Link
             href="/compare?mode=compare"
             className="group relative isolate flex min-h-[420px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
@@ -202,28 +212,27 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           <PlayerCard profile={rightProfile} season={season} />
         </div>
         <div className="table-scroll mt-4 overflow-x-auto rounded border border-slate-200">
-          <table className="min-w-full table-fixed border-collapse bg-white text-sm">
+          <table className="w-full table-fixed border-collapse bg-white text-sm" style={comparisonResultTableMinWidth ? { minWidth: comparisonResultTableMinWidth } : undefined}>
             <colgroup>
-              <col className="w-[40%]" />
-              <col className="w-[22%]" />
-              <col className="w-[14%]" />
-              <col className="w-[24%]" />
+              {comparisonResultColumns.map((column) => (
+                <col key={column.key} style={{ width: column.width }} />
+              ))}
             </colgroup>
             <thead className="bg-slate-100 text-xs uppercase tracking-[0.08em] text-slate-600">
               <tr>
-                <th className="border-b border-slate-200 px-3 py-3 text-left font-black">Metric</th>
-                <th className="border-b border-slate-200 px-3 py-3 text-right font-black">{leftProfile.player.name}</th>
-                <th className="border-b border-slate-200 px-3 py-3 text-center font-black">Edge</th>
-                <th className="border-b border-slate-200 px-3 py-3 text-left font-black">{rightProfile.player.name}</th>
+                <th className="h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 py-3 text-left align-middle font-black">Metric</th>
+                <th className="h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 py-3 text-right align-middle font-black"><span className="block truncate">{leftProfile.player.name}</span></th>
+                <th className="h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 py-3 text-center align-middle font-black">Edge</th>
+                <th className="h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 py-3 text-left align-middle font-black"><span className="block truncate">{rightProfile.player.name}</span></th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={row.key} className="border-b border-slate-100 last:border-b-0">
-                  <td className="px-3 py-3 font-semibold text-ink">{row.metric.label}</td>
-                  <td className={`px-3 py-3 text-right tabular-nums ${row.winner === "left" ? "font-black text-emerald-700" : ""}`}>{formatMetric(row.key, row.leftValue)}</td>
-                  <td className="px-3 py-3 text-center"><WinnerIcon winner={row.winner} /></td>
-                  <td className={`px-3 py-3 text-left tabular-nums ${row.winner === "right" ? "font-black text-red-700" : ""}`}>{formatMetric(row.key, row.rightValue)}</td>
+                  <td className="h-14 overflow-hidden whitespace-nowrap px-3 py-3 align-middle font-semibold text-ink">{row.metric.label}</td>
+                  <td className={`h-14 overflow-hidden whitespace-nowrap px-3 py-3 text-right align-middle tabular-nums ${row.winner === "left" ? "font-black text-emerald-700" : ""}`}>{formatMetric(row.key, row.leftValue)}</td>
+                  <td className="h-14 overflow-hidden whitespace-nowrap px-3 py-3 text-center align-middle"><WinnerIcon winner={row.winner} /></td>
+                  <td className={`h-14 overflow-hidden whitespace-nowrap px-3 py-3 text-left align-middle tabular-nums ${row.winner === "right" ? "font-black text-red-700" : ""}`}>{formatMetric(row.key, row.rightValue)}</td>
                 </tr>
               ))}
             </tbody>

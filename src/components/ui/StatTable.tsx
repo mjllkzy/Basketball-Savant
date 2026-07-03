@@ -5,6 +5,7 @@ import Image from "next/image";
 import { flexRender, getCoreRowModel, useReactTable, type Row, type SortingState } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { compareStatTableValues, compareStatTableValuesForSort } from "@/lib/tableSorting";
+import { defaultTableColumnWidth, tableMinWidth } from "@/components/ui/tableSizing";
 
 export type StatTableColumn = {
   key: string;
@@ -142,15 +143,20 @@ export function StatTable({
     setSorting(initialSorting ?? []);
   }, [initialSorting]);
 
-  const hasColumnSizing = columns.some((column) => column.width || column.minWidth);
-  const hasColumnGroups = columns.some((column) => column.group);
-  const groups = useMemo(() => columnGroups(columns), [columns]);
+  const sizedColumns = useMemo(
+    () => columns.map((column) => column.width || column.minWidth ? column : { ...column, width: defaultTableColumnWidth(column) }),
+    [columns],
+  );
+  const effectiveMinWidth = minWidth ?? tableMinWidth(sizedColumns);
+  const hasColumnSizing = sizedColumns.some((column) => column.width || column.minWidth);
+  const hasColumnGroups = sizedColumns.some((column) => column.group);
+  const groups = useMemo(() => columnGroups(sizedColumns), [sizedColumns]);
   const sortedRows = useMemo(() => {
     if (sorting.length === 0) return rows;
 
     return rows.slice().sort((a, b) => {
       for (const sort of sorting) {
-        const column = columns.find((item) => item.key === sort.id);
+        const column = sizedColumns.find((item) => item.key === sort.id);
         const leftValue = column?.sortValueKey ? a[column.sortValueKey] : a[sort.id];
         const rightValue = column?.sortValueKey ? b[column.sortValueKey] : b[sort.id];
         const compared = compareStatTableValuesForSort(leftValue, rightValue, sort.desc ? "desc" : "asc", column?.sortOrder);
@@ -158,10 +164,10 @@ export function StatTable({
       }
       return 0;
     });
-  }, [columns, rows, sorting]);
+  }, [sizedColumns, rows, sorting]);
   const tableColumns = useMemo(
     () =>
-      columns.map((column) => ({
+      sizedColumns.map((column) => ({
         accessorKey: column.key,
         header: column.label,
         sortingFn: (rowA: Row<StatTableRow>, rowB: Row<StatTableRow>, columnId: string) =>
@@ -207,7 +213,7 @@ export function StatTable({
           return href ? <Link href={String(href)} className={hrefClassName}>{content}</Link> : content;
         }
       })),
-    [columns]
+    [sizedColumns]
   );
   const table = useReactTable({
     data: sortedRows,
@@ -222,11 +228,11 @@ export function StatTable({
     <div className="table-scroll overflow-x-auto rounded border border-slate-200 bg-white shadow-sm">
       <table
         className={`w-full min-w-full border-collapse text-sm ${layout === "fixed" ? "table-fixed" : ""}`}
-        style={minWidth ? { minWidth } : undefined}
+        style={effectiveMinWidth ? { minWidth: effectiveMinWidth } : undefined}
       >
         {hasColumnSizing ? (
           <colgroup>
-            {columns.map((column) => (
+            {sizedColumns.map((column) => (
               <col key={column.key} style={column.width || column.minWidth ? { width: column.width, minWidth: column.minWidth } : undefined} />
             ))}
           </colgroup>
@@ -249,9 +255,9 @@ export function StatTable({
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header, index) => {
-                const align = alignmentClasses(columns[index]?.align);
-                const groupBoundary = groupBoundaryClasses(columns, index);
-                const headerClassName = columns[index]?.headerClassName ?? "";
+                const align = alignmentClasses(sizedColumns[index]?.align);
+                const groupBoundary = groupBoundaryClasses(sizedColumns, index);
+                const headerClassName = sizedColumns[index]?.headerClassName ?? "";
                 return (
                   <th
                     key={header.id}
@@ -271,10 +277,10 @@ export function StatTable({
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
               {row.getVisibleCells().map((cell, index) => {
-                const column = columns[index];
+                const column = sizedColumns[index];
                 const align = alignmentClasses(column?.align);
-                const groupBoundary = groupBoundaryClasses(columns, index);
-                const accentStyle = rowAccentColorKey && (rowAccentColumnKey ?? columns[0]?.key) === column?.key
+                const groupBoundary = groupBoundaryClasses(sizedColumns, index);
+                const accentStyle = rowAccentColorKey && (rowAccentColumnKey ?? sizedColumns[0]?.key) === column?.key
                   ? rowAccentStyle(row.original[rowAccentColorKey])
                   : undefined;
                 const cellClassName = column?.cellClassName ?? "";

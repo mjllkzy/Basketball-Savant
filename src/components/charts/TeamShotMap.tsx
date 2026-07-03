@@ -1,12 +1,27 @@
 import type { Shot } from "@/lib/types";
 import { BasketballCourt, courtPoint } from "@/components/charts/BasketballCourt";
 import { ShotZoneLayer, shotZoneStats } from "@/components/charts/ShotZoneLayer";
+import { tableColumnWidths, tableMinWidth } from "@/components/ui/tableSizing";
 import { formatMetric } from "@/lib/metrics/format";
 
 function sampleShots(shots: Shot[], maxShots: number) {
   if (shots.length <= maxShots) return shots;
   const step = shots.length / maxShots;
   return Array.from({ length: maxShots }, (_, index) => shots[Math.floor(index * step)]);
+}
+
+const zoneSummaryColumns = [
+  { key: "zone", label: "Zone", width: tableColumnWidths.text, align: "left" },
+  { key: "frequency", label: "Freq", width: tableColumnWidths.compact, align: "right" },
+  { key: "fg", label: "FG%", width: tableColumnWidths.compact, align: "right" },
+  { key: "efg", label: "eFG%", width: tableColumnWidths.compact, align: "right" },
+] as const;
+
+const zoneSummaryTableMinWidth = tableMinWidth(zoneSummaryColumns);
+
+function alignClass(align: typeof zoneSummaryColumns[number]["align"]) {
+  if (align === "right") return "text-right tabular-nums";
+  return "text-left";
 }
 
 export function TeamShotMap({ shots, maxShots = 650 }: { shots: Shot[]; maxShots?: number }) {
@@ -74,25 +89,31 @@ export function TeamShotMap({ shots, maxShots = 650 }: { shots: Shot[]; maxShots
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse text-sm">
+            <table className="w-full table-fixed border-collapse text-sm" style={zoneSummaryTableMinWidth ? { minWidth: zoneSummaryTableMinWidth } : undefined}>
+              <colgroup>
+                {zoneSummaryColumns.map((column) => (
+                  <col key={column.key} style={{ width: column.width }} />
+                ))}
+              </colgroup>
               <thead className="bg-slate-100 text-xs uppercase tracking-widest text-slate-600">
                 <tr>
-                  <th className="border-b border-slate-200 px-3 py-2 text-left">Zone</th>
-                  <th className="border-b border-slate-200 px-3 py-2 text-right">Freq</th>
-                  <th className="border-b border-slate-200 px-3 py-2 text-right">FG%</th>
-                  <th className="border-b border-slate-200 px-3 py-2 text-right">eFG%</th>
+                  {zoneSummaryColumns.map((column) => (
+                    <th key={column.key} className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 py-2 align-middle font-black ${alignClass(column.align)}`}>
+                      <span className="block truncate">{column.label}</span>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {stats.map((stat) => (
                   <tr key={stat.zone} className="border-b border-slate-100">
-                    <td className="px-3 py-2 font-bold text-ink">{stat.zone}</td>
-                    <td className="px-3 py-2 text-right font-semibold text-slate-700">
+                    <td className="h-14 overflow-hidden whitespace-nowrap px-3 py-2 align-middle font-bold text-ink">{stat.zone}</td>
+                    <td className="h-14 overflow-hidden whitespace-nowrap px-3 py-2 text-right align-middle font-semibold tabular-nums text-slate-700">
                       {formatMetric("usage_rate", stat.attemptShare)}
                       <div className="text-[11px] font-bold text-slate-400">{stat.attempts.toLocaleString()}</div>
                     </td>
-                    <td className="px-3 py-2 text-right font-semibold text-slate-700">{formatMetric("fg_pct", stat.fgPct)}</td>
-                    <td className="px-3 py-2 text-right font-black text-signal">{formatMetric("efg_pct", stat.efgPct)}</td>
+                    <td className="h-14 overflow-hidden whitespace-nowrap px-3 py-2 text-right align-middle font-semibold tabular-nums text-slate-700">{formatMetric("fg_pct", stat.fgPct)}</td>
+                    <td className="h-14 overflow-hidden whitespace-nowrap px-3 py-2 text-right align-middle font-black tabular-nums text-signal">{formatMetric("efg_pct", stat.efgPct)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { BasketballCourt, courtPoint } from "@/components/charts/BasketballCourt";
+import { tableColumnWidths, tableMinWidth } from "@/components/ui/tableSizing";
 
 export type ShotSearchRow = {
   id: string;
@@ -32,42 +33,73 @@ export type ShotSearchRow = {
   possessionId: string;
 };
 
+type ShotSearchColumn = {
+  key: string;
+  label: string;
+  width: string;
+  align?: "left" | "right" | "center";
+  render: (row: ShotSearchRow) => ReactNode;
+};
+
+const shotSearchColumns: ShotSearchColumn[] = [
+  { key: "date", label: "Date", width: tableColumnWidths.summary, render: (row) => row.date },
+  { key: "game", label: "Game", width: tableColumnWidths.text, render: (row) => row.game },
+  { key: "quarter", label: "Q", width: tableColumnWidths.narrow, align: "center", render: (row) => row.quarter },
+  { key: "clock", label: "Clock", width: tableColumnWidths.compact, align: "center", render: (row) => row.clock },
+  { key: "player", label: "Player", width: tableColumnWidths.entity, render: (row) => <span className="font-bold text-signal">{row.player}</span> },
+  { key: "team", label: "Team", width: tableColumnWidths.compact, align: "center", render: (row) => row.team },
+  { key: "opponent", label: "Opp", width: tableColumnWidths.compact, align: "center", render: (row) => row.opponent },
+  { key: "playType", label: "Play Type", width: tableColumnWidths.text, render: (row) => row.playType },
+  { key: "shotZone", label: "Zone", width: tableColumnWidths.text, render: (row) => row.shotZone },
+  { key: "shotType", label: "Type", width: tableColumnWidths.text, render: (row) => row.shotType },
+  { key: "defender", label: "Defender", width: tableColumnWidths.wideText, render: (row) => row.defender },
+  { key: "defenderDistance", label: "Def Dist", width: tableColumnWidths.compact, align: "right", render: (row) => row.defenderDistance },
+  { key: "dribbles", label: "Drib", width: tableColumnWidths.compact, align: "right", render: (row) => row.dribbles },
+  { key: "touchTime", label: "Touch", width: tableColumnWidths.compact, align: "right", render: (row) => row.touchTime },
+  { key: "shotClock", label: "Clock", width: tableColumnWidths.compact, align: "right", render: (row) => row.shotClock },
+  { key: "xfg", label: "xFG%", width: tableColumnWidths.compact, align: "right", render: (row) => row.xfg },
+  { key: "xpts", label: "xPTS", width: tableColumnWidths.compact, align: "right", render: (row) => row.xpts },
+  { key: "result", label: "Result", width: tableColumnWidths.compact, render: (row) => <span className={`font-black ${row.made ? "text-make" : "text-miss"}`}>{row.result}</span> },
+  { key: "points", label: "PTS", width: tableColumnWidths.compact, align: "right", render: (row) => row.points },
+  { key: "ame", label: "A-xE", width: tableColumnWidths.compact, align: "right", render: (row) => row.ame },
+];
+
+const shotSearchTableMinWidth = tableMinWidth(shotSearchColumns);
+
+function alignClass(align: ShotSearchColumn["align"]) {
+  if (align === "right") return "text-right tabular-nums";
+  if (align === "center") return "text-center tabular-nums";
+  return "text-left";
+}
+
 export function ShotSearchResults({ rows }: { rows: ShotSearchRow[] }) {
   const [selected, setSelected] = useState<ShotSearchRow | null>(null);
   return (
     <>
       <div className="table-scroll overflow-x-auto rounded border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-[1320px] border-collapse text-sm">
+        <table className="w-full table-fixed border-collapse text-sm" style={shotSearchTableMinWidth ? { minWidth: shotSearchTableMinWidth } : undefined}>
+          <colgroup>
+            {shotSearchColumns.map((column) => (
+              <col key={column.key} style={{ width: column.width }} />
+            ))}
+          </colgroup>
           <thead className="bg-slate-100 text-xs uppercase tracking-[0.08em] text-slate-600">
             <tr>
-              {["Date", "Game", "Q", "Clock", "Player", "Team", "Opp", "Play Type", "Zone", "Type", "Defender", "Def Dist", "Drib", "Touch", "Clock", "xFG%", "xPTS", "Result", "PTS", "A-xE"].map((heading) => (
-                <th key={heading} className="border-b border-slate-200 px-3 py-2 text-left font-black">{heading}</th>
+              {shotSearchColumns.map((column) => (
+                <th key={column.key} className={`h-11 overflow-hidden whitespace-nowrap border-b border-slate-200 px-3 py-2 align-middle font-black ${alignClass(column.align)}`}>
+                  <span className="block truncate">{column.label}</span>
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} onClick={() => setSelected(row)} className="cursor-pointer border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
-                <td className="px-3 py-2">{row.date}</td>
-                <td className="px-3 py-2">{row.game}</td>
-                <td className="px-3 py-2">{row.quarter}</td>
-                <td className="px-3 py-2">{row.clock}</td>
-                <td className="px-3 py-2 font-bold text-signal">{row.player}</td>
-                <td className="px-3 py-2">{row.team}</td>
-                <td className="px-3 py-2">{row.opponent}</td>
-                <td className="px-3 py-2">{row.playType}</td>
-                <td className="px-3 py-2">{row.shotZone}</td>
-                <td className="px-3 py-2">{row.shotType}</td>
-                <td className="px-3 py-2">{row.defender}</td>
-                <td className="px-3 py-2 text-right">{row.defenderDistance}</td>
-                <td className="px-3 py-2 text-right">{row.dribbles}</td>
-                <td className="px-3 py-2 text-right">{row.touchTime}</td>
-                <td className="px-3 py-2 text-right">{row.shotClock}</td>
-                <td className="px-3 py-2 text-right">{row.xfg}</td>
-                <td className="px-3 py-2 text-right">{row.xpts}</td>
-                <td className={`px-3 py-2 font-black ${row.made ? "text-make" : "text-miss"}`}>{row.result}</td>
-                <td className="px-3 py-2 text-right">{row.points}</td>
-                <td className="px-3 py-2 text-right">{row.ame}</td>
+                {shotSearchColumns.map((column) => (
+                  <td key={column.key} className={`h-14 overflow-hidden whitespace-nowrap px-3 py-2 align-middle ${alignClass(column.align)}`}>
+                    {column.render(row)}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
