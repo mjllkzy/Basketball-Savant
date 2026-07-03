@@ -10,6 +10,7 @@ import {
   contractDealSummary,
   contractSalarySortValue,
   freeAgencyStatusForSeason,
+  hasTwoWayContractForSeason,
   listPlayerContracts,
   selectActiveContractDeal,
   summarizeTotalRemainingContract,
@@ -151,6 +152,8 @@ function contractColumnsForSeason(selectedSeason: ContractSeason): StatTableColu
       sortValueKey: "remaining_yearsSort",
       subValueKey: "remaining_yearsSub",
       subValueClassName: "text-rose-700",
+      noteValueKey: "remaining_yearsNote",
+      noteValueClassName: "text-cyan-700",
       valueClassNameKey: "remaining_yearsClass",
     },
     {
@@ -296,6 +299,7 @@ const contractLegend = [
   { label: "Team option", className: "border-sky-200 bg-sky-50 text-sky-700" },
   { label: "Mutual option", className: "border-violet-200 bg-violet-50 text-violet-700" },
   { label: "Non/partial guarantee", className: "border-rose-200 bg-rose-50 text-rose-700" },
+  { label: "Two-way", className: "border-cyan-200 bg-cyan-50 text-cyan-700" },
   { label: "Details pending", className: "border-slate-200 bg-slate-50 text-slate-600" },
 ];
 
@@ -352,6 +356,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         const originalContract = contractDealSummary(activeDeal) ?? summarizeContractSalaries(row.salaryBySeason);
         const currentContract = summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, contractSeason);
         const freeAgencyStatus = currentContract ? null : freeAgencyStatusForSeason(row.contractDeals, contractSeason);
+        const twoWayContract = hasTwoWayContractForSeason(row, contractSeason);
         const base = {
           player: row.playerName,
           href: row.playerSlug ? playerHref(row.playerSlug, seasonType, season) : undefined,
@@ -362,6 +367,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
           original_yearsSort: originalContract?.years ?? null,
           remaining_years: currentContract ? formatContractYears(currentContract.years) : freeAgencyStatus ? "0 yrs" : "--",
           remaining_yearsSub: freeAgencyStatus ?? "",
+          remaining_yearsNote: twoWayContract ? "Two-way" : "",
           remaining_yearsSort: currentContract?.years ?? (freeAgencyStatus ? 0 : null),
           remaining_yearsClass: freeAgencyStatus ? "text-rose-700" : "",
           original_total: formatMoney(originalContract?.total),

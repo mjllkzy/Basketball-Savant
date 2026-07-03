@@ -469,6 +469,37 @@ export function selectActiveContractDeal(deals: ContractDeal[], season: Contract
   return activeDeals[0] ?? null;
 }
 
+function activeContractDealsForSeason(deals: ContractDeal[], season: ContractSeason) {
+  const year = seasonStartYear(season);
+  return deals.filter((deal) => deal.startYear <= year && deal.endYear >= year);
+}
+
+function contractDealSearchText(deal: ContractDeal | null | undefined) {
+  return `${deal?.label ?? ""} ${deal?.signedUsing ?? ""}`.toLowerCase();
+}
+
+export function isTwoWayContractDeal(deal: ContractDeal | null | undefined) {
+  return /\btwo[-\s]?way\b/.test(contractDealSearchText(deal));
+}
+
+export function hasTwoWayContractForSeason(row: PlayerContractRow, season: ContractSeason) {
+  return activeContractDealsForSeason(row.contractDeals, season).some(isTwoWayContractDeal);
+}
+
+export function isNonRosterContractDeal(deal: ContractDeal | null | undefined) {
+  return /\b10-day\b|hardship|exhibit\s*10|training camp|camp invite|summer/.test(contractDealSearchText(deal));
+}
+
+export function hasNonRosterContractForSeason(row: PlayerContractRow, season: ContractSeason) {
+  const activeDeals = activeContractDealsForSeason(row.contractDeals, season);
+  if (activeDeals.length === 0) return false;
+
+  const selectedDeal = selectActiveContractDeal(row.contractDeals, season);
+  if (selectedDeal && isNonRosterContractDeal(selectedDeal)) return true;
+
+  return activeDeals.every(isNonRosterContractDeal);
+}
+
 export function selectNextContractDeal(deals: ContractDeal[], season: ContractSeason) {
   const year = seasonStartYear(season);
   const nextDeals = deals

@@ -9,6 +9,8 @@ import {
   contractSalarySortValue,
   contractSummarySortValue,
   freeAgencyStatusForSeason,
+  hasNonRosterContractForSeason,
+  hasTwoWayContractForSeason,
   listPlayerContracts,
   selectActiveContractDeal,
   selectNextContractDeal,
@@ -484,6 +486,96 @@ describe("player contract summaries", () => {
     expect(freeAgencyStatusForSeason([unrestrictedDeal], "2026-27")).toBe("Unrestricted FA");
     expect(freeAgencyStatusForSeason([restrictedDeal], "2026-27")).toBe("Restricted FA");
     expect(freeAgencyStatusForSeason([activeDeal, unrestrictedDeal], "2026-27")).toBeNull();
+  });
+
+  it("identifies active two-way contracts for the selected season", () => {
+    const twoWayDeal: ContractDeal = {
+      source: "Spotrac",
+      sourceUrl: null,
+      label: "Two-Way Contract",
+      startYear: 2025,
+      endYear: 2025,
+      years: 1,
+      total: 600_000,
+      averageAnnualValue: 600_000,
+      guaranteedAtSign: null,
+      totalGuaranteed: null,
+      freeAgent: "UFA",
+      signedUsing: "Two-Way",
+      pending: false,
+    };
+    const row: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "player",
+      playerName: "Player",
+      teamId: "TST",
+      teamAbbreviation: "TST",
+      historicalTeamId: null,
+      historicalTeamAbbreviation: null,
+      position: "G",
+      salaryBySeason: { "2025-26": 600_000 },
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: null,
+      needsFollowup: false,
+      contractDeals: [twoWayDeal],
+    };
+
+    expect(hasTwoWayContractForSeason(row, "2025-26")).toBe(true);
+    expect(hasTwoWayContractForSeason(row, "2026-27")).toBe(false);
+    expect(hasNonRosterContractForSeason(row, "2025-26")).toBe(false);
+  });
+
+  it("identifies short-term non-roster contract rows without mislabeling standard active deals", () => {
+    const tenDayDeal: ContractDeal = {
+      source: "Spotrac",
+      sourceUrl: null,
+      label: "10-Day Contract",
+      startYear: 2025,
+      endYear: 2025,
+      years: 1,
+      total: 120_000,
+      averageAnnualValue: 120_000,
+      guaranteedAtSign: null,
+      totalGuaranteed: null,
+      freeAgent: "UFA",
+      signedUsing: "10-Day",
+      pending: false,
+    };
+    const standardDeal: ContractDeal = {
+      source: "Spotrac",
+      sourceUrl: null,
+      label: "Veteran Contract",
+      startYear: 2025,
+      endYear: 2026,
+      years: 2,
+      total: 4_000_000,
+      averageAnnualValue: 2_000_000,
+      guaranteedAtSign: 4_000_000,
+      totalGuaranteed: 4_000_000,
+      freeAgent: "UFA",
+      signedUsing: "Minimum Salary Exception",
+      pending: false,
+    };
+    const baseRow: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "player",
+      playerName: "Player",
+      teamId: "TST",
+      teamAbbreviation: "TST",
+      historicalTeamId: null,
+      historicalTeamAbbreviation: null,
+      position: "G",
+      salaryBySeason: { "2025-26": 120_000 },
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: null,
+      needsFollowup: false,
+      contractDeals: [],
+    };
+
+    expect(hasNonRosterContractForSeason({ ...baseRow, contractDeals: [tenDayDeal] }, "2025-26")).toBe(true);
+    expect(hasNonRosterContractForSeason({ ...baseRow, contractDeals: [standardDeal, tenDayDeal] }, "2025-26")).toBe(false);
   });
 
   it("sorts free agents below real salaries using prior-year salary as a tie-breaker", () => {

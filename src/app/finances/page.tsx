@@ -12,6 +12,8 @@ import {
   contractDealSummary,
   contractSalarySortValue,
   freeAgencyStatusForSeason,
+  hasNonRosterContractForSeason,
+  hasTwoWayContractForSeason,
   listPlayerContracts,
   selectActiveContractDeal,
   summarizeContractSalaries,
@@ -42,6 +44,9 @@ const teamPrimaryColorByAbbreviation = new Map(nbaTeams.map((team) => [team.abbr
 const salaryCapBySeason: Partial<Record<ContractSeason, number>> = {
   "2025-26": 154_647_000,
   "2026-27": 164_961_000,
+};
+const standardRosterLimitBySeason: Partial<Record<ContractSeason, number>> = {
+  "2025-26": 15,
 };
 
 export const metadata: Metadata = {
@@ -181,7 +186,7 @@ function playerFinanceColumns(selectedSeason: ContractSeason): StatTableColumn[]
     identityColumn("team", "Team"),
     identityColumn("pos", "Pos"),
     { key: "originalYears", label: "Orig Yrs", group: "Contract Summary", align: "center", width: contractSummaryColumnWidth, sortValueKey: "originalYearsSort" },
-    { key: "remainingYears", label: "Time Left", group: "Contract Summary", align: "center", width: contractSummaryColumnWidth, sortValueKey: "remainingYearsSort", subValueKey: "remainingYearsSub", subValueClassName: "text-rose-700", valueClassNameKey: "remainingYearsClass" },
+    { key: "remainingYears", label: "Time Left", group: "Contract Summary", align: "center", width: contractSummaryColumnWidth, sortValueKey: "remainingYearsSort", subValueKey: "remainingYearsSub", subValueClassName: "text-rose-700", noteValueKey: "remainingYearsNote", noteValueClassName: "text-cyan-700", valueClassNameKey: "remainingYearsClass" },
     { key: "originalTotal", label: "Orig Total", group: "Contract Summary", align: "center", width: moneyColumnWidth, sortValueKey: "originalTotalSort" },
     { key: "remainingTotal", label: "Money Left", group: "Contract Summary", align: "center", width: moneyColumnWidth, sortValueKey: "remainingTotalSort" },
     { key: "originalAav", label: "Orig AAV", group: "Contract Summary", align: "center", width: moneyColumnWidth, sortValueKey: "originalAavSort" },
@@ -220,6 +225,7 @@ const contractLegend = [
   { label: "Team option", className: "border-sky-200 bg-sky-50 text-sky-700" },
   { label: "Mutual option", className: "border-violet-200 bg-violet-50 text-violet-700" },
   { label: "Non/partial guarantee", className: "border-rose-200 bg-rose-50 text-rose-700" },
+  { label: "Two-way", className: "border-cyan-200 bg-cyan-50 text-cyan-700" },
   { label: "Details pending", className: "border-slate-200 bg-slate-50 text-slate-600" },
 ];
 
@@ -332,6 +338,7 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
     const originalContract = contractDealSummary(activeDeal) ?? summarizeContractSalaries(row.salaryBySeason);
     const currentContract = summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, season);
     const freeAgencyStatus = currentContract ? null : freeAgencyStatusForSeason(row.contractDeals, season);
+    const twoWayContract = hasTwoWayContractForSeason(row, season);
     const base: StatTableRow = {
       player: row.playerName,
       href: playerHref(row, season),
@@ -342,6 +349,7 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
       originalYearsSort: originalContract?.years ?? null,
       remainingYears: currentContract ? formatContractYears(currentContract.years) : freeAgencyStatus ? "0 yrs" : "--",
       remainingYearsSub: freeAgencyStatus ?? "",
+      remainingYearsNote: twoWayContract ? "Two-way" : "",
       remainingYearsSort: currentContract?.years ?? (freeAgencyStatus ? 0 : null),
       remainingYearsClass: freeAgencyStatus ? "text-rose-700" : "",
       originalTotal: formatMoney(originalContract?.total),
@@ -378,8 +386,31 @@ function isSelectedSeasonBookOnly(row: PlayerContractRow, season: ContractSeason
   return hasSelectedSeasonSalary(row, season) && !row.playerSlug;
 }
 
+function isSelectedSeasonTwoWay(row: PlayerContractRow, season: ContractSeason) {
+  return hasSelectedSeasonSalary(row, season) && hasTwoWayContractForSeason(row, season);
+}
+
+function isSelectedSeasonNonRoster(row: PlayerContractRow, season: ContractSeason) {
+  return hasSelectedSeasonSalary(row, season) && (!row.position || hasNonRosterContractForSeason(row, season));
+}
+
+function isSelectedSeasonStandardRosterCandidate(row: PlayerContractRow, season: ContractSeason) {
+  return (
+    hasSelectedSeasonSalary(row, season) &&
+    !isSelectedSeasonBookOnly(row, season) &&
+    !isSelectedSeasonTwoWay(row, season) &&
+    !isSelectedSeasonNonRoster(row, season)
+  );
+}
+
 function isSelectedSeasonFreeAgent(row: PlayerContractRow, season: ContractSeason) {
   return !hasSelectedSeasonSalary(row, season) && Boolean(freeAgencyStatusForSeason(row.contractDeals, season));
+}
+
+function sortContractsBySeasonSalary(rows: PlayerContractRow[], season: ContractSeason) {
+  return rows
+    .slice()
+    .sort((left, right) => (contractSalarySortValue(right, season) ?? Number.NEGATIVE_INFINITY) - (contractSalarySortValue(left, season) ?? Number.NEGATIVE_INFINITY) || left.playerName.localeCompare(right.playerName));
 }
 
 function guaranteedSalaryForSeason(row: PlayerContractRow, season: ContractSeason) {
@@ -395,8 +426,19 @@ function guaranteedSalaryForSeason(row: PlayerContractRow, season: ContractSeaso
 function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: ContractSeason) {
   const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
   const activeContracts = contracts.filter((row) => hasSelectedSeasonSalary(row, season));
-  const rosteredContracts = activeContracts.filter((row) => !isSelectedSeasonBookOnly(row, season));
   const bookOnlyContracts = activeContracts.filter((row) => isSelectedSeasonBookOnly(row, season));
+  const twoWayContracts = activeContracts.filter((row) => !isSelectedSeasonBookOnly(row, season) && isSelectedSeasonTwoWay(row, season));
+  const explicitNonRosterContracts = activeContracts.filter(
+    (row) => !isSelectedSeasonBookOnly(row, season) && !isSelectedSeasonTwoWay(row, season) && isSelectedSeasonNonRoster(row, season),
+  );
+  const rosterCandidates = sortContractsBySeasonSalary(
+    activeContracts.filter((row) => isSelectedSeasonStandardRosterCandidate(row, season)),
+    season,
+  );
+  const standardRosterLimit = standardRosterLimitBySeason[season];
+  const rosteredContracts = standardRosterLimit ? rosterCandidates.slice(0, standardRosterLimit) : rosterCandidates;
+  const overflowNonRosterContracts = standardRosterLimit ? rosterCandidates.slice(standardRosterLimit) : [];
+  const nonRosterContracts = [...explicitNonRosterContracts, ...overflowNonRosterContracts];
   const payroll = activeContracts.reduce((sum, row) => sum + (row.salaryBySeason[season] ?? 0), 0);
   const guaranteed = activeContracts.reduce((sum, row) => sum + guaranteedSalaryForSeason(row, season), 0);
   const topContract = activeContracts
@@ -405,7 +447,7 @@ function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: C
   const topSalary = topContract?.salaryBySeason[season];
   const capPosition = formatCapPosition(payroll, season);
 
-  return { contracts, activeContracts, rosteredContracts, bookOnlyContracts, payroll, guaranteed, topContract, topSalary, capPosition };
+  return { contracts, activeContracts, rosteredContracts, bookOnlyContracts, twoWayContracts, nonRosterContracts, payroll, guaranteed, topContract, topSalary, capPosition };
 }
 
 function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason, selectedTeamId?: string): StatTableRow[] {
@@ -478,19 +520,19 @@ function teamBreakdownRows(rows: PlayerContractRow[], team: Team): StatTableRow[
 
 function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: PlayerContractRow[]; season: ContractSeason }) {
   const selectedSalarySort = contractSalaryKey(season);
-  const teamRows = rows
-    .filter((row) => row.teamAbbreviation === team.abbreviation)
-    .sort((left, right) => (contractSalarySortValue(right, season) ?? Number.NEGATIVE_INFINITY) - (contractSalarySortValue(left, season) ?? Number.NEGATIVE_INFINITY) || left.playerName.localeCompare(right.playerName));
-  const rosteredRows = teamRows.filter((row) => hasSelectedSeasonSalary(row, season) && !isSelectedSeasonBookOnly(row, season));
-  const bookOnlyRows = teamRows.filter((row) => isSelectedSeasonBookOnly(row, season));
+  const selectedSeasonSummary = teamContractsForSeason(rows, team, season);
+  const teamRows = sortContractsBySeasonSalary(rows.filter((row) => row.teamAbbreviation === team.abbreviation), season);
+  const rosteredRows = selectedSeasonSummary.rosteredContracts;
+  const twoWayRows = sortContractsBySeasonSalary(selectedSeasonSummary.twoWayContracts, season);
+  const nonRosterRows = sortContractsBySeasonSalary([...selectedSeasonSummary.nonRosterContracts, ...selectedSeasonSummary.bookOnlyContracts], season);
   const freeAgentRows = teamRows.filter((row) => isSelectedSeasonFreeAgent(row, season));
   const yearlyRows = teamBreakdownRows(rows, team);
   const financeColumns = playerFinanceColumns(season);
   const financeMinWidth = tableMinWidth(financeColumns);
   const playerRows = playerFinanceRows(rosteredRows, season);
-  const bookOnlyPlayerRows = playerFinanceRows(bookOnlyRows, season);
+  const twoWayPlayerRows = playerFinanceRows(twoWayRows, season);
+  const nonRosterPlayerRows = playerFinanceRows(nonRosterRows, season);
   const freeAgentPlayerRows = playerFinanceRows(freeAgentRows, season);
-  const selectedSeasonSummary = teamContractsForSeason(rows, team, season);
 
   return (
     <section id="team-breakdown" className="grid scroll-mt-6 gap-4 rounded border border-slate-200 bg-white p-4 shadow-sm">
@@ -536,15 +578,32 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
           rowAccentColumnKey="player"
         />
       </div>
-      {bookOnlyPlayerRows.length > 0 ? (
+      {twoWayPlayerRows.length > 0 ? (
         <div className="border-t border-slate-200 pt-4">
           <div className="mb-3">
-            <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} On-Books, Not Rostered</h3>
-            <p className="text-sm text-slate-600">Salary rows with no matched roster profile, separated from active rostered players while still counting toward tracked payroll.</p>
+            <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} Two-Way Contracts</h3>
+            <p className="text-sm text-slate-600">Two-way contracts are tagged separately and do not count toward the standard roster total.</p>
           </div>
           <StatTable
             columns={financeColumns}
-            rows={bookOnlyPlayerRows}
+            rows={twoWayPlayerRows}
+            layout="fixed"
+            minWidth={financeMinWidth}
+            initialSorting={[{ id: selectedSalarySort, desc: true }]}
+            rowAccentColorKey="teamAccent"
+            rowAccentColumnKey="player"
+          />
+        </div>
+      ) : null}
+      {nonRosterPlayerRows.length > 0 ? (
+        <div className="border-t border-slate-200 pt-4">
+          <div className="mb-3">
+            <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} On-Books, Not Rostered</h3>
+            <p className="text-sm text-slate-600">Salary rows outside the standard roster count, separated from active players while still counting toward tracked payroll.</p>
+          </div>
+          <StatTable
+            columns={financeColumns}
+            rows={nonRosterPlayerRows}
             layout="fixed"
             minWidth={financeMinWidth}
             initialSorting={[{ id: selectedSalarySort, desc: true }]}
