@@ -47,6 +47,7 @@ const salaryCapBySeason: Partial<Record<ContractSeason, number>> = {
 };
 const standardRosterLimitBySeason: Partial<Record<ContractSeason, number>> = {
   "2025-26": 15,
+  "2026-27": 15,
 };
 
 export const metadata: Metadata = {
