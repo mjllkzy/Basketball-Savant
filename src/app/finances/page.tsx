@@ -374,6 +374,10 @@ function hasSelectedSeasonSalary(row: PlayerContractRow, season: ContractSeason)
   return typeof row.salaryBySeason[season] === "number";
 }
 
+function isSelectedSeasonBookOnly(row: PlayerContractRow, season: ContractSeason) {
+  return hasSelectedSeasonSalary(row, season) && !row.playerSlug;
+}
+
 function isSelectedSeasonFreeAgent(row: PlayerContractRow, season: ContractSeason) {
   return !hasSelectedSeasonSalary(row, season) && Boolean(freeAgencyStatusForSeason(row.contractDeals, season));
 }
@@ -391,6 +395,8 @@ function guaranteedSalaryForSeason(row: PlayerContractRow, season: ContractSeaso
 function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: ContractSeason) {
   const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
   const activeContracts = contracts.filter((row) => hasSelectedSeasonSalary(row, season));
+  const rosteredContracts = activeContracts.filter((row) => !isSelectedSeasonBookOnly(row, season));
+  const bookOnlyContracts = activeContracts.filter((row) => isSelectedSeasonBookOnly(row, season));
   const payroll = activeContracts.reduce((sum, row) => sum + (row.salaryBySeason[season] ?? 0), 0);
   const guaranteed = activeContracts.reduce((sum, row) => sum + guaranteedSalaryForSeason(row, season), 0);
   const topContract = activeContracts
@@ -399,13 +405,13 @@ function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: C
   const topSalary = topContract?.salaryBySeason[season];
   const capPosition = formatCapPosition(payroll, season);
 
-  return { contracts, activeContracts, payroll, guaranteed, topContract, topSalary, capPosition };
+  return { contracts, activeContracts, rosteredContracts, bookOnlyContracts, payroll, guaranteed, topContract, topSalary, capPosition };
 }
 
 function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason, selectedTeamId?: string): StatTableRow[] {
   return nbaTeams
     .map((team) => {
-      const { activeContracts, payroll, guaranteed, topContract, topSalary, capPosition } = teamContractsForSeason(rows, team, season);
+      const { rosteredContracts, payroll, guaranteed, topContract, topSalary, capPosition } = teamContractsForSeason(rows, team, season);
       const isSelected = selectedTeamId === team.id;
       return {
         team: `${team.city} ${team.name}`,
@@ -419,8 +425,8 @@ function teamFinanceRows(rows: PlayerContractRow[], season: ContractSeason, sele
         conf: team.conference,
         division: team.division,
         teamAccent: teamAccentColor(team),
-        contractedPlayers: activeContracts.length,
-        contractedPlayersSort: activeContracts.length,
+        contractedPlayers: rosteredContracts.length,
+        contractedPlayersSort: rosteredContracts.length,
         payroll: formatMoney(payroll),
         payrollSort: payroll,
         payrollCapPct: formatSalaryCapShare(payroll, season),
@@ -450,11 +456,11 @@ const teamBreakdownMinWidth = tableMinWidth(teamBreakdownColumns);
 
 function teamBreakdownRows(rows: PlayerContractRow[], team: Team): StatTableRow[] {
   return contractSeasons.map((contractSeason) => {
-    const { activeContracts, payroll, guaranteed, topContract, topSalary, capPosition } = teamContractsForSeason(rows, team, contractSeason);
+    const { rosteredContracts, payroll, guaranteed, topContract, topSalary, capPosition } = teamContractsForSeason(rows, team, contractSeason);
     return {
       season: contractSeason,
-      players: activeContracts.length,
-      playersSort: activeContracts.length,
+      players: rosteredContracts.length,
+      playersSort: rosteredContracts.length,
       payroll: formatMoney(payroll),
       payrollSort: payroll,
       payrollCapPct: formatSalaryCapShare(payroll, contractSeason),
@@ -475,12 +481,14 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
   const teamRows = rows
     .filter((row) => row.teamAbbreviation === team.abbreviation)
     .sort((left, right) => (contractSalarySortValue(right, season) ?? Number.NEGATIVE_INFINITY) - (contractSalarySortValue(left, season) ?? Number.NEGATIVE_INFINITY) || left.playerName.localeCompare(right.playerName));
-  const rosteredRows = teamRows.filter((row) => hasSelectedSeasonSalary(row, season));
+  const rosteredRows = teamRows.filter((row) => hasSelectedSeasonSalary(row, season) && !isSelectedSeasonBookOnly(row, season));
+  const bookOnlyRows = teamRows.filter((row) => isSelectedSeasonBookOnly(row, season));
   const freeAgentRows = teamRows.filter((row) => isSelectedSeasonFreeAgent(row, season));
   const yearlyRows = teamBreakdownRows(rows, team);
   const financeColumns = playerFinanceColumns(season);
   const financeMinWidth = tableMinWidth(financeColumns);
   const playerRows = playerFinanceRows(rosteredRows, season);
+  const bookOnlyPlayerRows = playerFinanceRows(bookOnlyRows, season);
   const freeAgentPlayerRows = playerFinanceRows(freeAgentRows, season);
   const selectedSeasonSummary = teamContractsForSeason(rows, team, season);
 
@@ -495,7 +503,7 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
             <div className="text-xs font-black uppercase tracking-[0.16em] text-signal">Team Breakdown</div>
             <h2 className="text-2xl font-black tracking-normal text-ink">{team.city} {team.name}</h2>
             <p className="text-sm text-slate-600">
-              {formatMoney(selectedSeasonSummary.payroll)} tracked {selectedSeasonLabel(season)} payroll across {selectedSeasonSummary.activeContracts.length} rostered players.
+              {formatMoney(selectedSeasonSummary.payroll)} tracked {selectedSeasonLabel(season)} payroll across {selectedSeasonSummary.rosteredContracts.length} rostered players.
             </p>
           </div>
         </div>
@@ -528,6 +536,23 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
           rowAccentColumnKey="player"
         />
       </div>
+      {bookOnlyPlayerRows.length > 0 ? (
+        <div className="border-t border-slate-200 pt-4">
+          <div className="mb-3">
+            <h3 className="text-lg font-black tracking-normal text-ink">{selectedSeasonLabel(season)} On-Books, Not Rostered</h3>
+            <p className="text-sm text-slate-600">Salary rows with no matched roster profile, separated from active rostered players while still counting toward tracked payroll.</p>
+          </div>
+          <StatTable
+            columns={financeColumns}
+            rows={bookOnlyPlayerRows}
+            layout="fixed"
+            minWidth={financeMinWidth}
+            initialSorting={[{ id: selectedSalarySort, desc: true }]}
+            rowAccentColorKey="teamAccent"
+            rowAccentColumnKey="player"
+          />
+        </div>
+      ) : null}
       {freeAgentPlayerRows.length > 0 ? (
         <div className="border-t border-slate-200 pt-4">
           <div className="mb-3">
