@@ -20,7 +20,7 @@ import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 import { nbaTeamLogoUrl, teamAccentColor, teamTintStyle } from "@/lib/teamBranding";
 
 const comparisonResultColumns = [
-  { key: "metric", width: tableColumnWidths.entity },
+  { key: "metric", width: tableColumnWidths.text },
   { key: "left", width: tableColumnWidths.wideText },
   { key: "edge", width: tableColumnWidths.compact },
   { key: "right", width: tableColumnWidths.wideText },
