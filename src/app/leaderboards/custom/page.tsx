@@ -2,6 +2,7 @@ import { ExportCsvButton } from "@/components/ui/ExportCsvButton";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ShareUrlButton } from "@/components/ui/ShareUrlButton";
 import { StatTable } from "@/components/ui/StatTable";
+import { tableColumnWidths } from "@/components/ui/tableSizing";
 import { getCustomLeaderboardAnalytics } from "@/lib/db/customAnalytics.server";
 import { getMetric, metricRegistry } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
@@ -53,7 +54,7 @@ export default async function CustomLeaderboardPage({ searchParams }: { searchPa
           <StatTable
             columns={[
               { key: "rank", label: "Rk", align: "right" },
-              { key: "entity", label: entityType },
+              { key: "entity", label: entityType, width: tableColumnWidths.entity },
               { key: "team", label: "Team" },
               ...metricKeys.map((key) => ({ key, label: getMetric(key).shortLabel, align: "right" as const }))
             ]}

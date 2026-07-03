@@ -3,6 +3,7 @@ import { PlayerGameTrendChart, ScoringLeadersChart, TeamStyleMatrix, type Leader
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable } from "@/components/ui/StatTable";
+import { tableColumnWidths } from "@/components/ui/tableSizing";
 import { teamShotCacheAttempts } from "@/lib/data/teamShotCache";
 import { formatShortDate } from "@/lib/date";
 import { gameContextLabel, gameMatchupLabel, listGameAnalytics } from "@/lib/db/gameAnalytics.server";
@@ -196,7 +197,7 @@ export default async function VisualsPage({ searchParams }: { searchParams: Prom
           <TeamStyleMatrix data={teamStyleData} />
           <StatTable
             columns={[
-              { key: "team", label: "Team" },
+              { key: "team", label: "Team", width: tableColumnWidths.entity },
               { key: "pace", label: "Pace", align: "right" },
               { key: "efg", label: "eFG%", align: "right" },
               { key: "ortg", label: "ORtg", align: "right" },
