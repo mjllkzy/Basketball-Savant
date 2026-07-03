@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { closeDatabasePool } from "./client.server";
 import {
+  applyCurrentRosterContractOverlay,
   canonicalContractTeamAbbreviation,
   contractDealSummary,
   hydrateContractAnnualData,
   contractSalarySortValue,
   contractSummarySortValue,
   freeAgencyStatusForSeason,
+  listPlayerContracts,
   selectActiveContractDeal,
   selectNextContractDeal,
   summarizeContractSalaries,
@@ -22,6 +25,65 @@ describe("player contract summaries", () => {
     expect(canonicalContractTeamAbbreviation("PHO")).toBe("PHX");
     expect(canonicalContractTeamAbbreviation(" lal ")).toBe("LAL");
   });
+
+  it("applies current roster trade teams only to upcoming contract seasons", () => {
+    const milesBridgesRow: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "miles-bridges",
+      playerName: "Miles Bridges",
+      teamId: "1610612766",
+      teamAbbreviation: "CHA",
+      position: "SF",
+      salaryBySeason: {
+        "2025-26": 24_900_000,
+        "2026-27": 22_826_087,
+      },
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: 75_000_000,
+      needsFollowup: false,
+      contractDeals: [],
+    };
+
+    expect(applyCurrentRosterContractOverlay(milesBridgesRow, "2025-26")).toMatchObject({
+      teamId: "1610612766",
+      teamAbbreviation: "CHA",
+    });
+    expect(applyCurrentRosterContractOverlay(milesBridgesRow, "2026-27")).toMatchObject({
+      teamId: "1610612756",
+      teamAbbreviation: "PHX",
+    });
+  });
+
+  it("filters 2026-27 contracts by current trade team while preserving 2025-26 team context", async () => {
+    const originalDatabaseUrl = process.env.DATABASE_URL;
+    await closeDatabasePool();
+    delete process.env.DATABASE_URL;
+
+    try {
+      const [phoenixUpcoming, charlotteUpcoming, charlotteHistorical] = await Promise.all([
+        listPlayerContracts({ season: "2026-27", teamId: "1610612756", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2026-27", teamId: "1610612766", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2025-26", teamId: "1610612766", all: true, pageSize: 1000 }),
+      ]);
+
+      expect(phoenixUpcoming.rows.find((row) => row.playerSlug === "miles-bridges")).toMatchObject({
+        playerName: "Miles Bridges",
+        teamId: "1610612756",
+        teamAbbreviation: "PHX",
+      });
+      expect(charlotteUpcoming.rows.some((row) => row.playerSlug === "miles-bridges")).toBe(false);
+      expect(charlotteHistorical.rows.find((row) => row.playerSlug === "miles-bridges")).toMatchObject({
+        playerName: "Miles Bridges",
+        teamId: "1610612766",
+        teamAbbreviation: "CHA",
+      });
+    } finally {
+      await closeDatabasePool();
+      if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = originalDatabaseUrl;
+    }
+  }, 15_000);
 
   it("summarizes full and remaining contract salary schedules", () => {
     const salaries = {

@@ -43,11 +43,15 @@ describe("database-backed player directory", () => {
     const jerami = result.rows.find((row) => row.playerName === "Jerami Grant");
     const kris = result.rows.find((row) => row.playerName === "Kris Murray");
     const lamelo = result.rows.find((row) => row.playerName === "LaMelo Ball");
+    const miles = result.rows.find((row) => row.playerName === "Miles Bridges");
+    const naz = result.rows.find((row) => row.playerName === "Naz Reid");
 
     expect(ja?.teamAbbreviation).toBe("POR");
     expect(jerami?.teamAbbreviation).toBe("MEM");
     expect(kris?.teamAbbreviation).toBe("MEM");
-    expect(lamelo?.teamAbbreviation).toBe("CHA");
+    expect(lamelo?.teamAbbreviation).toBe("MIN");
+    expect(miles?.teamAbbreviation).toBe("PHX");
+    expect(naz?.teamAbbreviation).toBe("CHA");
     expect(ja?.games).toBe(0);
     expect(ja?.pts).toBeNull();
   }, 15_000);

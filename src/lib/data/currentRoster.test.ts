@@ -111,4 +111,27 @@ describe("current roster overlay", () => {
       pts: 8.9,
     });
   });
+
+  it("includes the NBA.com offseason trade ledger for major 2026-27 roster moves", () => {
+    expect(currentTeamOverrideForPlayerSlug("miles-bridges")).toMatchObject({
+      season: "2026-27",
+      fromTeamAbbreviation: "CHA",
+      toTeamAbbreviation: "PHX",
+    });
+    expect(currentTeamOverrideForPlayerSlug("lamelo-ball")).toMatchObject({
+      season: "2026-27",
+      fromTeamAbbreviation: "CHA",
+      toTeamAbbreviation: "MIN",
+    });
+    expect(currentTeamOverrideForPlayerSlug("naz-reid")).toMatchObject({
+      season: "2026-27",
+      fromTeamAbbreviation: "MIN",
+      toTeamAbbreviation: "CHA",
+    });
+    expect(currentTeamOverrideForPlayerSlug("jaylen-brown")).toMatchObject({
+      season: "2026-27",
+      fromTeamAbbreviation: "BOS",
+      toTeamAbbreviation: "PHI",
+    });
+  });
 });

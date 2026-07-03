@@ -1,8 +1,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { currentTeamOverrideForPlayerSlug } from "@/lib/data/currentRoster";
 import { loadRuntimeFallbacks, type RuntimePlayerFallback } from "@/lib/data/runtimeFallbacks.server";
 import { nbaTeamByAbbreviation } from "@/lib/data/nbaTeams";
-import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
+import { DEFAULT_SEASON, UPCOMING_SEASON, parseSeason } from "@/lib/seasons";
 import { memoizeServer } from "@/lib/serverCache";
 import { queryDatabase } from "./client.server";
 
@@ -374,6 +375,21 @@ function seasonStartYear(season: ContractSeason) {
   return Number(season.slice(0, 4));
 }
 
+export function applyCurrentRosterContractOverlay(row: PlayerContractRow, selectedSeason: ContractSeason): PlayerContractRow {
+  if (seasonStartYear(selectedSeason) < seasonStartYear(UPCOMING_SEASON as ContractSeason)) return row;
+  if (!row.playerSlug) return row;
+
+  const move = currentTeamOverrideForPlayerSlug(row.playerSlug);
+  if (!move) return row;
+
+  const team = teamByAbbreviation.get(move.toTeamAbbreviation);
+  return {
+    ...row,
+    teamId: team?.id ?? move.toTeamAbbreviation,
+    teamAbbreviation: move.toTeamAbbreviation,
+  };
+}
+
 function seasonFromStartYear(year: number) {
   return contractSeasons.find((season) => seasonStartYear(season) === year);
 }
@@ -631,7 +647,9 @@ function filterAndPageContracts(rows: PlayerContractRow[], params: PlayerContrac
   const sort = params.sort ?? "selected_salary";
   const order = params.order ?? (sort === "player" || sort === "team" || sort === "position" ? "asc" : "desc");
 
-  const filtered = rows
+  const rosterAdjustedRows = rows.map((row) => applyCurrentRosterContractOverlay(row, selectedSeason));
+
+  const filtered = rosterAdjustedRows
     .filter((row) => hasContractSeasonContext(row, selectedSeason))
     .filter((row) => !query || `${row.playerName} ${row.teamAbbreviation} ${row.position ?? ""}`.toLowerCase().includes(query))
     .filter((row) => !params.teamId || row.teamId === params.teamId || row.teamAbbreviation === params.teamId)

@@ -46,6 +46,9 @@ jobs:
           python -m py_compile scripts/ingest_nba_excel.py
           python -m py_compile scripts/import_player_contracts.py
           python -m py_compile scripts/sync_player_contract_options.py
+          python -m py_compile scripts/sync_current_roster_transactions.py
+          python -m py_compile scripts/validate_current_roster_transactions.py
+          python scripts/validate_current_roster_transactions.py
 
       - name: Test
         run: pnpm test

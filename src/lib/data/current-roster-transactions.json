@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "season": "2026-27",
+    "sourceLabel": "NBA.com offseason deals tracker",
+    "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
+    "updatedAt": "2026-07-03T14:14:56Z",
+    "description": "Persistent roster-impacting trade ledger for the upcoming season. Generated from explicit NBA.com trade additions/departures and validated against local player/team data."
+  },
+  "transactions": [
+    {
+      "id": "nba-offseason-deals-2026-trades",
+      "season": "2026-27",
+      "type": "trade",
+      "officialDate": "2026-07-03",
+      "sourceLabel": "NBA.com offseason deals tracker",
+      "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
+      "moves": [
+        {
+          "playerSlug": "aj-johnson",
+          "playerName": "AJ Johnson",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "DAL",
+          "toTeamAbbreviation": "MEM"
+        },
+        {
+          "playerSlug": "aaron-wiggins",
+          "playerName": "Aaron Wiggins",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "OKC",
+          "toTeamAbbreviation": "ATL"
+        },
+        {
+          "playerSlug": "bobby-portis",
+          "playerName": "Bobby Portis",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIL",
+          "toTeamAbbreviation": "MIA"
+        },
+        {
+          "playerSlug": "brandon-ingram",
+          "playerName": "Brandon Ingram",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "TOR",
+          "toTeamAbbreviation": "LAC"
+        },
+        {
+          "playerSlug": "devin-carter",
+          "playerName": "Devin Carter",
+          "nbaPlayerId": "1642269",
+          "fromTeamAbbreviation": "SAC",
+          "toTeamAbbreviation": "ATL"
+        },
+        {
+          "playerSlug": "giannis-antetokounmpo",
+          "playerName": "Giannis Antetokounmpo",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIL",
+          "toTeamAbbreviation": "MIA"
+        },
+        {
+          "playerSlug": "gradey-dick",
+          "playerName": "Gradey Dick",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "TOR",
+          "toTeamAbbreviation": "LAC"
+        },
+        {
+          "playerSlug": "grayson-allen",
+          "playerName": "Grayson Allen",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "PHX",
+          "toTeamAbbreviation": "CHA"
+        },
+        {
+          "playerSlug": "isaiah-joe",
+          "playerName": "Isaiah Joe",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "OKC",
+          "toTeamAbbreviation": "DET"
+        },
+        {
+          "playerSlug": "ja-morant",
+          "playerName": "Ja Morant",
+          "nbaPlayerId": "1629630",
+          "fromTeamAbbreviation": "MEM",
+          "toTeamAbbreviation": "POR"
+        },
+        {
+          "playerSlug": "jaime-jaquez-jr",
+          "playerName": "Jaime Jaquez Jr.",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIA",
+          "toTeamAbbreviation": "MIL"
+        },
+        {
+          "playerSlug": "jaylen-brown",
+          "playerName": "Jaylen Brown",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "BOS",
+          "toTeamAbbreviation": "PHI"
+        },
+        {
+          "playerSlug": "jerami-grant",
+          "playerName": "Jerami Grant",
+          "nbaPlayerId": "203924",
+          "fromTeamAbbreviation": "POR",
+          "toTeamAbbreviation": "MEM"
+        },
+        {
+          "playerSlug": "josh-green",
+          "playerName": "Josh Green",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "CHA",
+          "toTeamAbbreviation": "MIN"
+        },
+        {
+          "playerSlug": "julius-randle",
+          "playerName": "Julius Randle",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIN",
+          "toTeamAbbreviation": "BKN"
+        },
+        {
+          "playerSlug": "kam-jones",
+          "playerName": "Kam Jones",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "IND",
+          "toTeamAbbreviation": "CHI"
+        },
+        {
+          "playerSlug": "kasparas-jakucionis",
+          "playerName": "Kasparas Jaku\u010dionis",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIA",
+          "toTeamAbbreviation": "MIL"
+        },
+        {
+          "playerSlug": "kawhi-leonard",
+          "playerName": "Kawhi Leonard",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "LAC",
+          "toTeamAbbreviation": "TOR"
+        },
+        {
+          "playerSlug": "kel-el-ware",
+          "playerName": "Kel'el Ware",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIA",
+          "toTeamAbbreviation": "MIL"
+        },
+        {
+          "playerSlug": "kris-murray",
+          "playerName": "Kris Murray",
+          "nbaPlayerId": "1631200",
+          "fromTeamAbbreviation": "POR",
+          "toTeamAbbreviation": "MEM"
+        },
+        {
+          "playerSlug": "lamelo-ball",
+          "playerName": "LaMelo Ball",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "CHA",
+          "toTeamAbbreviation": "MIN"
+        },
+        {
+          "playerSlug": "miles-bridges",
+          "playerName": "Miles Bridges",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "CHA",
+          "toTeamAbbreviation": "PHX"
+        },
+        {
+          "playerSlug": "mouhamadou-gueye",
+          "playerName": "Mouhamadou Gueye",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "CHI",
+          "toTeamAbbreviation": "MIN"
+        },
+        {
+          "playerSlug": "naz-reid",
+          "playerName": "Naz Reid",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIN",
+          "toTeamAbbreviation": "CHA"
+        },
+        {
+          "playerSlug": "nic-claxton",
+          "playerName": "Nic Claxton",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "BKN",
+          "toTeamAbbreviation": "CHI"
+        },
+        {
+          "playerSlug": "paul-george",
+          "playerName": "Paul George",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "PHI",
+          "toTeamAbbreviation": "BOS"
+        },
+        {
+          "playerSlug": "royce-o-neale",
+          "playerName": "Royce O'Neale",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "PHX",
+          "toTeamAbbreviation": "CHA"
+        },
+        {
+          "playerSlug": "santi-aldama",
+          "playerName": "Santi Aldama",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MEM",
+          "toTeamAbbreviation": "DAL"
+        },
+        {
+          "playerSlug": "tyler-herro",
+          "playerName": "Tyler Herro",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIA",
+          "toTeamAbbreviation": "MIL"
+        },
+        {
+          "playerSlug": "walker-kessler",
+          "playerName": "Walker Kessler",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "UTA",
+          "toTeamAbbreviation": "LAL"
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,30 @@
 import { UPCOMING_SEASON } from "@/lib/seasons";
+import rosterLedger from "@/lib/data/current-roster-transactions.json";
 import type { RuntimePlayerFallback, RuntimeTeamFallback } from "@/lib/data/runtimeFallbacks.server";
 import type { TeamSeasonAggregate } from "@/lib/types";
 
+type CurrentRosterMove = {
+  playerSlug: string;
+  playerName: string;
+  nbaPlayerId: string;
+  fromTeamAbbreviation: string;
+  toTeamAbbreviation: string;
+};
+
+type CurrentRosterTransactionRecord = {
+  id: string;
+  season: typeof UPCOMING_SEASON;
+  type: "trade";
+  sourceLabel: string;
+  sourceUrl: string;
+  officialDate: string;
+  moves: CurrentRosterMove[];
+};
+
 export type CurrentRosterTransaction = {
   season: typeof UPCOMING_SEASON;
+  transactionId: string;
+  type: CurrentRosterTransactionRecord["type"];
   playerSlug: string;
   playerName: string;
   nbaPlayerId: string;
@@ -14,56 +35,42 @@ export type CurrentRosterTransaction = {
   officialDate: string;
 };
 
-const officialNbaTradeTracker = "https://www.nba.com/news/2026-offseason-trade-tracker";
+function flattenRosterLedger() {
+  const transactions = rosterLedger.transactions as CurrentRosterTransactionRecord[];
+  return transactions.flatMap((transaction) =>
+    transaction.moves.map((move) => ({
+      season: transaction.season,
+      transactionId: transaction.id,
+      type: transaction.type,
+      playerSlug: move.playerSlug,
+      playerName: move.playerName,
+      nbaPlayerId: move.nbaPlayerId,
+      fromTeamAbbreviation: move.fromTeamAbbreviation,
+      toTeamAbbreviation: move.toTeamAbbreviation,
+      sourceLabel: transaction.sourceLabel,
+      sourceUrl: transaction.sourceUrl,
+      officialDate: transaction.officialDate,
+    })),
+  );
+}
 
-export const currentRosterTransactions: CurrentRosterTransaction[] = [
-  {
-    season: UPCOMING_SEASON,
-    playerSlug: "devin-carter",
-    playerName: "Devin Carter",
-    nbaPlayerId: "1642269",
-    fromTeamAbbreviation: "SAC",
-    toTeamAbbreviation: "ATL",
-    sourceLabel: "NBA.com 2026 offseason trade tracker",
-    sourceUrl: officialNbaTradeTracker,
-    officialDate: "2026-06-30",
-  },
-  {
-    season: UPCOMING_SEASON,
-    playerSlug: "ja-morant",
-    playerName: "Ja Morant",
-    nbaPlayerId: "1629630",
-    fromTeamAbbreviation: "MEM",
-    toTeamAbbreviation: "POR",
-    sourceLabel: "NBA.com 2026 offseason trade tracker",
-    sourceUrl: officialNbaTradeTracker,
-    officialDate: "2026-06-30",
-  },
-  {
-    season: UPCOMING_SEASON,
-    playerSlug: "jerami-grant",
-    playerName: "Jerami Grant",
-    nbaPlayerId: "203924",
-    fromTeamAbbreviation: "POR",
-    toTeamAbbreviation: "MEM",
-    sourceLabel: "NBA.com 2026 offseason trade tracker",
-    sourceUrl: officialNbaTradeTracker,
-    officialDate: "2026-06-30",
-  },
-  {
-    season: UPCOMING_SEASON,
-    playerSlug: "kris-murray",
-    playerName: "Kris Murray",
-    nbaPlayerId: "1631200",
-    fromTeamAbbreviation: "POR",
-    toTeamAbbreviation: "MEM",
-    sourceLabel: "NBA.com 2026 offseason trade tracker",
-    sourceUrl: officialNbaTradeTracker,
-    officialDate: "2026-06-30",
-  },
-];
+export const currentRosterTransactions: CurrentRosterTransaction[] = flattenRosterLedger();
 
-const transactionBySlug = new Map(currentRosterTransactions.map((move) => [move.playerSlug, move]));
+function transactionMapBySlug(transactions: CurrentRosterTransaction[]) {
+  const bySlug = new Map<string, CurrentRosterTransaction>();
+
+  for (const move of transactions) {
+    const existing = bySlug.get(move.playerSlug);
+    if (existing && existing.toTeamAbbreviation !== move.toTeamAbbreviation) {
+      throw new Error(`Conflicting current roster transactions for ${move.playerSlug}.`);
+    }
+    bySlug.set(move.playerSlug, move);
+  }
+
+  return bySlug;
+}
+
+const transactionBySlug = transactionMapBySlug(currentRosterTransactions);
 
 const nullStatFields = {
   games: 0,

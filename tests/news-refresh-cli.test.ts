@@ -15,14 +15,18 @@ const pythonCommand = findPythonCommand();
 const runIfPython = pythonCommand ? it : it.skip;
 
 describe("basketball news refresh", () => {
-  it("refreshes NBA.com and trusted rumor sources on a daily noon Phoenix schedule", () => {
+  it("refreshes NBA.com, trusted rumor sources, and roster transactions on a daily 5:15 PM Phoenix schedule", () => {
     const workflow = readFileSync(".github/workflows/news-refresh.yml", "utf8");
     const script = readFileSync("scripts/refresh_nba_news.py", "utf8");
 
-    expect(workflow).toContain('cron: "0 19 * * *"');
+    expect(workflow).toContain('cron: "15 0 * * *"');
     expect(workflow).toContain("python scripts/refresh_nba_news.py --require-rumors");
+    expect(workflow).toContain("python scripts/sync_current_roster_transactions.py --write");
+    expect(workflow).toContain("python scripts/validate_current_roster_transactions.py");
     expect(workflow).toContain("src/lib/data/news.json");
+    expect(workflow).toContain("src/lib/data/current-roster-transactions.json");
     expect(workflow).toContain("Refresh NBA.com and trusted rumor news data");
+    expect(workflow).toContain("Refresh NBA.com roster transaction data");
     expect(script).toContain("https://www.nba.com/news");
     expect(script).toContain("https://www.hoopsrumors.com/feed");
     expect(script).toContain("DEFAULT_OFFICIAL_LIMIT = 10");
