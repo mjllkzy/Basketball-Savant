@@ -110,7 +110,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           title="Compare"
           description="Separate workspaces for side-by-side player comparisons and role-based player similarity."
         />
-        <div className="grid min-h-[calc(100vh-280px)] gap-4 lg:grid-cols-2">
+        <div className="grid min-h-[calc(100vh-280px)] gap-4">
           <Link
             href="/compare?mode=compare"
             className="group relative isolate flex min-h-[420px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
