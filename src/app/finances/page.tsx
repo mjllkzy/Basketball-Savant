@@ -210,7 +210,7 @@ const teamFinanceColumns: StatTableColumn[] = [
   { key: "payroll", label: "Payroll", group: "Roster Money", align: "center", width: moneyColumnWidth, sortValueKey: "payrollSort", subValueKey: "payrollCapPct" },
   { key: "capPosition", label: "Cap Position", group: "Roster Money", align: "center", width: actionColumnWidth, sortValueKey: "capPositionSort", subValueKey: "capLineSub", subValueClassName: "text-slate-500" },
   { key: "topSalary", label: "Top Salary", group: "Top Contract", align: "center", width: moneyColumnWidth, sortValueKey: "topSalarySort", subValueKey: "topPlayer", subValueClassName: "text-signal" },
-  { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: moneyColumnWidth, sortValueKey: "guaranteedSort" },
+  { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: guaranteedColumnWidth, sortValueKey: "guaranteedSort" },
 ];
 
 const teamFinanceMinWidth = tableMinWidth(teamFinanceColumns);
@@ -443,7 +443,7 @@ const teamBreakdownColumns: StatTableColumn[] = [
   { key: "payroll", label: "Payroll", group: "Cap Situation", align: "center", width: moneyColumnWidth, sortValueKey: "payrollSort", subValueKey: "payrollCapPct" },
   { key: "capPosition", label: "Cap Position", group: "Cap Situation", align: "center", width: actionColumnWidth, sortValueKey: "capPositionSort", subValueKey: "capLineSub", subValueClassName: "text-slate-500" },
   { key: "topSalary", label: "Top Salary", group: "Top Contract", align: "center", width: moneyColumnWidth, sortValueKey: "topSalarySort", subValueKey: "topPlayer", subValueClassName: "text-signal" },
-  { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: moneyColumnWidth, sortValueKey: "guaranteedSort" },
+  { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: guaranteedColumnWidth, sortValueKey: "guaranteedSort" },
 ];
 
 const teamBreakdownMinWidth = tableMinWidth(teamBreakdownColumns);
