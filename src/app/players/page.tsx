@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
-import { tableColumnWidths } from "@/components/ui/tableSizing";
+import { tableColumnWidths, tableMinWidth as calculateTableMinWidth } from "@/components/ui/tableSizing";
 import { PlayerFilterForm } from "@/components/domain/PlayerFilterForm";
 import { nbaTeams } from "@/lib/data/nbaTeams";
 import {
@@ -38,9 +38,6 @@ const contractSummaryColumnWidth = tableColumnWidths.summary;
 const contractMoneyColumnWidth = tableColumnWidths.money;
 const contractSalaryColumnWidth = tableColumnWidths.salary;
 const contractGuaranteedColumnWidth = tableColumnWidths.guaranteed;
-const standardTableMinWidth = "1888px";
-const advancedTableMinWidth = "1982px";
-const contractTableMinWidth = "2112px";
 const pastContractSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastContractSalaryCellClassName = "bg-slate-100/60 text-slate-500";
 const teamPrimaryColorByAbbreviation = new Map(nbaTeams.map((team) => [team.abbreviation, team.primaryColor]));
@@ -101,6 +98,9 @@ const advancedColumns: StatTableColumn[] = [
   metricColumn("net", "Net", "Impact"),
   metricColumn("pie", "PIE", "Impact")
 ];
+
+const standardTableMinWidth = calculateTableMinWidth(standardColumns);
+const advancedTableMinWidth = calculateTableMinWidth(advancedColumns);
 
 function contractSalaryKey(season: ContractSeason) {
   return `salary_${season.replace("-", "_")}`;
@@ -422,7 +422,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
       }));
   const resultMeta = isContractView ? contractResult!.meta : playerResult!.meta;
   const columns = isContractView ? contractColumnsForSeason(season as ContractSeason) : statView === "advanced" ? advancedColumns : standardColumns;
-  const tableMinWidth = isContractView ? contractTableMinWidth : statView === "advanced" ? advancedTableMinWidth : standardTableMinWidth;
+  const tableMinWidth = isContractView ? calculateTableMinWidth(columns) : statView === "advanced" ? advancedTableMinWidth : standardTableMinWidth;
   const contractTableSortColumn = isContractView
     ? sort === "selected_salary"
       ? contractSalaryKey(season as ContractSeason)

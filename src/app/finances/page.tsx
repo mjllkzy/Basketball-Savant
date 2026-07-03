@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Landmark, Users } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn, type StatTableRow } from "@/components/ui/StatTable";
-import { tableColumnWidths } from "@/components/ui/tableSizing";
+import { tableColumnWidths, tableMinWidth } from "@/components/ui/tableSizing";
 import { nbaTeams } from "@/lib/data/nbaTeams";
 import {
   contractSeasons,
@@ -36,8 +36,6 @@ const salaryColumnWidth = tableColumnWidths.salary;
 const actionColumnWidth = tableColumnWidths.action;
 const divisionColumnWidth = tableColumnWidths.division;
 const guaranteedColumnWidth = tableColumnWidths.guaranteed;
-const playerFinanceMinWidth = "2112px";
-const teamFinanceMinWidth = "1320px";
 const pastSalaryHeaderClassName = "bg-slate-200/80 text-slate-500";
 const pastSalaryCellClassName = "bg-slate-100/60 text-slate-500";
 const teamPrimaryColorByAbbreviation = new Map(nbaTeams.map((team) => [team.abbreviation, team.primaryColor]));
@@ -214,6 +212,8 @@ const teamFinanceColumns: StatTableColumn[] = [
   { key: "topSalary", label: "Top Salary", group: "Top Contract", align: "center", width: moneyColumnWidth, sortValueKey: "topSalarySort", subValueKey: "topPlayer", subValueClassName: "text-signal" },
   { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: moneyColumnWidth, sortValueKey: "guaranteedSort" },
 ];
+
+const teamFinanceMinWidth = tableMinWidth(teamFinanceColumns);
 
 const contractLegend = [
   { label: "Player option", className: "border-amber-200 bg-amber-50 text-amber-700" },
@@ -446,6 +446,8 @@ const teamBreakdownColumns: StatTableColumn[] = [
   { key: "guaranteed", label: "Guaranteed", group: "Guaranteed Money", align: "center", width: moneyColumnWidth, sortValueKey: "guaranteedSort" },
 ];
 
+const teamBreakdownMinWidth = tableMinWidth(teamBreakdownColumns);
+
 function teamBreakdownRows(rows: PlayerContractRow[], team: Team): StatTableRow[] {
   return contractSeasons.map((contractSeason) => {
     const { activeContracts, payroll, guaranteed, topContract, topSalary, capPosition } = teamContractsForSeason(rows, team, contractSeason);
@@ -476,6 +478,8 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
   const rosteredRows = teamRows.filter((row) => hasSelectedSeasonSalary(row, season));
   const freeAgentRows = teamRows.filter((row) => isSelectedSeasonFreeAgent(row, season));
   const yearlyRows = teamBreakdownRows(rows, team);
+  const financeColumns = playerFinanceColumns(season);
+  const financeMinWidth = tableMinWidth(financeColumns);
   const playerRows = playerFinanceRows(rosteredRows, season);
   const freeAgentPlayerRows = playerFinanceRows(freeAgentRows, season);
   const selectedSeasonSummary = teamContractsForSeason(rows, team, season);
@@ -507,7 +511,7 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
         columns={teamBreakdownColumns}
         rows={yearlyRows}
         layout="fixed"
-        minWidth="760px"
+        minWidth={teamBreakdownMinWidth}
       />
       <div className="border-t border-slate-200 pt-4">
         <div className="mb-3">
@@ -515,10 +519,10 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
           <p className="text-sm text-slate-600">Players with active {selectedSeasonLabel(season)} salary counting toward tracked team payroll.</p>
         </div>
         <StatTable
-          columns={playerFinanceColumns(season)}
+          columns={financeColumns}
           rows={playerRows}
           layout="fixed"
-          minWidth={playerFinanceMinWidth}
+          minWidth={financeMinWidth}
           initialSorting={[{ id: selectedSalarySort, desc: true }]}
           rowAccentColorKey="teamAccent"
           rowAccentColumnKey="player"
@@ -531,10 +535,10 @@ function TeamFinanceBreakdown({ team, rows, season }: { team: Team; rows: Player
             <p className="text-sm text-slate-600">Expired team-linked contracts separated from rostered payroll so they do not read as active players.</p>
           </div>
           <StatTable
-            columns={playerFinanceColumns(season)}
+            columns={financeColumns}
             rows={freeAgentPlayerRows}
             layout="fixed"
-            minWidth={playerFinanceMinWidth}
+            minWidth={financeMinWidth}
             initialSorting={[{ id: selectedSalarySort, desc: true }]}
             rowAccentColorKey="teamAccent"
             rowAccentColumnKey="player"
@@ -579,6 +583,8 @@ async function TeamFinanceView({ season, selectedTeamId }: { season: ContractSea
 async function PlayerFinanceView({ season }: { season: ContractSeason }) {
   const selectedSalarySort = contractSalaryKey(season);
   const contractResult = await listPlayerContracts({ season, all: true, pageSize: 1000, sort: selectedSalarySort, order: "desc" });
+  const financeColumns = playerFinanceColumns(season);
+  const financeMinWidth = tableMinWidth(financeColumns);
   const rows = playerFinanceRows(contractResult.rows, season);
 
   return (
@@ -594,10 +600,10 @@ async function PlayerFinanceView({ season }: { season: ContractSeason }) {
       </div>
       <ContractLegend />
       <StatTable
-        columns={playerFinanceColumns(season)}
+        columns={financeColumns}
         rows={rows}
         layout="fixed"
-        minWidth={playerFinanceMinWidth}
+        minWidth={financeMinWidth}
         initialSorting={[{ id: selectedSalarySort, desc: true }]}
         rowAccentColorKey="teamAccent"
         rowAccentColumnKey="player"

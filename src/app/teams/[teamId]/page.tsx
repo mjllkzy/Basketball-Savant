@@ -4,7 +4,8 @@ import { TeamShotMap } from "@/components/charts/TeamShotMap";
 import { TeamStyleProfile } from "@/components/charts/TeamStyleProfile";
 import { TeamHeader } from "@/components/domain/TeamHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
-import { StatTable } from "@/components/ui/StatTable";
+import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
+import { tableColumnWidths, tableMinWidth } from "@/components/ui/tableSizing";
 import { gameMatchupLabel } from "@/lib/db/gameAnalytics.server";
 import { listTeamSeasonSummaries, loadTeamProfile } from "@/lib/db/teamAnalytics.server";
 import { formatShortDate } from "@/lib/date";
@@ -15,6 +16,25 @@ import { DEFAULT_SEASON, parseSeason } from "@/lib/seasons";
 import { singleParam, type RouteSearchParams } from "@/lib/searchParams";
 
 export const revalidate = 300;
+
+const teamRosterColumns: StatTableColumn[] = [
+  { key: "player", label: "Player", hrefKey: "href", width: tableColumnWidths.entity, truncate: true },
+  { key: "pos", label: "Pos", align: "center", width: tableColumnWidths.compact },
+  { key: "games", label: "G", align: "center", width: tableColumnWidths.compact },
+  { key: "min", label: "MIN", align: "center", width: tableColumnWidths.compact },
+  { key: "pts", label: "PTS", align: "center", width: tableColumnWidths.compact },
+  { key: "reb", label: "REB", align: "center", width: tableColumnWidths.compact },
+  { key: "ast", label: "AST", align: "center", width: tableColumnWidths.compact },
+  { key: "stl", label: "STL", align: "center", width: tableColumnWidths.compact },
+  { key: "blk", label: "BLK", align: "center", width: tableColumnWidths.compact },
+  { key: "tov", label: "TOV", align: "center", width: tableColumnWidths.compact },
+  { key: "fg", label: "FG%", align: "center", width: tableColumnWidths.compact },
+  { key: "three", label: "3P%", align: "center", width: tableColumnWidths.compact },
+  { key: "ft", label: "FT%", align: "center", width: tableColumnWidths.compact },
+  { key: "ts", label: "TS%", align: "center", width: tableColumnWidths.compact },
+];
+
+const teamRosterMinWidth = tableMinWidth(teamRosterColumns);
 
 function playerHref(slug: string, season: string, seasonType: string) {
   const params = new URLSearchParams();
@@ -88,23 +108,8 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
         <h2 className="mb-2 text-lg font-black text-ink">Roster</h2>
         <StatTable
           dense
-          minWidth="1120px"
-          columns={[
-            { key: "player", label: "Player", hrefKey: "href", width: "220px", truncate: true },
-            { key: "pos", label: "Pos", align: "center", width: "64px" },
-            { key: "games", label: "G", align: "right", width: "56px" },
-            { key: "min", label: "MIN", align: "right", width: "70px" },
-            { key: "pts", label: "PTS", align: "right", width: "70px" },
-            { key: "reb", label: "REB", align: "right", width: "70px" },
-            { key: "ast", label: "AST", align: "right", width: "70px" },
-            { key: "stl", label: "STL", align: "right", width: "70px" },
-            { key: "blk", label: "BLK", align: "right", width: "70px" },
-            { key: "tov", label: "TOV", align: "right", width: "70px" },
-            { key: "fg", label: "FG%", align: "right", width: "76px" },
-            { key: "three", label: "3P%", align: "right", width: "76px" },
-            { key: "ft", label: "FT%", align: "right", width: "76px" },
-            { key: "ts", label: "TS%", align: "right", width: "76px" }
-          ]}
+          minWidth={teamRosterMinWidth}
+          columns={teamRosterColumns}
           rows={rosterRows}
         />
       </div>

@@ -5,7 +5,7 @@ export const tableColumnWidths = {
   summary: "112px",
   money: "126px",
   salary: "126px",
-  action: "140px",
+  action: "180px",
   text: "160px",
   wideText: "220px",
   division: "120px",
@@ -38,6 +38,7 @@ export function defaultTableColumnWidth(column: TableSizingColumn) {
   if (text.includes("player") || text.includes("lineup")) return tableColumnWidths.entity;
   if (column.imageKey && text.includes("team")) return tableColumnWidths.entity;
   if (text.includes("matchup") || text.includes("description") || text.includes("formula") || text.includes("context") || text.includes("notes") || text.includes("scorer")) return tableColumnWidths.wideText;
+  if (text.includes("offense") || text.includes("defense") || text.includes("category") || text.includes("required data")) return tableColumnWidths.text;
   if (text.includes("metric") || text.includes("name") || text.includes("zone")) return tableColumnWidths.text;
   if (text.includes("path") || text.includes("source") || text.includes("status") || text.includes("feed") || text.includes("method")) return tableColumnWidths.text;
   if (text.includes("play type") || text.includes("shot profile")) return tableColumnWidths.text;

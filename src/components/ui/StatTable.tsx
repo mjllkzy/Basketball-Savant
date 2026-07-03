@@ -122,7 +122,7 @@ export function StatTable({
   columns,
   rows,
   dense = false,
-  layout = "auto",
+  layout = "fixed",
   minWidth,
   initialSorting,
   rowAccentColorKey,

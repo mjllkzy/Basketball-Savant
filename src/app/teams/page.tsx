@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { TeamFilterForm } from "@/components/domain/TeamFilterForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatTable, type StatTableColumn } from "@/components/ui/StatTable";
-import { tableColumnWidths } from "@/components/ui/tableSizing";
+import { tableColumnWidths, tableMinWidth as calculateTableMinWidth } from "@/components/ui/tableSizing";
 import { listTeamSeasonSummaries, loadTeamSeasonSummaryFilters } from "@/lib/db/teamAnalytics.server";
 import { calculateTeamMetric } from "@/lib/metrics/registry";
 import { formatMetric } from "@/lib/metrics/format";
@@ -15,7 +15,6 @@ export const revalidate = 300;
 
 const entityColumnWidth = tableColumnWidths.entity;
 const secondaryColumnWidth = tableColumnWidths.compact;
-const teamTableMinWidth = "1418px";
 
 export const metadata: Metadata = {
   title: "NBA Teams",
@@ -52,6 +51,8 @@ const teamColumns: StatTableColumn[] = [
   centerColumn("reb", "REB%", "Possession", secondaryColumnWidth),
   centerColumn("tov", "TOV%", "Possession", secondaryColumnWidth)
 ];
+
+const teamTableMinWidth = calculateTableMinWidth(teamColumns);
 
 function selectedOption<T extends string>(value: string | undefined, options: Array<{ value: T }>) {
   return options.some((option) => option.value === value) ? (value as T) : undefined;
