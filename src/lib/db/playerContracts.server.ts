@@ -23,6 +23,8 @@ export type PlayerContractRow = {
   playerName: string;
   teamId: string;
   teamAbbreviation: string;
+  historicalTeamId: string | null;
+  historicalTeamAbbreviation: string | null;
   position: string | null;
   salaryBySeason: Partial<Record<ContractSeason, number>>;
   optionsBySeason: Partial<Record<ContractSeason, string>>;
@@ -142,6 +144,8 @@ type PlayerContractDbRow = {
   source_player_name: string;
   team_id: string | null;
   team_abbreviation: string;
+  player_team_id: string | null;
+  player_team_abbreviation: string | null;
   position: string | null;
   salary_by_season: unknown;
   options_by_season: unknown;
@@ -325,12 +329,16 @@ function dedupeContractRows(rows: PlayerContractRow[]) {
 function dbRowToContract(row: PlayerContractDbRow): PlayerContractRow {
   const teamAbbreviation = canonicalContractTeamAbbreviation(row.team_abbreviation);
   const team = teamByAbbreviation.get(teamAbbreviation);
+  const historicalTeamAbbreviation = canonicalContractTeamAbbreviation(row.player_team_abbreviation);
+  const historicalTeam = teamByAbbreviation.get(historicalTeamAbbreviation);
   return {
     sourceRank: numeric(row.source_rank) ?? 0,
     playerSlug: row.player_slug,
     playerName: row.player_name || row.source_player_name,
     teamId: team?.id ?? row.team_id ?? teamAbbreviation,
     teamAbbreviation,
+    historicalTeamId: historicalTeam?.id ?? row.player_team_id ?? null,
+    historicalTeamAbbreviation: historicalTeamAbbreviation || null,
     position: row.position,
     salaryBySeason: numberRecord(row.salary_by_season),
     optionsBySeason: stringRecord(row.options_by_season),
@@ -345,12 +353,16 @@ function jsonRowToContract(row: ContractJsonRow, playersBySlug: Map<string, Runt
   const player = row.matched_player_slug ? playersBySlug.get(row.matched_player_slug) : undefined;
   const teamAbbreviation = canonicalContractTeamAbbreviation(row.team_abbreviation);
   const team = teamByAbbreviation.get(teamAbbreviation);
+  const historicalTeamAbbreviation = canonicalContractTeamAbbreviation(player?.team_abbreviation);
+  const historicalTeam = teamByAbbreviation.get(historicalTeamAbbreviation);
   return {
     sourceRank: row.source_rank,
     playerSlug: row.matched_player_slug ?? null,
     playerName: player?.player_name ?? row.matched_player_name ?? row.player_name,
     teamId: team?.id ?? teamAbbreviation,
     teamAbbreviation,
+    historicalTeamId: historicalTeam?.id ?? player?.team_id ?? null,
+    historicalTeamAbbreviation: historicalTeamAbbreviation || null,
     position: player?.position ?? null,
     salaryBySeason: numberRecord(row.salaries),
     optionsBySeason: stringRecord(row.options_by_season),
@@ -387,6 +399,22 @@ export function applyCurrentRosterContractOverlay(row: PlayerContractRow, select
     ...row,
     teamId: team?.id ?? move.toTeamAbbreviation,
     teamAbbreviation: move.toTeamAbbreviation,
+  };
+}
+
+export function applyContractRosterSeasonOverlay(row: PlayerContractRow, selectedSeason: ContractSeason): PlayerContractRow {
+  if (seasonStartYear(selectedSeason) >= seasonStartYear(UPCOMING_SEASON as ContractSeason)) {
+    return applyCurrentRosterContractOverlay(row, selectedSeason);
+  }
+
+  const teamAbbreviation = canonicalContractTeamAbbreviation(row.historicalTeamAbbreviation);
+  if (!teamAbbreviation) return row;
+
+  const team = teamByAbbreviation.get(teamAbbreviation);
+  return {
+    ...row,
+    teamId: team?.id ?? row.historicalTeamId ?? teamAbbreviation,
+    teamAbbreviation,
   };
 }
 
@@ -647,7 +675,7 @@ function filterAndPageContracts(rows: PlayerContractRow[], params: PlayerContrac
   const sort = params.sort ?? "selected_salary";
   const order = params.order ?? (sort === "player" || sort === "team" || sort === "position" ? "asc" : "desc");
 
-  const rosterAdjustedRows = rows.map((row) => applyCurrentRosterContractOverlay(row, selectedSeason));
+  const rosterAdjustedRows = rows.map((row) => applyContractRosterSeasonOverlay(row, selectedSeason));
 
   const filtered = rosterAdjustedRows
     .filter((row) => hasContractSeasonContext(row, selectedSeason))
@@ -697,6 +725,8 @@ async function listPlayerContractsUncached(params: PlayerContractParams = {}): P
         contract.source_player_name,
         contract.team_id,
         contract.team_abbreviation,
+        player.primary_team_id AS player_team_id,
+        player.primary_team_abbreviation AS player_team_abbreviation,
         player.position,
         contract.salary_by_season,
         contract.options_by_season,

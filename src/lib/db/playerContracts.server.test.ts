@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { closeDatabasePool } from "./client.server";
 import {
+  applyContractRosterSeasonOverlay,
   applyCurrentRosterContractOverlay,
   canonicalContractTeamAbbreviation,
   contractDealSummary,
@@ -33,6 +34,8 @@ describe("player contract summaries", () => {
       playerName: "Miles Bridges",
       teamId: "1610612766",
       teamAbbreviation: "CHA",
+      historicalTeamId: "1610612766",
+      historicalTeamAbbreviation: "CHA",
       position: "SF",
       salaryBySeason: {
         "2025-26": 24_900_000,
@@ -84,6 +87,67 @@ describe("player contract summaries", () => {
       else process.env.DATABASE_URL = originalDatabaseUrl;
     }
   }, 15_000);
+
+  it("keeps offseason signings off the new team in historical contract roster views", async () => {
+    const originalDatabaseUrl = process.env.DATABASE_URL;
+    await closeDatabasePool();
+    delete process.env.DATABASE_URL;
+
+    try {
+      const [brooklynHistorical, clevelandHistorical, brooklynUpcoming] = await Promise.all([
+        listPlayerContracts({ season: "2025-26", teamId: "1610612751", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2025-26", teamId: "1610612739", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2026-27", teamId: "1610612751", all: true, pageSize: 1000 }),
+      ]);
+
+      expect(brooklynHistorical.rows.some((row) => row.playerSlug === "keon-ellis")).toBe(false);
+      expect(clevelandHistorical.rows.find((row) => row.playerSlug === "keon-ellis")).toMatchObject({
+        playerName: "Keon Ellis",
+        teamId: "1610612739",
+        teamAbbreviation: "CLE",
+      });
+      expect(brooklynUpcoming.rows.find((row) => row.playerSlug === "keon-ellis")).toMatchObject({
+        playerName: "Keon Ellis",
+        teamId: "1610612751",
+        teamAbbreviation: "BKN",
+      });
+    } finally {
+      await closeDatabasePool();
+      if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = originalDatabaseUrl;
+    }
+  }, 15_000);
+
+  it("switches contract roster context by selected season", () => {
+    const offseasonSigningRow: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "keon-ellis",
+      playerName: "Keon Ellis",
+      teamId: "1610612751",
+      teamAbbreviation: "BKN",
+      historicalTeamId: "1610612739",
+      historicalTeamAbbreviation: "CLE",
+      position: "SG",
+      salaryBySeason: {
+        "2025-26": 2_301_587,
+        "2026-27": 8_653_846,
+      },
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: 18_000_000,
+      needsFollowup: true,
+      contractDeals: [],
+    };
+
+    expect(applyContractRosterSeasonOverlay(offseasonSigningRow, "2025-26")).toMatchObject({
+      teamId: "1610612739",
+      teamAbbreviation: "CLE",
+    });
+    expect(applyContractRosterSeasonOverlay(offseasonSigningRow, "2026-27")).toMatchObject({
+      teamId: "1610612751",
+      teamAbbreviation: "BKN",
+    });
+  });
 
   it("summarizes full and remaining contract salary schedules", () => {
     const salaries = {
@@ -177,6 +241,8 @@ describe("player contract summaries", () => {
       playerName: "Player",
       teamId: "TST",
       teamAbbreviation: "TST",
+      historicalTeamId: null,
+      historicalTeamAbbreviation: null,
       position: "G",
       salaryBySeason: { "2025-26": 12_000_000 },
       optionsBySeason: {},
@@ -226,6 +292,8 @@ describe("player contract summaries", () => {
       playerName: "Player",
       teamId: "TST",
       teamAbbreviation: "TST",
+      historicalTeamId: null,
+      historicalTeamAbbreviation: null,
       position: "G",
       salaryBySeason: {},
       optionsBySeason: {},
@@ -263,6 +331,8 @@ describe("player contract summaries", () => {
       playerName: "Player",
       teamId: "TST",
       teamAbbreviation: "TST",
+      historicalTeamId: null,
+      historicalTeamAbbreviation: null,
       position: "G",
       salaryBySeason: { "2026-27": 18_000_000 },
       optionsBySeason: {},
@@ -438,6 +508,8 @@ describe("player contract summaries", () => {
       playerName: "Player",
       teamId: "TST",
       teamAbbreviation: "TST",
+      historicalTeamId: null,
+      historicalTeamAbbreviation: null,
       position: "G",
       salaryBySeason: {},
       optionsBySeason: {},
