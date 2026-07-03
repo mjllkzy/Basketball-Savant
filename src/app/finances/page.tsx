@@ -231,7 +231,7 @@ function FinanceChooser({ season }: { season: ContractSeason }) {
         title="Finances"
         description="Separate workspaces for team payroll context and all-player contract tables from the contract masterfile."
       />
-      <div className="grid min-h-[calc(100vh-280px)] grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid min-h-[calc(100vh-280px)] grid-cols-[repeat(2,minmax(280px,1fr))] gap-4 overflow-x-auto pb-1">
         <Link
           href={financeHref("teams", season)}
           className="group relative isolate flex min-h-[420px] overflow-hidden rounded border border-signal/30 bg-signal p-8 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
