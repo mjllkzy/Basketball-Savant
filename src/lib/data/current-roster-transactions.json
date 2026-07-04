@@ -3,7 +3,7 @@
     "season": "2026-27",
     "sourceLabel": "NBA.com offseason deals tracker",
     "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-    "updatedAt": "2026-07-03T14:14:56Z",
+    "updatedAt": "2026-07-04T01:48:41Z",
     "description": "Persistent roster-impacting trade ledger for the upcoming season. Generated from explicit NBA.com trade additions/departures and validated against local player/team data."
   },
   "transactions": [
@@ -11,7 +11,7 @@
       "id": "nba-offseason-deals-2026-trades",
       "season": "2026-27",
       "type": "trade",
-      "officialDate": "2026-07-03",
+      "officialDate": "2026-07-04",
       "sourceLabel": "NBA.com offseason deals tracker",
       "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
       "moves": [
@@ -44,11 +44,25 @@
           "toTeamAbbreviation": "LAC"
         },
         {
+          "playerSlug": "deandre-ayton",
+          "playerName": "Deandre Ayton",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "LAL",
+          "toTeamAbbreviation": "WAS"
+        },
+        {
           "playerSlug": "devin-carter",
           "playerName": "Devin Carter",
           "nbaPlayerId": "1642269",
           "fromTeamAbbreviation": "SAC",
           "toTeamAbbreviation": "ATL"
+        },
+        {
+          "playerSlug": "dorian-finney-smith",
+          "playerName": "Dorian Finney-Smith",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "HOU",
+          "toTeamAbbreviation": "CHA"
         },
         {
           "playerSlug": "giannis-antetokounmpo",
@@ -84,6 +98,13 @@
           "nbaPlayerId": "1629630",
           "fromTeamAbbreviation": "MEM",
           "toTeamAbbreviation": "POR"
+        },
+        {
+          "playerSlug": "jaden-hardy",
+          "playerName": "Jaden Hardy",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "WAS",
+          "toTeamAbbreviation": "LAL"
         },
         {
           "playerSlug": "jaime-jaquez-jr",

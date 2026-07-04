@@ -34,6 +34,10 @@
       "updated_player_count": 20,
       "needs_followup_count": 48,
       "notes": "Added and updated July 1-2 reported 2026 free-agency agreements; explicit follow-up remains where annual salary, guarantees, or options are not fully public."
+    },
+    "official_agreement_sync": {
+      "generated_at": "2026-07-04T09:10:44Z",
+      "contract_rows_updated_from_news": 2
     }
   },
   "contracts": [
@@ -4286,14 +4290,15 @@
       "normalized_player_name": "andre drummond",
       "matched_player_slug": "andre-drummond",
       "matched_player_name": "Andre Drummond",
-      "team_abbreviation": "PHI",
+      "team_abbreviation": "NYK",
       "salaries": {
         "2025-26": 5000000
       },
       "guaranteed": 5000000,
       "options_by_season": {
         "2025-26": "Player Option"
-      }
+      },
+      "needs_followup": true
     },
     {
       "source_rank": 263,
@@ -7562,7 +7567,8 @@
         "2025-26": 712637,
         "2026-27": 2497812
       },
-      "guaranteed": 3210449
+      "guaranteed": 3210449,
+      "needs_followup": true
     },
     {
       "source_rank": 471,
