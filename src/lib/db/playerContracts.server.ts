@@ -529,6 +529,15 @@ export function hasNonRosterContractForSeason(row: PlayerContractRow, season: Co
   return activeDeals.every(isNonRosterContractDeal);
 }
 
+export function hasActiveContractForSeason(row: PlayerContractRow, season: ContractSeason) {
+  return selectedSeasonSalary(row, season) !== null || selectActiveContractDeal(row.contractDeals, season) !== null;
+}
+
+export function hasPendingActiveContractForSeason(row: PlayerContractRow, season: ContractSeason) {
+  const selectedDeal = selectActiveContractDeal(row.contractDeals, season);
+  return Boolean(selectedDeal?.pending && !isTwoWayContractDeal(selectedDeal) && !isNonRosterContractDeal(selectedDeal));
+}
+
 export function selectNextContractDeal(deals: ContractDeal[], season: ContractSeason) {
   const year = seasonStartYear(season);
   const nextDeals = deals
@@ -689,6 +698,7 @@ export function summarizeTotalRemainingContract(salaries: Partial<Record<Contrac
 
 function hasContractSeasonContext(row: PlayerContractRow, season: ContractSeason) {
   return selectedSeasonSalary(row, season) !== null ||
+    selectActiveContractDeal(row.contractDeals, season) !== null ||
     summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, season) !== null ||
     freeAgencyStatusForSeason(row.contractDeals, season) !== null;
 }

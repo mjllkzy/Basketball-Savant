@@ -12,7 +12,9 @@ import {
   contractDealSummary,
   contractSalarySortValue,
   freeAgencyStatusForSeason,
+  hasActiveContractForSeason,
   hasNonRosterContractForSeason,
+  hasPendingActiveContractForSeason,
   hasTwoWayContractForSeason,
   listPlayerContracts,
   selectActiveContractDeal,
@@ -338,7 +340,9 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
     const activeDeal = selectActiveContractDeal(row.contractDeals, season);
     const originalContract = contractDealSummary(activeDeal) ?? summarizeContractSalaries(row.salaryBySeason);
     const currentContract = summarizeTotalRemainingContract(row.salaryBySeason, row.contractDeals, season);
-    const freeAgencyStatus = currentContract ? null : freeAgencyStatusForSeason(row.contractDeals, season);
+    const pendingActiveDeal = hasPendingActiveContractForSeason(row, season) ? activeDeal : null;
+    const pendingRemainingYears = pendingActiveDeal ? Math.max(1, pendingActiveDeal.endYear - Number(season.slice(0, 4)) + 1) : null;
+    const freeAgencyStatus = currentContract || pendingActiveDeal ? null : freeAgencyStatusForSeason(row.contractDeals, season);
     const twoWayContract = hasTwoWayContractForSeason(row, season);
     const base: StatTableRow = {
       player: row.playerName,
@@ -346,12 +350,12 @@ function playerFinanceRows(rows: PlayerContractRow[], season: ContractSeason): S
       team: row.teamAbbreviation,
       teamAccent: teamPrimaryColorByAbbreviation.get(row.teamAbbreviation) ?? "#0f766e",
       pos: row.position ?? "N/A",
-      originalYears: formatContractYears(originalContract?.years),
-      originalYearsSort: originalContract?.years ?? null,
-      remainingYears: currentContract ? formatContractYears(currentContract.years) : freeAgencyStatus ? "0 yrs" : "--",
-      remainingYearsSub: freeAgencyStatus ?? "",
+      originalYears: formatContractYears(originalContract?.years ?? pendingActiveDeal?.years),
+      originalYearsSort: originalContract?.years ?? pendingActiveDeal?.years ?? null,
+      remainingYears: currentContract ? formatContractYears(currentContract.years) : pendingRemainingYears ? formatContractYears(pendingRemainingYears) : freeAgencyStatus ? "0 yrs" : "--",
+      remainingYearsSub: pendingActiveDeal ? "Details pending" : freeAgencyStatus ?? "",
       remainingYearsNote: twoWayContract ? "Two-way" : "",
-      remainingYearsSort: currentContract?.years ?? (freeAgencyStatus ? 0 : null),
+      remainingYearsSort: currentContract?.years ?? pendingRemainingYears ?? (freeAgencyStatus ? 0 : null),
       remainingYearsClass: freeAgencyStatus ? "text-rose-700" : "",
       originalTotal: formatMoney(originalContract?.total),
       originalTotalSort: originalContract?.total ?? null,
@@ -383,21 +387,25 @@ function hasSelectedSeasonSalary(row: PlayerContractRow, season: ContractSeason)
   return typeof row.salaryBySeason[season] === "number";
 }
 
+function hasSelectedSeasonActiveContract(row: PlayerContractRow, season: ContractSeason) {
+  return hasActiveContractForSeason(row, season);
+}
+
 function isSelectedSeasonBookOnly(row: PlayerContractRow, season: ContractSeason) {
   return hasSelectedSeasonSalary(row, season) && !row.playerSlug;
 }
 
 function isSelectedSeasonTwoWay(row: PlayerContractRow, season: ContractSeason) {
-  return hasSelectedSeasonSalary(row, season) && hasTwoWayContractForSeason(row, season);
+  return hasSelectedSeasonActiveContract(row, season) && hasTwoWayContractForSeason(row, season);
 }
 
 function isSelectedSeasonNonRoster(row: PlayerContractRow, season: ContractSeason) {
-  return hasSelectedSeasonSalary(row, season) && hasNonRosterContractForSeason(row, season);
+  return hasSelectedSeasonActiveContract(row, season) && hasNonRosterContractForSeason(row, season);
 }
 
 function isSelectedSeasonStandardRosterCandidate(row: PlayerContractRow, season: ContractSeason) {
   return (
-    hasSelectedSeasonSalary(row, season) &&
+    hasSelectedSeasonActiveContract(row, season) &&
     !isSelectedSeasonBookOnly(row, season) &&
     !isSelectedSeasonTwoWay(row, season) &&
     !isSelectedSeasonNonRoster(row, season)
@@ -405,7 +413,7 @@ function isSelectedSeasonStandardRosterCandidate(row: PlayerContractRow, season:
 }
 
 function isSelectedSeasonFreeAgent(row: PlayerContractRow, season: ContractSeason) {
-  return !hasSelectedSeasonSalary(row, season) && Boolean(freeAgencyStatusForSeason(row.contractDeals, season));
+  return !hasSelectedSeasonActiveContract(row, season) && Boolean(freeAgencyStatusForSeason(row.contractDeals, season));
 }
 
 function sortContractsBySeasonSalary(rows: PlayerContractRow[], season: ContractSeason) {
@@ -426,7 +434,7 @@ function guaranteedSalaryForSeason(row: PlayerContractRow, season: ContractSeaso
 
 function teamContractsForSeason(rows: PlayerContractRow[], team: Team, season: ContractSeason) {
   const contracts = rows.filter((row) => row.teamAbbreviation === team.abbreviation);
-  const activeContracts = contracts.filter((row) => hasSelectedSeasonSalary(row, season));
+  const activeContracts = contracts.filter((row) => hasSelectedSeasonActiveContract(row, season));
   const bookOnlyContracts = activeContracts.filter((row) => isSelectedSeasonBookOnly(row, season));
   const twoWayContracts = activeContracts.filter((row) => !isSelectedSeasonBookOnly(row, season) && isSelectedSeasonTwoWay(row, season));
   const explicitNonRosterContracts = activeContracts.filter(

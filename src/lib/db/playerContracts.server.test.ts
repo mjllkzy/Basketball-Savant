@@ -9,7 +9,9 @@ import {
   contractSalarySortValue,
   contractSummarySortValue,
   freeAgencyStatusForSeason,
+  hasActiveContractForSeason,
   hasNonRosterContractForSeason,
+  hasPendingActiveContractForSeason,
   hasTwoWayContractForSeason,
   listPlayerContracts,
   selectActiveContractDeal,
@@ -83,6 +85,38 @@ describe("player contract summaries", () => {
         teamId: "1610612766",
         teamAbbreviation: "CHA",
       });
+    } finally {
+      await closeDatabasePool();
+      if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = originalDatabaseUrl;
+    }
+  }, 15_000);
+
+  it("keeps official return agreements active while contract terms are still pending", async () => {
+    const originalDatabaseUrl = process.env.DATABASE_URL;
+    await closeDatabasePool();
+    delete process.env.DATABASE_URL;
+
+    try {
+      const result = await listPlayerContracts({
+        season: "2026-27",
+        teamId: "1610612739",
+        q: "Thomas Bryant",
+        all: true,
+        pageSize: 1000,
+      });
+      const row = result.rows.find((contractRow) => contractRow.playerSlug === "thomas-bryant");
+
+      expect(row).toBeDefined();
+      expect(row).toMatchObject({
+        playerName: "Thomas Bryant",
+        teamId: "1610612739",
+        teamAbbreviation: "CLE",
+      });
+      expect(row ? hasActiveContractForSeason(row, "2026-27") : false).toBe(true);
+      expect(row ? hasPendingActiveContractForSeason(row, "2026-27") : false).toBe(true);
+      expect(row ? freeAgencyStatusForSeason(row.contractDeals, "2026-27") : null).toBeNull();
+      expect(row?.salaryBySeason["2026-27"]).toBeUndefined();
     } finally {
       await closeDatabasePool();
       if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;

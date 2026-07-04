@@ -30528,6 +30528,26 @@
       "spotrac_url": null,
       "deals": [
         {
+          "source": "NBA.com",
+          "source_url": "https://www.nba.com/news/cavaliers-thomas-bryant-free-agency-2026",
+          "label": "Reported one-year agreement to return to Cleveland",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": null,
+          "average_annual_value": null,
+          "guaranteed_at_sign": null,
+          "total_guaranteed": null,
+          "free_agent": "UFA",
+          "signed_using": null,
+          "pending": true,
+          "salary_by_season": {},
+          "options_by_season": {},
+          "guarantee_status_by_season": {
+            "2026-27": "Details unavailable"
+          }
+        },
+        {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/thomas-bryant",
           "label": "Veteran Contract",
@@ -30638,7 +30658,7 @@
           "guarantee_status_by_season": {}
         }
       ],
-      "needs_followup": false
+      "needs_followup": true
     },
     {
       "source_rank": 394,
