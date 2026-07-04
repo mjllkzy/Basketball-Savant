@@ -20,6 +20,14 @@ DEFAULT_LEDGER_PATH = Path("src/lib/data/current-roster-transactions.json")
 RUNTIME_FALLBACKS_PATH = Path("src/lib/data/generated/runtime-fallbacks.json")
 UPCOMING_SEASON = "2026-27"
 GENERATED_TRANSACTION_ID = "nba-offseason-deals-2026-trades"
+OFFICIAL_STATUS = "official"
+REPORTED_AGREEMENT_STATUS = "reported_agreement"
+EXCLUDED_RUMOR_STATUS = "excluded_rumor"
+MOVE_STATUS_LABELS = {
+    OFFICIAL_STATUS: "Official",
+    REPORTED_AGREEMENT_STATUS: "Reported Agreement",
+    EXCLUDED_RUMOR_STATUS: "Excluded Rumor",
+}
 
 TEAM_ALIASES = {
     "blazers": "portland trail blazers",
@@ -82,16 +90,71 @@ def clean_line(value: str) -> str:
     return " ".join(value.replace("\xa0", " ").split())
 
 
-def parse_trade_moves(article: dict[str, Any], runtime: dict[str, Any]) -> tuple[list[dict[str, str]], list[str]]:
+def classify_move_status(line: str, source_note: str) -> tuple[str, str]:
+    status_blob = f"{source_note} {line}".lower()
+    rumor_markers = (
+        "rumor",
+        "rumour",
+        "interest",
+        "interested",
+        "shopping",
+        "shopped",
+        "trade block",
+        "discussed",
+        "discussions",
+        "talks",
+        "could",
+        "may",
+        "might",
+        "likely",
+    )
+    official_markers = (
+        "officially announced",
+        "team announced",
+        "nba announced",
+        "league announced",
+        "announced by",
+    )
+    reported_agreement_markers = (
+        "multiple reports",
+        "reported by",
+        "reports",
+        "reported",
+        "agreed",
+        "agreement",
+        "will send",
+        "will acquire",
+    )
+
+    for marker in rumor_markers:
+        if marker in status_blob:
+            return EXCLUDED_RUMOR_STATUS, marker
+    for marker in official_markers:
+        if marker in status_blob:
+            return OFFICIAL_STATUS, marker
+    for marker in reported_agreement_markers:
+        if marker in status_blob:
+            return REPORTED_AGREEMENT_STATUS, marker
+    return EXCLUDED_RUMOR_STATUS, "no roster-impacting status marker"
+
+
+def parse_trade_moves(
+    article: dict[str, Any],
+    runtime: dict[str, Any],
+    source_url: str,
+) -> tuple[list[dict[str, str]], list[str], list[str]]:
     players_by_name, teams_by_name = runtime_lookups(runtime)
     body = str(article["articleBody"])
+    source_name = "NBA.com offseason deals tracker"
     current_team: dict[str, Any] | None = None
     mode: str | None = None
     moves_by_slug: dict[str, dict[str, str]] = {}
     unmatched: list[str] = []
+    excluded: list[str] = []
     pattern = re.compile(
         r"^(?P<player>.+?)\s+(?P<verb>joins|departs)\s+via\s+"
-        r"(?:3-team\s+)?(?:sign-and-)?trade\s+with\s+(?P<team>[^()]+)",
+        r"(?:3-team\s+)?(?:sign-and-)?trade\s+with\s+(?P<team>[^()]+?)"
+        r"(?:\s+\((?P<source_note>[^)]+)\))?$",
         re.IGNORECASE,
     )
 
@@ -115,6 +178,12 @@ def parse_trade_moves(article: dict[str, Any], runtime: dict[str, Any]) -> tuple
 
         match = pattern.match(line)
         if not match:
+            continue
+
+        source_note = clean_line(match.group("source_note") or "")
+        status, matched_status_marker = classify_move_status(line, source_note)
+        if status == EXCLUDED_RUMOR_STATUS:
+            excluded.append(line)
             continue
 
         verb = match.group("verb").lower()
@@ -148,20 +217,30 @@ def parse_trade_moves(article: dict[str, Any], runtime: dict[str, Any]) -> tuple
             "nbaPlayerId": "",
             "fromTeamAbbreviation": from_team,
             "toTeamAbbreviation": to_team,
+            "status": status,
+            "statusLabel": MOVE_STATUS_LABELS[status],
+            "statusDetail": source_note or MOVE_STATUS_LABELS[status],
+            "sourceName": source_name,
+            "sourceUrl": source_url,
+            "sourceNote": source_note,
+            "rawTrackerLine": line,
+            "matchedStatusMarker": matched_status_marker,
         }
         existing = moves_by_slug.get(move["playerSlug"])
         if existing and (
             existing["fromTeamAbbreviation"] != move["fromTeamAbbreviation"]
             or existing["toTeamAbbreviation"] != move["toTeamAbbreviation"]
+            or existing["status"] != move["status"]
         ):
             raise RuntimeError(
                 "Conflicting trade destinations for "
-                f"{move['playerName']}: {existing['fromTeamAbbreviation']}->{existing['toTeamAbbreviation']} "
-                f"and {move['fromTeamAbbreviation']}->{move['toTeamAbbreviation']}"
+                f"{move['playerName']}: "
+                f"{existing['fromTeamAbbreviation']}->{existing['toTeamAbbreviation']} ({existing['status']}) "
+                f"and {move['fromTeamAbbreviation']}->{move['toTeamAbbreviation']} ({move['status']})"
             )
         moves_by_slug[move["playerSlug"]] = move
 
-    return sorted(moves_by_slug.values(), key=lambda move: move["playerName"]), unmatched
+    return sorted(moves_by_slug.values(), key=lambda move: move["playerName"]), unmatched, excluded
 
 
 def existing_player_ids(ledger: dict[str, Any]) -> dict[str, str]:
@@ -178,7 +257,7 @@ def sync_ledger(source_url: str, ledger_path: Path) -> tuple[dict[str, Any], lis
     runtime = read_json(RUNTIME_FALLBACKS_PATH)
     ledger = read_json(ledger_path) if ledger_path.exists() else {"metadata": {}, "transactions": []}
     article = fetch_article(source_url)
-    moves, unmatched = parse_trade_moves(article, runtime)
+    moves, unmatched, _excluded = parse_trade_moves(article, runtime, source_url)
     player_ids = existing_player_ids(ledger)
 
     for move in moves:
@@ -209,8 +288,9 @@ def sync_ledger(source_url: str, ledger_path: Path) -> tuple[dict[str, Any], lis
             "updatedAt": date_modified,
             "description": (
                 "Persistent roster-impacting trade ledger for the upcoming season. "
-                "Generated from explicit NBA.com trade additions/departures and "
-                "validated against local player/team data."
+                "Generated from explicit NBA.com trade additions/departures. "
+                "Official and credible reported agreements are projected into rosters; "
+                "rumors and unverified items are excluded from payroll calculations."
             ),
         },
         "transactions": [*preserved_transactions, generated_transaction],

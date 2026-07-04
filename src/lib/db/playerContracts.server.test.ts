@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { currentTeamOverrideForPlayerSlug } from "@/lib/data/currentRoster";
 import { closeDatabasePool } from "./client.server";
 import {
   applyContractRosterSeasonOverlay,
@@ -31,34 +32,75 @@ describe("player contract summaries", () => {
     expect(canonicalContractTeamAbbreviation(" lal ")).toBe("LAL");
   });
 
-  it("applies current roster trade teams only to upcoming contract seasons", () => {
-    const milesBridgesRow: PlayerContractRow = {
+  it("applies official current roster trade teams only to upcoming contract seasons", () => {
+    const jaMorantRow: PlayerContractRow = {
       sourceRank: 1,
-      playerSlug: "miles-bridges",
-      playerName: "Miles Bridges",
-      teamId: "1610612766",
-      teamAbbreviation: "CHA",
-      historicalTeamId: "1610612766",
-      historicalTeamAbbreviation: "CHA",
-      position: "SF",
+      playerSlug: "ja-morant",
+      playerName: "Ja Morant",
+      teamId: "1610612763",
+      teamAbbreviation: "MEM",
+      historicalTeamId: "1610612763",
+      historicalTeamAbbreviation: "MEM",
+      position: "PG",
       salaryBySeason: {
-        "2025-26": 24_900_000,
-        "2026-27": 22_826_087,
+        "2025-26": 39_446_090,
+        "2026-27": 42_165_510,
       },
       optionsBySeason: {},
       guaranteeStatusBySeason: {},
-      guaranteedAmount: 75_000_000,
+      guaranteedAmount: 197_230_450,
       needsFollowup: false,
       contractDeals: [],
     };
 
-    expect(applyCurrentRosterContractOverlay(milesBridgesRow, "2025-26")).toMatchObject({
-      teamId: "1610612766",
-      teamAbbreviation: "CHA",
+    expect(applyCurrentRosterContractOverlay(jaMorantRow, "2025-26")).toMatchObject({
+      teamId: "1610612763",
+      teamAbbreviation: "MEM",
     });
-    expect(applyCurrentRosterContractOverlay(milesBridgesRow, "2026-27")).toMatchObject({
-      teamId: "1610612756",
-      teamAbbreviation: "PHX",
+    expect(applyCurrentRosterContractOverlay(jaMorantRow, "2026-27")).toMatchObject({
+      teamId: "1610612757",
+      teamAbbreviation: "POR",
+    });
+  });
+
+  it("applies reported-agreement roster moves with status metadata only to upcoming contract seasons", () => {
+    const jaylenBrownRow: PlayerContractRow = {
+      sourceRank: 1,
+      playerSlug: "jaylen-brown",
+      playerName: "Jaylen Brown",
+      teamId: "1610612738",
+      teamAbbreviation: "BOS",
+      historicalTeamId: "1610612738",
+      historicalTeamAbbreviation: "BOS",
+      position: "SF",
+      salaryBySeason: {
+        "2025-26": 53_142_264,
+        "2026-27": 57_078_728,
+      },
+      optionsBySeason: {},
+      guaranteeStatusBySeason: {},
+      guaranteedAmount: 285_393_640,
+      needsFollowup: false,
+      contractDeals: [],
+    };
+
+    expect(currentTeamOverrideForPlayerSlug("jaylen-brown")).toMatchObject({
+      fromTeamAbbreviation: "BOS",
+      toTeamAbbreviation: "PHI",
+      status: "reported_agreement",
+      statusLabel: "Reported Agreement",
+      sourceName: "NBA.com offseason deals tracker",
+      sourceNote: "multiple reports",
+      rawTrackerLine: "Jaylen Brown joins via trade with Celtics (multiple reports)",
+      matchedStatusMarker: "multiple reports",
+    });
+    expect(applyCurrentRosterContractOverlay(jaylenBrownRow, "2025-26")).toMatchObject({
+      teamId: "1610612738",
+      teamAbbreviation: "BOS",
+    });
+    expect(applyCurrentRosterContractOverlay(jaylenBrownRow, "2026-27")).toMatchObject({
+      teamId: "1610612755",
+      teamAbbreviation: "PHI",
     });
   });
 
@@ -68,22 +110,52 @@ describe("player contract summaries", () => {
     delete process.env.DATABASE_URL;
 
     try {
-      const [phoenixUpcoming, charlotteUpcoming, charlotteHistorical] = await Promise.all([
-        listPlayerContracts({ season: "2026-27", teamId: "1610612756", all: true, pageSize: 1000 }),
-        listPlayerContracts({ season: "2026-27", teamId: "1610612766", all: true, pageSize: 1000 }),
-        listPlayerContracts({ season: "2025-26", teamId: "1610612766", all: true, pageSize: 1000 }),
+      const [portlandUpcoming, memphisUpcoming, memphisHistorical] = await Promise.all([
+        listPlayerContracts({ season: "2026-27", teamId: "1610612757", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2026-27", teamId: "1610612763", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2025-26", teamId: "1610612763", all: true, pageSize: 1000 }),
       ]);
 
-      expect(phoenixUpcoming.rows.find((row) => row.playerSlug === "miles-bridges")).toMatchObject({
-        playerName: "Miles Bridges",
-        teamId: "1610612756",
-        teamAbbreviation: "PHX",
+      expect(portlandUpcoming.rows.find((row) => row.playerSlug === "ja-morant")).toMatchObject({
+        playerName: "Ja Morant",
+        teamId: "1610612757",
+        teamAbbreviation: "POR",
       });
-      expect(charlotteUpcoming.rows.some((row) => row.playerSlug === "miles-bridges")).toBe(false);
-      expect(charlotteHistorical.rows.find((row) => row.playerSlug === "miles-bridges")).toMatchObject({
-        playerName: "Miles Bridges",
-        teamId: "1610612766",
-        teamAbbreviation: "CHA",
+      expect(memphisUpcoming.rows.some((row) => row.playerSlug === "ja-morant")).toBe(false);
+      expect(memphisHistorical.rows.find((row) => row.playerSlug === "ja-morant")).toMatchObject({
+        playerName: "Ja Morant",
+        teamId: "1610612763",
+        teamAbbreviation: "MEM",
+      });
+    } finally {
+      await closeDatabasePool();
+      if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = originalDatabaseUrl;
+    }
+  }, 15_000);
+
+  it("filters reported-agreement 2026-27 contracts by projected team while preserving 2025-26 context", async () => {
+    const originalDatabaseUrl = process.env.DATABASE_URL;
+    await closeDatabasePool();
+    delete process.env.DATABASE_URL;
+
+    try {
+      const [philadelphiaUpcoming, bostonUpcoming, bostonHistorical] = await Promise.all([
+        listPlayerContracts({ season: "2026-27", teamId: "1610612755", q: "Jaylen Brown", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2026-27", teamId: "1610612738", q: "Jaylen Brown", all: true, pageSize: 1000 }),
+        listPlayerContracts({ season: "2025-26", teamId: "1610612738", q: "Jaylen Brown", all: true, pageSize: 1000 }),
+      ]);
+
+      expect(philadelphiaUpcoming.rows.find((row) => row.playerSlug === "jaylen-brown")).toMatchObject({
+        playerName: "Jaylen Brown",
+        teamId: "1610612755",
+        teamAbbreviation: "PHI",
+      });
+      expect(bostonUpcoming.rows.some((row) => row.playerSlug === "jaylen-brown")).toBe(false);
+      expect(bostonHistorical.rows.find((row) => row.playerSlug === "jaylen-brown")).toMatchObject({
+        playerName: "Jaylen Brown",
+        teamId: "1610612738",
+        teamAbbreviation: "BOS",
       });
     } finally {
       await closeDatabasePool();

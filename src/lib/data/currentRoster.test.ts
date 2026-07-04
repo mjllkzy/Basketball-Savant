@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildUpcomingRosterRows, currentTeamOverrideForPlayerSlug } from "@/lib/data/currentRoster";
+import { buildUpcomingRosterRows, currentRosterTransactions, currentTeamOverrideForPlayerSlug } from "@/lib/data/currentRoster";
 import type { RuntimePlayerFallback, RuntimeTeamFallback } from "@/lib/data/runtimeFallbacks.server";
 
 const playerBase = {
@@ -94,6 +94,13 @@ describe("current roster overlay", () => {
       season: "2026-27",
       fromTeamAbbreviation: "SAC",
       toTeamAbbreviation: "ATL",
+      status: "official",
+      statusLabel: "Official",
+      sourceName: "NBA.com offseason deals tracker",
+      sourceUrl: "https://www.nba.com/news/nba-offseason-deals-2026",
+      sourceNote: "officially announced",
+      rawTrackerLine: "Devin Carter departs via trade with Hawks (officially announced)",
+      matchedStatusMarker: "officially announced",
     });
     expect(upcomingCarter).toMatchObject({
       player_slug: "devin-carter",
@@ -112,26 +119,53 @@ describe("current roster overlay", () => {
     });
   });
 
-  it("includes the NBA.com offseason trade ledger for major 2026-27 roster moves", () => {
-    expect(currentTeamOverrideForPlayerSlug("miles-bridges")).toMatchObject({
+  it("includes official and reported-agreement moves while excluding rumors from the 2026-27 roster ledger", () => {
+    expect(currentTeamOverrideForPlayerSlug("ja-morant")).toMatchObject({
       season: "2026-27",
-      fromTeamAbbreviation: "CHA",
-      toTeamAbbreviation: "PHX",
-    });
-    expect(currentTeamOverrideForPlayerSlug("lamelo-ball")).toMatchObject({
-      season: "2026-27",
-      fromTeamAbbreviation: "CHA",
-      toTeamAbbreviation: "MIN",
-    });
-    expect(currentTeamOverrideForPlayerSlug("naz-reid")).toMatchObject({
-      season: "2026-27",
-      fromTeamAbbreviation: "MIN",
-      toTeamAbbreviation: "CHA",
+      fromTeamAbbreviation: "MEM",
+      toTeamAbbreviation: "POR",
+      status: "official",
+      statusLabel: "Official",
+      statusDetail: "officially announced",
+      sourceName: "NBA.com offseason deals tracker",
+      sourceUrl: "https://www.nba.com/news/nba-offseason-deals-2026",
+      sourceNote: "officially announced",
+      rawTrackerLine: "Ja Morant joins via trade with Grizzlies (officially announced)",
+      matchedStatusMarker: "officially announced",
     });
     expect(currentTeamOverrideForPlayerSlug("jaylen-brown")).toMatchObject({
       season: "2026-27",
       fromTeamAbbreviation: "BOS",
       toTeamAbbreviation: "PHI",
+      status: "reported_agreement",
+      statusLabel: "Reported Agreement",
+      statusDetail: "multiple reports",
+      sourceName: "NBA.com offseason deals tracker",
+      sourceUrl: "https://www.nba.com/news/nba-offseason-deals-2026",
+      sourceNote: "multiple reports",
+      rawTrackerLine: "Jaylen Brown joins via trade with Celtics (multiple reports)",
+      matchedStatusMarker: "multiple reports",
     });
+    expect(currentTeamOverrideForPlayerSlug("lamelo-ball")).toMatchObject({
+      fromTeamAbbreviation: "CHA",
+      toTeamAbbreviation: "MIN",
+      status: "reported_agreement",
+    });
+    expect(currentTeamOverrideForPlayerSlug("naz-reid")).toMatchObject({
+      fromTeamAbbreviation: "MIN",
+      toTeamAbbreviation: "CHA",
+      status: "reported_agreement",
+    });
+    expect(currentTeamOverrideForPlayerSlug("trey-murphy-iii")).toBeUndefined();
+    expect(currentRosterTransactions.some((transaction) => transaction.status === "excluded_rumor")).toBe(false);
+    expect(
+      currentRosterTransactions.every(
+        (transaction) =>
+          transaction.sourceName &&
+          transaction.sourceUrl &&
+          transaction.rawTrackerLine &&
+          transaction.matchedStatusMarker,
+      ),
+    ).toBe(true);
   });
 });

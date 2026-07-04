@@ -9,7 +9,17 @@ type CurrentRosterMove = {
   nbaPlayerId: string;
   fromTeamAbbreviation: string;
   toTeamAbbreviation: string;
+  status?: CurrentRosterMoveStatus;
+  statusLabel?: string;
+  statusDetail?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  sourceNote?: string;
+  rawTrackerLine?: string;
+  matchedStatusMarker?: string;
 };
+
+export type CurrentRosterMoveStatus = "official" | "reported_agreement";
 
 type CurrentRosterTransactionRecord = {
   id: string;
@@ -30,6 +40,13 @@ export type CurrentRosterTransaction = {
   nbaPlayerId: string;
   fromTeamAbbreviation: string;
   toTeamAbbreviation: string;
+  status: CurrentRosterMoveStatus;
+  statusLabel: string;
+  statusDetail: string;
+  sourceName: string;
+  sourceNote: string;
+  rawTrackerLine: string;
+  matchedStatusMarker: string;
   sourceLabel: string;
   sourceUrl: string;
   officialDate: string;
@@ -38,19 +55,31 @@ export type CurrentRosterTransaction = {
 function flattenRosterLedger() {
   const transactions = rosterLedger.transactions as CurrentRosterTransactionRecord[];
   return transactions.flatMap((transaction) =>
-    transaction.moves.map((move) => ({
-      season: transaction.season,
-      transactionId: transaction.id,
-      type: transaction.type,
-      playerSlug: move.playerSlug,
-      playerName: move.playerName,
-      nbaPlayerId: move.nbaPlayerId,
-      fromTeamAbbreviation: move.fromTeamAbbreviation,
-      toTeamAbbreviation: move.toTeamAbbreviation,
-      sourceLabel: transaction.sourceLabel,
-      sourceUrl: transaction.sourceUrl,
-      officialDate: transaction.officialDate,
-    })),
+    transaction.moves.map((move) => {
+      const status = move.status ?? "official";
+      const statusLabel = move.statusLabel ?? (status === "reported_agreement" ? "Reported Agreement" : "Official");
+
+      return {
+        season: transaction.season,
+        transactionId: transaction.id,
+        type: transaction.type,
+        playerSlug: move.playerSlug,
+        playerName: move.playerName,
+        nbaPlayerId: move.nbaPlayerId,
+        fromTeamAbbreviation: move.fromTeamAbbreviation,
+        toTeamAbbreviation: move.toTeamAbbreviation,
+        status,
+        statusLabel,
+        statusDetail: move.statusDetail ?? statusLabel,
+        sourceName: move.sourceName ?? transaction.sourceLabel,
+        sourceNote: move.sourceNote ?? "",
+        rawTrackerLine: move.rawTrackerLine ?? "",
+        matchedStatusMarker: move.matchedStatusMarker ?? move.statusDetail ?? statusLabel,
+        sourceLabel: transaction.sourceLabel,
+        sourceUrl: move.sourceUrl ?? transaction.sourceUrl,
+        officialDate: transaction.officialDate,
+      };
+    }),
   );
 }
 
