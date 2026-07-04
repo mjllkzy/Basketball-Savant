@@ -117,6 +117,40 @@ describe("player contract summaries", () => {
       expect(row ? hasPendingActiveContractForSeason(row, "2026-27") : false).toBe(true);
       expect(row ? freeAgencyStatusForSeason(row.contractDeals, "2026-27") : null).toBeNull();
       expect(row?.salaryBySeason["2026-27"]).toBeUndefined();
+      expect(row?.guaranteeStatusBySeason["2026-27"]).toBe("Details Pending");
+    } finally {
+      await closeDatabasePool();
+      if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = originalDatabaseUrl;
+    }
+  }, 15_000);
+
+  it("promotes official agreement notes into active pending deal windows", async () => {
+    const originalDatabaseUrl = process.env.DATABASE_URL;
+    await closeDatabasePool();
+    delete process.env.DATABASE_URL;
+
+    try {
+      const result = await listPlayerContracts({
+        season: "2026-27",
+        teamId: "1610612762",
+        q: "Nurkic",
+        all: true,
+        pageSize: 1000,
+      });
+      const row = result.rows.find((contractRow) => contractRow.playerSlug === "jusuf-nurkic");
+
+      expect(row).toBeDefined();
+      expect(row).toMatchObject({
+        playerName: "Jusuf Nurkić",
+        teamId: "1610612762",
+        teamAbbreviation: "UTA",
+      });
+      expect(row ? hasActiveContractForSeason(row, "2026-27") : false).toBe(true);
+      expect(row ? hasPendingActiveContractForSeason(row, "2026-27") : false).toBe(true);
+      expect(row ? freeAgencyStatusForSeason(row.contractDeals, "2026-27") : null).toBeNull();
+      expect(row?.salaryBySeason["2026-27"]).toBe(11_000_000);
+      expect(row?.guaranteeStatusBySeason["2026-27"]).toBe("Details Pending");
     } finally {
       await closeDatabasePool();
       if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;

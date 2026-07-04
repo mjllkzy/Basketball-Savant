@@ -741,7 +741,8 @@ function filterAndPageContracts(rows: PlayerContractRow[], params: PlayerContrac
   const requestedPageSize = params.all ? 1000 : params.pageSize ?? 100;
   const pageSize = Math.min(1000, Math.max(1, requestedPageSize));
   const selectedSeason = contractSeason(params.season);
-  const query = params.q?.trim().toLowerCase();
+  const query = params.q?.trim();
+  const normalizedQuery = query ? normalizedContractName(query) : "";
   const sort = params.sort ?? "selected_salary";
   const order = params.order ?? (sort === "player" || sort === "team" || sort === "position" ? "asc" : "desc");
 
@@ -749,7 +750,10 @@ function filterAndPageContracts(rows: PlayerContractRow[], params: PlayerContrac
 
   const filtered = rosterAdjustedRows
     .filter((row) => hasContractSeasonContext(row, selectedSeason))
-    .filter((row) => !query || `${row.playerName} ${row.teamAbbreviation} ${row.position ?? ""}`.toLowerCase().includes(query))
+    .filter((row) => {
+      if (!normalizedQuery) return true;
+      return normalizedContractName(`${row.playerName} ${row.teamAbbreviation} ${row.position ?? ""}`).includes(normalizedQuery);
+    })
     .filter((row) => !params.teamId || row.teamId === params.teamId || row.teamAbbreviation === params.teamId)
     .filter((row) => positionMatches(row.position, params.position))
     .sort((left, right) =>
