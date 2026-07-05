@@ -1,142 +1,202 @@
 [
   {
-    "id": "josh-okogie-jazz-free-agency-2026",
-    "title": "Jazz reportedly agree to 2-year deal with Josh Okogie",
+    "id": "hoops-rumors-stein-fischers-latest-kuminga-lakers-knicks-diabate-ayton-temple",
+    "title": "Kuminga, Lakers, Knicks, Diabate, Ayton, Temple",
     "category": "Free Agency",
     "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-04T02:00:10Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/josh-okogie-jazz-free-agency-2026",
-    "summary": "NBA.com relays ESPN's Shams Charania report that Utah agreed to a two-year, $12 million contract with veteran guard Josh Okogie."
+    "publishedAt": "2026-07-05T04:05:12.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/stein-fischers-latest-kuminga-lakers-knicks-diabate-ayton-temple.html",
+    "summary": "The Lakers are focusing on free agent forward Jonathan Kuminga as they search for another wing and one more big man to round out their roster."
   },
   {
-    "id": "andre-drummond-knicks-free-agency-2026",
-    "title": "Knicks reportedly sign Andre Drummond for frontcourt depth",
+    "id": "hoops-rumors-jazz-adding-trey-alexander-on-two-way-deal",
+    "title": "Jazz Adding Trey Alexander On Two-Way Deal",
+    "category": "Transaction",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-05T03:32:30.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/jazz-adding-trey-alexander-on-two-way-deal.html",
+    "summary": "Trey Alexander will sign a two-way contract with the Jazz."
+  },
+  {
+    "id": "hoops-rumors-jazz-notes-peterson-george-kessler-bailey",
+    "title": "Jazz: Peterson, George, Kessler, Bailey",
+    "category": "League",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-05T02:48:11.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/jazz-notes-peterson-george-kessler-bailey.html",
+    "summary": "Darryn Peterson received his first standing ovation from a partisan Jazz crowd when he led his team onto the court for warm-ups prior to Saturday’s game..."
+  },
+  {
+    "id": "hoops-rumors-nuggets-notes-watson-valanciunas-nnaji-johnson-lebron",
+    "title": "Nuggets: Watson, Valanciunas, Nnaji, Johnson, LeBron",
+    "category": "League",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-05T01:31:02.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/nuggets-notes-watson-valanciunas-nnaji-johnson-lebron.html",
+    "summary": "Nuggets forward Peyton Watson is hoping to top $25MM in average annual value in his next contract."
+  },
+  {
+    "id": "hoops-rumors-patrick-ewing-to-join-wizards-coaching-staff",
+    "title": "Patrick Ewing To Join Wizards’ Coaching Staff; Steve Clifford Being Hired As Advisor",
+    "category": "Coaching",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-05T00:17:07.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/patrick-ewing-to-join-wizards-coaching-staff.html",
+    "summary": "Former NBA star Patrick Ewing has agreed to become an assistant coach under Brian Keefe in Washington."
+  },
+  {
+    "id": "hoops-rumors-southwest-notes-boylan-lopez-clayton-pippen-spurs",
+    "title": "Southwest: Boylan, Lopez, Clayton, Pippen, Spurs",
+    "category": "Coaching",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-04T21:02:25.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/southwest-notes-boylan-lopez-clayton-pippen-spurs.html",
+    "summary": "A report in May indicated that veteran assistant coach Joe Boylan would be joining Taylor Jenkins‘ staff in Milwaukee..."
+  },
+  {
+    "id": "hoops-rumors-heat-notes-fontecchio-donaldson-conwell-hardaway",
+    "title": "Heat: Fontecchio, Donaldson, Conwell, Hardaway",
+    "category": "Transaction",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-04T20:22:01.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/heat-notes-fontecchio-donaldson-conwell-hardaway.html",
+    "summary": "During a Zoom call with reporters, forward Simone Fontecchio explained his decision to re-sign with the Heat."
+  },
+  {
+    "id": "hoops-rumors-garrett-temple-retiring-as-player-joining-mavs-coaching-staff",
+    "title": "Garrett Temple Retiring As Player, Joining Mavs’ Coaching Staff",
+    "category": "Coaching",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-04T18:50:23.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/garrett-temple-retiring-as-player-joining-mavs-coaching-staff.html",
+    "summary": "Veteran wing Garrett Temple is retiring as a player to join the coaching staff of new Mavericks head coach Dusty May."
+  },
+  {
+    "id": "hoops-rumors-rich-paul-lebrons-decision-likely-isnt-imminent",
+    "title": "Rich Paul: LeBron’s Decision Likely Not Imminent",
+    "category": "League",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-04T18:17:02.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/rich-paul-lebrons-decision-likely-isnt-imminent.html",
+    "summary": "Speaking to Forbes contributor Mark Medina, Klutch Sports CEO Rich Paul said he’s not expecting his star client, LeBron James..."
+  },
+  {
+    "id": "live-updates-2026-salt-lake-city-summer-league",
+    "title": "Recap: 2026 Salt Lake City Summer League, Day 1 | Darryn Peterson",
+    "category": "League",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-04T17:20:03Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/live-updates-2026-salt-lake-city-summer-league",
+    "summary": "Tap in with the NBA.com live blog as the Salt Lake City Summer League gets underway on the ESPN family of networks and Prime Video."
+  },
+  {
+    "id": "hoops-rumors-bucks-agree-to-two-way-contract-with-kam-jones",
+    "title": "Bucks Agree To Two-Way Contract With Kam Jones",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-04T15:13:33.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/bucks-agree-to-two-way-contract-with-kam-jones.html",
+    "summary": "The Bucks and guard Kam Jones have agreed to a two-way deal, reports HoopsHype’s Michael Scotto ."
+  },
+  {
+    "id": "2026-salt-lake-city-summer-league-hawks-jazz",
+    "title": "2026 Salt Lake City Summer League: Peterson leads Jazz over Hawks",
+    "category": "League",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-04T14:53:56Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/2026-salt-lake-city-summer-league-hawks-jazz",
+    "summary": "Darryn Peterson scores 28 points to lead the Utah Jazz over the Atlanta Hawks in OT, 103-102, in Summer League action Saturday."
+  },
+  {
+    "id": "2026-salt-lake-city-summer-league-grizzlies-thunder",
+    "title": "2026 Salt Lake City Summer League: Boozer, Grizzlies score winning debut",
+    "category": "League",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-04T14:49:36Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/2026-salt-lake-city-summer-league-grizzlies-thunder",
+    "summary": "Olivier-Maxence Prosper and Cameron Boozer lead Memphis to 111-74 win against OKC in Salt Lake City."
+  },
+  {
+    "id": "2026-california-classic-summer-league-nets-kings",
+    "title": "2026 California Classic Summer League: Kings beat Nets on late 3",
+    "category": "League",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-04T14:45:35Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/2026-california-classic-summer-league-nets-kings",
+    "summary": "Nique Clifford nails a 3 in the final seconds to lead the Kings to a 79-76 win over the Nets in California Classic action."
+  },
+  {
+    "id": "hoops-rumors-2026-nba-draft-pick-signings",
+    "title": "2026 NBA Draft Pick Signings",
+    "category": "Draft Rumor",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-04T14:43:28.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/2026-nba-draft-pick-signings.html",
+    "summary": "Free agent and trade news has generated the biggest NBA headlines over the last couple weeks..."
+  },
+  {
+    "id": "hoops-rumors-pacific-notes-doncic-karaban-lendeborg-carr-flagler-mogbo",
+    "title": "Pacific: Doncic, Karaban, Lendeborg, Carr, Flagler, Mogbo",
+    "category": "Roster",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-04T13:36:00.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/pacific-notes-doncic-karaban-lendeborg-carr-flagler-mogbo.html",
+    "summary": "Luka Doncic gives a thumbs up to the flurry of Lakers roster moves."
+  },
+  {
+    "id": "2026-nba-champion-knicks-sign-andre-drummond-to-fill-out-frontcourt",
+    "title": "2026 NBA champion Knicks sign Andre Drummond to fill out frontcourt",
     "category": "Free Agency",
     "reportingStatus": "Official",
     "publishedAt": "2026-07-03T23:27:06Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/2026-nba-champion-knicks-sign-andre-drummond-to-fill-out-frontcourt",
-    "summary": "NBA.com reports ESPN and HoopsHype say Andre Drummond agreed to a one-year deal with the defending champion Knicks."
+    "summary": "Multiple news outlets are reporting that the Knicks have signed veteran center Andre Drummond to a one-year deal for $3.8 million."
   },
   {
     "id": "jordan-miller-clippers-free-agency-2026",
-    "title": "Clippers reportedly agree to 3-year deal with Jordan Miller",
+    "title": "Clippers agree to 3-year deal with Jordan Miller",
     "category": "Free Agency",
-    "reportingStatus": "Rumor",
+    "reportingStatus": "Official",
     "publishedAt": "2026-07-03T21:20:38Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/jordan-miller-clippers-free-agency-2026",
-    "summary": "NBA.com relays ESPN's Shams Charania report that restricted free agent Jordan Miller is returning to LA on a three-year, $15.3 million contract."
+    "summary": "The 26-year old guard is returning to LA after averaging 10.0 points and 2.3 assists in 2025-26."
   },
   {
-    "id": "deandre-ayton-wizards-lakers-trade-2026",
-    "title": "Wizards reportedly add Deandre Ayton in Lakers trade",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
+    "id": "deandre-ayton-trade-wizards-lakers",
+    "title": "Wizards reportedly add Deandre Ayton in trade with Lakers",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
     "publishedAt": "2026-07-03T18:00:12Z",
     "sourceName": "NBA.com",
     "sourceUrl": "https://www.nba.com/news/deandre-ayton-trade-wizards-lakers",
-    "summary": "NBA.com cites ESPN's Shams Charania on a reported deal sending Deandre Ayton to Washington for Jaden Hardy and two future second-round picks."
+    "summary": "The former No. 1 overall pick is headed to his fourth team after Los Angeles reportedly shipped him to Washington."
   },
   {
-    "id": "dorian-finney-smith-hornets-rockets-trade-2026",
-    "title": "Hornets reportedly acquire Dorian Finney-Smith from Rockets",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-03T17:18:09Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/dorian-finney-smith-hornets-trade",
-    "summary": "NBA.com relays ESPN's Shams Charania report that Houston is sending Dorian Finney-Smith and three second-round picks to Charlotte."
-  },
-  {
-    "id": "neemias-queta-celtics-free-agency-2026",
-    "title": "Celtics reportedly agree to 4-year deal with Neemias Queta",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-03T14:03:14Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/neemias-queta-free-agency-2026",
-    "summary": "NBA.com cites ESPN's Shams Charania on Boston's reported four-year, $56 million agreement with center Neemias Queta."
-  },
-  {
-    "id": "tari-eason-rockets-free-agency-2026",
-    "title": "Rockets reportedly re-sign Tari Eason on 5-year deal",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-03T00:48:37Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/tari-eason-free-agency-2026",
-    "summary": "NBA.com reports ESPN has Tari Eason returning to Houston on a five-year, $81 million deal, with The Athletic reporting a fifth-year player option."
-  },
-  {
-    "id": "raptors-extend-darko-rajakovic-2026",
-    "title": "Raptors extend coach Darko Rajakovic",
+    "id": "the-athletic-spurs-hire-billy-donovan-as-lead-assistant-coach",
+    "title": "The Athletic: Spurs to reportedly hire Billy Donovan as lead assistant coach",
     "category": "Coaching",
     "reportingStatus": "Official",
-    "publishedAt": "2026-07-02T19:09:44Z",
+    "publishedAt": "2026-07-03T01:35:19Z",
     "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/toronto-raptors-extend-darko-rajakovic",
-    "summary": "Toronto officially announced a multi-year extension for Darko Rajakovic after the Raptors improved by 16 wins and earned the East's No. 5 seed."
-  },
-  {
-    "id": "anfernee-simons-sixers-free-agency-2026",
-    "title": "Sixers reportedly agree to 2-year deal with Anfernee Simons",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-02T19:00:41Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/anfernee-simons-sixers-free-agency-2026",
-    "summary": "NBA.com says multiple reports, including ESPN's Shams Charania and Marc Stein, have Anfernee Simons joining Philadelphia on a two-year deal."
-  },
-  {
-    "id": "jaylen-brown-sixers-celtics-trade-2026",
-    "title": "Sixers reportedly set to acquire Jaylen Brown from Celtics",
-    "category": "Trade",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-01T22:41:35Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/reports-sixers-to-acquire-jaylen-brown-from-celtics",
-    "summary": "NBA.com reports ESPN first had the Jaylen Brown-for-Paul George framework, with The Athletic and The Boston Globe also confirming the deal."
-  },
-  {
-    "id": "lakers-add-sexton-grimes-mamukelashvili-2026",
-    "title": "Lakers reportedly add Sexton, Grimes and Mamukelashvili",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-01T16:49:32Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/sandro-mamukelashvili-collin-sexton-quentin-grimes-free-agency-2026",
-    "summary": "NBA.com cites multiple reports that the Lakers reached agreements with Collin Sexton, Quentin Grimes and Sandro Mamukelashvili."
-  },
-  {
-    "id": "walker-kessler-lakers-jazz-trade-2026",
-    "title": "Lakers reportedly add Walker Kessler in Jazz trade",
-    "category": "Trade",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-01T15:49:20Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/walker-kessler-trade-los-angeles-lakers",
-    "summary": "NBA.com says multiple reports have Utah sending Walker Kessler to the Lakers for two unprotected first-round picks and two pick swaps."
-  },
-  {
-    "id": "kawhi-leonard-raptors-clippers-trade-2026",
-    "title": "Raptors reportedly agree to acquire Kawhi Leonard from Clippers",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T20:12:02Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/raptors-clippers-kawhi-leonard-trade",
-    "summary": "NBA.com cites multiple reports that Toronto is reacquiring Kawhi Leonard for Brandon Ingram, Gradey Dick and a package of draft picks."
-  },
-  {
-    "id": "lebron-james-leaving-lakers-free-agency-2026",
-    "title": "LeBron James reportedly plans to leave Lakers",
-    "category": "Free Agency",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-06-30T16:20:44Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/lebron-james-free-agency-2026",
-    "summary": "NBA.com reports multiple outlets citing Klutch Sports CEO Rich Paul say LeBron James plans to play for a team other than the Lakers in 2026-27."
+    "sourceUrl": "https://www.nba.com/news/the-athletic-spurs-hire-billy-donovan-as-lead-assistant-coach",
+    "summary": "Former Bulls head coach Billy Donovan agrees to join Mitch Johnson’s staff in San Antonio, a team source confirms."
   }
 ]
