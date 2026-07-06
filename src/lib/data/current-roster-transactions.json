@@ -3,7 +3,7 @@
     "season": "2026-27",
     "sourceLabel": "NBA.com offseason deals tracker",
     "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-    "updatedAt": "2026-07-04T01:48:41Z",
+    "updatedAt": "2026-07-05T15:32:03Z",
     "description": "Persistent roster-impacting trade ledger for the upcoming season. Generated from explicit NBA.com trade additions/departures. Official and credible reported agreements are projected into rosters; rumors and unverified items are excluded from payroll calculations."
   },
   "transactions": [
@@ -11,7 +11,7 @@
       "id": "nba-offseason-deals-2026-trades",
       "season": "2026-27",
       "type": "trade",
-      "officialDate": "2026-07-04",
+      "officialDate": "2026-07-05",
       "sourceLabel": "NBA.com offseason deals tracker",
       "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
       "moves": [
