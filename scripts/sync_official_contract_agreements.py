@@ -252,7 +252,11 @@ def derive_deal_from_contract_row(row: dict[str, Any]) -> dict[str, Any] | None:
     source_url = agreement_context(row).get("source_url") or (row_source_urls(row) or [None])[0]
     team = effective_agreement_team(row)
     label_years = f"{years}-year" if years else "new"
-    label = f"Reported {label_years} agreement with {team}".strip()
+    label = (
+        f"Reported {label_years} offer sheet from {team}"
+        if re.search(r"\boffer\s+sheet\b", text, re.IGNORECASE)
+        else f"Reported {label_years} agreement with {team}"
+    ).strip()
 
     return {
         "source": source_name_from_url(source_url),
@@ -299,6 +303,9 @@ def merge_deal(existing: dict[str, Any], incoming: dict[str, Any]) -> bool:
             continue
 
         if existing.get(key) in (None, "", {}, []) and value not in (None, "", {}, []):
+            existing[key] = value
+            changed = True
+        elif key == "label" and value and existing.get(key) != value:
             existing[key] = value
             changed = True
         elif key == "pending" and value is True and existing.get(key) is not True:
@@ -425,6 +432,16 @@ def contains_normalized_name(text: str, name: str) -> bool:
     return re.search(rf"(?:^|\s){re.escape(name)}(?:\s|$)", text) is not None
 
 
+def extract_team_abbreviation(title: str, text: str, teams: list[tuple[str, str]]) -> str | None:
+    normalized_title = normalize(title)
+    title_match = next((abbr for alias, abbr in teams if contains_normalized_name(normalized_title, alias)), None)
+    if title_match:
+        return title_match
+
+    normalized_text = normalize(text)
+    return next((abbr for alias, abbr in teams if contains_normalized_name(normalized_text, alias)), None)
+
+
 def sync_contract_rows_from_news(
     contracts: list[dict[str, Any]],
     news: list[dict[str, Any]],
@@ -444,13 +461,12 @@ def sync_contract_rows_from_news(
         if not AGREEMENT_RE.search(title) or NEWS_SKIP_RE.search(text):
             continue
 
-        normalized_text = normalize(text)
         normalized_title = normalize(title)
         player_row = next((row for name, row in name_index if contains_normalized_name(normalized_title, name)), None)
         if not player_row:
             continue
 
-        team_abbreviation = next((abbr for alias, abbr in teams if contains_normalized_name(normalized_text, alias)), None)
+        team_abbreviation = extract_team_abbreviation(title, text, teams)
         if not team_abbreviation:
             continue
 

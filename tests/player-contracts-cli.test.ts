@@ -226,6 +226,64 @@ assert deal["pending"] is True
     expect(result.status).toBe(0);
   });
 
+  runIfPython("official agreement sync prefers headline team over matching-rights summary team", () => {
+    const code = `
+import importlib.util
+import pathlib
+
+script_path = pathlib.Path("scripts/sync_official_contract_agreements.py")
+spec = importlib.util.spec_from_file_location("sync_official_contract_agreements", script_path)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+contracts = [
+    {
+        "source_rank": 437,
+        "player_name": "Quinten Post",
+        "matched_player_slug": "quinten-post",
+        "matched_player_name": "Quinten Post",
+        "team_abbreviation": "GSW",
+        "salaries": {"2025-26": 1955377},
+        "source_urls": [],
+        "contract_notes": "",
+        "needs_followup": False,
+        "guaranteed": 1955377,
+    }
+]
+news = [
+    {
+        "title": "Grizzlies sign Quinten Post to 3-year offer sheet",
+        "summary": "Golden State has until Tuesday to match Memphis' three-year offer sheet for Post.",
+        "reportingStatus": "Official",
+        "sourceName": "NBA.com",
+        "sourceUrl": "https://www.nba.com/news/quinten-post-free-agency-2026",
+    }
+]
+runtime = {
+    "teams": [
+        {"abbreviation": "GSW", "city": "Golden State", "name": "Warriors", "slug": "golden-state-warriors"},
+        {"abbreviation": "MEM", "city": "Memphis", "name": "Grizzlies", "slug": "memphis-grizzlies"},
+    ]
+}
+
+assert module.sync_contract_rows_from_news(contracts, news, runtime) == 1
+assert contracts[0]["team_abbreviation"] == "GSW"
+
+deal = module.derive_deal_from_contract_row(contracts[0])
+assert deal["label"] == "Reported 3-year offer sheet from MEM"
+assert deal["source_url"] == "https://www.nba.com/news/quinten-post-free-agency-2026"
+assert deal["start_year"] == 2026
+assert deal["end_year"] == 2028
+assert deal["pending"] is True
+`;
+    const result = spawnSync(pythonCommand!, ["-c", code], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+  });
+
   runIfPython("validates local contract data without DATABASE_URL", () => {
     const env = { ...process.env };
     delete env.DATABASE_URL;
