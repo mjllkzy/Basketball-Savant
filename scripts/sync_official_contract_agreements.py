@@ -35,6 +35,7 @@ RUNTIME_PATH = ROOT / "src/lib/data/generated/runtime-fallbacks.json"
 FIRST_FUTURE_START_YEAR = 2026
 CONTRACT_SEASONS = ("2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31")
 SEASON_START_YEAR = {season: 2025 + index for index, season in enumerate(CONTRACT_SEASONS)}
+AGREEMENT_CONTEXT_KEY = "__official_agreement_context"
 
 WORD_NUMBERS = {
     "one": 1,
@@ -129,15 +130,45 @@ def extract_years(text: str) -> int | None:
     return None
 
 
+def agreement_context(row: dict[str, Any]) -> dict[str, Any]:
+    context = row.get(AGREEMENT_CONTEXT_KEY)
+    return context if isinstance(context, dict) else {}
+
+
+def effective_agreement_team(row: dict[str, Any]) -> str:
+    context = agreement_context(row)
+    return str(context.get("team_abbreviation") or row.get("team_abbreviation") or "")
+
+
+def is_cross_team_agreement_context(row: dict[str, Any]) -> bool:
+    context_team = agreement_context(row).get("team_abbreviation")
+    source_team = row.get("team_abbreviation")
+    return bool(context_team and source_team and context_team != source_team)
+
+
+def row_source_urls(row: dict[str, Any]) -> list[str]:
+    urls = [url for url in row.get("source_urls") or [] if isinstance(url, str)]
+    context_url = agreement_context(row).get("source_url")
+    if isinstance(context_url, str) and context_url and context_url not in urls:
+        urls.insert(0, context_url)
+    return urls
+
+
 def row_text(row: dict[str, Any]) -> str:
     notes = row.get("contract_notes") or ""
-    urls = " ".join(row.get("source_urls") or [])
-    return f"{row.get('player_name', '')} {notes} {urls}"
+    urls = " ".join(row_source_urls(row))
+    context = agreement_context(row)
+    context_text = " ".join(
+        str(value)
+        for value in (context.get("title"), context.get("summary"), context.get("source_name"))
+        if value
+    )
+    return f"{row.get('player_name', '')} {notes} {context_text} {urls}"
 
 
 def has_official_agreement_context(row: dict[str, Any]) -> bool:
     text = row_text(row)
-    source_urls = row.get("source_urls") or []
+    source_urls = row_source_urls(row)
     trusted_source = any("nba.com" in url.lower() or "hoopsrumors.com" in url.lower() for url in source_urls)
     return bool(trusted_source and AGREEMENT_RE.search(text))
 
@@ -162,7 +193,10 @@ def future_salary_items(row: dict[str, Any]) -> list[tuple[str, int]]:
 
 def derive_deal_from_contract_row(row: dict[str, Any]) -> dict[str, Any] | None:
     text = row_text(row)
-    future_salaries = future_salary_items(row)
+    context_based_agreement = bool(agreement_context(row))
+    cross_team_agreement = is_cross_team_agreement_context(row)
+    future_salaries = [] if cross_team_agreement else future_salary_items(row)
+    use_row_term_fields = not (cross_team_agreement or (context_based_agreement and not future_salaries))
     has_agreement_note = has_official_agreement_context(row)
 
     if not has_agreement_note:
@@ -190,8 +224,8 @@ def derive_deal_from_contract_row(row: dict[str, Any]) -> dict[str, Any] | None:
     total = parsed_total or salary_total
     average_annual_value = round(total / years) if total else None
 
-    options = row.get("options_by_season") or {}
-    guarantees = row.get("guarantee_status_by_season") or {}
+    options = (row.get("options_by_season") or {}) if use_row_term_fields else {}
+    guarantees = (row.get("guarantee_status_by_season") or {}) if use_row_term_fields else {}
     options_by_season = {
         season: value
         for season, value in options.items()
@@ -203,15 +237,20 @@ def derive_deal_from_contract_row(row: dict[str, Any]) -> dict[str, Any] | None:
         if season in SEASON_START_YEAR and start_year <= SEASON_START_YEAR[season] <= end_year
     }
 
+    parsed_total_is_guaranteed = bool(parsed_total and re.search(r"\bguarantee(?:d|s)?\b", text, re.IGNORECASE))
+    total_guaranteed = row.get("guaranteed")
+    if not use_row_term_fields:
+        total_guaranteed = parsed_total if parsed_total_is_guaranteed else None
+
     salary_window_complete = len(salary_by_season) >= years
-    needs_followup = bool(row.get("needs_followup")) or not salary_window_complete or row.get("guaranteed") is None
+    needs_followup = bool(row.get("needs_followup")) or not salary_window_complete or total_guaranteed is None
     if needs_followup:
         for year in range(start_year, end_year + 1):
             season = season_from_start_year(year)
             guarantee_status_by_season.setdefault(season, "Details Pending")
 
-    source_url = (row.get("source_urls") or [None])[0]
-    team = row.get("team_abbreviation") or ""
+    source_url = agreement_context(row).get("source_url") or (row_source_urls(row) or [None])[0]
+    team = effective_agreement_team(row)
     label_years = f"{years}-year" if years else "new"
     label = f"Reported {label_years} agreement with {team}".strip()
 
@@ -225,7 +264,7 @@ def derive_deal_from_contract_row(row: dict[str, Any]) -> dict[str, Any] | None:
         "total": total,
         "average_annual_value": average_annual_value,
         "guaranteed_at_sign": None,
-        "total_guaranteed": row.get("guaranteed"),
+        "total_guaranteed": total_guaranteed,
         "free_agent": f"{end_year + 1} / UFA",
         "signed_using": None,
         "pending": needs_followup,
@@ -289,7 +328,7 @@ def find_or_create_deal_row(
         "player_name": source_row.get("player_name"),
         "matched_player_slug": source_row.get("matched_player_slug"),
         "matched_player_name": source_row.get("matched_player_name"),
-        "team_abbreviation": source_row.get("team_abbreviation"),
+        "team_abbreviation": effective_agreement_team(source_row),
         "salaryswish_url": None,
         "spotrac_url": None,
         "deals": [],
@@ -310,11 +349,16 @@ def sync_deal_rows(contracts: list[dict[str, Any]], deals_payload: dict[str, Any
             continue
 
         deal_row = find_or_create_deal_row(deal_rows, source_row)
-        for key in ("source_rank", "player_name", "matched_player_slug", "matched_player_name", "team_abbreviation"):
+        for key in ("source_rank", "player_name", "matched_player_slug", "matched_player_name"):
             value = source_row.get(key)
             if value is not None and deal_row.get(key) != value:
                 deal_row[key] = value
                 updated += 1
+
+        team_value = effective_agreement_team(source_row)
+        if team_value and deal_row.get("team_abbreviation") != team_value:
+            deal_row["team_abbreviation"] = team_value
+            updated += 1
 
         existing_deals = deal_row.setdefault("deals", [])
         incoming_key = deal_duplicate_key(incoming)
@@ -410,28 +454,15 @@ def sync_contract_rows_from_news(
         if not team_abbreviation:
             continue
 
-        source_url = item.get("url")
-        source_urls = list(player_row.get("source_urls") or [])
-        row_changed = False
-        if source_url and source_url not in source_urls:
-            source_urls.append(source_url)
-            player_row["source_urls"] = source_urls
-            row_changed = True
-
-        if player_row.get("team_abbreviation") != team_abbreviation:
-            player_row["team_abbreviation"] = team_abbreviation
-            row_changed = True
-
-        existing_note = player_row.get("contract_notes") or ""
-        if source_url and source_url not in existing_note:
-            player_row["contract_notes"] = summary or title
-            row_changed = True
-
-        if player_row.get("needs_followup") is not True:
-            player_row["needs_followup"] = True
-            row_changed = True
-
-        if row_changed:
+        context = {
+            "team_abbreviation": team_abbreviation,
+            "source_name": item.get("sourceName") or source_name_from_url(item.get("sourceUrl") or item.get("url")),
+            "source_url": item.get("sourceUrl") or item.get("url"),
+            "title": title,
+            "summary": summary,
+        }
+        if player_row.get(AGREEMENT_CONTEXT_KEY) != context:
+            player_row[AGREEMENT_CONTEXT_KEY] = context
             changed += 1
 
     return changed
@@ -458,34 +489,32 @@ def main() -> int:
         now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         deals_payload.setdefault("metadata", {})["official_agreement_sync"] = {
             "generated_at": now,
-            "contract_rows_updated_from_news": news_updates,
+            "agreement_contexts_found_from_news": news_updates,
             "pending_deals_inserted": inserted_deals,
             "deal_rows_updated": updated_deals,
-            "source_contracts_sha256": sha256_payload(contracts_payload.get("contracts") or []),
+            "source_contracts_sha256": sha256_payload(
+                [
+                    {key: value for key, value in row.items() if key != AGREEMENT_CONTEXT_KEY}
+                    for row in contracts_payload.get("contracts") or []
+                ]
+            ),
+            "writes_raw_contract_file": False,
         }
-
-        if news_updates:
-            contracts_payload.setdefault("metadata", {})["official_agreement_sync"] = {
-                "generated_at": now,
-                "contract_rows_updated_from_news": news_updates,
-            }
 
     print(
         json.dumps(
             {
-                "contract_rows_updated_from_news": news_updates,
+                "agreement_contexts_found_from_news": news_updates,
                 "pending_deals_inserted": inserted_deals,
                 "deal_rows_updated": updated_deals,
                 "write": args.write,
-                "files_written": bool(args.write and has_changes),
+                "files_written": ["data/raw/player_contract_deals_2025_2031.json"] if args.write and has_changes else [],
             },
             indent=2,
         )
     )
 
     if args.write and has_changes:
-        if news_updates:
-            write_json(CONTRACTS_PATH, contracts_payload)
         write_json(DEALS_PATH, deals_payload)
 
     return 0

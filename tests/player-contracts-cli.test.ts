@@ -160,6 +160,72 @@ describe("player contract import CLI", () => {
     expect(result.status).toBe(0);
   });
 
+  runIfPython("official agreement sync keeps cross-team news out of the raw compact row", () => {
+    const code = `
+import importlib.util
+import pathlib
+
+script_path = pathlib.Path("scripts/sync_official_contract_agreements.py")
+spec = importlib.util.spec_from_file_location("sync_official_contract_agreements", script_path)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+contracts = [
+    {
+        "source_rank": 999,
+        "player_name": "Keon Ellis",
+        "matched_player_slug": "keon-ellis",
+        "matched_player_name": "Keon Ellis",
+        "team_abbreviation": "SAC",
+        "salaries": {"2025-26": 2301587, "2026-27": 9999999},
+        "source_urls": [],
+        "contract_notes": "",
+        "needs_followup": False,
+        "guaranteed": None,
+    }
+]
+news = [
+    {
+        "title": "Reports: Keon Ellis agrees to 2-year deal with Nets",
+        "summary": "NBA.com reports Keon Ellis will join Brooklyn on a two-year, $18 million guaranteed deal.",
+        "reportingStatus": "Official",
+        "sourceName": "NBA.com",
+        "sourceUrl": "https://www.nba.com/news/keon-ellis-nets-deal",
+    }
+]
+runtime = {
+    "teams": [
+        {"abbreviation": "BKN", "city": "Brooklyn", "name": "Nets", "slug": "brooklyn-nets"}
+    ]
+}
+
+assert module.sync_contract_rows_from_news(contracts, news, runtime) == 1
+assert contracts[0]["team_abbreviation"] == "SAC"
+assert contracts[0]["source_urls"] == []
+assert contracts[0]["contract_notes"] == ""
+assert contracts[0]["needs_followup"] is False
+
+deal = module.derive_deal_from_contract_row(contracts[0])
+assert deal["label"] == "Reported 2-year agreement with BKN"
+assert deal["source"] == "NBA.com"
+assert deal["source_url"] == "https://www.nba.com/news/keon-ellis-nets-deal"
+assert deal["start_year"] == 2026
+assert deal["end_year"] == 2027
+assert deal["years"] == 2
+assert deal["total"] == 18000000
+assert deal["average_annual_value"] == 9000000
+assert deal["total_guaranteed"] == 18000000
+assert deal["salary_by_season"] == {}
+assert deal["pending"] is True
+`;
+    const result = spawnSync(pythonCommand!, ["-c", code], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+  });
+
   runIfPython("validates local contract data without DATABASE_URL", () => {
     const env = { ...process.env };
     delete env.DATABASE_URL;
