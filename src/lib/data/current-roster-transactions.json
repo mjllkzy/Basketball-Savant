@@ -3,7 +3,7 @@
     "season": "2026-27",
     "sourceLabel": "NBA.com offseason deals tracker",
     "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-    "updatedAt": "2026-07-05T15:32:03Z",
+    "updatedAt": "2026-07-07T06:18:18Z",
     "description": "Persistent roster-impacting trade ledger for the upcoming season. Generated from explicit NBA.com trade additions/departures. Official and credible reported agreements are projected into rosters; rumors and unverified items are excluded from payroll calculations."
   },
   "transactions": [
@@ -11,7 +11,7 @@
       "id": "nba-offseason-deals-2026-trades",
       "season": "2026-27",
       "type": "trade",
-      "officialDate": "2026-07-05",
+      "officialDate": "2026-07-07",
       "sourceLabel": "NBA.com offseason deals tracker",
       "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
       "moves": [
@@ -36,14 +36,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "OKC",
           "toTeamAbbreviation": "ATL",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Aaron Wiggins joins via trade with Thunder (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Aaron Wiggins departs via trade with Hawks (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "bobby-portis",
@@ -51,14 +51,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "MIL",
           "toTeamAbbreviation": "MIA",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Bobby Portis departs via trade with Heat (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Bobby Portis departs via trade with Heat (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "brandon-ingram",
@@ -126,14 +126,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "MIL",
           "toTeamAbbreviation": "MIA",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Giannis Antetokounmpo departs via trade with Heat (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Giannis Antetokounmpo departs via trade with Heat (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "gradey-dick",
@@ -171,14 +171,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "OKC",
           "toTeamAbbreviation": "DET",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "official release",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Isaiah Joe joins via trade with Thunder (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "official release",
+          "rawTrackerLine": "Isaiah Joe departs via trade with Pistons (official release)",
+          "matchedStatusMarker": "official release"
         },
         {
           "playerSlug": "ja-morant",
@@ -216,14 +216,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "MIA",
           "toTeamAbbreviation": "MIL",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Jaime Jaquez Jr. joins via trade with Heat (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Jaime Jaquez Jr. joins via trade with Heat (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "jaylen-brown",
@@ -231,14 +231,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "BOS",
           "toTeamAbbreviation": "PHI",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Jaylen Brown joins via trade with Celtics (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Jaylen Brown joins via trade with Celtics (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "jerami-grant",
@@ -306,14 +306,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "MIA",
           "toTeamAbbreviation": "MIL",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Kasparas Jaku\u010dionis joins via trade with Heat (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Kasparas Jaku\u010dionis joins via trade with Heat (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "kawhi-leonard",
@@ -336,14 +336,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "MIA",
           "toTeamAbbreviation": "MIL",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Kel\u2019el Ware joins via trade with Heat (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Kel\u2019el Ware joins via trade with Heat (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "kris-murray",
@@ -441,14 +441,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "PHI",
           "toTeamAbbreviation": "BOS",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Paul George departs via trade with Celtics (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Paul George departs via trade with Celtics (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "royce-o-neale",
@@ -486,14 +486,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "MIA",
           "toTeamAbbreviation": "MIL",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Tyler Herro joins via trade with Heat (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Tyler Herro joins via trade with Heat (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "walker-kessler",

@@ -87,12 +87,12 @@ describe("player contract summaries", () => {
     expect(currentTeamOverrideForPlayerSlug("jaylen-brown")).toMatchObject({
       fromTeamAbbreviation: "BOS",
       toTeamAbbreviation: "PHI",
-      status: "reported_agreement",
-      statusLabel: "Reported Agreement",
+      status: "official",
+      statusLabel: "Official",
       sourceName: "NBA.com offseason deals tracker",
-      sourceNote: "multiple reports",
-      rawTrackerLine: "Jaylen Brown joins via trade with Celtics (multiple reports)",
-      matchedStatusMarker: "multiple reports",
+      sourceNote: "officially announced",
+      rawTrackerLine: "Jaylen Brown joins via trade with Celtics (officially announced)",
+      matchedStatusMarker: "officially announced",
     });
     expect(applyCurrentRosterContractOverlay(jaylenBrownRow, "2025-26")).toMatchObject({
       teamId: "1610612738",

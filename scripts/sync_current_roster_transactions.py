@@ -110,6 +110,7 @@ def classify_move_status(line: str, source_note: str) -> tuple[str, str]:
     )
     official_markers = (
         "officially announced",
+        "official release",
         "team announced",
         "nba announced",
         "league announced",
