@@ -3,7 +3,7 @@
     "season": "2026-27",
     "sourceLabel": "NBA.com offseason deals tracker",
     "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-    "updatedAt": "2026-07-07T06:18:18Z",
+    "updatedAt": "2026-07-07T07:27:35Z",
     "description": "Persistent roster-impacting trade ledger for the upcoming season. Generated from explicit NBA.com trade additions/departures. Official and credible reported agreements are projected into rosters; rumors and unverified items are excluded from payroll calculations."
   },
   "transactions": [
@@ -111,14 +111,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "HOU",
           "toTeamAbbreviation": "CHA",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "multiple reports",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "multiple reports",
-          "rawTrackerLine": "Dorian Finney-Smith departs via trade with Hornets (multiple reports)",
-          "matchedStatusMarker": "multiple reports"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Dorian Finney-Smith departs via trade with Hornets (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "giannis-antetokounmpo",

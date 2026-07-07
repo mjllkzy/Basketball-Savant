@@ -11,10 +11,10 @@
     "with_deals": 533,
     "errors": 0,
     "official_agreement_sync": {
-      "generated_at": "2026-07-07T06:28:34Z",
+      "generated_at": "2026-07-07T11:26:12Z",
       "agreement_contexts_found_from_news": 2,
       "pending_deals_inserted": 0,
-      "deal_rows_updated": 1,
+      "deal_rows_updated": 0,
       "source_contracts_sha256": "1aba3e8ab1cdfa882e6044c75f6e130d167e2a96a646661fc0a5fc99f8f78696",
       "writes_raw_contract_file": false
     }
