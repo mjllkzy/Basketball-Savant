@@ -27,6 +27,7 @@ CONTENT_NAMESPACE = "{http://purl.org/rss/1.0/modules/content/}"
 DEFAULT_OFFICIAL_LIMIT = 10
 DEFAULT_RUMOR_LIMIT = 10
 DEFAULT_RETENTION_DAYS = 3
+DEFAULT_TRUSTED_RUMOR_FEED_PAGES = 4
 MAX_NEWS_TITLE_LENGTH = 88
 MAX_NEWS_SUMMARY_LENGTH = 155
 PERSON_NAME_PATTERN = r"[A-Z][A-Za-z'’.-]+(?:\s+(?:[A-Z][A-Za-z'’.-]+|Jr\.|Sr\.|II|III|IV)){0,3}"
@@ -78,10 +79,13 @@ TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
     r"\breported(?:ly)?\s+(?:[a-z0-9'’.-]+\s+){0,4}(?:trade|deal|agreement|signing|extension|contract)\b",
     r"\breported\s+deal\s+(?:sending|sends|bringing|brings|returning|returns)\b",
     r"\b(?:deal|trade)\s+(?:sending|sends|bringing|brings|returning|returns)\b",
+    r"\bcomplete\s+(?:their\s+|an?\s+|the\s+)?deals?\b",
     r"\breach(?:es|ed|ing)?\s+(?:an?\s+)?agreement\b",
+    r"\breach(?:es|ed|ing)?\s+(?:an?\s+)?deal\b",
     r"\b(?:has|have|had)\s+agreed\s+to\b",
     r"\bagreed\s+to\b",
     r"\bagrees?\s+to\b",
+    r"\bconfirm(?:s|ed|ing)?\s+(?:[a-z0-9'’.-]+\s+){0,6}(?:changes?|plans?|move|moves|hire|hired|sign|signed|signing|contract|deal|extension|trade|transaction|waiv|release)\b",
     r"\bplans?\s+to\s+(?:sign|re-sign|return|join|hire|opt\s+in|exercise|decline)\b",
     r"\bintends?\s+to\s+(?:sign|re-sign|return|join|hire|opt\s+in|exercise|decline)\b",
     r"\bis\s+bringing\s+back\b",
@@ -90,8 +94,12 @@ TRUSTED_SOURCE_OFFICIAL_PATTERNS = (
     r"\bannounced?\b",
     r"\bcompleted\b",
     r"\bfinalized\b",
+    r"\bfinaliz(?:e|ed|es|ing)\s+(?:an?\s+|the\s+)?(?:contract|extension|deal|staff)\b",
     r"\b(?:is|are|was|were|will\s+be)\s+(?:headed|heading|joining|returning|leaving|staying)\s+(?:to|with|for)\b",
     r"\bis\s+joining\b",
+    r"\bto\s+assume\b.{0,40}\bcontrol\b",
+    r"\bstaying\s+with\b",
+    r"\bwill\s+(?:hang\s+onto|receive|be\s+guaranteed|stay|remain|wait)\b",
     r"\bopt(?:s|ed|ing)?\s+in\b",
     r"\b(?:decline|declined|declines|declining)\s+(?:his|her|the|their|a|an)?\s*(?:player|team)?\s*option\b",
     r"\bexercis(?:e|ed|es|ing)\s+(?:his|her|the|their|a|an)?\s*(?:player|team)?\s*option\b",
@@ -633,31 +641,39 @@ def rss_item_to_news_item(item: ET.Element, source: TrustedRumorSource) -> NewsI
     )
 
 
+def trusted_source_feed_urls(source: TrustedRumorSource, *, max_pages: int = DEFAULT_TRUSTED_RUMOR_FEED_PAGES) -> list[str]:
+    urls = [source.url]
+    separator = "&" if "?" in source.url else "?"
+    urls.extend(f"{source.url}{separator}paged={page}" for page in range(2, max_pages + 1))
+    return urls
+
+
 def refresh_trusted_rumor_news(sources: tuple[TrustedRumorSource, ...], *, limit: int, allow_failures: bool) -> list[dict[str, str]]:
     items: list[NewsItem] = []
     seen: set[str] = set()
     for source in sources:
-        try:
-            feed_xml = fetch_text(source.url)
-            feed = ET.fromstring(feed_xml)
-        except (OSError, urllib.error.URLError, ET.ParseError, RuntimeError) as error:
-            if not allow_failures:
-                raise RuntimeError(f"{source.name} rumor refresh failed: {error}") from error
-            print(f"{source.name} rumor refresh skipped: {error}", file=sys.stderr)
-            continue
-
-        for entry in feed.findall("./channel/item"):
+        for feed_url in trusted_source_feed_urls(source):
             try:
-                item = rss_item_to_news_item(entry, source)
-            except (ValueError, RuntimeError) as error:
+                feed_xml = fetch_text(feed_url)
+                feed = ET.fromstring(feed_xml)
+            except (OSError, urllib.error.URLError, ET.ParseError, RuntimeError) as error:
                 if not allow_failures:
-                    raise RuntimeError(f"{source.name} rumor item failed validation: {error}") from error
-                print(f"{source.name} rumor item skipped: {error}", file=sys.stderr)
+                    raise RuntimeError(f"{source.name} rumor refresh failed for {feed_url}: {error}") from error
+                print(f"{source.name} rumor refresh skipped for {feed_url}: {error}", file=sys.stderr)
                 continue
-            if not item or item.id in seen:
-                continue
-            seen.add(item.id)
-            items.append(item)
+
+            for entry in feed.findall("./channel/item"):
+                try:
+                    item = rss_item_to_news_item(entry, source)
+                except (ValueError, RuntimeError) as error:
+                    if not allow_failures:
+                        raise RuntimeError(f"{source.name} rumor item failed validation: {error}") from error
+                    print(f"{source.name} rumor item skipped: {error}", file=sys.stderr)
+                    continue
+                if not item or item.id in seen:
+                    continue
+                seen.add(item.id)
+                items.append(item)
 
     items.sort(key=lambda item: parse_iso_datetime(item.publishedAt), reverse=True)
     return [item.to_json() for item in items[:limit]]

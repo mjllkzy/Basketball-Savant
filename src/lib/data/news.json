@@ -1,33 +1,103 @@
 [
   {
-    "id": "starting-5-july-6-2026",
-    "title": "Starting 5: Summer League rolls on in California, Utah",
+    "id": "hoops-rumors-six-teams-still-in-mix-for-lebron-james",
+    "title": "Six Teams Still In Mix For LeBron James?",
     "category": "League",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-06T13:46:15Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/starting-5-july-6-2026",
-    "summary": "Rookies shine during the opening weekend of the California Classic & Salt Lake City Summer League as more games loom this week."
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-07T04:58:58.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/six-teams-still-in-mix-for-lebron-james.html",
+    "summary": "Appearing on the All NBA Podcast alongside Adam Mares on late Sunday/early Monday, Marc Stein of The Stein Line said six teams still believe they’re in t..."
   },
   {
-    "id": "hoops-rumors-bucks-sign-brayden-burries-to-rookie-scale-contract",
-    "title": "Bucks Sign Brayden Burries To Rookie Scale Contract",
+    "id": "nikola-jokic-hopes-to-play-with-the-nuggets-forever",
+    "title": "Nikola Jokić hopes to play with the Nuggets 'forever'",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-07T00:38:56Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/nikola-jokic-hopes-to-play-with-the-nuggets-forever",
+    "summary": "3-time Kia MVP Nikola Jokić reiterated Monday his hope to remain with the Denver Nuggets for the rest of his career."
+  },
+  {
+    "id": "hoops-rumors-nets-notes-watson-offseason-moves-randle-koch",
+    "title": "Nets: Watson, Offseason Moves, Randle, Koch",
+    "category": "League",
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-07T00:28:51.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/nets-notes-watson-offseason-moves-randle-koch.html",
+    "summary": "In a subscriber-only article discussing the positive and negative aspects of Nets‘ offseason moves thus far..."
+  },
+  {
+    "id": "hoops-rumors-nikola-jokic-to-wait-until-next-summer-to-sign-new-deal",
+    "title": "Nikola Jokic To Wait Until Next Summer To Sign New Deal",
     "category": "Transaction",
     "reportingStatus": "Official",
-    "publishedAt": "2026-07-06T03:55:41.000Z",
+    "publishedAt": "2026-07-06T21:40:52.000Z",
     "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/07/bucks-sign-brayden-burries-to-rookie-scale-contract.html",
-    "summary": "Brayden Burries, the 10th overall pick in June’s draft, has become the 23rd 2026 first-rounder to officially sign his rookie scale contract..."
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/nikola-jokic-to-wait-until-next-summer-to-sign-new-deal.html",
+    "summary": "Superstar center Nikola Jokic confirmed he plans to wait until the 2027 offseason to sign a new contract."
   },
   {
-    "id": "hoops-rumors-nuggets-listening-to-sign-and-trades-for-peyton-watson",
-    "title": "Nuggets Open To Peyton Watson Sign-And-Trade?",
-    "category": "Trade",
-    "reportingStatus": "Rumor",
-    "publishedAt": "2026-07-06T01:22:53.000Z",
+    "id": "hoops-rumors-suns-ceo-signing-extension-mcnair-staying-with-clippers",
+    "title": "Suns CEO Signing Extension; McNair Staying With Clippers",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-06T20:48:15.000Z",
     "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/07/nuggets-listening-to-sign-and-trades-for-peyton-watson.html",
-    "summary": "The Nuggets have been clear in their desire to upgrade the roster around Nikola Jokic this summer, despite their limited resources."
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/suns-ceo-signing-extension-mcnair-staying-with-clippers.html",
+    "summary": "Suns CEO Josh Bartelstein, who holds the same title with the WNBA’s Phoenix Mercury, is finalizing a contract extension..."
+  },
+  {
+    "id": "hoops-rumors-ebuka-okorie-signs-rookie-scale-contract-with-pistons",
+    "title": "Ebuka Okorie Signs Rookie Scale Contract With Pistons",
+    "category": "Transaction",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-06T19:41:08.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/ebuka-okorie-signs-rookie-scale-contract-with-pistons.html",
+    "summary": "Ebuka Okorie has signed his rookie scale contract with the Pistons. The former Stanford guard was the No. 17 pick in last month’s draft."
+  },
+  {
+    "id": "demar-derozan-released-kings",
+    "title": "Kings release All-Star guard DeMar DeRozan",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-06T19:11:25Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/demar-derozan-released-kings",
+    "summary": "Sacramento is moving on from guard DeMar DeRozan, who will become an unrestricted free agent after the waiver process."
+  },
+  {
+    "id": "giannis-antetokounmpo-bids-farewell-milwaukee-trade",
+    "title": "Giannis Antetokounmpo bids farewell to Bucks, calls Milwaukee 'my city, my team",
+    "category": "Trade",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-06T18:43:43Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/giannis-antetokounmpo-bids-farewell-milwaukee-trade",
+    "summary": "Giannis Antetokounmpo uses a video message to relay his thoughts on Milwaukee as he is officially traded to Miami."
+  },
+  {
+    "id": "rui-hachimura-free-agency-2026",
+    "title": "Rui Hachimura, Clippers agree to two-year deal",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-06T16:02:00Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/rui-hachimura-free-agency-2026",
+    "summary": "The Clippers add a player from the crosstown rival Lakers by agreeing to a deal with Rui Hachimura."
+  },
+  {
+    "id": "quinten-post-free-agency-2026",
+    "title": "Grizzlies sign Quinten Post to 3-year offer sheet",
+    "category": "Free Agency",
+    "reportingStatus": "Official",
+    "publishedAt": "2026-07-06T15:57:02Z",
+    "sourceName": "NBA.com",
+    "sourceUrl": "https://www.nba.com/news/quinten-post-free-agency-2026",
+    "summary": "Golden State has until Tuesday to match Memphis' three-year offer sheet for Post, who is a restricted free agent."
   },
   {
     "id": "hoops-rumors-northwest-notes-gilgeous-alexander-bates-mara-james",
@@ -38,16 +108,6 @@
     "sourceName": "Hoops Rumors",
     "sourceUrl": "https://www.hoopsrumors.com/2026/07/northwest-notes-gilgeous-alexander-bates-mara-james.html",
     "summary": "Shai Gilgeous-Alexander was back in action for the first time since the Thunder‘s Game 7 loss to the Spurs in the Western Conference Finals..."
-  },
-  {
-    "id": "hoops-rumors-atlantic-notes-j-brown-tatum-james-m-brown",
-    "title": "Atlantic: J. Brown, Tatum, James, M. Brown",
-    "category": "Trade",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-05T23:02:38.000Z",
-    "sourceName": "Hoops Rumors",
-    "sourceUrl": "https://www.hoopsrumors.com/2026/07/atlantic-notes-j-brown-tatum-james-m-brown.html",
-    "summary": "News of the Sixers’ trade agreement for star wing Jaylen Brown sent shock waves across the basketball world..."
   },
   {
     "id": "hoops-rumors-mitchell-robinson-reveals-source-of-hand-injury",
@@ -100,16 +160,6 @@
     "summary": "German forward Isaac Bonga has decided to stay in Europe, having reached an agreement on a multiyear contract with Greek powerhouse Panathinaikos..."
   },
   {
-    "id": "2026-california-classic-summer-league-spurs-warriors-gold",
-    "title": "2026 California Classic Summer League: Warriors Gold overpower Spurs",
-    "category": "League",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-05T14:30:22Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-california-classic-summer-league-spurs-warriors-gold",
-    "summary": "Yaxel Lendeborg scores 11 points and Warriors Gold roll to a one-sided win over the Spurs in California Classic action Sunday."
-  },
-  {
     "id": "hoops-rumors-summer-league-notes-boozer-acuff-ejiofor-reed",
     "title": "Summer League: Boozer, Acuff, Ejiofor, Reed",
     "category": "League",
@@ -120,53 +170,23 @@
     "summary": "Scouts who watched Cameron Boozer‘s summer league debut in Salt Lake City were particularly impressed with the former Duke star’s passing."
   },
   {
-    "id": "2026-california-classic-summer-league-warriors-blue-kings",
-    "title": "2026 California Classic Summer League: Kings rally late to beat Warriors Blue",
-    "category": "League",
+    "id": "hoops-rumors-knicks-notes-drummond-diawara-towns-hart-mcbride-dolan",
+    "title": "Knicks: Drummond, Diawara, Towns, Hart, McBride, Dolan",
+    "category": "Transaction",
     "reportingStatus": "Official",
-    "publishedAt": "2026-07-05T14:26:29Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-california-classic-summer-league-warriors-blue-kings",
-    "summary": "Emanuel Sharp keys a comeback and the Kings outlast Warriors Blue 91-85, improving to 2-0 in Summer League play."
+    "publishedAt": "2026-07-05T13:12:34.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/knicks-notes-drummond-diawara-towns-hart-mcbride-dolan.html",
+    "summary": "In his first public comments since he agreed to sign with the Knicks, veteran center Andre Drummond said he’s excited to join the defending champions ."
   },
   {
-    "id": "2026-california-classic-summer-league-heat-lakers",
-    "title": "2026 California Classic Summer League: Carr, Watson lift Lakers to sudden death win",
-    "category": "League",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-05T14:20:41Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-california-classic-summer-league-heat-lakers",
-    "summary": "Cameron Carr scores 26 points and Anton Watson scores the game-winner as the Lakers beat the Heat in sudden death overtime."
-  },
-  {
-    "id": "2026-california-classic-summer-league-nets-bucks",
-    "title": "2026 California Classic Summer League: Ben Humrichous",
-    "category": "League",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-05T14:16:26Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-california-classic-summer-league-nets-bucks",
-    "summary": "Brooklyn sprints past Milwaukee 89-69 to move to 1-1 in California Classic Summer League action."
-  },
-  {
-    "id": "live-updates-2026-salt-lake-city-summer-league",
-    "title": "Recap: 2026 Salt Lake City Summer League, Day 1 | Darryn Peterson",
-    "category": "League",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-04T17:20:03Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/live-updates-2026-salt-lake-city-summer-league",
-    "summary": "Tap in with the NBA.com live blog as the Salt Lake City Summer League gets underway on the ESPN family of networks and Prime Video."
-  },
-  {
-    "id": "2026-nba-champion-knicks-sign-andre-drummond-to-fill-out-frontcourt",
-    "title": "2026 NBA champion Knicks sign Andre Drummond to fill out frontcourt",
+    "id": "hoops-rumors-stein-fischers-latest-kuminga-lakers-knicks-diabate-ayton-temple",
+    "title": "Kuminga, Lakers, Knicks, Diabate, Ayton, Temple",
     "category": "Free Agency",
-    "reportingStatus": "Official",
-    "publishedAt": "2026-07-03T23:27:06Z",
-    "sourceName": "NBA.com",
-    "sourceUrl": "https://www.nba.com/news/2026-nba-champion-knicks-sign-andre-drummond-to-fill-out-frontcourt",
-    "summary": "Multiple news outlets are reporting that the Knicks have signed veteran center Andre Drummond to a one-year deal for $3.8 million."
+    "reportingStatus": "Rumor",
+    "publishedAt": "2026-07-05T04:05:12.000Z",
+    "sourceName": "Hoops Rumors",
+    "sourceUrl": "https://www.hoopsrumors.com/2026/07/stein-fischers-latest-kuminga-lakers-knicks-diabate-ayton-temple.html",
+    "summary": "The Lakers are focusing on free agent forward Jonathan Kuminga as they search for another wing and one more big man to round out their roster."
   }
 ]

@@ -175,6 +175,34 @@ describe("basketball news refresh", () => {
     }));
   });
 
+  runIfPython("classifies trusted-source confirmed staff and salary decisions as Official status", () => {
+    const script = [
+      "import importlib.util, json, pathlib, sys",
+      "spec = importlib.util.spec_from_file_location('refresh_nba_news', pathlib.Path('scripts/refresh_nba_news.py').resolve())",
+      "module = importlib.util.module_from_spec(spec)",
+      "sys.modules[spec.name] = module",
+      "spec.loader.exec_module(module)",
+      "feed = '''<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\"><channel>",
+      "<item><title>Wizards Confirm Changes To Coaching Staff For Next Season</title><link>https://www.hoopsrumors.com/2026/07/wizards-confirm-changes-to-coaching-staff-for-next-season.html</link><pubDate>Tue, 07 Jul 2026 01:43:43 +0000</pubDate><category>Washington Wizards</category><description><![CDATA[The Wizards confirmed in a press release that they have made a few changes to their coaching staff for next season.]]></description></item>",
+      "<item><title>Sixers Guaranteeing Adem Bona's Salary For 2026/27</title><link>https://www.hoopsrumors.com/2026/07/sixers-guaranteeing-adem-bonas-salary-for-2026-27.html</link><pubDate>Mon, 06 Jul 2026 21:10:08 +0000</pubDate><category>Philadelphia 76ers</category><description><![CDATA[The Sixers will hang onto Adem Bona through Tuesday's salary guarantee deadline, ensuring that he'll receive his full salary.]]></description></item>",
+      "</channel></rss>'''",
+      "source = module.TRUSTED_RUMOR_SOURCES[0]",
+      "root = module.ET.fromstring(feed)",
+      "items = [module.rss_item_to_news_item(item, source).to_json() for item in root.findall('./channel/item')]",
+      "print(json.dumps(items))"
+    ].join("\n");
+
+    const result = spawnSync(pythonCommand!, ["-c", script], {
+      cwd: process.cwd(),
+      encoding: "utf8"
+    });
+
+    expect(result.status).toBe(0);
+    const items = JSON.parse(result.stdout) as Array<{ reportingStatus: string }>;
+    expect(items).toHaveLength(2);
+    expect(items.every((item) => item.reportingStatus === "Official")).toBe(true);
+  });
+
   runIfPython("promotes NBA.com rumor-category posts to Official when a deal is decided", () => {
     const script = [
       "import importlib.util, json, pathlib, sys",
