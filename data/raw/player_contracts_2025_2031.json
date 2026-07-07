@@ -26,14 +26,17 @@
     "latest_contract_audit": {
       "audit_date": "2026-07-02",
       "source_urls": [
-        "https://www.nba.com/news/nba-offseason-deals-2026",
         "https://www.nba.com/news/2026-nba-offseason-roundup",
-        "https://www.espn.com/nba/story/_/id/49236864/sources-nikola-vucevic-reuniting-magic-1-year-deal",
-        "https://www.spotrac.com/nba/free-agents/_/year/2026"
+        "https://www.nba.com/news/sandro-mamukelashvili-collin-sexton-quentin-grimes-free-agency-2026",
+        "https://www.espn.com/nba/story/_/id/48957095/2026-nba-free-agency-grades-offseason-signings-deals-contracts-extensions-depth-charts",
+        "https://www.espn.com/nba/story/_/id/49166079/sources-lakers-reaves-intends-sign-4-year-185m-extension",
+        "https://www.spotrac.com/nba/player/_/id/74218/austin-reaves",
+        "https://www.hoopsrumors.com/2026/06/bones-hyland-re-signing-with-timberwolves-on-one-year-deal.html",
+        "https://www.salaryswish.com/players/nahshon-bones-hyland"
       ],
-      "updated_player_count": 20,
-      "needs_followup_count": 48,
-      "notes": "Added and updated July 1-2 reported 2026 free-agency agreements; explicit follow-up remains where annual salary, guarantees, or options are not fully public."
+      "updated_player_count": 3,
+      "needs_followup_count": 52,
+      "notes": "Conservative Track A cleanup on top of current roster refresh: kept raw rows season-safe, preserved current-roster/deal files as the offseason movement source of truth, and retained only same-team source-backed updates for Collin Sexton, Austin Reaves, and Bones Hyland."
     },
     "official_agreement_sync": {
       "generated_at": "2026-07-05T09:48:37Z",
@@ -1611,9 +1614,10 @@
       "options_by_season": {
         "2027-28": "Player Option"
       },
-      "contract_notes": "Reported two-year agreement with the Lakers, including a player option. Contract value, annual salary, and guarantees unavailable.",
+      "contract_notes": "Reported two-year, $19 million agreement with the Lakers, including a 2027-28 player option. Season-by-season salary and guarantees unavailable.",
       "source_urls": [
-        "https://www.nba.com/news/sandro-mamukelashvili-collin-sexton-quentin-grimes-free-agency-2026"
+        "https://www.nba.com/news/sandro-mamukelashvili-collin-sexton-quentin-grimes-free-agency-2026",
+        "https://www.espn.com/nba/story/_/id/48957095/2026-nba-free-agency-grades-offseason-signings-deals-contracts-extensions-depth-charts"
       ],
       "needs_followup": true
     },
@@ -2148,13 +2152,14 @@
       "salaries": {
         "2025-26": 13937574
       },
-      "guaranteed": 185000000,
+      "guaranteed": 184760000,
       "options_by_season": {
         "2029-30": "Player Option"
       },
-      "contract_notes": "Reported four-year, $185 million maximum agreement with the Lakers, including a 2029-30 player option. Annual salary breakdown remains unavailable.",
+      "contract_notes": "Reported four-year, $184.76 million maximum agreement with the Lakers, including a 2029-30 player option. Annual salary breakdown remains unavailable.",
       "source_urls": [
-        "https://www.espn.com/nba/story/_/id/49166079/sources-lakers-reaves-intends-sign-4-year-185m-extension"
+        "https://www.espn.com/nba/story/_/id/49166079/sources-lakers-reaves-intends-sign-4-year-185m-extension",
+        "https://www.spotrac.com/nba/player/_/id/74218/austin-reaves"
       ],
       "needs_followup": true
     },
@@ -6208,9 +6213,17 @@
       "matched_player_name": "Bones Hyland",
       "team_abbreviation": "MIN",
       "salaries": {
-        "2025-26": 2296274
+        "2025-26": 2296274,
+        "2026-27": 2457010
       },
-      "guaranteed": 2296274
+      "guaranteed": null,
+      "contract_notes": "Reported one-year minimum agreement to return to Minnesota. SalarySwish lists a $2,457,010 cap hit; guarantee status needs follow-up.",
+      "source_urls": [
+        "https://www.nba.com/news/2026-nba-offseason-roundup",
+        "https://www.hoopsrumors.com/2026/06/bones-hyland-re-signing-with-timberwolves-on-one-year-deal.html",
+        "https://www.salaryswish.com/players/nahshon-bones-hyland"
+      ],
+      "needs_followup": true
     },
     {
       "source_rank": 380,
