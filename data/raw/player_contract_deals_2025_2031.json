@@ -11,10 +11,10 @@
     "with_deals": 533,
     "errors": 0,
     "official_agreement_sync": {
-      "generated_at": "2026-07-07T11:26:12Z",
-      "agreement_contexts_found_from_news": 2,
-      "pending_deals_inserted": 0,
-      "deal_rows_updated": 0,
+      "generated_at": "2026-07-08T09:32:01Z",
+      "agreement_contexts_found_from_news": 1,
+      "pending_deals_inserted": 1,
+      "deal_rows_updated": 2,
       "source_contracts_sha256": "1aba3e8ab1cdfa882e6044c75f6e130d167e2a96a646661fc0a5fc99f8f78696",
       "writes_raw_contract_file": false
     }
@@ -29144,10 +29144,30 @@
       "player_name": "Kyle Lowry",
       "matched_player_slug": "kyle-lowry",
       "matched_player_name": "Kyle Lowry",
-      "team_abbreviation": "PHI",
+      "team_abbreviation": "TOR",
       "salaryswish_url": "https://www.salaryswish.com/players/kyle-lowry",
       "spotrac_url": null,
       "deals": [
+        {
+          "source": "NBA.com",
+          "source_url": "https://www.nba.com/news/kyle-lowry-retires-with-toronto-raptors",
+          "label": "Reported 1-year agreement with TOR",
+          "start_year": 2026,
+          "end_year": 2026,
+          "years": 1,
+          "total": null,
+          "average_annual_value": null,
+          "guaranteed_at_sign": null,
+          "total_guaranteed": null,
+          "free_agent": "2027 / UFA",
+          "signed_using": null,
+          "pending": true,
+          "salary_by_season": {},
+          "options_by_season": {},
+          "guarantee_status_by_season": {
+            "2026-27": "Details Pending"
+          }
+        },
         {
           "source": "SalarySwish",
           "source_url": "https://www.salaryswish.com/players/kyle-lowry",
@@ -29313,7 +29333,7 @@
           "guarantee_status_by_season": {}
         }
       ],
-      "needs_followup": false
+      "needs_followup": true
     },
     {
       "source_rank": 376,

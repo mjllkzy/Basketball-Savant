@@ -3,7 +3,7 @@
     "season": "2026-27",
     "sourceLabel": "NBA.com offseason deals tracker",
     "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-    "updatedAt": "2026-07-07T07:27:35Z",
+    "updatedAt": "2026-07-08T08:05:09Z",
     "description": "Persistent roster-impacting trade ledger for the upcoming season. Generated from explicit NBA.com trade additions/departures. Official and credible reported agreements are projected into rosters; rumors and unverified items are excluded from payroll calculations."
   },
   "transactions": [
@@ -11,7 +11,7 @@
       "id": "nba-offseason-deals-2026-trades",
       "season": "2026-27",
       "type": "trade",
-      "officialDate": "2026-07-07",
+      "officialDate": "2026-07-08",
       "sourceLabel": "NBA.com offseason deals tracker",
       "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
       "moves": [
@@ -76,19 +76,49 @@
           "matchedStatusMarker": "multiple reports"
         },
         {
-          "playerSlug": "deandre-ayton",
-          "playerName": "Deandre Ayton",
+          "playerSlug": "caris-levert",
+          "playerName": "Caris LeVert",
           "nbaPlayerId": "",
-          "fromTeamAbbreviation": "LAL",
-          "toTeamAbbreviation": "WAS",
+          "fromTeamAbbreviation": "DET",
+          "toTeamAbbreviation": "MIL",
           "status": "reported_agreement",
           "statusLabel": "Reported Agreement",
           "statusDetail": "multiple reports",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
           "sourceNote": "multiple reports",
-          "rawTrackerLine": "Deandre Ayton joins via trade with Lakers (multiple reports)",
+          "rawTrackerLine": "Caris LeVert joins via trade with Pistons (multiple reports)",
           "matchedStatusMarker": "multiple reports"
+        },
+        {
+          "playerSlug": "d-angelo-russell",
+          "playerName": "D'Angelo Russell",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "WAS",
+          "toTeamAbbreviation": "MEM",
+          "status": "reported_agreement",
+          "statusLabel": "Reported Agreement",
+          "statusDetail": "multiple reports",
+          "sourceName": "NBA.com offseason deals tracker",
+          "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
+          "sourceNote": "multiple reports",
+          "rawTrackerLine": "D'Angelo Russell departs via trade with Grizzlies (multiple reports)",
+          "matchedStatusMarker": "multiple reports"
+        },
+        {
+          "playerSlug": "deandre-ayton",
+          "playerName": "Deandre Ayton",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "LAL",
+          "toTeamAbbreviation": "WAS",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
+          "sourceName": "NBA.com offseason deals tracker",
+          "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Deandre Ayton joins via trade with Lakers (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "devin-carter",
@@ -119,6 +149,21 @@
           "sourceNote": "officially announced",
           "rawTrackerLine": "Dorian Finney-Smith departs via trade with Hornets (officially announced)",
           "matchedStatusMarker": "officially announced"
+        },
+        {
+          "playerSlug": "gary-harris",
+          "playerName": "Gary Harris",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIL",
+          "toTeamAbbreviation": "DET",
+          "status": "reported_agreement",
+          "statusLabel": "Reported Agreement",
+          "statusDetail": "multiple reports",
+          "sourceName": "NBA.com offseason deals tracker",
+          "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
+          "sourceNote": "multiple reports",
+          "rawTrackerLine": "Gary Harris joins via trade with Bucks (multiple reports)",
+          "matchedStatusMarker": "multiple reports"
         },
         {
           "playerSlug": "giannis-antetokounmpo",
@@ -173,12 +218,12 @@
           "toTeamAbbreviation": "DET",
           "status": "official",
           "statusLabel": "Official",
-          "statusDetail": "official release",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "official release",
-          "rawTrackerLine": "Isaiah Joe departs via trade with Pistons (official release)",
-          "matchedStatusMarker": "official release"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Isaiah Joe departs via trade with Pistons (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "ja-morant",
@@ -201,14 +246,14 @@
           "nbaPlayerId": "",
           "fromTeamAbbreviation": "WAS",
           "toTeamAbbreviation": "LAL",
-          "status": "reported_agreement",
-          "statusLabel": "Reported Agreement",
-          "statusDetail": "reported by ESPN",
+          "status": "official",
+          "statusLabel": "Official",
+          "statusDetail": "officially announced",
           "sourceName": "NBA.com offseason deals tracker",
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
-          "sourceNote": "reported by ESPN",
-          "rawTrackerLine": "Jaden Hardy departs via trade with Lakers (reported by ESPN)",
-          "matchedStatusMarker": "reported by"
+          "sourceNote": "officially announced",
+          "rawTrackerLine": "Jaden Hardy departs via trade with Lakers (officially announced)",
+          "matchedStatusMarker": "officially announced"
         },
         {
           "playerSlug": "jaime-jaquez-jr",
@@ -346,6 +391,21 @@
           "matchedStatusMarker": "officially announced"
         },
         {
+          "playerSlug": "khris-middleton",
+          "playerName": "Khris Middleton",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "DAL",
+          "toTeamAbbreviation": "WAS",
+          "status": "reported_agreement",
+          "statusLabel": "Reported Agreement",
+          "statusDetail": "multiple reports",
+          "sourceName": "NBA.com offseason deals tracker",
+          "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
+          "sourceNote": "multiple reports",
+          "rawTrackerLine": "Khris Middleton joins via sign-and-trade with Mavericks (multiple reports)",
+          "matchedStatusMarker": "multiple reports"
+        },
+        {
           "playerSlug": "kris-murray",
           "playerName": "Kris Murray",
           "nbaPlayerId": "1631200",
@@ -478,6 +538,21 @@
           "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
           "sourceNote": "multiple reports",
           "rawTrackerLine": "Santi Aldama departs via trade with Mavericks (multiple reports)",
+          "matchedStatusMarker": "multiple reports"
+        },
+        {
+          "playerSlug": "taurean-prince",
+          "playerName": "Taurean Prince",
+          "nbaPlayerId": "",
+          "fromTeamAbbreviation": "MIL",
+          "toTeamAbbreviation": "DET",
+          "status": "reported_agreement",
+          "statusLabel": "Reported Agreement",
+          "statusDetail": "multiple reports",
+          "sourceName": "NBA.com offseason deals tracker",
+          "sourceUrl": "https://www.nba.com/news/nba-offseason-deals-2026",
+          "sourceNote": "multiple reports",
+          "rawTrackerLine": "Taurean Prince joins via trade with Bucks (multiple reports)",
           "matchedStatusMarker": "multiple reports"
         },
         {
