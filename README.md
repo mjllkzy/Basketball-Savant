@@ -61,6 +61,8 @@ The authoritative 2025-26 baseline is the tracked workbook at `data/raw/nba_data
 
 Production reads use Postgres where available and keep generated JSON as the local/degraded fallback. The current pipeline is documented in `docs/production-data-refresh.md`.
 
+Repository workflow and automation guardrails are documented in `docs/workflow-guardrails.md`.
+
 NBA Stats is the primary machine-readable source. Public box-score and series pages from Basketball Reference, NBA.com, and ESPN are tracked in snapshot metadata as cross-reference sources for score and series sanity checks.
 
 NBA Stats Advanced player and team tables are loaded for TS%, eFG%, USG%, AST%, rebound percentages, ratings, pace, PIE, and official possession counts. Basketball Reference player advanced, player per-game, and team advanced pages are parsed into lightweight cross-check tables for player and team efficiency/rate stats; NBA Stats remains the primary machine-readable source.
